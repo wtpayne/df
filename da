@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+# ---
+#
+# title:
+#     "Design automation shell script."
+#
+# description:
+#     "The design automation shell script is
+#     intended to help provide a common entry
+#     point for all the automated processes
+#     in the design factory.
+#
+#     This shell script is responsible for
+#     ensuring that the virtual environment
+#     is appropriately created, configured
+#     and activated. It is also responsible
+#     for invoking the da.cli python module
+#     which will handle command line argument
+#     parsing and command invocation."
+#
+# type:
+#     dt000_bash_script
+#
+# validation_level:
+#     v00_minimum
+#
+# protection:
+#     k00_general
+#
+# copyright:
+#     "Copyright 2015-2022 William Payne"
+#
+# license:
+#     "Licensed under the Apache License, Version
+#     2.0 (the License); you may not use this file
+#     except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed
+#     to in writing, software distributed under
+#     the License is distributed on an AS IS BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+#     either express or implied. See the License
+#     for the specific language governing
+#     permissions and limitations under the
+#     License."
+#
+# ...
+
+
+# -----------------------------------------------------------------------------
+# Set shell options.
+#
+set -o errexit   # abort on nonzero exitstatus
+set -o nounset   # abort on unbound variable
+set -o pipefail  # don't hide errors within pipes
+
+
+# -----------------------------------------------------------------------------
+# Determine the path to the current workspace.
+#
+WORKSPACE=$(
+    pushd . > /dev/null;
+    temp="${BASH_SOURCE[0]}";
+    if ([ -h "${temp}" ]); then
+        while ([ -h "${temp}" ]); do
+            cd "$(dirname "$temp")";
+            temp=$(readlink "${temp}");
+        done
+    fi
+    cd "$(dirname ${temp})" > /dev/null;
+    pwd;
+    popd > /dev/null;
+);
+export WORKSPACE;
+
+
+# -----------------------------------------------------------------------------
+# Create the e000_da virtual environment if it is
+# not present.
+#
+name_venv="e000_da"
+dirpath_venv="${WORKSPACE}/a0_env/venv/${name_venv}"
+if [[ ! -d "${dirpath_venv}" ]]; then
+   python3 -m venv "${dirpath_venv}";
+   is_venv_stale=1;
+else
+    is_venv_stale=0;
+fi
+
+
+# -----------------------------------------------------------------------------
+# Check to see if the e000_da virtual environment
+# is stale.
+#
+dirpath_tmpl="${WORKSPACE}/a3_src/h70_internal/da/${name_venv}"
+filepath_tmpl="${dirpath_tmpl}/requirements.template.txt"
+dirpath_pkg="${dirpath_venv}/lib/python3.8/site-packages";
+dirpath_whl="${dirpath_venv}/share/python-wheels";
+is_pkg_stale=0;
+is_whl_stale=0;
+if [[ ${filepath_tmpl} -nt ${dirpath_pkg}          ]]; then is_pkg_stale=1;  fi
+if [[ ${filepath_tmpl} -nt ${dirpath_whl}          ]]; then is_whl_stale=1;  fi
+if [[ ${is_pkg_stale} == 1 && ${is_whl_stale} == 1 ]]; then is_venv_stale=1; fi
+
+
+# -----------------------------------------------------------------------------
+# Ensure that the e000_da virtual environment is
+# active.
+#
+is_active_none=0;
+is_active_old=0;
+is_active_new=0;
+
+if   [[ "${VIRTUAL_ENV-none}" == "none"       ]]; then is_active_none=1;
+elif [[ "${VIRTUAL_ENV}" != "${dirpath_venv}" ]]; then is_active_old=1;
+elif [[ "${VIRTUAL_ENV}" == "${dirpath_venv}" ]]; then is_active_new=1;
+else
+    echo "Logic implementation error.";
+    exit 1;
+fi
+
+if   [[ ${is_active_none} == 1 ]]; then do_deactivate_old=0 do_source_new=1
+elif [[ ${is_active_old}  == 1 ]]; then do_deactivate_old=1 do_source_new=1
+elif [[ ${is_active_new}  == 1 ]]; then do_deactivate_old=0 do_source_new=0
+else
+    echo "Logic implementation error.";
+    exit 1;
+fi
+
+if [[ ${do_deactivate_old} == 1 ]]; then deactivate; fi
+if [[ ${do_source_new}     == 1 ]]; then source "${dirpath_venv}/bin/activate"; fi
+
+
+# -----------------------------------------------------------------------------
+# If the e000_da virtual environment is stale then
+# update it.
+#
+if [[ ${is_venv_stale} == 1 ]]; then
+    filename_reqs="requirements.txt"
+    dirpath_reqs="${WORKSPACE}/a4_tmp/${name_venv}"
+    filepath_reqs="${dirpath_reqs}/${filename_reqs}"
+    mkdir -p "${dirpath_reqs}"
+    cat "${filepath_tmpl}" | envsubst > "${filepath_reqs}"
+    pip3 install -r ${filepath_reqs}
+fi
+
+
+# -----------------------------------------------------------------------------
+# Run the design automation command line interface
+# command module with all supplied command line
+# arguments.
+#
+# We prepend the name of the app to the arguments
+# list so that it can be extracted in command.py
+# and then passed to the click library to use as
+# the name of the command in the help string.
+#
+NAME_APP=$(basename "$0")
+python3 -m da.cli.command "${NAME_APP}" "${@}"

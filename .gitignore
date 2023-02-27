@@ -1,0 +1,115 @@
+# This .gitignore is configured such that the
+# file types intended to be placed under revision
+# control must be explicitly specified here.
+#
+# Note: .gitignore configures a rules based
+#       system. The order in which rules are
+#       listed matters, with rules that appear
+#       later in this file overriding rules that
+#       appear earlier.
+#
+
+
+# -----------------------------------------------------------------------------
+# Ignore all files and all directories (unless
+# otherwise specified).
+#
+
+*
+
+
+# -----------------------------------------------------------------------------
+# Override the global ignore rule for directories
+# and subdirectories so that git will search them
+# recursively (unless otherwise specified).
+#
+# If this rule is not present, git will only
+# search the root directory for files to include.
+#
+
+!*/
+
+# Blacklist certain directories.
+#
+/a0_env/*
+/a2_dat/*
+/a4_tmp/*
+/a5_cms/*
+
+# -----------------------------------------------------------------------------
+# Override the global ignore rule for some
+# specific files and file types that we intend
+# to be included (unless otherwise specified).
+#
+
+# Stableflow system configuration source documents.
+#
+!*.cfg.ini
+!*.cfg.json
+!*.cfg.toml
+!*.cfg.xml
+!*.cfg.yaml
+
+# Python/Cython/Codon program source documents.
+#
+!*.py
+!*.pxd
+!*.pxi
+!*.pyx
+!*.codon
+
+# C/C++ program source documents.
+#
+!*.h
+!*.c
+!*.hpp
+!*.cpp
+
+# Rust program source documents.
+#
+!*.rs
+
+# C# program source documents.
+#
+!*.cs
+
+# Markdown, ReStructuredText and plain text source documents.
+#
+!*.md
+!*.rst
+!*.txt
+
+# HTML/CSS/Javascript source documents.
+#
+!*.html
+!*.css
+!*.js
+
+!*.sh
+
+
+!da
+
+!.gitattributes
+!.gitignore
+
+
+# -----------------------------------------------------------------------------
+# Explicitly ignore specific directories,
+# files and file types that we intend to be
+# excluded.
+#
+
+# Secrets files for python-dotenv.
+#
+*.env
+
+# Python bytecode files.
+#
+*.pyc
+*__pycache__*
+
+# Python build output.
+#
+*.egg-info/
+*.pytest_cache*
