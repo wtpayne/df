@@ -3,7 +3,7 @@
 ---
 
 title:
-    "Design index extract and transform steadyflow-edict component."
+    "Design index extract and transform stableflow-edict component."
 
 description:
     "Prepares design information to be stored
@@ -13,7 +13,7 @@ id:
     "f94d59d0-d11e-473c-81d9-8c55edf4fd45"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 dependencies:
     - pycozo[embedded,pandas]

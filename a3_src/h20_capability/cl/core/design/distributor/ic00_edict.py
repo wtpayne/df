@@ -3,7 +3,7 @@
 ---
 
 title:
-    "File information distributor steadyflow-edict component."
+    "File information distributor stableflow-edict component."
 
 description:
     "File information distributor component.
@@ -14,7 +14,7 @@ id:
     "845c6440-bda4-413d-966d-a004b2d56eab"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 validation_level:
     v00_minimum

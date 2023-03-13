@@ -3,7 +3,7 @@
 ---
 
 title:
-    "File watcher and loader steadyflow-edict component."
+    "File watcher and loader stableflow-edict component."
 
 description:
     "This component watches one or more
@@ -15,7 +15,7 @@ id:
     "438bf477-cf5a-427b-8652-f34a87c2257a"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 validation_level:
     v00_minimum

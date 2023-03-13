@@ -3,7 +3,7 @@
 ---
 
 title:
-    "Design document parsing steadyflow-edict component."
+    "Design document parsing stableflow-edict component."
 
 description:
     "Design document parsing component."
@@ -12,7 +12,7 @@ id:
     "be7445bd-f048-4b14-b35b-5a0896c7a441"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 validation_level:
     v00_minimum

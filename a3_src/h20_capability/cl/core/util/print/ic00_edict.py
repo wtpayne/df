@@ -3,7 +3,7 @@
 ---
 
 title:
-    "Diagnostic print utility steadyflow-edict component."
+    "Diagnostic print utility stableflow-edict component."
 
 description:
     "Diagnostic print utility component."
@@ -12,7 +12,7 @@ id:
     "f3581a3e-bcfd-4c99-b7e3-015da68a71f1"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 validation_level:
     v00_minimum

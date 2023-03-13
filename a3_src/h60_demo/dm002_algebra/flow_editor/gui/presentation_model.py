@@ -140,7 +140,7 @@ class Host():
         self.portnum_min   = 8090
         self.portnum_max   = 8090
         self.dirpath_log   = '/var/log'
-        self.launch_script = 'stableflow'
+        self.launch_cmd    = './da stableflow'
         self.log_level     = 'INFO'
 
         ctx.ui.add_collapsing_header(
@@ -196,8 +196,8 @@ class Host():
                     user_data     = ctx)
 
         ctx.ui.add_input_text(
-                    default_value = self.launch_script,
-                    label         = f'Launch script',
+                    default_value = self.launch_cmd,
+                    label         = f'Launch cmd',
                     indent        = INDENT,
                     width         = SIDEBAR_WIDGET_WIDTH,
                     parent        = self.tag,

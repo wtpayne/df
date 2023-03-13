@@ -10,7 +10,7 @@ host:
     acct_provision:  'wtp'
     port_range:      '8090-9000'
     dirpath_log:     ''
-    launch_script:   'bowyer'
+    launch_cmd:      './da stableflow'
     log_level:       'TRACE'
 
 

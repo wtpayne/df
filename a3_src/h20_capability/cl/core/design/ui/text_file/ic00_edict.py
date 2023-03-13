@@ -3,7 +3,7 @@
 ---
 
 title:
-    "Design report text file writer steadyflow-edict component."
+    "Design report text file writer stableflow-edict component."
 
 description:
     "Design report text file writer component."
@@ -12,7 +12,7 @@ id:
     "dea92a32-4031-45e9-a69a-50c0443dbae7"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 validation_level:
     v00_minimum

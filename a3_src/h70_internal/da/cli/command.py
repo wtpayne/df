@@ -56,11 +56,40 @@ license:
 
 
 import importlib.metadata
+import os
 import sys
 
 import click
 
 import da.cli.group
+import stableflow.cli.command
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_self():
+    """
+    Return the directory path to the current module.
+
+    """
+    return os.path.dirname(os.path.realpath(__file__))
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_src():
+    """
+    Return the path of the root directory of the design document filesystem.
+
+    The source design documents which are
+    monitored by the process assistant are
+    all stored in a single large filesystem
+    hierarchy.
+
+    This function returns the directory path
+    of the root directory of this filesystem
+    hierarchy.
+
+    """
+    return os.path.normpath(os.path.join(_dirpath_self(), '../../..'))
 
 
 # -----------------------------------------------------------------------------
@@ -237,47 +266,25 @@ def stop():
 
 
 # -----------------------------------------------------------------------------
-@grp_main.group(name = 'build',
+@grp_main.group(name = 'test',
                 cls  = da.cli.group.Ordered)
-def grp_build():
+def grp_test():
     """
-    Build system.
+    Testing tools and commands.
 
     """
     pass
 
 
 # -----------------------------------------------------------------------------
-@grp_build.command()
-def docs():
+@grp_test.command()
+def all():
     """
-    Build documentation.
-
-    """
-    import da.cli.build
-    sys.exit(da.cli.build.docs())
-
-
-# -----------------------------------------------------------------------------
-@grp_main.group(name = 'release',
-                cls  = da.cli.group.Ordered)
-def grp_cms():
-    """
-    Configuration management system.
+    Run all tests.
 
     """
-    pass
-
-
-# -----------------------------------------------------------------------------
-@grp_build.command()
-def release():
-    """
-    Make a public release.
-
-    """
-    import da.cli.cms
-    sys.exit(da.cli.cms.release())
+    import da.cli.test
+    sys.exit(da.cli.test.all(dirpath_src = _dirpath_src()))
 
 
 # -----------------------------------------------------------------------------
@@ -303,7 +310,8 @@ def start(name):
 
     """
     import da.cli.demo
-    sys.exit(da.cli.demo.start(name_demo = name))
+    sys.exit(da.cli.demo.start(dirpath_src = _dirpath_src(),
+                               name_demo   = name))
 
 
 # -----------------------------------------------------------------------------
@@ -318,7 +326,12 @@ def stop(name):
 
     """
     import da.cli.demo
-    sys.exit(da.cli.demo.stop(name_demo = name))
+    sys.exit(da.cli.demo.stop(dirpath_src = _dirpath_src(),
+                              name_demo   = name))
+
+
+# -----------------------------------------------------------------------------
+grp_main.add_command(stableflow.cli.command.grp_main, name = 'stableflow')
 
 
 # -----------------------------------------------------------------------------

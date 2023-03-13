@@ -70,7 +70,7 @@ def _filepath_system_cfg():
 
     """
     dirpath_self = _dirpath_self()
-    filename_cfg = '{name_system}.steadyflow.cfg.yaml'.format(
+    filename_cfg = '{name_system}.stableflow.cfg.yaml'.format(
                                 name_system = os.path.basename(dirpath_self))
     return os.path.join(dirpath_self, filename_cfg)
 

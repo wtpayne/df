@@ -3,7 +3,7 @@
 ---
 
 title:
-    "System controller steadyflow-edict component."
+    "System controller stableflow-edict component."
 
 description:
     "System level controller component."
@@ -12,7 +12,7 @@ id:
     "a386829e-53a1-4516-ba18-e9295fc12554"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 validation_level:
     v00_minimum

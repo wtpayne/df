@@ -3,7 +3,7 @@
 ---
 
 title:
-    "Design document nonconformity report aggregator steadyflow component."
+    "Design document nonconformity report aggregator stableflow component."
 
 description:
     "Design document nonconformity report aggregator component."
@@ -12,7 +12,7 @@ id:
     "5d824805-88e2-4d7c-a1cb-c9a4e23052a8"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 validation_level:
     v00_minimum

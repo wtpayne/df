@@ -56,74 +56,47 @@ import bowyer.sys
 
 
 # -----------------------------------------------------------------------------
-def _dirpath_self():
-    """
-    Return the directory path to the current module.
-
-    """
-    return os.path.dirname(os.path.realpath(__file__))
-
-
-# -----------------------------------------------------------------------------
-def _dirpath_src():
-    """
-    Return the path of the root directory of the design document filesystem.
-
-    The source design documents which are
-    monitored by the process assistant are
-    all stored in a single large filesystem
-    hierarchy.
-
-    This function returns the directory path
-    of the root directory of this filesystem
-    hierarchy.
-
-    """
-    return os.path.normpath(os.path.join(_dirpath_self(), '../../../..'))
-
-
-# -----------------------------------------------------------------------------
-def _dirpath_demo():
+def _dirpath_demo(dirpath_src, name_demo):
     """
     Return the path to demos.
 
     """
-    return os.path.join(_dirpath_src(), 'h60_demo')
+    return os.path.join(dirpath_src, 'h60_demo', name_demo)
 
 
 # -----------------------------------------------------------------------------
-def _filepath_cfg(name):
+def _filepath_cfg(dirpath_src, name_demo):
     """
     Return the file path of the configuration data for the demo.
 
     """
-    dirpath_demo = os.path.join(_dirpath_demo(), name)
-    filename_cfg = '{name}.steadyflow.cfg.yaml'.format(name = name)
+    dirpath_demo  = _dirpath_demo(dirpath_src, name_demo)
+    filename_cfg  = '{name}.stableflow.cfg.yaml'.format(name = name_demo)
     return os.path.join(dirpath_demo, filename_cfg)
 
 
 # -----------------------------------------------------------------------------
-def _filepath_entrypoint(name):
+def _filepath_entrypoint(dirpath_src, name_demo):
     """
     Return the file path of the entrypoint script for the demo.
 
     """
-    dirpath_demo        = os.path.join(_dirpath_demo(), name)
-    filename_entrypoint = '{name}.py'.format(name = name)
+    dirpath_demo        = _dirpath_demo(dirpath_src, name_demo)
+    filename_entrypoint = '{name}.py'.format(name = name_demo)
     return os.path.join(dirpath_demo, filename_entrypoint)
 
 
 # -----------------------------------------------------------------------------
-def start(name_demo):
+def start(dirpath_src, name_demo):
     """
     Start the specified demo.
 
     """
-    filepath_cfg = _filepath_cfg(name_demo)
+    filepath_cfg = _filepath_cfg(dirpath_src, name_demo)
     if os.path.exists(filepath_cfg):
-        return _start_steadyflow(filepath_cfg)
+        return _start_stableflow(filepath_cfg)
 
-    filepath_py = _filepath_entrypoint(name_demo)
+    filepath_py = _filepath_entrypoint(dirpath_src, name_demo)
     if os.path.exists(filepath_py):
         _start_entrypoint_script(filepath_py)
 
@@ -147,9 +120,9 @@ def _start_entrypoint_script(filepath_py):
 
 
 # -----------------------------------------------------------------------------
-def _start_steadyflow(filepath_cfg):
+def _start_stableflow(filepath_cfg):
     """
-    Start the specified dewo steadyflow system.
+    Start the specified dewo stableflow system.
 
     """
     with bowyer.log.logger.catch(onerror = lambda _: sys.exit(1)):
@@ -178,15 +151,16 @@ def _start_steadyflow(filepath_cfg):
 
 
 # -----------------------------------------------------------------------------
-def stop(name_demo):
+def stop(dirpath_src, name_demo):
     """
-    Stop the specified demo steadyflow system.
+    Stop the specified demo stableflow system.
 
     """
     with bowyer.log.logger.catch(onerror = lambda _: sys.exit(1)):
 
         try:
-            cfg = bowyer.cfg.prepare(path_cfg = _filepath_cfg(name_demo))
+            filepath_cfg = _filepath_cfg(dirpath_src, name_demo)
+            cfg = bowyer.cfg.prepare(path_cfg = filepath_cfg)
         except bowyer.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             return 1

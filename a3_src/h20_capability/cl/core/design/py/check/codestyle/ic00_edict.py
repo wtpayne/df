@@ -3,7 +3,7 @@
 ---
 
 title:
-    "Python design document style checking steadyflow-edict component."
+    "Python design document style checking stableflow-edict component."
 
 description:
     "Design document style checking component"
@@ -12,7 +12,7 @@ id:
     "fe27f0f1-cb13-4aff-bbec-471d51f143a5"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 validation_level:
     v00_minimum

@@ -3,7 +3,7 @@
 ---
 
 title:
-    "Design index database steadyflow-edict component."
+    "Design index database stableflow-edict component."
 
 description:
     "Stores design information in the design
@@ -13,7 +13,7 @@ id:
     "4823e97f-bae0-46e9-b34b-e7fdf65178a6"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 dependencies:
     - pycozo[embedded,pandas]

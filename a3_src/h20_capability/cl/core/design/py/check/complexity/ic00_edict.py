@@ -3,7 +3,7 @@
 ---
 
 title:
-    "Placeholder no-op steadyflow-edict component."
+    "Placeholder no-op stableflow-edict component."
 
 description:
     "Placeholder no-op component. Does nothing"
@@ -12,7 +12,7 @@ id:
     "06dab7f3-4ee2-44f1-b105-be709c9b5d07"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 validation_level:
     v00_minimum

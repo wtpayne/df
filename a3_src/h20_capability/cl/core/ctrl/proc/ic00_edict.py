@@ -3,7 +3,7 @@
 ---
 
 title:
-    "Process controller steadyflow-edict component."
+    "Process controller stableflow-edict component."
 
 description:
     "Process level controller component."
@@ -12,7 +12,7 @@ id:
     "0f6302ae-1b80-4eaf-bb56-2d0510212473"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 validation_level:
     v00_minimum

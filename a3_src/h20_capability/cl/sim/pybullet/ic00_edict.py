@@ -3,17 +3,17 @@
 ---
 
 title:
-    "PyBullet simulation steadyflow-edict component."
+    "PyBullet simulation stableflow-edict component."
 
 description:
-    "PyBullet simulation steadyflow-edict component.
+    "PyBullet simulation stableflow-edict component.
     Runs."
 
 id:
     "8fb922d3-a661-4da5-b2f8-75d75d5457cc"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 validation_level:
     v00_minimum

@@ -3,7 +3,7 @@
 ---
 
 title:
-    "Placeholder no-op steadyflow-edict component."
+    "Placeholder no-op stableflow-edict component."
 
 description:
     "Placeholder no-op component. Does nothing"
@@ -12,7 +12,7 @@ id:
     "8747de1c-76ac-4f63-a88d-f67a60515571"
 
 type:
-    dt004_python_steadyflow_edict_component
+    dt004_python_stableflow_edict_component
 
 validation_level:
     v00_minimum
@@ -81,8 +81,8 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     #
     str_name_process  = 'discord-bot'
     fcn_client        = _discord_client
-    queue_to_client   = multiprocessing.Queue()  # steadyflow --> client
-    queue_from_client = multiprocessing.Queue()  # client     --> steadyflow
+    queue_to_client   = multiprocessing.Queue()  # stableflow --> client
+    queue_from_client = multiprocessing.Queue()  # client     --> stableflow
     tup_args          = (cfg_client, queue_to_client, queue_from_client)
     proc_client       = multiprocessing.Process(target = fcn_client,
                                                 args   = tup_args,
@@ -107,7 +107,7 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
         # Take any messages that
         # we recieve from the rest
-        # of the steadyflow system
+        # of the stableflow system
         # and forward them on to
         # the discord client so that
         # they can be printed in
@@ -127,7 +127,7 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         # a user has input into the
         # discord client and forward
         # them to the rest of the
-        # steadyflow system for
+        # stableflow system for
         # further processing.
         #
         list_msg = list()
