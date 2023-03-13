@@ -44,6 +44,12 @@
 
 # Stableflow system configuration source documents.
 #
+!*.register.toml
+!*.register.yaml
+!pytest.ini
+
+# Stableflow system configuration source documents.
+#
 !*.cfg.ini
 !*.cfg.json
 !*.cfg.toml

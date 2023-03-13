@@ -1,0 +1,96 @@
+title:
+  "Reference control hierarchy tier register."
+
+
+introduction:
+  "This register holds a list of reference control
+  hierarchy tiers with a brief description.
+
+  In general, design elements managed at a tier
+  with a higher numerical value are both intended
+  and permitted to reference design elements
+  managed at a tier with a lower numerical value.
+
+  References in the other direction being either
+  discouraged or disallowed."
+
+
+register:
+
+  h00_thirdparty:
+    desc: "Vendored third party designs."
+
+  h10_resource:
+    desc: "The h10_resource tier is intended for
+          the management of static resources
+          used across all products and product
+          lines.
+
+          This includes things like brand logo
+          and pallette, document templates,
+          organisation level registers and
+          mini-databases, and anything else
+          with a similar organisation-wide
+          pattern of use.
+
+  h20_capability:
+    desc: "The h20_capability tier is intended
+          for the management of design elements
+          which are used across multiple products
+          and product lines.
+
+          This includes things like proprietary
+          software component libraries, APIs,
+          middleware and design kits."
+
+  h30_product:
+    desc: "The h30_product tier is intended for
+          the management of designs of off the
+          shelf products.
+
+          The designs in the h30_product tier
+          are normally composed of design
+          elements drawn from the h20_capability
+          tier.
+
+  h40_bespoke:
+    desc: "The h40_bespoke tier is intended for
+          the management of designs of bespoke
+          products.
+
+          The designs in the h40_bespoke tier
+          are normally composed of tailorings
+          applied on top of off the shelf product
+          designs drawn from the h30_product
+          tier.
+
+  h50_research:
+    desc: "The h50_research tier is intended for
+          the management of design elements that
+          arise from research activities.
+
+          The design elements managed in the
+          h50_research tier are normally composed
+          of tailorings and improvements that
+          modify or replace design elements drawn
+          from previous tiers."
+
+  h60_demo:
+    desc: "The h60_demo tier is intended for
+          the management of design elements that
+          arise from the preparation of
+          technical demonstrations or early
+          feasibility studies.
+
+          The design elements managed in the
+          h50_research tier are normally composed
+          of tailorings and improvements that
+          modify or replace design elements drawn
+          from previous tiers."
+
+  h70_internal:
+    desc: "The h70_internal tier is intended
+          for the management of design elements,
+          programs, scripts, tools and utilities
+          that are used to automate the design
+          process itself."

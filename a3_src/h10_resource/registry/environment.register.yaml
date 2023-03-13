@@ -1,0 +1,16 @@
+title:
+  "Environment register"
+
+
+introduction:
+  "This register holds a list of environments and
+  the role that each is currently assigned to."
+
+
+register:
+
+  e000_df_proc:
+    name: "df_proc"
+    type: "virtualenv"
+    desc: "Primary virtualenv for design factory processes."
+
