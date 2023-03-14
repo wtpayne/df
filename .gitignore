@@ -42,13 +42,7 @@
 # to be included (unless otherwise specified).
 #
 
-# Stableflow system configuration source documents.
-#
-!*.register.toml
-!*.register.yaml
-!pytest.ini
-
-# Stableflow system configuration source documents.
+# Stableflow system configuration design documents.
 #
 !*.cfg.ini
 !*.cfg.json
@@ -56,7 +50,7 @@
 !*.cfg.xml
 !*.cfg.yaml
 
-# Python/Cython/Codon program source documents.
+# Python/Cython/Codon design documents.
 #
 !*.py
 !*.pxd
@@ -64,38 +58,48 @@
 !*.pyx
 !*.codon
 
-# C/C++ program source documents.
+# C/C++ design documents.
 #
 !*.h
 !*.c
 !*.hpp
 !*.cpp
 
-# Rust program source documents.
+# Rust design documents.
 #
 !*.rs
 
-# C# program source documents.
+# C# design documents.
 #
 !*.cs
 
-# Markdown, ReStructuredText and plain text source documents.
-#
-!*.md
-!*.rst
-!*.txt
-
-# HTML/CSS/Javascript source documents.
+# HTML/CSS/Javascript design documents.
 #
 !*.html
 !*.css
 !*.js
 
+# Shellscript design documents.
+#
 !*.sh
 
+# Markdown, ReStructuredText and plain text documents.
+#
+!*.md
+!*.rst
+!*.txt
 
+# Controlled item registration documents.
+#
+!*.register.yaml
+
+# The development automation system entrypoint.
+#
 !da
 
+# Tool configuration documents.
+#
+!pytest.ini
 !.gitattributes
 !.gitignore
 
