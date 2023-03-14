@@ -1,5 +1,15 @@
-bowyer
-click==8.1.3
+click==8.1.3            # da
+loguru==0.5.3           # da
+pudb==2022.1.3          # da
+prompt-toolkit==3.0.38  # da interact bpy
+bpython==0.24           # da interact bpy
+ptpython==3.0.23        # da interact ptpy
+ipython==8.11.0         # da interact ipy
+pycozo==0.5.1           # da interact direpl
+cozo-embedded==0.5.1    # da interact direpl
+rich==13.3.2            # da interact browse
+textual==0.15.1         # da interact browse
+
 -e ${WORKSPACE}/a3_src/h20_capability
 -e ${WORKSPACE}/a3_src/h30_product
 -e ${WORKSPACE}/a3_src/h40_bespoke

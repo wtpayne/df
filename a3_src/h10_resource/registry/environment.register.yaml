@@ -9,8 +9,8 @@ introduction:
 
 register:
 
-  e000_df_proc:
-    name: "df_proc"
+  e000_da:
+    name: "da"
     type: "virtualenv"
-    desc: "Primary virtualenv for design factory processes."
+    desc: "Primary virtualenv for core design automation tools."
 

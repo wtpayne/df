@@ -136,15 +136,19 @@ if [[ ${do_source_new}     == 1 ]]; then source "${dirpath_venv}/bin/activate"; 
 
 # -----------------------------------------------------------------------------
 # If the e000_da virtual environment is stale then
-# update it.
+# update it. We explicitly install 'wheel' first,
+# as it needs to be present before some other
+# packages will install.
 #
 if [[ ${is_venv_stale} == 1 ]]; then
-    filename_reqs="requirements.txt"
-    dirpath_reqs="${WORKSPACE}/a4_tmp/${name_venv}"
-    filepath_reqs="${dirpath_reqs}/${filename_reqs}"
-    mkdir -p "${dirpath_reqs}"
-    cat "${filepath_tmpl}" | envsubst > "${filepath_reqs}"
-    pip3 install -r ${filepath_reqs}
+    pip3 install "wheel";
+    filename_reqs="requirements.txt";
+    dirpath_reqs="${WORKSPACE}/a4_tmp/${name_venv}";
+    filepath_reqs="${dirpath_reqs}/${filename_reqs}";
+    mkdir -p "${dirpath_reqs}";
+    cat "${filepath_tmpl}" | envsubst > "${filepath_reqs}";
+    pip3 install -r ${filepath_reqs};
+    clear;
 fi
 
 
