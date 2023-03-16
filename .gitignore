@@ -36,6 +36,7 @@
 /a4_tmp/*
 /a5_cms/*
 
+
 # -----------------------------------------------------------------------------
 # Override the global ignore rule for some
 # specific files and file types that we intend
@@ -92,6 +93,18 @@
 # Controlled item registration documents.
 #
 !*.register.yaml
+
+# Work breakdown structure documents.
+#
+!*.wbs.yaml
+
+# Requirements specification documents.
+#
+!*.req.yaml
+
+# Document schema documents.
+#
+!*.schema.yaml
 
 # The development automation system entrypoint.
 #

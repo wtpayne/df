@@ -13,7 +13,9 @@ register:
     atlas:      [z0001_atlas]
     student:    [dm001_student]
     algebra:    [dm002_algebra]
-    orion:      Null
+    poetic:     [dm003_poetic]
+    orion:      [co000_orion]
+    invicta:    [p0000_invicta]
     legend:     Null
     chicago:    Null
     viking:     Null
@@ -22,7 +24,6 @@ register:
     griffin:    Null
     pinball:    Null
     olympic:    Null
-    invicta:    Null
     benny:      Null
     battery:    Null
     size:       Null
@@ -79,7 +80,6 @@ register:
     robin:      Null
     traffic:    Null
     street:     Null
-    poetic:     Null
     monkey:     Null
     broken:     Null
     machine:    Null

@@ -31,7 +31,7 @@ register:
           organisation level registers and
           mini-databases, and anything else
           with a similar organisation-wide
-          pattern of use.
+          pattern of use."
 
   h20_capability:
     desc: "The h20_capability tier is intended
@@ -51,7 +51,7 @@ register:
           The designs in the h30_product tier
           are normally composed of design
           elements drawn from the h20_capability
-          tier.
+          tier."
 
   h40_bespoke:
     desc: "The h40_bespoke tier is intended for
@@ -62,7 +62,7 @@ register:
           are normally composed of tailorings
           applied on top of off the shelf product
           designs drawn from the h30_product
-          tier.
+          tier."
 
   h50_research:
     desc: "The h50_research tier is intended for

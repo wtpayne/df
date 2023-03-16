@@ -1,0 +1,26 @@
+
+req:
+
+  i000000_design_process:
+    statement:
+      - "The [[design_process]] WILL be composed of a collection of
+        [[design_process_configuration]] elements, each representing
+        a different [[design_process]] or [[design_process]] variant."
+
+  i000001_design_process_configuration:
+    - "Each [[design_process_configuration]] WILL be composed of
+      a collection of [[design_process_activity]] elements, each
+      representing a functional step in the [[design_process_configuration]]"
+
+  i000002_design_process_activity:
+    - "Each [[design_process_activity]] WILL be composed of a
+      collection of [[design_process_activity_input]] elements, a
+      collection of [[design_process_activity_output]] elements, and
+      a [[design_process_activity_function]] that consumes inputs
+      and produces outputs.
+
+  i000003_design_process_automation:
+    - "The [[design_factory_system]] SHOULD provide each [[team_member]]
+      with the ability to systematically control the properties
+      of each [[design_process_activity_function]] in the [[design_process]].
+

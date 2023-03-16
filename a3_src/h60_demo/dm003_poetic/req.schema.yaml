@@ -1,0 +1,634 @@
+$schema: http://json-schema.org/draft-07/schema#
+$id:     http://XXXXX/schemas/XXXXX.json
+
+definitions:
+
+  requirement:
+
+    type:                          object
+    properties:
+
+
+      # ------------------------------------------------------------------------
+      # requirement.identification
+      #
+      #   Attributes related to the identification
+      #   of the requirement.
+      #
+      identification:
+        type:                      object
+        properties:
+
+          # requirement.identification.category
+          #
+          #   Path in requirements breakdown
+          #   structure.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A38 (Type/Category)
+          #
+          category:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.identification.code
+          #
+          #   i-number-id.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A13 (Unique identifier)
+          #
+          code:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.identification.name
+          #
+          #   Human readable name.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A14 (Unique name)
+          #
+          name:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.identification.version
+          #
+          #   Versioning information. (e.g. last-changed-commit/baseline)
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A21 (Version Number)
+          #
+          version:
+            type:                  array
+            items:
+              type:                string
+
+
+      # ------------------------------------------------------------------------
+      # requirement.statement
+      #
+      #   The formal requirement statement in
+      #   restricted natural language.
+      #
+      statement:
+          type:                    array
+          items:
+            type:                  string
+
+
+      # ------------------------------------------------------------------------
+      # requirement.intent
+      #
+      #   These are attributes related to describing
+      #   the intent of the requirement.
+      #
+      intent:
+        type:                      object
+        properties:
+
+          # requirement.intent.rationale
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A1 (Rationale)
+          #
+          rationale:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.intent.condition_of_use
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A6 (Condition of use)
+          #
+          condition_of_use:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.intent.states_and_modes
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A7 (States and modes)
+          #
+          states_and_modes:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.intent.allocation
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A8 (Allocation to architectural component)
+          #
+          allocation:
+            type:                  array
+            items:
+              type:                string
+
+
+      # ------------------------------------------------------------------------
+      # requirement.importance
+      #
+      #   Attributes related to describing the
+      #   importance of the requirement.
+      #
+      importance:
+        type:                      object
+        properties:
+
+          # requirement.importance.is_critical
+          #
+          #   true/false essential/nonessential.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A33 (Criticality or Essentiality)
+          #
+          is_critical:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.importance.is_key_driver
+          #
+          #   true/false key driver of costs, risks or delays.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A36 (Key Driving Need or Requirement)
+          #
+          is_key_driver:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.importance.level_of_risk
+          #
+          #   high/medium/low technical risk.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A34 (Risk of implementation)
+          #
+          level_of_risk:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.importance.level_of_stability
+          #
+          #   high/medium/low inverse change-likelihood.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A24 (Stability)
+          #
+          level_of_stability:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.importance.level_of_priority
+          #
+          #   high/medium/low importance to stakeholders.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A32 (Priority)
+          #
+          level_of_priority:
+            type:                  array
+            items:
+              type:                string
+
+
+      # ------------------------------------------------------------------------
+      # requirement.scope
+      #
+      #   Attributes related to describing the
+      #   scope of the requirement.
+      #
+      scope:
+        type:                      object
+        properties:
+
+          # requirement.scope.applicability
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A39 - Applicability
+          #
+          #
+          applicability:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.scope.region
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A40 - Region
+          #
+          #
+          region:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.scope.country
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A41 - Country
+          #
+          #
+          country:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.scope.province
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A42 - State/Province
+          #
+          #
+          province:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.scope.application
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A43 - Application
+          #
+          #
+          application:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.scope.market_segment
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A44 - Market Segment
+          #
+          #
+          market_segment:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.scope.business_unit
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A45 - Business Unit
+          #
+          #
+          business_unit:
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.scope.product_line
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A46 - Business (Product) line.
+          #
+          #
+          product_line:
+            type:                  array
+            items:
+              type:                string
+
+
+      # ------------------------------------------------------------------------
+      # requirement.control
+      #
+      #   Attributes related to controlling the
+      #   requirement and SOI lifecycle.
+      #
+      control:
+        type:                      object
+        properties:
+
+          # requirement.control.requirement
+          #
+          #   Attributes related to controlling the
+          #   requirement lifecycle.
+          #
+          requirement:
+            type:                  object
+            properties:
+
+              # requirement.control.requirement.status
+              #
+              #   Ref: INCOSE-TP-2010-006-03/A28 (Status of the need or requirement)
+              #
+              status:
+                type:              array
+                items:
+                  type:            string
+
+              # Attributes related to requirement verification.
+              #
+              verification:
+                type:              object
+                properties:
+
+                  # requirement.control.requirement.verification.status
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A26 - Need Validation or Requirement Verification Status
+                  #
+                  status:
+                    type:          array
+                    items:
+                      type:        string
+
+              # Attributes related to requirement validation.
+              #
+              validation:
+                type:              object
+                properties:
+
+                # requirement.control.requirement.validation.status.
+                #
+                #   Ref: INCOSE-TP-2010-006-03/A27 - Need or Requirement Validation Status
+                #
+                status:
+                  type:            array
+                  items:
+                    type:          string
+
+
+          # Attributes related to controlling the design lifecycle.
+          #
+          design:
+            type:                  object
+            properties:
+
+              # requirement.control.design.status
+              #
+              #   Ref: INCOSE-TP-2010-006-03/A29 - Status (of design/implementation)
+              #
+              status:
+                type:              array
+                items:
+                  type:            string
+
+              verification:
+                type:              object
+                properties:
+
+                  # requirement.control.verification.method
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A2  - SOI primary verification or validation method
+                  #
+                  method:
+                    type:          array
+                    items:
+                      type:        string
+
+                  # requirement.control.verification.approach
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A3  - SOI verification or validation approach
+                  #
+                  approach:
+                    type:          array
+                    items:
+                      type:        string
+
+                  # requirement.control.verification.level
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A9  - SOI verification or validation level
+                  #
+                  level:
+                    type:          array
+                    items:
+                      type:        string
+
+                  # requirement.control.verification.phase
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A10 - SOI verification or validation phase
+                  #
+                  phase:
+                    type:          array
+                    items:
+                      type:        string
+
+                  # requirement.control.verification.results
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A11 - SOI verification or validation results
+                  #
+                  results:
+                    type:          array
+                    items:
+                      type:        string
+
+                  # requirement.control.verification.status
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A12 - SOI verification or validation status
+                  #
+                  status:
+                    type:          array
+                    items:
+                      type:        string
+
+              validation:
+                type:              object
+                properties:
+
+                  # requirement.control.validation.method
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A2  - SOI primary verification or validation method
+                  #
+                  method:
+                    type:          array
+                    items:
+                      type:        string
+
+                  # requirement.control.validation.approach
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A3  - SOI verification or validation approach
+                  #
+                  approach:
+                    type:          array
+                    items:
+                      type:        string
+
+                  # requirement.control.validation.level
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A9  - SOI verification or validation level
+                  #
+                  level:
+                    type:          array
+                    items:
+                      type:        string
+
+                  # requirement.control.validation.phase
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A10 - SOI verification or validation phase
+                  #
+                  phase:
+                    type:          array
+                    items:
+                      type:        string
+
+                  # requirement.control.validation.results
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A11 - SOI verification or validation results
+                  #
+                  results:
+                    type:          array
+                    items:
+                      type:        string
+
+                  # requirement.control.validation.status
+                  #
+                  #   Ref: INCOSE-TP-2010-006-03/A12 - SOI verification or validation status
+                  #
+                  status:
+                    type:          array
+                    items:
+                      type:        string
+
+          # requirement.control.change_status
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A20 (Change Status)
+          #
+          change_status:           []
+            type:                  array
+            items:
+              type:                string
+
+          # requirement.control.risk_mitigation
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A35 (Risk Mitigation)
+          #
+          risk_mitigation:
+            type:                  array
+            items:
+              type:                string
+
+
+
+      # ------------------------------------------------------------------------
+      # Attributes related to dates in the lifecycle of the requirement.
+      #
+      date:
+        type:                      object
+        properties:
+
+          # Date requirement entered.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A16 (Date Requirement Entered)
+          #
+          entered:
+            type:                  array
+            items:
+              type:                string
+
+          # Approval date.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A22 (Approval Date)
+          #
+          approved:
+            type:                  array
+            items:
+              type:                string
+
+          # Date of last change.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A23 (Date of Last Change)
+          #
+          last_changed:
+            type:                  array
+            items:
+              type:                string
+
+
+      # ------------------------------------------------------------------------
+      # Attributes related to team member stakeholders in the requirement.
+      #
+      team:
+        type:                      object
+        properties:
+
+          # Team member originator.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A15 (Originator/Author)
+          #
+          originator:
+            type:                  array
+            items:
+              type:                string
+
+          # Team member owner.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A17 (Owner)
+          #
+          owner:
+            type:                  array
+            items:
+              type:                string
+
+          # Team member responsible,
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A25 (Responsible person)
+          #
+          responsible_person:
+            type:                  array
+            items:
+              type:                string
+
+          # Change board.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A19 (Change Board)
+          #
+          change_board:
+            type:                  array
+            items:
+              type:                string
+
+          # Other stakeholders.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A18 (Stakeholders)
+          #
+          stakeholders:
+            type:                  array
+            items:
+              type:                string
+
+
+      # ------------------------------------------------------------------------
+      # Attributes related to traces and cross references.
+      #
+      trace:
+        type:                      object
+        properties:
+
+          # Trace to parent.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A4 (Trace to Parent)
+          #
+          to_parent:
+            type:                  array
+            items:
+              type:                string
+
+          # Trace to source.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A5 (Trace to source)
+          #
+          to_source:
+            type:                  array
+            items:
+              type:                string
+
+          # Trace to peer.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A31 (Trace to Peer Requirements)
+          #
+          to_peer:
+            type:                  array
+            items:
+              type:                string
+
+          # Trace to interface.
+          #
+          #   Ref: INCOSE-TP-2010-006-03/A30 (Trace to Interface Definition)
+          #
+          to_interface:
+            type:                  array
+            items:
+              type:                string
+
+
+      # ------------------------------------------------------------------------
+      # Additional comments.
+      #
+      #   Ref: INCOSE-TP-2010-006-03/A37 - Additional Comments
+      #
+      additional_comments:
+        type:                      array
+        items:
+          type:                    string

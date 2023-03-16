@@ -134,7 +134,7 @@ register:
     regs: Null
     desc: "Item identifier."
     pfix: "i"
-    dgts: 5
+    dgts: 6
     note: "Items are generic identifiers that can
           be used for any thing that needs to be
           tracked. These are currently most heavily
