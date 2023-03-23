@@ -182,9 +182,10 @@ class DataBase():
         Yield traces from the specified origin.
 
         """
-        result = self._client.run(script = _SCRIPT_QUERY_BY_SRC,
-                                  params = {_ID_SRC: id_from})
-
-        if result['ok']:
+        try:
+            result = self._client.run(script = _SCRIPT_QUERY_BY_SRC,
+                                      params = {_ID_SRC: id_from})
             for trace in result['rows']:
                 yield trace
+        except:
+            pass
