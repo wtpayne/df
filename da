@@ -75,15 +75,15 @@ if command -v "envsubst" > /dev/null; then has_command_envsubst=1; fi
 if command -v "python3"  > /dev/null; then has_command_python3=1;  fi
 if command -v "pip3"     > /dev/null; then has_command_pip3=1;     fi
 
-if [[ ${has_command_envsubst} == 0 ]]; then
+if [ ${has_command_envsubst} -eq 0 ]; then
     printf "The 'envsubst' command was not found.\n" 1>&2;
     exit 1;
 fi
-if [[ ${has_command_python3} == 0 ]]; then
+if [ ${has_command_python3} -eq 0 ]; then
     printf "The 'python3' command was not found.\n" 1>&2;
     exit 1;
 fi
-if [[ ${has_command_pip3} == 0 ]]; then
+if [ ${has_command_pip3} -eq 0 ]; then
     printf "The 'pip3' command was not found.\n" 1>&2;
     exit 1;
 fi
@@ -117,6 +117,27 @@ export WORKSPACE;
 
 
 # -----------------------------------------------------------------------------
+# Check for problems with the e000_da virtual environment.
+#
+# We have sometimes run into problems that result
+# in the venv directory being created but not
+# populated. We detect this by looking to see if
+# the directory exists but without the usual
+# "/bin/activate" script inside it. If this is
+# the case, then we simply wipe the directory
+# and start again from scratch.
+#
+name_venv="e000_da"
+dirpath_venv="${WORKSPACE}/a0_env/venv/${name_venv}"
+filepath_activate="${dirpath_venv}/bin/activate"
+if [ -d "${dirpath_venv}" ] && [ ! -f "${filepath_activate}" ]; then
+    printf "The venv appears to be broken.\n" 1>&2;
+    printf "The venv will be recreated.\n" 1>&2;
+    rm -r "${dirpath_venv}"
+fi
+
+
+# -----------------------------------------------------------------------------
 # Ensure the e000_da virtual environment exists,
 #
 # This section checks if the virtual environment
@@ -125,24 +146,16 @@ export WORKSPACE;
 # as stale so that required packages will be
 # installed.
 #
-# TODO: If venv command does not work, try to
-#       install python3-venv from the package
-#       manager:
-#
-#       sudo apt-get update
-#       sudo apt-get install python3-venv
-#
-# TODO: Check to see if 'activate' file
-#       is present. If it isn't, then the
-#       venv may be in a partially configured
-#       bad state and will need to be recreated.
-#
-name_venv="e000_da"
 is_stale_venv=0;
-dirpath_venv="${WORKSPACE}/a0_env/venv/${name_venv}"
-if [[ ! -d "${dirpath_venv}" ]]; then
-   python3 -m venv "${dirpath_venv}";
-   is_stale_venv=1;
+if [ ! -d "${dirpath_venv}" ]; then
+    if python3 -m venv "${dirpath_venv}"; then
+        is_stale_venv=1;
+    else
+        printf "Try installing python3-venv with:\n"     1>&2;
+        printf "   sudo apt-get update\n"                1>&2;
+        printf "   sudo apt-get install python3-venv\n"  1>&2;
+        exit 1
+    fi
 fi
 
 
