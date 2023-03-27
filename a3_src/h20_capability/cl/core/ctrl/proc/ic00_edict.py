@@ -48,7 +48,7 @@ import datetime
 import signal
 import time
 
-import bowyer.signal
+import stableflow.signal
 
 
 # -----------------------------------------------------------------------------
@@ -141,4 +141,4 @@ def step(inputs, state, outputs):
         outputs[key_ctrl_out].update(inputs['control'])
 
     if inputs['control']['do_halt']:
-        return (bowyer.signal.exit_ok_controlled,)
+        return (stableflow.signal.exit_ok_controlled,)

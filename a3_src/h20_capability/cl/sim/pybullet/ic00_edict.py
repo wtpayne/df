@@ -69,9 +69,9 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
     physicsClient = pybullet.connect(pybullet.GUI)
     pybullet.setAdditionalSearchPath(pybullet_data.getDataPath())
-    pybullet.setGravity(0,0,-10)
+    pybullet.setGravity(0, 0, -10)
     planeId          = pybullet.loadURDF("plane.urdf")
-    startPos         = [0,0,1]
+    startPos         = [0, 0, 1]
     startOrientation = pybullet.getQuaternionFromEuler([0,0,0])
     boxId            = pybullet.loadURDF("data/quadrotor.urdf")
 
@@ -114,4 +114,3 @@ def _foo():
     """
     """
     pass
-

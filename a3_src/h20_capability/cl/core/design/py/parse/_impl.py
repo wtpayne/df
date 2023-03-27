@@ -397,7 +397,7 @@ def _iter_windowed_pairs(itable):
     src  = itertools.chain([None], itable, [None])
     prev = next(src)
     for item in src:
-        yield(prev, item)
+        yield (prev, item)
         prev = item
 
 

@@ -516,7 +516,7 @@ TupEvent = collections.namedtuple(
 # =============================================================================
 class EventEnqueueingHandler(watchdog.events.FileSystemEventHandler):
     """
-    Enqueues watchdog filesystem events for bowyer to pick up.
+    Enqueues watchdog filesystem events for stableflow to pick up.
 
     """
 
@@ -572,9 +572,9 @@ class EventEnqueueingHandler(watchdog.events.FileSystemEventHandler):
         Add the specified event to the queue.
 
         """
-        path_src   = None
-        path_dst   = None
-        is_dir     = False
+        path_src = None
+        path_dst = None
+        is_dir   = False
 
         if hasattr(event, 'src_path'):
             if event.src_path:
@@ -607,4 +607,4 @@ class EventEnqueueingHandler(watchdog.events.FileSystemEventHandler):
             except queue.Empty:
                 break
         list_tup_event = list(set_tup_event)
-        return(list_tup_event)
+        return list_tup_event

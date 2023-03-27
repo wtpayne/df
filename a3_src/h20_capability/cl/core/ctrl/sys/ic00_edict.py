@@ -236,9 +236,9 @@ def _temporal_aggregation_codes():
     gmt     = time.gmtime()
     id_year = gmt.tm_year
     id_day  = (id_year * 1000) + gmt.tm_yday
-    id_hour = (id_day  *  100) + gmt.tm_hour
-    id_min  = (id_hour *  100) + gmt.tm_min
-    id_sec  = (id_min  *  100) + gmt.tm_sec
+    id_hour = (id_day  *  100) + gmt.tm_hour  # pylint: disable=E222
+    id_min  = (id_hour *  100) + gmt.tm_min   # pylint: disable=E222
+    id_sec  = (id_min  *  100) + gmt.tm_sec   # pylint: disable=E222
 
     return (id_year, id_day, id_hour, id_min, id_sec)
 
