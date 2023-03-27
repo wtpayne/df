@@ -59,7 +59,46 @@ set -o pipefail  # don't hide errors within pipes
 
 
 # -----------------------------------------------------------------------------
+# Check to ensure required commands exist.
+#
+# This section uses 'command' to check that the
+# 'envsubst', 'python3' and 'pip3' commands exist
+# in the current execution environment, and halt
+# the bash script with an error code and an error
+# message on stderr if any of them are missing.
+#
+has_command_envsubst=0;
+has_command_python3=0;
+has_command_pip3=0;
+
+if command -v "envsubst" > /dev/null; then has_command_envsubst=1; fi
+if command -v "python3"  > /dev/null; then has_command_python3=1;  fi
+if command -v "pip3"     > /dev/null; then has_command_pip3=1;     fi
+
+if [[ ${has_command_envsubst} == 0 ]]; then
+    printf "The 'envsubst' command was not found.\n" 1>&2;
+    exit 1;
+fi
+if [[ ${has_command_python3} == 0 ]]; then
+    printf "The 'python3' command was not found.\n" 1>&2;
+    exit 1;
+fi
+if [[ ${has_command_pip3} == 0 ]]; then
+    printf "The 'pip3' command was not found.\n" 1>&2;
+    exit 1;
+fi
+
+
+# -----------------------------------------------------------------------------
 # Determine the path to the current workspace.
+#
+# This section uses the pushd and popd commands
+# to change the current directory to the location
+# of the script and then back to the original
+# directory. It also resolves any symbolic links
+# in the path. The resulting path is then stored
+# in the WORKSPACE variable and exported so that
+# it can be accessed by any child processes.
 #
 WORKSPACE=$(
     pushd . > /dev/null;
@@ -78,16 +117,32 @@ export WORKSPACE;
 
 
 # -----------------------------------------------------------------------------
-# Create the e000_da virtual environment if it is
-# not present.
+# Ensure the e000_da virtual environment exists,
+#
+# This section checks if the virtual environment
+# is present and creates it if not. If a new
+# virtual environemnt is created, it is marked
+# as stale so that required packages will be
+# installed.
+#
+# TODO: If venv command does not work, try to
+#       install python3-venv from the package
+#       manager:
+#
+#       sudo apt-get update
+#       sudo apt-get install python3-venv
+#
+# TODO: Check to see if 'activate' file
+#       is present. If it isn't, then the
+#       venv may be in a partially configured
+#       bad state and will need to be recreated.
 #
 name_venv="e000_da"
+is_stale_venv=0;
 dirpath_venv="${WORKSPACE}/a0_env/venv/${name_venv}"
 if [[ ! -d "${dirpath_venv}" ]]; then
    python3 -m venv "${dirpath_venv}";
-   is_venv_stale=1;
-else
-    is_venv_stale=0;
+   is_stale_venv=1;
 fi
 
 
@@ -95,20 +150,39 @@ fi
 # Check to see if the e000_da virtual environment
 # is stale.
 #
+# This section checks if the virtual environment
+# is stale, i.e., if the list of requirements in
+# the e000_da requirements template has changed
+# since the virtual environment was created or
+# last updated.
+#
+# This section checks the modification times of
+# the requirements.template.txt file and the
+# site-packages and python-wheels directories
+# in the virtual environment, and if the
+# requirements file is newer than either of
+# these directories, the virtual environment
+# is considered stale.
+#
 dirpath_tmpl="${WORKSPACE}/a3_src/h70_internal/da/${name_venv}"
 filepath_tmpl="${dirpath_tmpl}/requirements.template.txt"
 dirpath_pkg="${dirpath_venv}/lib/python3.8/site-packages";
 dirpath_whl="${dirpath_venv}/share/python-wheels";
-is_pkg_stale=0;
-is_whl_stale=0;
-if [[ ${filepath_tmpl} -nt ${dirpath_pkg}          ]]; then is_pkg_stale=1;  fi
-if [[ ${filepath_tmpl} -nt ${dirpath_whl}          ]]; then is_whl_stale=1;  fi
-if [[ ${is_pkg_stale} == 1 && ${is_whl_stale} == 1 ]]; then is_venv_stale=1; fi
+is_stale_pkg=0;
+is_stale_whl=0;
+if [[ ${filepath_tmpl} -nt ${dirpath_pkg}          ]]; then is_stale_pkg=1;  fi
+if [[ ${filepath_tmpl} -nt ${dirpath_whl}          ]]; then is_stale_whl=1;  fi
+if [[ ${is_stale_pkg} == 1 && ${is_stale_whl} == 1 ]]; then is_stale_venv=1; fi
 
 
 # -----------------------------------------------------------------------------
 # Ensure that the e000_da virtual environment is
 # active.
+#
+# This section ensures that the e000_da virtual
+# environment is active, deactivating the old
+# environment if necessary and activating the
+# new one.
 #
 is_active_none=0;
 is_active_old=0;
@@ -118,7 +192,7 @@ if   [[ "${VIRTUAL_ENV-none}" == "none"       ]]; then is_active_none=1;
 elif [[ "${VIRTUAL_ENV}" != "${dirpath_venv}" ]]; then is_active_old=1;
 elif [[ "${VIRTUAL_ENV}" == "${dirpath_venv}" ]]; then is_active_new=1;
 else
-    echo "Logic implementation error.";
+    printf "Logic implementation error.\n";
     exit 1;
 fi
 
@@ -126,7 +200,7 @@ if   [[ ${is_active_none} == 1 ]]; then do_deactivate_old=0 do_source_new=1
 elif [[ ${is_active_old}  == 1 ]]; then do_deactivate_old=1 do_source_new=1
 elif [[ ${is_active_new}  == 1 ]]; then do_deactivate_old=0 do_source_new=0
 else
-    echo "Logic implementation error.";
+    printf "Logic implementation error.\n";
     exit 1;
 fi
 
@@ -135,12 +209,23 @@ if [[ ${do_source_new}     == 1 ]]; then source "${dirpath_venv}/bin/activate"; 
 
 
 # -----------------------------------------------------------------------------
-# If the e000_da virtual environment is stale then
-# update it. We explicitly install 'wheel' first,
-# as it needs to be present before some other
-# packages will install.
+# Update the e000_da virtual environment if it is
+# stale.
 #
-if [[ ${is_venv_stale} == 1 ]]; then
+# If the virtual environment is stale, this section
+# updates it by installing all of the packages
+# listed in the requirements.template.txt file.
+#
+# The envsubst command is used to substitute
+# environment variables in the template file
+# and generate a requirements.txt file before
+# installing packages.
+#
+# We explicitly install 'wheel' first, as it
+# needs to be present before some other packages
+# can be installed.
+#
+if [[ ${is_stale_venv} == 1 ]]; then
     pip3 install "wheel";
     filename_reqs="requirements.txt";
     dirpath_reqs="${WORKSPACE}/a4_tmp/${name_venv}";
