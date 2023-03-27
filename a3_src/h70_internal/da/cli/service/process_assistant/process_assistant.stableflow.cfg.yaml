@@ -269,6 +269,8 @@ node:
     functionality:
       py_module:    cl.core.design.index.db.ic00_edict
     state_type:     py_dict
+    config:
+      filepath_db:  Null
 
   # ---------------------------------------------------------------------------
   ui_system_tray:

@@ -65,11 +65,8 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
     """
 
-
-    filepath_db = '/media/wtp/Data/dev/df/ws00_pri/a4_tmp/main/design_index.db'
-    db_trace    = trace.DataBase(filepath_db = filepath_db)
-
-    signal = None
+    db_trace = trace.DataBase(filepath_db = cfg['filepath_db'])
+    signal   = None
 
     for id_out in outputs.keys():
         outputs[id_out]['ena']  = False

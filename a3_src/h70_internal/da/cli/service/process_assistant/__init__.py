@@ -76,6 +76,15 @@ def _filepath_system_cfg():
 
 
 # -----------------------------------------------------------------------------
+def _dirpath_root():
+    """
+    Return the path of the root directory of the design factory filesystem.
+
+    """
+    return os.path.normpath(os.path.join(_dirpath_self(), '../../../../../..'))
+
+
+# -----------------------------------------------------------------------------
 def _dirpath_src():
     """
     Return the path of the root directory of the design document filesystem.
@@ -90,7 +99,16 @@ def _dirpath_src():
     hierarchy.
 
     """
-    return os.path.normpath(os.path.join(_dirpath_self(), '../../../../..'))
+    return os.path.join(_dirpath_root(), 'a3_src')
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_tmp():
+    """
+    Return the path of the root directory of the temporary document filesystem.
+
+    """
+    return os.path.join(_dirpath_root(), 'a4_tmp')
 
 
 # -----------------------------------------------------------------------------
@@ -107,14 +125,33 @@ def _filepath_env():
 
 
 # -----------------------------------------------------------------------------
+def _filepath_db():
+    """
+    Return the file path of the design index database file.
+
+    """
+    return os.path.join(_dirpath_tmp(), 'main/design_index.db')
+
+
+# -----------------------------------------------------------------------------
 def start():
     """
     Start monitoring.
 
     """
+
+    # Create the database directory if it doesn't
+    # already exist.
+    #
+    filepath_db = _filepath_db()
+    dirpath_db  = os.path.dirname(filepath_db)
+    if not os.path.exists(dirpath_db):
+        os.makedirs(dirpath_db)
+
     overrides = (
         'node.filesystem_watcher.config.iter_dirpath_root', [_dirpath_src(),],
-        'node.ui_discord_client.config.filepath_env',       _filepath_env())
+        'node.ui_discord_client.config.filepath_env',        _filepath_env(),
+        'node.design_index_db.config.filepath_db',           _filepath_db())
 
     with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
 

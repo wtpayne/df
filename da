@@ -84,7 +84,10 @@ if [ ${has_command_python3} -eq 0 ]; then
     exit 1;
 fi
 if [ ${has_command_pip3} -eq 0 ]; then
-    printf "The 'pip3' command was not found.\n" 1>&2;
+    printf "The 'pip3' command was not found.\n"    1>&2;
+    printf "Try installing python3-pip with:\n"     1>&2;
+    printf "   sudo apt-get update\n"               1>&2;
+    printf "   sudo apt-get install python3-pip\n"  1>&2;
     exit 1;
 fi
 
