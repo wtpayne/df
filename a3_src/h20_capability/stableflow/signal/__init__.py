@@ -19,13 +19,33 @@ import cython
 import signal
 
 
-continue_ok:        cython.int = 100
-exit_ex_immediate:  cython.int = int(signal.SIGKILL)  # Immediate exceptional shutdown (e.g. fatal nonrecoverable error).
-exit_ex_controlled: cython.int = 101                  # Controlled exceptional shutdown.
-exit_ok_controlled: cython.int = int(signal.SIGTERM)  # Controlled nominal shutdown.
-control_reset:      cython.int = 102                  # Reset and retry
-control_pause:      cython.int = int(signal.SIGUSR1)  #
-control_step:       cython.int = int(signal.SIGUSR2)
+# Continue, everything is OK.
+#
+continue_ok: cython.int = 100
+
+# Immediate exceptional shutdown (e.g. fatal nonrecoverable error).
+#
+exit_ex_immediate: cython.int = int(signal.SIGKILL)
+
+# Controlled exceptional shutdown.
+#
+exit_ex_controlled: cython.int = 101
+
+# Controlled nominal shutdown.
+#
+exit_ok_controlled: cython.int = int(signal.SIGTERM)
+
+# Reset and retry
+#
+control_reset: cython.int = 102
+
+# Pause
+#
+control_pause: cython.int = int(signal.SIGUSR1)
+
+# Single-step when paused.
+#
+control_step: cython.int = int(signal.SIGUSR2)
 
 exit = (
     exit_ex_immediate,

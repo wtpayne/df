@@ -79,7 +79,7 @@ class GracefulHalt(ControlSignal):
 # =============================================================================
 class NonRecoverableError(ControlSignal):
     """
-    Thrown to trigger a controlled shutdown in an unplanned erroneous condition.
+    Thrown to trigger controlled shutdown in an unplanned erroneous condition.
 
     This signal is used to initiate a
     controlled shutdown of the entire

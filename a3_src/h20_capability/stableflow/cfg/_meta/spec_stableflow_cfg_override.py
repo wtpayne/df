@@ -40,7 +40,8 @@ class SpecifyApply:
         cfg         = valid_normalized_config
         id_sys_orig = copy.deepcopy(cfg['system']['id_system'])
 
-        stableflow.cfg.override.apply(cfg, ('system.id_system', 'some_other_name'))
+        stableflow.cfg.override.apply(
+                                cfg, ('system.id_system', 'some_other_name'))
 
         id_sys_mod  = cfg['system']['id_system']
         assert id_sys_orig != id_sys_mod

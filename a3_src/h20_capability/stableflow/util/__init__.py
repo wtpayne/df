@@ -294,7 +294,7 @@ def iter_format_string_fields(fmt_string):
 # -----------------------------------------------------------------------------
 def topological_sort(map_forward, map_backward = None):
     """
-    Return graph nodes as list of sets of equivalent rank in topological order.
+    Return nodes as list of sets of equivalent rank in topological order.
 
     Get the tranche list for the directed
     acyclic graph (data flow graph) of the
@@ -626,7 +626,7 @@ class RestrictedWriteDict(collections.UserDict):  # pylint: disable=R0901
     # -------------------------------------------------------------------------
     def __setitem__(self, key, value):
         """
-        Raise RuntimeError to prevent inadvertent overwrites of edge containers.
+        Raise RuntimeError to prevent inadvertent overwrite of edge containers.
 
         """
         raise RuntimeError('Ensure you are updating output (or input) '

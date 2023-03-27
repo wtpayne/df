@@ -140,7 +140,7 @@ def _signal_process_tree(iter_pid, signal):
         except psutil.NoSuchProcess:
             continue
 
-        children = parent.children(recursive=True)
+        children = parent.children(recursive = True)
         children.append(parent)
         for proc in children:
             proc.send_signal(signal)

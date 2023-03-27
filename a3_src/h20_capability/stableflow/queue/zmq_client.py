@@ -71,4 +71,3 @@ def _port_number(cfg_host, cfg_edge):
     if port > port_hi:
         raise RuntimeError('Insufficient port numbers available for graph')
     return port
-

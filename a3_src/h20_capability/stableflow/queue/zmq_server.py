@@ -23,12 +23,18 @@ class Queue:
         """
         self.owner     = cfg_edge['owner']
         self.direction = cfg_edge['dirn']
-        port           = _port_number(cfg['host'][id_host], cfg_edge)
-        address        = 'tcp://*:{port}'.format(port = port)
-        is_src         = id_host == cfg_edge['id_host_src']
-        socket_type    = zmq.PUB if is_src else zmq.SUB  # pylint: disable=E1101
-        self._context  = zmq.Context()
-        self._socket   = self._context.socket(socket_type)
+
+        port    = _port_number(cfg['host'][id_host], cfg_edge)
+        address = 'tcp://*:{port}'.format(port = port)
+        is_src  = id_host == cfg_edge['id_host_src']
+
+        if is_src:
+            socket_type = zmq.PUB
+        else:
+            socket_type = zmq.SUB  # pylint: disable=E1101
+
+        self._context = zmq.Context()
+        self._socket  = self._context.socket(socket_type)
         self._socket.bind(address)
 
     # -------------------------------------------------------------------------

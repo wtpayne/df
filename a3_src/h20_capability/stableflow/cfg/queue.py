@@ -46,5 +46,3 @@ def denormalize(cfg):
     #     'tags':      ('*',),
     #     'logic':      None})
     # cfg['queue']['default_rules'] = default_rules
-
-

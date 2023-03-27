@@ -106,7 +106,7 @@ def _normalized_cfg_schema():
                                 'type': 'string'
                             }
                         }
-                    } # ,
+                    }  # ,
                     # 'py_dill': {
                     #     'type': 'object',
                     #     'properties': {

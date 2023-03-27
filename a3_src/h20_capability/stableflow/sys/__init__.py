@@ -189,4 +189,5 @@ def _run_locally(cfg):
     cfg['runtime']['id']['id_process'] = id_process_local
 
     map_queues = stableflow.host.connect_queues(cfg, id_host_local)
-    return stableflow.proc.start(cfg, id_process_local, id_host_local, map_queues)
+    return stableflow.proc.start(
+                            cfg, id_process_local, id_host_local, map_queues)

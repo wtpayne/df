@@ -31,7 +31,8 @@ def start(cfg, id_process, id_process_host, map_queues):
     Start the main loop in the local process and process host.
 
     """
-    setproctitle.setproctitle(fully_qualified_name(cfg, id_process))
+    if setproctitle is not None:
+        setproctitle.setproctitle(fully_qualified_name(cfg, id_process))
     id_system = cfg['system']['id_system']
     stableflow.log.setup(cfg_host   = cfg['host'].get(id_process_host, None),
                      id_system  = id_system,
@@ -316,6 +317,3 @@ def _get_list_id_node_unscheduled(map_cfg_node, list_id_node, id_process):
         if is_in_process and (not is_scheduled):
             list_id_node_unscheduled.append(id_node)
     return list_id_node_unscheduled
-
-
-

@@ -251,4 +251,3 @@ def _start_one_child_process(cfg, id_process, map_queues):
     except BrokenPipeError:
         stableflow.log.logger.warning('Broken pipe when running: ' + id_process)
     return proc
-

@@ -121,7 +121,7 @@ def denormalize(cfg):
     such information explicit.
 
     """
-    return  stableflow.cfg.queue.denormalize(
+    return stableflow.cfg.queue.denormalize(
                 stableflow.cfg.edge.denormalize(
                     stableflow.cfg.data.denormalize(cfg)))
 
@@ -151,7 +151,7 @@ def _merge_dicts(first, second):
                 yield (key, dict(_merge_dicts(first[key], second[key])))
             else:
                 # second overwrites first if both are present.
-                yield(key, second[key])
+                yield (key, second[key])
         elif _in_first:
             yield (key, first[key])
         else:
