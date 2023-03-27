@@ -48,10 +48,10 @@ license:
 import os
 import sys
 
-import bowyer.cfg
-import bowyer.cfg.exception
-import bowyer.log
-import bowyer.sys
+import stableflow.cfg
+import stableflow.cfg.exception
+import stableflow.log
+import stableflow.sys
 
 
 # -----------------------------------------------------------------------------
@@ -116,20 +116,21 @@ def start():
         'node.filesystem_watcher.config.iter_dirpath_root', [_dirpath_src(),],
         'node.ui_discord_client.config.filepath_env',       _filepath_env())
 
-    with bowyer.log.logger.catch(onerror = lambda _: sys.exit(1)):
+    with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
 
         try:
 
-            cfg = bowyer.cfg.prepare(path_cfg      = _filepath_system_cfg(),
-                                     tup_overrides = overrides)
+            cfg = stableflow.cfg.prepare(
+                                    path_cfg      = _filepath_system_cfg(),
+                                    tup_overrides = overrides)
 
-        except bowyer.cfg.exception.CfgError as err:
+        except stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             return 1
 
         else:
             try:
-                return bowyer.sys.start(cfg)
+                return stableflow.sys.start(cfg)
             except Exception as err:
                 # An exception will be thrown
                 # when we need to display either
@@ -148,17 +149,17 @@ def stop():
     Stop monitoring.
 
     """
-    with bowyer.log.logger.catch(onerror = lambda _: sys.exit(1)):
+    with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
 
         try:
-            cfg = bowyer.cfg.prepare(path_cfg = _filepath_system_cfg())
-        except bowyer.cfg.exception.CfgError as err:
+            cfg = stableflow.cfg.prepare(path_cfg = _filepath_system_cfg())
+        except stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             return 1
 
         else:
             try:
-                return bowyer.sys.stop(cfg)
+                return stableflow.sys.stop(cfg)
             except Exception as err:
                 # An exception will be thrown
                 # when we need to display either

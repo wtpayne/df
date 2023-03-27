@@ -49,10 +49,10 @@ license:
 import os
 import os.path
 
-import bowyer.cfg
-import bowyer.cfg.exception
-import bowyer.log
-import bowyer.sys
+import stableflow.cfg
+import stableflow.cfg.exception
+import stableflow.log
+import stableflow.sys
 
 
 # -----------------------------------------------------------------------------
@@ -125,19 +125,19 @@ def _start_stableflow(filepath_cfg):
     Start the specified dewo stableflow system.
 
     """
-    with bowyer.log.logger.catch(onerror = lambda _: sys.exit(1)):
+    with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
 
         try:
 
-            cfg = bowyer.cfg.prepare(path_cfg = filepath_cfg)
+            cfg = stableflow.cfg.prepare(path_cfg = filepath_cfg)
 
-        except bowyer.cfg.exception.CfgError as err:
+        except stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             return 1
 
         else:
             try:
-                return bowyer.sys.start(cfg)
+                return stableflow.sys.start(cfg)
             except Exception as err:
                 # An exception will be thrown
                 # when we need to display either
@@ -156,18 +156,18 @@ def stop(dirpath_src, name_demo):
     Stop the specified demo stableflow system.
 
     """
-    with bowyer.log.logger.catch(onerror = lambda _: sys.exit(1)):
+    with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
 
         try:
             filepath_cfg = _filepath_cfg(dirpath_src, name_demo)
-            cfg = bowyer.cfg.prepare(path_cfg = filepath_cfg)
-        except bowyer.cfg.exception.CfgError as err:
+            cfg = stableflow.cfg.prepare(path_cfg = filepath_cfg)
+        except stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             return 1
 
         else:
             try:
-                return bowyer.sys.stop(cfg)
+                return stableflow.sys.stop(cfg)
             except Exception as err:
                 # An exception will be thrown
                 # when we need to display either
