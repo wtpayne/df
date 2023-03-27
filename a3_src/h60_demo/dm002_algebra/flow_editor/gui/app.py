@@ -173,6 +173,7 @@ def menu_file_save(sender, app_data, ctx):
     """
     pass
 
+
 # -----------------------------------------------------------------------------
 def menu_tools_about(sender, app_data, ctx):
     """

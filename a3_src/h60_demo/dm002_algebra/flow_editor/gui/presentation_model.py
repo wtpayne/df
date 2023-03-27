@@ -503,7 +503,8 @@ class Node():
         # Setup initial items list for the proc combo box.
         assert len(ctx.pm.proc) > 0
         self._tag_proc_combo = 'vp.win.main.side.tab.cfg.node.proc'
-        self._list_id_proc   = list((it.id for it in self.ctx.pm.proc.values()))
+        self._list_id_proc   = list(
+                                (it.id for it in self.ctx.pm.proc.values()))
         self._idx_proc       = 0
         self.proc            = self._list_id_proc[self._idx_proc]
         self.ctx.ui.configure_item(self._tag_proc_combo,
@@ -752,7 +753,6 @@ class InputPort():
                         width         = NODE_WIDGET_WIDTH,
                         default_value = DEFAULT_PORT_NAME)
 
-    
 
 # =============================================================================
 class OutputPort():
@@ -798,7 +798,6 @@ class OutputPort():
                         tag           = self.tag_node_input,
                         width         = NODE_WIDGET_WIDTH,
                         default_value = DEFAULT_PORT_NAME)
-
 
 
 # =============================================================================

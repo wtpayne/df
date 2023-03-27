@@ -322,5 +322,3 @@ class LiveMap(collections.abc.MutableMapping):
             pass
         for callback in self._lm_list_global_callback:
             callback(self)
-
-
