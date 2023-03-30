@@ -10,13 +10,13 @@ introduction:
 
 register:
 
-    atlas:      [z0001_atlas]
+    orion:      [co000_orion]
     student:    [dm001_student]
     algebra:    [dm002_algebra]
     poetic:     [dm003_poetic]
-    orion:      [co000_orion]
+    legend:     [dm004_legend]
     invicta:    [p0000_invicta]
-    legend:     Null
+    atlas:      [z0001_atlas]
     chicago:    Null
     viking:     Null
     dragon:     Null

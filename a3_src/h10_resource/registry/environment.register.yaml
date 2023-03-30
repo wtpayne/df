@@ -13,4 +13,3 @@ register:
     name: "da"
     type: "virtualenv"
     desc: "Primary virtualenv for core design automation tools."
-
