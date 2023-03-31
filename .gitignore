@@ -90,6 +90,10 @@
 !*.rst
 !*.txt
 
+# Environment specification documents.
+#
+!*.envspec.json
+
 # Controlled item registration documents.
 #
 !*.register.yaml
