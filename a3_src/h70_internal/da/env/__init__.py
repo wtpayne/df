@@ -3,11 +3,11 @@
 ---
 
 title:
-    "Environment management module and script."
+    "Virtual environment management package."
 
 description:
-    "This package and script is used to create
-    and update managed environments."
+    "This package is used to create and update
+    virtual environments of various types."
 
 id:
     "1535294d-eedc-4d08-8721-31be6ecbef43"
@@ -45,20 +45,14 @@ license:
 """
 
 
+# Be careful not to import anything that won't be
+# present in the host system. We should be safe
+# as long as we stick to python3 builtin libraries
+# and functions only.
+#
 import json
 import os.path
 import subprocess
-import sys
-
-
-# -----------------------------------------------------------------------------
-def main():
-    """
-    Ensure the specified environment is up to date with the latest envspec.
-
-    """
-    ensure_updated(rootpath = sys.argv[1],
-                   id_env   = sys.argv[2])
 
 
 # -----------------------------------------------------------------------------
@@ -171,8 +165,3 @@ def _install_requirements(filepath_reqs):
     """
     subprocess.run(['pip', 'install', 'wheel'])
     subprocess.run(['pip', 'install', '-r', filepath_reqs])
-
-
-# -----------------------------------------------------------------------------
-if __name__ == '__main__':
-    main()
