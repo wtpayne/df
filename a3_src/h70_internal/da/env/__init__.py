@@ -85,20 +85,28 @@ def _create_requirements_file(rootpath, id_env, envspec):
     Return temporary requirements.txt filepath after writing envspec data to it.
 
     """
-    filename_reqs = 'requirements.txt'
-    dirpath_reqs  = os.path.join(rootpath, 'a4_tmp', id_env)
-    filepath_reqs = os.path.join(dirpath_reqs, filename_reqs)
 
-    if not os.path.exists(dirpath_reqs):
-       os.makedirs(dirpath_reqs)
+    filepath = _filepath_requirements(rootpath, id_env)
+    dirpath  = os.path.dirname(filepath)
+    if not os.path.exists(dirpath):
+       os.makedirs(dirpath)
 
-    with open(filepath_reqs, 'wt') as file_reqs:
+    with open(filepath, 'wt') as file_reqs:
         _write = lambda msg: print(msg, file = file_reqs)
         for item in envspec['list_item']:
             _process_requirement_item(rootpath, item, _write)
         _write('')
 
-    return filepath_reqs
+    return filepath
+
+
+# -----------------------------------------------------------------------------
+def _filepath_requirements(rootpath, id_env):
+    """
+    Return the filepath of the temp requirements file for the specified env.
+
+    """
+    return os.path.join(rootpath, 'a4_tmp', id_env, 'requirements.txt')
 
 
 # -----------------------------------------------------------------------------
