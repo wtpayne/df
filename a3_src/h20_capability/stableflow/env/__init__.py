@@ -1,0 +1,360 @@
+# -*- coding: utf-8 -*-
+"""
+---
+
+title:
+    "Virtual environment management package."
+
+description:
+    "This package is used to create and update
+    virtual environments of various types."
+
+id:
+    "1535294d-eedc-4d08-8721-31be6ecbef43"
+
+type:
+    dt002_python_package
+
+validation_level:
+    v00_minimum
+
+protection:
+    k00_general
+
+copyright:
+    "Copyright 2015-2022 William Payne"
+
+license:
+    "Licensed under the Apache License, Version
+    2.0 (the License); you may not use this file
+    except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed
+    to in writing, software distributed under
+    the License is distributed on an AS IS BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+    either express or implied. See the License
+    for the specific language governing
+    permissions and limitations under the
+    License."
+
+
+"""
+
+
+# Since this module is called during the bootstrap
+# process, we need to be careful not to depend on
+# too many things that won't be present in the
+# host environment. (i.e. before any of our
+# managed environments get activated).
+#
+# We make an exception for the shell commands
+# pip3 and git, which we require to be installed
+# beforehand -- but other than that we should
+# seek to stick to python3 builtin libraries
+# and unix coreutils only.
+#
+import json
+import os.path
+import shutil
+import subprocess
+
+
+# -----------------------------------------------------------------------------
+def ensure_updated(rootpath, id_env):
+    """
+    Ensure that the specified environment is up to date.
+
+    This public function is used by stableflow
+    to update environments as needed.
+
+    """
+
+    # Ensure the virtual environment exists and
+    # is active, recreating it from scratch if
+    # any problems are detected.
+    #
+    dirpath_env = _dirpath_env(rootpath, id_env)
+    _delete_env_if_corrupted(dirpath_env)
+    is_new_env  = _create_env_if_not_exists(dirpath_env)
+    _ensure_activated(dirpath_env)
+
+    # If the virtual environment is not up to date
+    # then perform an update, generating the
+    # requirements file and pip installing
+    # any newly added requirements.
+    #
+    if not _is_up_to_date(rootpath, id_env, dirpath_env):
+        do_update(rootpath, id_env)
+
+
+# -----------------------------------------------------------------------------
+def do_update(rootpath, id_env):
+    """
+    Update the specified environment with the latest envspec.
+
+    This public function is used by the top level
+    'da' script to update the e000_da environment
+    if required.
+
+    """
+    envspec       = _load_envspec(rootpath, id_env)
+    filepath_reqs = _create_requirements_file(rootpath, id_env, envspec)
+    _install_requirements(filepath_reqs)
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_env(rootpath, id_env):
+    """
+    Return the directory path of the specified environment.
+
+    """
+    return os.path.join(rootpath, "a0_env", "venv", id_env)
+
+
+# -----------------------------------------------------------------------------
+def _delete_env_if_corrupted(dirpath_env):
+    """
+    Delete the specified environment if corruption is detected.
+
+    """
+    filepath_activate = _filepath_venv_activate(dirpath_env)
+    if os.path.isdir(dirpath_env) and not os.path.isfile(filepath_activate):
+        shutil.rmtree(dirpath_env)
+
+
+# -----------------------------------------------------------------------------
+def _create_env_if_not_exists(dirpath_env):
+    """
+    Return True if a new environment was created, false otherwise.
+
+    This function will create the specified
+    environment if it does not already exist.
+
+    """
+    if os.path.isdir(dirpath_env):
+        is_new_env = False
+    else:
+        subprocess.check_call(["python3", "-m", "venv", dirpath_env])
+        is_new_env = True
+    return is_new_env
+
+
+# -----------------------------------------------------------------------------
+def _ensure_activated(dirpath_env):
+    """
+    Ensure that the virtual environment is activated.
+
+    """
+    is_active_none     = False
+    is_active_old      = False
+    is_active_new      = False
+    envvar_virtual_env = _envvar_virtual_env()
+    do_deactivate_old  = _do_deactivate_old(envvar_virtual_env, dirpath_env)
+    do_deactivate_new  = _do_activate_new(envvar_virtual_env, dirpath_env)
+
+    if do_deactivate_old:
+        subprocess.call('deactivate', shell = True)
+
+    if do_activate_new:
+        filepath_venv_activate = _filepath_venv_activate(dirpath_env)
+        subprocess.call(filepath_venv_activate, shell = True)
+
+
+# -----------------------------------------------------------------------------
+def _do_deactivate_old(envvar_virtual_env, dirpath_env):
+    """
+    Return true if an old virtual environment needs to be deactivated.
+
+    """
+    if envvar_virtual_env != dirpath_env and envvar_virtual_env is not None:
+        return True
+    return False
+
+
+# -----------------------------------------------------------------------------
+def _do_activate_new(envvar_virtual_env, dirpath_env):
+    """
+    Return true if a new virtual environment needs to be activated.
+
+    """
+    if envvar_virtual_env != dirpath_env:
+        return True
+    return False
+
+
+# -----------------------------------------------------------------------------
+def _envvar_virtual_env():
+    """
+    Return the value of the VIRTUAL_ENV environment variable if it exists.
+
+    """
+    return os.environ.get("VIRTUAL_ENV")
+
+
+# -----------------------------------------------------------------------------
+def _is_up_to_date(rootpath, id_env, dirpath_env):
+    """
+    Return true if the specified environment is up to date, false otherwise.
+
+    """
+    mtime_venv_pkg  = os.path.getmtime(_dirpath_venv_pkg(dirpath_env))
+    mtime_venv_whl  = os.path.getmtime(_dirpath_venv_whl(dirpath_env))
+    mtime_envspec   = os.path.getmtime(_filepath_envspec(rootpath, id_env))
+    is_updated_pkg  = mtime_venv_pkg > mtime_envspec
+    is_updated_whl  = mtime_venv_whl > mtime_envspec
+    is_updated_venv = is_updated_pkg or is_updated_whl
+    return is_updated_venv
+
+
+# -----------------------------------------------------------------------------
+def _load_envspec(rootpath, id_env):
+    """
+    Return the envspec data for the specified environment id.
+
+    """
+    dirpath  = os.path.join(rootpath, 'a3_src/h10_resource/envspec')
+    filename = '.'.join((id_env, 'envspec.json'))
+    filepath = os.path.join(dirpath, filename)
+    with open(filepath, 'rt') as file:
+        return json.load(file)
+
+
+# -----------------------------------------------------------------------------
+def _create_requirements_file(rootpath, id_env, envspec):
+    """
+    Return temporary requirements.txt filepath after writing envspec data to it.
+
+    """
+
+    filepath = _filepath_requirements(rootpath, id_env)
+    dirpath  = os.path.dirname(filepath)
+    if not os.path.exists(dirpath):
+       os.makedirs(dirpath)
+
+    with open(filepath, 'wt') as file_reqs:
+        _write = lambda msg: print(msg, file = file_reqs)
+        for item in envspec['list_item']:
+            _process_requirement_item(rootpath, item, _write)
+        _write('')
+
+    return filepath
+
+
+# -----------------------------------------------------------------------------
+def _process_requirement_item(rootpath, item, _write):
+    """
+    Write a single lines to the requirements file.
+
+    """
+    if isinstance(item, str):
+
+        _write(item)
+
+    elif item['type'] == 'pep508':
+
+        _write(item['spec'])
+
+    elif item['type'] == 'local':
+
+
+        _write('-e {dirpath_dep}'.format(
+                    dirpath_dep = os.path.join(rootpath, item['relpath'])))
+
+    elif item['type'] == 'github':
+
+        _write('-e {dirpath_dep}'.format(
+                    dirpath_dep = _ensure_cloned_fron_github(
+                                                url_remote = item['remote'],
+                                                tag        = item['tag'],
+                                                rootpath   = rootpath)))
+
+
+# -----------------------------------------------------------------------------
+def _ensure_cloned_fron_github(url_remote, tag, rootpath):
+    """
+    Ensure that specified github repository is cloned to local storage.
+
+    """
+    (_, user_and_path) = url_remote.split(':')
+    (user, repo_path)  = user_and_path.split('/', maxsplit = 1)
+    (repo_name, _)     = repo_path.rsplit('.', maxsplit = 1)
+    dirpath_env        = os.path.join(rootpath, 'a0_env/src')
+    dirpath_dep        = os.path.join(dirpath_env, user, repo_name)
+    is_already_cloned  = os.path.exists(dirpath_dep)
+
+    if not is_already_cloned:
+        os.makedirs(dirpath_dep)
+        subprocess.run(['git', 'clone', url_remote, dirpath_dep])
+
+    subprocess.run(['git', 'checkout', tag], cwd = dirpath_dep)
+
+    return dirpath_dep
+
+
+# -----------------------------------------------------------------------------
+def _install_requirements(filepath_reqs):
+    """
+    Install the dependencies specified in the given requirements file.
+
+    We also always ensure that the wheel package
+    is installed first, as some of the other
+    packages require it before they can be
+    installed.
+
+    """
+    subprocess.run(['pip', 'install', 'wheel'])
+    subprocess.run(['pip', 'install', '-r', filepath_reqs])
+
+
+# -----------------------------------------------------------------------------
+def _filepath_envspec(rootpath, id_env):
+    """
+    Return the filepath of the envspec file for the specified environment.
+
+    """
+    filename = '{id_env}.envspec.json'.format(id_env = id_env)
+    return os.path.join(
+                    rootpath, 'a3_src', 'h10_resource', 'envspec', filename)
+
+
+# -----------------------------------------------------------------------------
+def _filepath_requirements(rootpath, id_env):
+    """
+    Return the path of the temporary requirements file for the specified env.
+
+    """
+    return os.path.join(rootpath, 'a4_tmp', id_env, 'requirements.txt')
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_venv_whl(dirpath_env):
+    """
+    Return the path of the virtual environment python wheels directory.
+
+    """
+    return os.path.join(dirpath_env, 'share', 'python-wheels')
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_venv_pkg(dirpath_env):
+    """
+    Return the path of the virtual environment site packages directory.
+
+    """
+    return os.path.join(dirpath_env, 'lib', 'python3.8', 'site-packages')
+
+
+# -----------------------------------------------------------------------------
+def _filepath_venv_activate(dirpath_env):
+    """
+    Return the path of the virtual environment activate script.
+
+    """
+    return os.path.join(dirpath_env, "bin", "activate")
+
+
+

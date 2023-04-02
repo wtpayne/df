@@ -48,7 +48,7 @@ license:
 
 import sys
 
-import da.env
+import stableflow.env
 
 
 # -----------------------------------------------------------------------------
@@ -57,8 +57,8 @@ def main():
     Ensure the specified environment is up to date with the latest envspec.
 
     """
-    da.env.ensure_updated(rootpath = sys.argv[1],
-                          id_env   = sys.argv[2])
+    stableflow.env.do_update(rootpath = sys.argv[1],
+                             id_env   = sys.argv[2])
 
 
 # -----------------------------------------------------------------------------

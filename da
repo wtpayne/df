@@ -254,8 +254,8 @@ if [[ ${is_stale_venv} == 1 ]]; then
 
     touch "${filepath_envspec}"
     sleep 1s
-    pip3 install -e "${WORKSPACE}/a3_src/h70_internal"
-    python3 -m da.env.update "${WORKSPACE}" "${id_env}"
+    pip3 install -e "${WORKSPACE}/a3_src/h20_capability"
+    python3 -m stableflow.env.update "${WORKSPACE}" "${id_env}"
     clear;
 
 fi
