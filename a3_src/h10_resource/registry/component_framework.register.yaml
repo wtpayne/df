@@ -10,9 +10,9 @@ introduction:
 
 register:
 
-  cf00_steadyflow:
-    name:      "Steadyflow."
-    desc:      "The Steadyflow component framework
+  cf00_stableflow:
+    name:      "Stableflow."
+    desc:      "The Stableflow component framework
                is an implementation of a Lee and
                Parks style dataflow process
                network with cyclostatic scheduling

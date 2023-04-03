@@ -7,6 +7,9 @@ of commands, organized into command groups. This
 module contains definitions for all of the
 command groups and commands used by stableflow.
 
+This file can also be executed as a script to
+provide an entry point to a stableflow system.
+
 Argument parsing and the display of command line
 help messages is implemented with the help of the
 python click library.
@@ -637,3 +640,8 @@ def ps_host(cfg = None):
     sys.exit(
         stableflow.host.get_process_summary(
             stableflow.util.serialization.deserialize(cfg)))
+
+
+# -----------------------------------------------------------------------------
+if __name__ == '__main__':
+    grp_main()

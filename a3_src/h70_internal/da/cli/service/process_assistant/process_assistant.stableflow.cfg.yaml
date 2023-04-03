@@ -10,7 +10,7 @@ host:
     acct_provision:  'wtp'
     port_range:      '8090-9000'
     dirpath_log:     ''
-    launch_cmd:      './da stableflow'
+    launch_cmd:      '/media/wtp/Data/dev/df/ws00_pri/a0_env/venv/e000_da/bin/python3 -m stableflow.cli.command'
     log_level:       'TRACE'
 
 

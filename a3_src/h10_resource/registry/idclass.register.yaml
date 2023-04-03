@@ -60,7 +60,7 @@ register:
     note: "This identifier is used to uniquely
           identify different component, modelling
           and software runtime frameworks.
-          (Steadyflow, Simulink, LabView etc...)"
+          (Stableflow, Simulink, LabView etc...)"
 
   counterparty:
     regs: Null

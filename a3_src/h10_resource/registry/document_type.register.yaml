@@ -25,8 +25,8 @@ register:
     desc: "A module written in the Python
           programming language."
 
-  dt004_python_steadyflow_edict_component:
+  dt004_python_stableflow_edict_component:
     desc: "An ic00_edict compliant component
-          for the cf00_steadyflow framework
+          for the cf00_stableflow framework
           written in the Python programming
           language."
