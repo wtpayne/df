@@ -99,8 +99,8 @@ def do_update(rootpath, id_env):
     Update the specified environment with the latest envspec.
 
     This public function is used by the top level
-    'da' script to update the e000_da environment
-    if required.
+    'da' script to update the environment
+    e000_design_automation_core if required.
 
     By setting the last-modified time of the
     envspec file to be one second prior to the
@@ -187,7 +187,7 @@ def _ensure_activated(dirpath_env):
     is_active_new      = False
     envvar_virtual_env = _envvar_virtual_env()
     do_deactivate_old  = _do_deactivate_old(envvar_virtual_env, dirpath_env)
-    do_deactivate_new  = _do_activate_new(envvar_virtual_env, dirpath_env)
+    do_activate_new    = _do_activate_new(envvar_virtual_env, dirpath_env)
 
     if do_deactivate_old:
         subprocess.call('deactivate', shell = True)

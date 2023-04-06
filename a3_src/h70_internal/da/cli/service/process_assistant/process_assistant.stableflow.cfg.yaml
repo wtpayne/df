@@ -4,20 +4,20 @@ system:
 
 ###############################################################################
 host:
-  localhost:
+  custom_env:
     hostname:        'localhost'
     acct_run:        'wtp'
     acct_provision:  'wtp'
     port_range:      '8090-9000'
     dirpath_log:     ''
-    launch_cmd:      '/media/wtp/Data/dev/df/ws00_pri/a0_env/venv/e000_da/bin/python3 -m stableflow.cli.command'
+    environment:     'e001_process_assistant'
     log_level:       'TRACE'
 
 
 ###############################################################################
 process:
   proc_main:
-    host: localhost
+    host: custom_env
 
 
 ###############################################################################

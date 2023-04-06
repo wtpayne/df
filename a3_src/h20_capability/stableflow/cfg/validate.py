@@ -143,6 +143,7 @@ def _normalized_cfg_schema():
                         'port_range':      { 'type': 'string' },
                         'password':        { 'type': 'string' },
                         'key_filename':    { 'type': 'string' },
+                        'environment':     { 'type': 'string' },
                         'launch_cmd':      { 'type': 'string' },
                         'dirpath_log':     { 'type': 'string' },
                         'log_level':       { 'type': 'string' }
@@ -154,7 +155,7 @@ def _normalized_cfg_schema():
             'process': {
                 'type': 'object',
                 'propertyNames': { 'type': 'string' },
-                'additionalProperties': {
+                'additio7nalProperties': {
                     'type': 'object',
                     'properties': {
                         'host': { '$ref': '#/definitions/id_host' }

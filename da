@@ -124,7 +124,7 @@ export WORKSPACE;
 
 
 # -----------------------------------------------------------------------------
-# Check for problems with the e000_da virtual environment.
+# Check for problems with the e000_design_automation_core virtual environment.
 #
 # We have sometimes run into problems that result
 # in the venv directory being created but not
@@ -134,7 +134,7 @@ export WORKSPACE;
 # the case, then we simply wipe the directory
 # and start again from scratch.
 #
-id_env="e000_da"
+id_env="e000_design_automation_core"
 dirpath_venv="${WORKSPACE}/a0_env/venv/${id_env}"
 filepath_activate="${dirpath_venv}/bin/activate"
 if [ -d "${dirpath_venv}" ] && [ ! -f "${filepath_activate}" ]; then
@@ -145,7 +145,7 @@ fi
 
 
 # -----------------------------------------------------------------------------
-# Ensure the e000_da virtual environment exists,
+# Ensure the e000_design_automation_core virtual environment exists.
 #
 # This section checks if the virtual environment
 # is present and creates it if not. If a new
@@ -167,8 +167,7 @@ fi
 
 
 # -----------------------------------------------------------------------------
-# Check to see if the e000_da virtual environment
-# is stale.
+# Check to see if e000_design_automation_core virtual environment is stale.
 #
 # This section checks if the virtual environment
 # is stale, i.e., if the list of requirements in
@@ -195,12 +194,11 @@ if [[ ${is_stale_pkg} == 1 && ${is_stale_whl} == 1 ]]; then is_stale_venv=1; fi
 
 
 # -----------------------------------------------------------------------------
-# Ensure that the e000_da virtual environment is
-# active.
+# Ensure that the e000_design_automation_core virtual environment is active.
 #
-# This section ensures that the e000_da virtual
-# environment is active, deactivating the old
-# environment if necessary and activating the
+# This section ensures that the e000_design_automation_core
+# virtual environment is active, deactivating the
+# old environment if necessary and activating the
 # new one.
 #
 is_active_none=0;
@@ -228,13 +226,12 @@ if [[ ${do_source_new}     == 1 ]]; then source "${dirpath_venv}/bin/activate"; 
 
 
 # -----------------------------------------------------------------------------
-# Update the e000_da virtual environment if it is
-# stale.
+# Update the e000_design_automation_core virtual environment if it is stale.
 #
 # If the virtual environment is stale, this
 # section updates it by installing all of the
-# packages listed in the e000_da.envspec.json
-# file.
+# packages listed in the file
+# e000_design_automation_core.envspec.json.
 #
 if [[ ${is_stale_venv} == 1 ]]; then
 

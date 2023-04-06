@@ -48,40 +48,60 @@ license:
 import os
 import sys
 
-import stableflow.cfg
-import stableflow.cfg.exception
-import stableflow.log
-import stableflow.sys
+import da.stableflow
 
 
 # -----------------------------------------------------------------------------
-def _dirpath_self():
+def start():
     """
-    Return the directory path to the current module.
+    Start the process assistant service.
+
+    This function will create the database directory
+    if it doesn't already exist and then launch the
+    stableflow service with some context dependent
+    runtime configuration.
 
     """
-    return os.path.dirname(os.path.realpath(__file__))
+    filepath_db = _filepath_db()
+    dirpath_db  = os.path.dirname(filepath_db)
+    if not os.path.exists(dirpath_db):
+        os.makedirs(dirpath_db)
+
+    tup_overrides = (
+        'node.filesystem_watcher.config.iter_dirpath_root', [_dirpath_src(),],
+        'node.ui_discord_client.config.filepath_env',        _filepath_dotenv(),
+        'node.design_index_db.config.filepath_db',           _filepath_db())
+
+    da.stableflow.start(
+        path_cfg      = _filepath_system_cfg(),
+        tup_overrides = tup_overrides)
 
 
 # -----------------------------------------------------------------------------
-def _filepath_system_cfg():
+def stop():
     """
-    Return the file path of the configuration data.
+    Stop the process assistant service.
 
     """
-    dirpath_self = _dirpath_self()
-    filename_cfg = '{name_system}.stableflow.cfg.yaml'.format(
-                                name_system = os.path.basename(dirpath_self))
-    return os.path.join(dirpath_self, filename_cfg)
+    da.stableflow.stop(path_cfg = _filepath_system_cfg())
 
 
 # -----------------------------------------------------------------------------
-def _dirpath_root():
+def _filepath_db():
     """
-    Return the path of the root directory of the design factory filesystem.
+    Return the file path of the design index database file.
 
     """
-    return os.path.normpath(os.path.join(_dirpath_self(), '../../../../../..'))
+    return os.path.join(_dirpath_tmp(), 'main/design_index.db')
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_tmp():
+    """
+    Return the path of the root directory of the temporary document filesystem.
+
+    """
+    return os.path.join(_dirpath_root(), 'a4_tmp')
 
 
 # -----------------------------------------------------------------------------
@@ -103,16 +123,16 @@ def _dirpath_src():
 
 
 # -----------------------------------------------------------------------------
-def _dirpath_tmp():
+def _dirpath_root():
     """
-    Return the path of the root directory of the temporary document filesystem.
+    Return the path of the root directory of the design factory filesystem.
 
     """
-    return os.path.join(_dirpath_root(), 'a4_tmp')
+    return os.path.normpath(os.path.join(_dirpath_self(), '../../../../../..'))
 
 
 # -----------------------------------------------------------------------------
-def _filepath_env():
+def _filepath_dotenv():
     """
     Return the file path of the .env file.
 
@@ -125,85 +145,21 @@ def _filepath_env():
 
 
 # -----------------------------------------------------------------------------
-def _filepath_db():
+def _filepath_system_cfg():
     """
-    Return the file path of the design index database file.
+    Return the file path of the configuration data.
 
     """
-    return os.path.join(_dirpath_tmp(), 'main/design_index.db')
+    dirpath_self = _dirpath_self()
+    filename_cfg = '{name_system}.stableflow.cfg.yaml'.format(
+                                name_system = os.path.basename(dirpath_self))
+    return os.path.join(dirpath_self, filename_cfg)
 
 
 # -----------------------------------------------------------------------------
-def start():
+def _dirpath_self():
     """
-    Start monitoring.
-
-    """
-
-    # Create the database directory if it doesn't
-    # already exist.
-    #
-    filepath_db = _filepath_db()
-    dirpath_db  = os.path.dirname(filepath_db)
-    if not os.path.exists(dirpath_db):
-        os.makedirs(dirpath_db)
-
-    overrides = (
-        'node.filesystem_watcher.config.iter_dirpath_root', [_dirpath_src(),],
-        'node.ui_discord_client.config.filepath_env',        _filepath_env(),
-        'node.design_index_db.config.filepath_db',           _filepath_db())
-
-    with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
-
-        try:
-
-            cfg = stableflow.cfg.prepare(
-                                    path_cfg      = _filepath_system_cfg(),
-                                    tup_overrides = overrides)
-
-        except stableflow.cfg.exception.CfgError as err:
-            print(err, file = sys.stderr)  # Custom message (no stack trace)
-            return 1
-
-        else:
-            try:
-                return stableflow.sys.start(cfg)
-            except Exception as err:
-                # An exception will be thrown
-                # when we need to display either
-                # a custom error message, or no
-                # error message at all.
-                #
-                err_msg = str(err)
-                if err_msg != '':
-                    print(err_msg, file = sys.stderr)
-                return 1
-
-
-# -----------------------------------------------------------------------------
-def stop():
-    """
-    Stop monitoring.
+    Return the directory path to the current module.
 
     """
-    with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
-
-        try:
-            cfg = stableflow.cfg.prepare(path_cfg = _filepath_system_cfg())
-        except stableflow.cfg.exception.CfgError as err:
-            print(err, file = sys.stderr)  # Custom message (no stack trace)
-            return 1
-
-        else:
-            try:
-                return stableflow.sys.stop(cfg)
-            except Exception as err:
-                # An exception will be thrown
-                # when we need to display either
-                # a custom error message, or no
-                # error message at all.
-                #
-                err_msg = str(err)
-                if err_msg != '':
-                    print(err_msg, file = sys.stderr)
-                return 1
+    return os.path.dirname(os.path.realpath(__file__))

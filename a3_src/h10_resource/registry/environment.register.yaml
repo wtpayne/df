@@ -9,7 +9,12 @@ introduction:
 
 register:
 
-  e000_da:
-    name: "da"
+  e000_design_automation_core:
+    name: "Design automation core"
     type: "virtualenv"
-    desc: "Primary virtualenv for core design automation tools."
+    desc: "Core virtualenv for core design automation tools."
+
+  e001_process_assistant:
+    name: "process assistant"
+    type: "virtualenv"
+    desc: "Virtualenv for the process assistant system and tools."
