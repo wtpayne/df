@@ -70,9 +70,9 @@ def prepare(path_cfg       = None,  # pylint: disable=R0913
                                         delim_cfg_addr = delim_cfg_addr)
 
     # Apply default values for each host.
-    for cfg_host in cfg['host'].values():
-        if 'launch_cmd' not in cfg_host:
-            cfg_host['launch_cmd'] = './da stableflow'
+    # for cfg_host in cfg['host'].values():
+    #     if 'launch_cmd' not in cfg_host:
+    #         cfg_host['launch_cmd'] = './da stableflow'
 
     # Calculate some UIDs for the file-path
     # and the config file content.

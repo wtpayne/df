@@ -47,4 +47,5 @@ license:
 """
 
 import setuptools
-setuptools.setup(name = 'h30_product')
+setuptools.setup(name       = 'h30_product',
+                 py_modules = [])

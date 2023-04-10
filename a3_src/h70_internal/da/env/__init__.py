@@ -66,7 +66,7 @@ import time
 
 
 # -----------------------------------------------------------------------------
-def ensure_updated(rootpath, id_env):
+def do_ensure_updated(rootpath, id_env):
     """
     Ensure that the specified environment is up to date.
 
@@ -74,22 +74,25 @@ def ensure_updated(rootpath, id_env):
     factory to update environments as needed.
 
     """
-
-    # Ensure the virtual environment exists and
-    # is active, recreating it from scratch if
-    # any problems are detected.
-    #
     dirpath_env = _dirpath_env(rootpath, id_env)
+
+    # Ensure the virtual environment exists,
+    # recreating it from scratch if any problems
+    # are detected.
+    #
     _delete_env_if_corrupted(dirpath_env)
     is_new_env  = _create_env_if_not_exists(dirpath_env)
-    _ensure_activated(dirpath_env)
 
     # If the virtual environment is not up to date
     # then perform an update, generating the
     # requirements file and pip installing
     # any newly added requirements.
     #
-    if not _is_up_to_date(rootpath, id_env, dirpath_env):
+    is_up_to_date    = _is_up_to_date(rootpath, id_env, dirpath_env)
+    is_stale         = not is_up_to_date
+    is_update_needed = is_new_env or is_stale
+
+    if is_update_needed:
         do_update(rootpath, id_env)
 
 
@@ -118,26 +121,29 @@ def do_update(rootpath, id_env):
     issues easier.
 
     """
-    filepath_envspec = _filepath_envspec(rootpath, id_env)
-    envspec          = _load_envspec(filepath_envspec)
-    filepath_reqs    = _create_requirements_file(rootpath, id_env, envspec)
+    filepath_envspec = _filepath_envspec(
+                                rootpath = rootpath,
+                                id_env   = id_env)
 
-    _set_timestamp_to_one_second_ago(filepath_envspec)
-    _install_requirements(filepath_reqs)
+    filepath_reqs    = _create_requirements_file(
+                                rootpath = rootpath,
+                                id_env   = id_env,
+                                envspec  = _load_envspec(filepath_envspec))
 
+    _touch(
+        filepath   = filepath_envspec,
+        delta_secs = -1) # Set mtime to one second in the past.
 
-# -----------------------------------------------------------------------------
-def _set_timestamp_to_one_second_ago(filepath):
-    """
-    Set last-accessed and last-modified times of filepath to 1s in the past.
+    _install_requirements(
+        rootpath      = rootpath,
+        id_env        = id_env,
+        filepath_reqs = filepath_reqs)
 
-    """
-    timestamp_now  = time.time()
-    datetime_now   = datetime.datetime.fromtimestamp(timestamp_now)
-    datetime_past  = datetime_now - datetime.timedelta(seconds = 1)
-    timestamp_past = datetime_past.timestamp()
-    os.utime(filepath, (timestamp_past, timestamp_past))
-
+    # dirpath_env      = _dirpath_env(rootpath, id_env)
+    # dirpath_venv_pkg = _dirpath_venv_pkg(dirpath_env)
+    # dirpath_venv_whl = _dirpath_venv_whl(dirpath_env)
+    # _touch(filepath  = dirpath_venv_pkg)
+    # _touch(filepath  = dirpath_venv_whl)
 
 # -----------------------------------------------------------------------------
 def _dirpath_env(rootpath, id_env):
@@ -154,7 +160,7 @@ def _delete_env_if_corrupted(dirpath_env):
     Delete the specified environment if corruption is detected.
 
     """
-    filepath_activate = _filepath_venv_activate(dirpath_env)
+    filepath_activate = os.path.join(dirpath_env, "bin", "activate")
     if os.path.isdir(dirpath_env) and not os.path.isfile(filepath_activate):
         shutil.rmtree(dirpath_env)
 
@@ -177,58 +183,6 @@ def _create_env_if_not_exists(dirpath_env):
 
 
 # -----------------------------------------------------------------------------
-def _ensure_activated(dirpath_env):
-    """
-    Ensure that the virtual environment is activated.
-
-    """
-    is_active_none     = False
-    is_active_old      = False
-    is_active_new      = False
-    envvar_virtual_env = _envvar_virtual_env()
-    do_deactivate_old  = _do_deactivate_old(envvar_virtual_env, dirpath_env)
-    do_activate_new    = _do_activate_new(envvar_virtual_env, dirpath_env)
-
-    if do_deactivate_old:
-        subprocess.call('deactivate', shell = True)
-
-    if do_activate_new:
-        filepath_venv_activate = _filepath_venv_activate(dirpath_env)
-        subprocess.call(filepath_venv_activate, shell = True)
-
-
-# -----------------------------------------------------------------------------
-def _do_deactivate_old(envvar_virtual_env, dirpath_env):
-    """
-    Return true if an old virtual environment needs to be deactivated.
-
-    """
-    if envvar_virtual_env != dirpath_env and envvar_virtual_env is not None:
-        return True
-    return False
-
-
-# -----------------------------------------------------------------------------
-def _do_activate_new(envvar_virtual_env, dirpath_env):
-    """
-    Return true if a new virtual environment needs to be activated.
-
-    """
-    if envvar_virtual_env != dirpath_env:
-        return True
-    return False
-
-
-# -----------------------------------------------------------------------------
-def _envvar_virtual_env():
-    """
-    Return the value of the VIRTUAL_ENV environment variable if it exists.
-
-    """
-    return os.environ.get("VIRTUAL_ENV")
-
-
-# -----------------------------------------------------------------------------
 def _is_up_to_date(rootpath, id_env, dirpath_env):
     """
     Return true if the specified environment is up to date, false otherwise.
@@ -244,13 +198,32 @@ def _is_up_to_date(rootpath, id_env, dirpath_env):
 
 
 # -----------------------------------------------------------------------------
-def _load_envspec(filepath_envspec):
+def _dirpath_venv_pkg(dirpath_env):
     """
-    Return the envspec data for the specified environment id.
+    Return the path of the virtual environment site packages directory.
 
     """
-    with open(filepath_envspec, 'rt') as file:
-        return json.load(file)
+    return os.path.join(dirpath_env, 'lib', 'python3.8', 'site-packages')
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_venv_whl(dirpath_env):
+    """
+    Return the path of the virtual environment python wheels directory.
+
+    """
+    return os.path.join(dirpath_env, 'share', 'python-wheels')
+
+
+# -----------------------------------------------------------------------------
+def _filepath_envspec(rootpath, id_env):
+    """
+    Return the filepath of the envspec file for the specified environment.
+
+    """
+    filename = '{id_env}.envspec.json'.format(id_env = id_env)
+    return os.path.join(
+                    rootpath, 'a3_src', 'h10_resource', 'envspec', filename)
 
 
 # -----------------------------------------------------------------------------
@@ -272,6 +245,15 @@ def _create_requirements_file(rootpath, id_env, envspec):
         _write('')
 
     return filepath
+
+
+# -----------------------------------------------------------------------------
+def _filepath_requirements(rootpath, id_env):
+    """
+    Return the path of the temporary requirements file for the specified env.
+
+    """
+    return os.path.join(rootpath, 'a4_tmp', id_env, 'requirements.txt')
 
 
 # -----------------------------------------------------------------------------
@@ -326,7 +308,30 @@ def _ensure_cloned_fron_github(url_remote, tag, rootpath):
 
 
 # -----------------------------------------------------------------------------
-def _install_requirements(filepath_reqs):
+def _load_envspec(filepath_envspec):
+    """
+    Return the envspec data for the specified environment id.
+
+    """
+    with open(filepath_envspec, 'rt') as file:
+        return json.load(file)
+
+
+# -----------------------------------------------------------------------------
+def _touch(filepath, delta_secs = 0):
+    """
+    Set last-accessed and last-modified times of filepath.
+
+    """
+    timestamp_now  = time.time()
+    datetime_now   = datetime.datetime.fromtimestamp(timestamp_now)
+    datetime_mod   = datetime_now + datetime.timedelta(seconds = delta_secs)
+    timestamp_mod  = datetime_mod.timestamp()
+    os.utime(filepath, (timestamp_mod, timestamp_mod))
+
+
+# -----------------------------------------------------------------------------
+def _install_requirements(rootpath, id_env, filepath_reqs):
     """
     Install the dependencies specified in the given requirements file.
 
@@ -336,52 +341,27 @@ def _install_requirements(filepath_reqs):
     installed.
 
     """
-    subprocess.run(['pip', 'install', 'wheel'])
-    subprocess.run(['pip', 'install', '-r', filepath_reqs])
+    dirpath_env       = _dirpath_env(rootpath, id_env)
+    filepath_activate = os.path.join(dirpath_env, 'bin', 'activate')
+    filepath_pip      = os.path.join(dirpath_env, 'bin', 'pip3')
 
+    cmd_source        = '. {act}'.format(
+                                        act    = filepath_activate)
 
-# -----------------------------------------------------------------------------
-def _filepath_envspec(rootpath, id_env):
-    """
-    Return the filepath of the envspec file for the specified environment.
+    cmd_pip_self      = '{pip} install --upgrade pip'.format(
+                                        pip    = filepath_pip)
 
-    """
-    filename = '{id_env}.envspec.json'.format(id_env = id_env)
-    return os.path.join(
-                    rootpath, 'a3_src', 'h10_resource', 'envspec', filename)
+    cmd_pip_wheel     = '{pip} install --upgrade pip'.format(
+                                        pip    = filepath_pip)
 
+    cmd_pip_reqs      = '{pip} install -r {reqs}'.format(
+                                        pip    = filepath_pip,
+                                        reqs   = filepath_reqs)
 
-# -----------------------------------------------------------------------------
-def _filepath_requirements(rootpath, id_env):
-    """
-    Return the path of the temporary requirements file for the specified env.
+    cmd_full          = '{source} && {pip} && {wheel} && {reqs}'.format(
+                                        source = cmd_source,
+                                        pip    = cmd_pip_self,
+                                        wheel  = cmd_pip_wheel,
+                                        reqs   = cmd_pip_reqs)
 
-    """
-    return os.path.join(rootpath, 'a4_tmp', id_env, 'requirements.txt')
-
-
-# -----------------------------------------------------------------------------
-def _dirpath_venv_whl(dirpath_env):
-    """
-    Return the path of the virtual environment python wheels directory.
-
-    """
-    return os.path.join(dirpath_env, 'share', 'python-wheels')
-
-
-# -----------------------------------------------------------------------------
-def _dirpath_venv_pkg(dirpath_env):
-    """
-    Return the path of the virtual environment site packages directory.
-
-    """
-    return os.path.join(dirpath_env, 'lib', 'python3.8', 'site-packages')
-
-
-# -----------------------------------------------------------------------------
-def _filepath_venv_activate(dirpath_env):
-    """
-    Return the path of the virtual environment activate script.
-
-    """
-    return os.path.join(dirpath_env, "bin", "activate")
+    subprocess.run(cmd_full, shell = True)

@@ -48,4 +48,5 @@ license:
 """
 
 import setuptools
-setuptools.setup(name = 'h50_research')
+setuptools.setup(name       = 'h50_research',
+                 py_modules = [])

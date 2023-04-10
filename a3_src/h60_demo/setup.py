@@ -47,4 +47,5 @@ license:
 """
 
 import setuptools
-setuptools.setup(name = 'h60_demo')
+setuptools.setup(name       = 'h60_demo',
+                 py_modules = [])

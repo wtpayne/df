@@ -47,4 +47,5 @@ license:
 """
 
 import setuptools
-setuptools.setup(name = 'h20_capability')
+setuptools.setup(name       = 'h20_capability',
+                 py_modules = [])

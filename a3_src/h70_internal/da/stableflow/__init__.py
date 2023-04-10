@@ -48,6 +48,7 @@ license:
 
 import os
 import sys
+import subprocess
 
 import stableflow.cfg
 import stableflow.cfg.exception
@@ -103,6 +104,9 @@ def stop(path_cfg):
 
         try:
             cfg = stableflow.cfg.prepare(path_cfg = path_cfg)
+
+            _configure_all_launch_commands(cfg)
+
         except stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             return 1
@@ -127,16 +131,21 @@ def _update_all_environments(cfg):
     """
     Update all environments used by the specified cfg.
 
-    TODO: Run these on remote hosts also.
-
     """
     dirpath_root = _dirpath_root()
     for cfg_host in cfg['host'].values():
-        try:
-            da.env.ensure_updated(rootpath = dirpath_root,
-                                  id_env   = cfg_host['environment'])
-        except KeyError:
-            pass
+
+        remote_command = 'python3 -m {module} {root} {env}'.format(
+                                        module = 'da.env.ensure_updated',
+                                        root   = dirpath_root,
+                                        env    = cfg_host['environment'])
+
+        local_command  = 'ssh {acct}@{host} "{cmd}"'.format(
+                                        acct = cfg_host['acct_run'],
+                                        host = cfg_host['hostname'],
+                                        cmd  = remote_command)
+
+        subprocess.run(local_command, shell = True, check = True)
 
 
 # -----------------------------------------------------------------------------
@@ -145,11 +154,12 @@ def _configure_all_launch_commands(cfg):
     Set each launch command as required for each host environment.
 
     """
+    dirpath_root = _dirpath_root()
     for cfg_host in cfg['host'].values():
 
         try:
             id_env       = cfg_host['environment']
-            dirpath_env  = os.path.join(_dirpath_env(), 'venv', id_env)
+            dirpath_env  = _dirpath_env(dirpath_root, id_env)
             filepath_py3 = os.path.join(dirpath_env, 'bin', 'python3')
             launch_cmd   = '{python} -m stableflow.cli.command'.format(
                                                         python = filepath_py3)
@@ -159,12 +169,12 @@ def _configure_all_launch_commands(cfg):
 
 
 # -----------------------------------------------------------------------------
-def _dirpath_env():
+def _dirpath_env(dirpath_root, id_env):
     """
     Return the path of the root directory of the environment filesystem.
 
     """
-    return os.path.join(_dirpath_root(), 'a0_env')
+    return os.path.join(dirpath_root, 'a0_env', 'venv', id_env)
 
 
 # -----------------------------------------------------------------------------

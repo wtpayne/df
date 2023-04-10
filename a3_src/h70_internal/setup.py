@@ -48,4 +48,5 @@ license:
 """
 
 import setuptools
-setuptools.setup(name = 'h70_internal')
+setuptools.setup(name       = 'h70_internal',
+                 py_modules = [])

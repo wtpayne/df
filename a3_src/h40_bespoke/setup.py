@@ -47,4 +47,5 @@ license:
 """
 
 import setuptools
-setuptools.setup(name = 'h40_bespoke')
+setuptools.setup(name       = 'h40_bespoke',
+                 py_modules = [])
