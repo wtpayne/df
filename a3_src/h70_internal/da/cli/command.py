@@ -61,35 +61,9 @@ import sys
 
 import click
 
+import da.cli.env
 import da.cli.group
 import stableflow.cli.command
-
-
-# -----------------------------------------------------------------------------
-def _dirpath_self():
-    """
-    Return the directory path to the current module.
-
-    """
-    return os.path.dirname(os.path.realpath(__file__))
-
-
-# -----------------------------------------------------------------------------
-def _dirpath_src():
-    """
-    Return the path of the root directory of the design document filesystem.
-
-    The source design documents which are
-    monitored by the process assistant are
-    all stored in a single large filesystem
-    hierarchy.
-
-    This function returns the directory path
-    of the root directory of this filesystem
-    hierarchy.
-
-    """
-    return os.path.normpath(os.path.join(_dirpath_self(), '../../..'))
 
 
 # -----------------------------------------------------------------------------
@@ -112,113 +86,14 @@ def grp_main():
 
 
 # -----------------------------------------------------------------------------
-@grp_main.group(name = 'util',
+@grp_main.group(name = 'env',
                 cls  = da.cli.group.Ordered)
-def grp_utility():
+def grp_env():
     """
-    Utility commands.
+    Environment management.
 
     """
     pass
-
-
-# -----------------------------------------------------------------------------
-@grp_utility.command()
-def uuid():
-    """
-    Generate a UUID4.
-
-    """
-    import da.cli.utility
-    sys.exit(da.cli.utility.uuid())
-
-
-# -----------------------------------------------------------------------------
-@grp_main.group(name = 'interact',
-                cls  = da.cli.group.Ordered)
-def grp_interactive():
-    """
-    Interactive tools, repls and shells.
-
-    """
-    pass
-
-
-# -----------------------------------------------------------------------------
-@grp_interactive.command()
-def bash():
-    """
-    Start a bash shell.
-
-    """
-    import da.cli.interactive
-    sys.exit(da.cli.interactive.bash())
-
-
-# -----------------------------------------------------------------------------
-@grp_interactive.command()
-def bpy():
-    """
-    Start a bpython repl.
-
-    """
-    import da.cli.interactive
-    sys.exit(da.cli.interactive.bpython())
-
-
-# -----------------------------------------------------------------------------
-@grp_interactive.command()
-def cpy():
-    """
-    Start a cpython repl.
-
-    """
-    import da.cli.interactive
-    sys.exit(da.cli.interactive.cpython())
-
-
-# -----------------------------------------------------------------------------
-@grp_interactive.command()
-def ipy():
-    """
-    Start a ipython repl.
-
-    """
-    import da.cli.interactive
-    sys.exit(da.cli.interactive.ipython())
-
-
-# -----------------------------------------------------------------------------
-@grp_interactive.command()
-def ptpy():
-    """
-    Start a ptpython repl.
-
-    """
-    import da.cli.interactive
-    sys.exit(da.cli.interactive.ptpython())
-
-
-# -----------------------------------------------------------------------------
-@grp_interactive.command()
-def direpl():
-    """
-    Start a design index repl.
-
-    """
-    import da.cli.interactive
-    sys.exit(da.cli.interactive.direpl())
-
-
-# -----------------------------------------------------------------------------
-@grp_interactive.command()
-def browse():
-    """
-    Start a design index browser.
-
-    """
-    import da.cli.interactive
-    sys.exit(da.cli.interactive.browser())
 
 
 # -----------------------------------------------------------------------------
@@ -263,6 +138,28 @@ def stop():
     """
     import da.cli.service.process_assistant
     sys.exit(da.cli.service.process_assistant.stop())
+
+
+# -----------------------------------------------------------------------------
+@grp_main.group(name = 'util',
+                cls  = da.cli.group.Ordered)
+def grp_utility():
+    """
+    Utility commands.
+
+    """
+    pass
+
+
+# -----------------------------------------------------------------------------
+@grp_utility.command()
+def uuid():
+    """
+    Generate a UUID4.
+
+    """
+    import da.cli.utility
+    sys.exit(da.cli.utility.uuid())
 
 
 # -----------------------------------------------------------------------------
@@ -331,7 +228,29 @@ def stop(name):
 
 
 # -----------------------------------------------------------------------------
+stableflow.cli.command.grp_main.help = 'Stableflow system control.'
 grp_main.add_command(stableflow.cli.command.grp_main, name = 'stableflow')
+
+da.cli.env.add_env_tools(grp_parent = grp_env)
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_src():
+    """
+    Return the path of the root directory of the design document filesystem.
+
+    The source design documents which are
+    monitored by the process assistant are
+    all stored in a single large filesystem
+    hierarchy.
+
+    This function returns the directory path
+    of the root directory of this filesystem
+    hierarchy.
+
+    """
+    dirpath_self = os.path.dirname(os.path.realpath(__file__))
+    return os.path.normpath(os.path.join(dirpath_self, '../../..'))
 
 
 # -----------------------------------------------------------------------------

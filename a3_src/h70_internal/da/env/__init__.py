@@ -345,7 +345,7 @@ def _install_requirements(rootpath, id_env, filepath_reqs):
     filepath_activate = os.path.join(dirpath_env, 'bin', 'activate')
     filepath_pip      = os.path.join(dirpath_env, 'bin', 'pip3')
 
-    cmd_source        = '. {act}'.format(
+    cmd_activate      = '. {act}'.format(
                                         act    = filepath_activate)
 
     cmd_pip_self      = '{pip} install --upgrade pip'.format(
@@ -358,10 +358,10 @@ def _install_requirements(rootpath, id_env, filepath_reqs):
                                         pip    = filepath_pip,
                                         reqs   = filepath_reqs)
 
-    cmd_full          = '{source} && {pip} && {wheel} && {reqs}'.format(
-                                        source = cmd_source,
-                                        pip    = cmd_pip_self,
-                                        wheel  = cmd_pip_wheel,
-                                        reqs   = cmd_pip_reqs)
+    cmd_full          = '{act} && {pip} && {wheel} && {reqs}'.format(
+                                        act   = cmd_activate,
+                                        pip   = cmd_pip_self,
+                                        wheel = cmd_pip_wheel,
+                                        reqs  = cmd_pip_reqs)
 
     subprocess.run(cmd_full, shell = True)

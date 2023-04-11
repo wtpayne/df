@@ -28,6 +28,16 @@
     "",
     "",
     "# -----------------------------------------------------------------------",
+    "# Packages required by the 'da service process_assistant start' command.",
+    "#",
+
+    { "type": "pep508", "spec":    "pycodestyle==2.10.0"                      },
+    { "type": "pep508", "spec":    "python-dotenv==1.0.0"                     },
+    { "type": "pep508", "spec":    "discord.py==2.2.2"                        },
+
+    "",
+    "",
+    "# -----------------------------------------------------------------------",
     "# Packages required by the 'da interact bpy' command.",
     "#",
 

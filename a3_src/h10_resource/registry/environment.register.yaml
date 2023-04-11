@@ -18,3 +18,8 @@ register:
     name: "process assistant"
     type: "virtualenv"
     desc: "Virtualenv for the process assistant system and tools."
+
+  e002_general_research:
+    name: "general research"
+    type: "virtualenv"
+    desc: "Virtualenv for general purpose research and development work."
