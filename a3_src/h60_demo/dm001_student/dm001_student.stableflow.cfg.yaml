@@ -10,7 +10,8 @@ host:
     acct_provision:  'wtp'
     port_range:      '8090-9000'
     dirpath_log:     ''
-    launch_cmd:      './da stableflow'
+    launch_cmd:      ''
+    environment:     'e002_general_research'
     log_level:       'TRACE'
 
 
@@ -33,8 +34,8 @@ node:
       py_module:    cl.core.ctrl.sys.ic00_edict
     state_type:     py_dict
     config:
-      frequency_hz: 5
-      idx_max:      1000
+      frequency_hz: 50
+      idx_max:      100
 
   # ---------------------------------------------------------------------------
   # State management for the main process.
@@ -55,6 +56,8 @@ node:
     functionality:
       py_module:    cl.sim.pybullet.ic00_edict
     state_type:     py_dict
+    config:
+      filepath_quadrotor: ''
 
   # ---------------------------------------------------------------------------
   # Debug display.

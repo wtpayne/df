@@ -24,6 +24,8 @@
     { "type": "pep508", "spec":    "psutil==5.9.4"                            },
     { "type": "pep508", "spec":    "pyzmq==25.0.2"                            },
     { "type": "pep508", "spec":    "setproctitle==1.3.2"                      },
+    { "type": "pep508", "spec":    "PyYAML==6.0"                              },
+    { "type": "pep508", "spec":    "pybullet==3.2.5"                          },
 
     "",
     "",

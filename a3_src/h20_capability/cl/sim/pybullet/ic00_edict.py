@@ -54,18 +54,20 @@ import pybullet_data
 # -----------------------------------------------------------------------------
 def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     """
-    Noop component coroutine.
+    Pybullet simulator coroutine.
+
+    # https://docs.google.com/document/d/10sXEhzFRSnvFcl3XxNGhnD4N2SedqwdAvK3dsihxVUA/edit#
+    # https://github.com/utiasDSL/gym-pybullet-drones
 
     """
     signal = None
+
+    filepath_quadrotor = cfg['filepath_quadrotor']
 
     for id_out in outputs.keys():
         outputs[id_out]['ena']  = False
         outputs[id_out]['ts']   = dict()
         outputs[id_out]['list'] = list()
-
-# https://docs.google.com/document/d/10sXEhzFRSnvFcl3XxNGhnD4N2SedqwdAvK3dsihxVUA/edit#
-# https://github.com/utiasDSL/gym-pybullet-drones
 
     physicsClient = pybullet.connect(pybullet.GUI)
     pybullet.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -73,7 +75,7 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     planeId          = pybullet.loadURDF("plane.urdf")
     startPos         = [0, 0, 1]
     startOrientation = pybullet.getQuaternionFromEuler([0,0,0])
-    boxId            = pybullet.loadURDF("data/quadrotor.urdf")
+    boxId            = pybullet.loadURDF(filepath_quadrotor)
 
     while True:
 

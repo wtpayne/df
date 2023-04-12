@@ -71,7 +71,6 @@ def start(path_cfg, tup_overrides = None):
             cfg = stableflow.cfg.prepare(
                                     path_cfg      = path_cfg,
                                     tup_overrides = tup_overrides)
-
             _update_all_environments(cfg)
             _configure_all_launch_commands(cfg)
 
