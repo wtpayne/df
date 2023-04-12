@@ -181,12 +181,10 @@ def _bash(dirpath_root, id_env):
     Start a bash shell.
 
     """
-    # py_src = 'import da.cli.env.bash_shell; da.cli.env.bash_shell.run()'
-    # return _run_python_in_env(dirpath_env, py_src)
     dirpath_self  = os.path.dirname(os.path.realpath(__file__))
     filepath_init = os.path.join(dirpath_self, 'bash_init.sh')
     cmd           = 'bash --init-file {file}'.format(file = filepath_init)
-    _update_activate_and_run(dirpath_root, id_env, cmd)
+    da.env.run(dirpath_root, id_env, cmd)
 
 
 # -----------------------------------------------------------------------------
@@ -195,9 +193,8 @@ def _cpy(dirpath_root, id_env):
     Start a cpython repl.
 
     """
-    return _run_python_in_env(
-                    dirpath_root = dirpath_root,
-                    id_env       = id_env)
+    return da.env.run_python(dirpath_root = dirpath_root,
+                             id_env       = id_env)
 
 
 # -----------------------------------------------------------------------------
@@ -207,10 +204,9 @@ def _ipy(dirpath_root, id_env):
 
     """
     py_src = 'import ptpython.ipython; ptpython.ipython.embed()'
-    return _run_python_in_env(
-                    dirpath_root = dirpath_root,
-                    id_env       = id_env,
-                    py_src       = py_src)
+    return da.env.run_python(dirpath_root = dirpath_root,
+                             id_env       = id_env,
+                             py_src       = py_src)
 
 
 # -----------------------------------------------------------------------------
@@ -220,10 +216,9 @@ def _ptpy(dirpath_root, id_env):
 
     """
     py_src = 'import ptpython.repl; ptpython.repl.embed(globals(), locals())'
-    return _run_python_in_env(
-                    dirpath_root = dirpath_root,
-                    id_env       = id_env,
-                    py_src       = py_src)
+    return da.env.run_python(dirpath_root = dirpath_root,
+                             id_env       = id_env,
+                             py_src       = py_src)
 
 
 # -----------------------------------------------------------------------------
@@ -233,10 +228,9 @@ def _bpy(dirpath_root, id_env):
 
     """
     py_src = 'import bpython; bpython.embed()'
-    return _run_python_in_env(
-                    dirpath_root = dirpath_root,
-                    id_env       = id_env,
-                    py_src       = py_src)
+    return da.env.run_python(dirpath_root = dirpath_root,
+                             id_env       = id_env,
+                             py_src       = py_src)
 
 
 # # -----------------------------------------------------------------------------
@@ -259,47 +253,3 @@ def _bpy(dirpath_root, id_env):
 #     import os
 #     import da.cli.env.direpl
 #     da.cli.env.direpl.run()
-
-
-
-# -----------------------------------------------------------------------------
-def _run_python_in_env(dirpath_root, id_env, py_src = None):
-    """
-    Run a command in the specified environment.
-
-    """
-    dirpath_env       = os.path.join(dirpath_root, 'a0_env', 'venv', id_env)
-    filepath_python   = os.path.join(dirpath_env, 'bin', 'python3')
-
-    if py_src is not None:
-        cmd = '{py3} -c "{py_src}"'.format(py3    = filepath_python,
-                                           py_src = py_src)
-    else:
-        cmd = '{py3}'.format(py3 = filepath_python)
-
-    _update_activate_and_run(dirpath_root, id_env, cmd)
-
-
-# -----------------------------------------------------------------------------
-def _update_activate_and_run(dirpath_root, id_env, cmd):
-    """
-    Update the specified environment, activate it and run a command.
-
-    """
-    filepath_act = os.path.join(dirpath_root,
-                                'a0_env', 'venv', id_env, 'bin', 'activate')
-
-    subprocess.run('python3 -m {module} {root} {env}'.format(
-                                        module = 'da.env.ensure_updated',
-                                        root   = dirpath_root,
-                                        env    = id_env),
-                   shell = True,
-                   check = True)
-
-    subprocess.run('. {act} && {cmd}'.format(
-                                        act = filepath_act,
-                                        cmd = cmd),
-                          shell = True,
-                          check = True)
-
-    return 0

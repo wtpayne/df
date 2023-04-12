@@ -59,7 +59,7 @@ import da.env
 
 
 # -----------------------------------------------------------------------------
-def start(path_cfg, tup_overrides):
+def start(path_cfg, tup_overrides = None):
     """
     Start the specified system.
 

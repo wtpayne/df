@@ -94,7 +94,7 @@ def start(dirpath_src, name_demo):
     """
     filepath_cfg = _filepath_cfg(dirpath_src, name_demo)
     if os.path.exists(filepath_cfg):
-        return _start_stableflow(filepath_cfg)
+        return da.stableflow.start(path_cfg = filepath_cfg)
 
     filepath_py = _filepath_entrypoint(dirpath_src, name_demo)
     if os.path.exists(filepath_py):
@@ -120,61 +120,11 @@ def _start_entrypoint_script(filepath_py):
 
 
 # -----------------------------------------------------------------------------
-def _start_stableflow(filepath_cfg):
-    """
-    Start the specified dewo stableflow system.
-
-    """
-    with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
-
-        try:
-
-            cfg = stableflow.cfg.prepare(path_cfg = filepath_cfg)
-
-        except stableflow.cfg.exception.CfgError as err:
-            print(err, file = sys.stderr)  # Custom message (no stack trace)
-            return 1
-
-        else:
-            try:
-                return stableflow.sys.start(cfg)
-            except Exception as err:
-                # An exception will be thrown
-                # when we need to display either
-                # a custom error message, or no
-                # error message at all.
-                #
-                err_msg = str(err)
-                if err_msg != '':
-                    print(err_msg, file = sys.stderr)
-                return 1
-
-
-# -----------------------------------------------------------------------------
 def stop(dirpath_src, name_demo):
     """
     Stop the specified demo stableflow system.
 
     """
-    with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
-
-        try:
-            filepath_cfg = _filepath_cfg(dirpath_src, name_demo)
-            cfg = stableflow.cfg.prepare(path_cfg = filepath_cfg)
-        except stableflow.cfg.exception.CfgError as err:
-            print(err, file = sys.stderr)  # Custom message (no stack trace)
-            return 1
-
-        else:
-            try:
-                return stableflow.sys.stop(cfg)
-            except Exception as err:
-                # An exception will be thrown
-                # when we need to display either
-                # a custom error message, or no
-                # error message at all.
-                #
-                err_msg = str(err)
-                if err_msg != '':
-                    print(err_msg, file = sys.stderr)
-                return 1
+    filepath_cfg = _filepath_cfg(dirpath_src, name_demo)
+    if os.path.exists(filepath_cfg):
+        return da.stableflow.stop(path_cfg = filepath_cfg)

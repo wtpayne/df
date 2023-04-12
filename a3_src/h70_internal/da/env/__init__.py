@@ -66,6 +66,46 @@ import time
 
 
 # -----------------------------------------------------------------------------
+def run_python(dirpath_root, id_env, py_src = None):
+    """
+    Run a python command in the specified environment.
+
+    """
+    dirpath_env       = os.path.join(dirpath_root, 'a0_env', 'venv', id_env)
+    filepath_python   = os.path.join(dirpath_env, 'bin', 'python3')
+
+    if py_src is not None:
+        cmd = '{py3} -c "{py_src}"'.format(py3    = filepath_python,
+                                           py_src = py_src)
+    else:
+        cmd = '{py3}'.format(py3 = filepath_python)
+
+    run(dirpath_root, id_env, cmd)
+
+
+# -----------------------------------------------------------------------------
+def run(rootpath, id_env, cmd):
+    """
+    Update the specified environment, activate it and run a command.
+
+    """
+    subprocess.run('python3 -m {module} {root} {env}'.format(
+                                        module = 'da.env.ensure_updated',
+                                        root   = rootpath,
+                                        env    = id_env),
+                   shell = True,
+                   check = True)
+    filepath_activate = os.path.join(
+                        rootpath, 'a0_env', 'venv', id_env, 'bin', 'activate')
+    subprocess.run('. {act} && {cmd}'.format(
+                                        act = filepath_activate,
+                                        cmd = cmd),
+                          shell = True,
+                          check = True)
+    return 0
+
+
+# -----------------------------------------------------------------------------
 def do_ensure_updated(rootpath, id_env):
     """
     Ensure that the specified environment is up to date.
