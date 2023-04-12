@@ -61,6 +61,7 @@ import sys
 
 import click
 
+import da.cli.demo
 import da.cli.env
 import da.cli.group
 import stableflow.cli.command
@@ -195,36 +196,36 @@ def grp_demo():
     pass
 
 
-# -----------------------------------------------------------------------------
-@grp_demo.command()
-@click.argument(
-    'name',
-    required = True,
-    type     = click.STRING)
-def start(name):
-    """
-    Start the named demonstration.
+# # -----------------------------------------------------------------------------
+# @grp_demo.command()
+# @click.argument(
+#     'name',
+#     required = True,
+#     type     = click.STRING)
+# def start(name):
+#     """
+#     Start the named demonstration.
 
-    """
-    import da.cli.demo
-    sys.exit(da.cli.demo.start(dirpath_src = _dirpath_src(),
-                               name_demo   = name))
+#     """
+#     import da.cli.demo
+#     sys.exit(da.cli.demo.start(dirpath_src = _dirpath_src(),
+#                                name_demo   = name))
 
 
-# -----------------------------------------------------------------------------
-@grp_demo.command()
-@click.argument(
-    'name',
-    required = True,
-    type     = click.STRING)
-def stop(name):
-    """
-    Stop the named demonstration.
+# # -----------------------------------------------------------------------------
+# @grp_demo.command()
+# @click.argument(
+#     'name',
+#     required = True,
+#     type     = click.STRING)
+# def stop(name):
+#     """
+#     Stop the named demonstration.
 
-    """
-    import da.cli.demo
-    sys.exit(da.cli.demo.stop(dirpath_src = _dirpath_src(),
-                              name_demo   = name))
+#     """
+#     import da.cli.demo
+#     sys.exit(da.cli.demo.stop(dirpath_src = _dirpath_src(),
+#                               name_demo   = name))
 
 
 # -----------------------------------------------------------------------------
@@ -232,7 +233,7 @@ stableflow.cli.command.grp_main.help = 'Stableflow system control.'
 grp_main.add_command(stableflow.cli.command.grp_main, name = 'stableflow')
 
 da.cli.env.add_env_tools(grp_parent = grp_env)
-
+da.cli.demo.add_demos(grp_parent = grp_demo)
 
 # -----------------------------------------------------------------------------
 def _dirpath_src():
