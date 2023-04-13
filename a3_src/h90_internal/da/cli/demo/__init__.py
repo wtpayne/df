@@ -64,7 +64,8 @@ import stableflow.sys
 def add_demos(grp_parent):
     """
     """
-    rootpath_demo = os.path.join(_dirpath_root(), 'a3_src', 'h60_demo')
+    rootpath_demo = os.path.join(
+                            _dirpath_root(), 'a3_src', 'h80_demonstration')
 
     for name in sorted(os.listdir(rootpath_demo)):
 

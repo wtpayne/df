@@ -4,15 +4,15 @@
 ---
 
 title:
-    "h20_capability setup script."
+    "h60_bespoke setup script."
 
 description:
-    "The h20_capability setup script is intended
-    to allow capabilities to be made available
+    "The h60_bespoke setup script is intended
+    to allow projects to be made available
     with the command 'pip install --editable'."
 
 id:
-    "f61c82c0-38c5-4033-9d10-9a23ea25e21b"
+    "8b1e1ff4-8a8a-44fb-92e4-767ceb1a9af2"
 
 type:
     dt001_python_script
@@ -47,5 +47,5 @@ license:
 """
 
 import setuptools
-setuptools.setup(name       = 'h20_capability',
+setuptools.setup(name       = 'h60_bespoke',
                  py_modules = [])

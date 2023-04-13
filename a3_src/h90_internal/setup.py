@@ -4,16 +4,15 @@
 ---
 
 title:
-    "h50_research setup script."
+    "h90_internal setup script."
 
 description:
-    "The h50_research setup script is
-    intended to allow research projects
-    to be made available with the
-    command 'pip install --editable'."
+    "The h90_internal setup script is intended
+    to allow internal tools to be made available
+    with the command 'pip install --editable'."
 
 id:
-    "87afaed2-898d-46e3-b773-8ac7e49ad830"
+    "1929a990-1563-4b6b-8777-9d6e13f96350"
 
 type:
     dt001_python_script
@@ -44,9 +43,10 @@ license:
     permissions and limitations under the
     License."
 
+
 ...
 """
 
 import setuptools
-setuptools.setup(name       = 'h50_research',
+setuptools.setup(name       = 'h90_internal',
                  py_modules = [])

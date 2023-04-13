@@ -130,11 +130,19 @@ def _update_all_environments(cfg):
     """
     Update all environments used by the specified cfg.
 
+    TODO: We still need logic to bootstrap the
+          setup of remote environments.
+
     """
     dirpath_root = _dirpath_root()
+    id_env       = 'e000_design_automation_core'
+    dirpath_env  = _dirpath_env(dirpath_root, id_env)
+    filepath_py3 = os.path.join(dirpath_env, 'bin', 'python3')
+
     for cfg_host in cfg['host'].values():
 
-        remote_command = 'python3 -m {module} {root} {env}'.format(
+        remote_command = '{py3} -m {module} {root} {env}'.format(
+                                        py3    = filepath_py3,
                                         module = 'da.env.ensure_updated',
                                         root   = dirpath_root,
                                         env    = cfg_host['environment'])

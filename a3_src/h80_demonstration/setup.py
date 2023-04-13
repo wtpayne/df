@@ -4,15 +4,15 @@
 ---
 
 title:
-    "h30_product setup script."
+    "h80_demonstration setup script."
 
 description:
-    "The h30_product setup script is intended
-    to allow products to be made available
+    "The h80_demonstration setup script is
+    intended to allow demos to be made available
     with the command 'pip install --editable'."
 
 id:
-    "a08b2f3b-675a-4806-b62d-bff8c512752c"
+    "b8c5b02f-ad60-4677-82e4-1cb4e957c218"
 
 type:
     dt001_python_script
@@ -47,5 +47,5 @@ license:
 """
 
 import setuptools
-setuptools.setup(name       = 'h30_product',
+setuptools.setup(name       = 'h80_demonstration',
                  py_modules = [])

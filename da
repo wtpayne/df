@@ -235,7 +235,7 @@ if [[ ${do_source_new}     == 1 ]]; then source "${dirpath_venv}/bin/activate"; 
 #
 if [[ ${is_stale_venv} == 1 ]]; then
 
-    pip3 install -e "${WORKSPACE}/a3_src/h70_internal"
+    pip3 install -e "${WORKSPACE}/a3_src/h90_internal"
     python3 -m da.env.update "${WORKSPACE}" "${id_env}"
 
 fi

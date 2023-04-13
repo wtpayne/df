@@ -4,15 +4,15 @@
 ---
 
 title:
-    "h70_internal setup script."
+    "h30_platform setup script."
 
 description:
-    "The h70_internal setup script is intended
-    to allow internal tools to be made available
+    "The h30_platform setup script is intended
+    to allow capabilities to be made available
     with the command 'pip install --editable'."
 
 id:
-    "1929a990-1563-4b6b-8777-9d6e13f96350"
+    "ce521311-7fe0-4eef-b41a-e6101ab19bb2"
 
 type:
     dt001_python_script
@@ -43,10 +43,9 @@ license:
     permissions and limitations under the
     License."
 
-
 ...
 """
 
 import setuptools
-setuptools.setup(name       = 'h70_internal',
+setuptools.setup(name       = 'h30_platform',
                  py_modules = [])

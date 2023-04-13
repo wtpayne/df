@@ -4,15 +4,15 @@
 ---
 
 title:
-    "h60_demo setup script."
+    "h40_component setup script."
 
 description:
-    "The h60_demo setup script is intended
-    to allow demos to be made available
+    "The h40_component setup script is intended
+    to allow capabilities to be made available
     with the command 'pip install --editable'."
 
 id:
-    "b8c5b02f-ad60-4677-82e4-1cb4e957c218"
+    "37297806-3f8b-463a-9c84-1b67441b3895"
 
 type:
     dt001_python_script
@@ -47,5 +47,5 @@ license:
 """
 
 import setuptools
-setuptools.setup(name       = 'h60_demo',
+setuptools.setup(name       = 'h40_component',
                  py_modules = [])

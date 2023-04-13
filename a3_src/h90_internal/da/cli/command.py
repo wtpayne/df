@@ -73,7 +73,7 @@ import stableflow.cli.command
         cls              = da.cli.group.Ordered,
         context_settings = { 'max_content_width': 50 })
 @click.version_option(
-        version          = importlib.metadata.version("h70_internal"))
+        version          = importlib.metadata.version("h90_internal"))
 def grp_main():
     """
     Design automation command line interface.

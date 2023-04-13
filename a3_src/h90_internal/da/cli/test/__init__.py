@@ -58,7 +58,7 @@ def all(dirpath_src):
     """
     import pytest
 
-    relpath_ini  = 'h70_internal/da/cli/test/pytest.ini'
+    relpath_ini  = 'h90_internal/da/cli/test/pytest.ini'
     filepath_ini = os.path.join(dirpath_src, relpath_ini)
 
     # os.chdir(dirpath_lwc_root)
