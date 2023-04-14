@@ -1,0 +1,53 @@
+# Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pyzw
+
+# IDE files
+.vscode/
+*.idea/
+
+# Compiled files
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Build directories
+build/
+dist/
+target/
+
+# Virtual environments
+venv/
+env/
+env.bak/
+
+# Logs
+*.log
+
+# Configuration files
+*.cfg
+*.conf
+*.ini
+*.env
+
+# Package files
+*.egg-info/
+*.egg
+*.tar.gz
+*.whl
+
+# Misc
+.DS_Store
+Thumbs.db
+desktop.ini
+
+images/
+vectors/

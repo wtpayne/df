@@ -1,0 +1,202 @@
+system:
+  id_system: acadasto
+
+
+###############################################################################
+host:
+  localhost:
+    hostname:        'localhost'
+    acct_run:        'wtp'
+    acct_provision:  'wtp'
+    port_range:      '8090-9000'
+    dirpath_log:     '/var/log/xact'
+    dirpath_install: '/home/wtp/dev/xact/'
+    dirpath_venv:    '/home/wtp/dev/venv/'    # /opt/xact
+    log_level:       'TRACE'
+
+
+###############################################################################
+process:
+  monitor_process:
+    host: localhost
+  reporter_process:
+    host: localhost
+
+
+###############################################################################
+node:
+
+  # ---------------------------------------------------------------------------
+  monitor_controller:
+    process:        monitor_process
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    xact.lib.util.simple_controller
+    state_type:     py_dict
+    config:
+      frequency_hz: 5
+
+  # ---------------------------------------------------------------------------
+  fs_monitor:
+    process:        monitor_process
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    xact.lib.fs.monitor
+    state_type:     py_dict
+    config:
+      dirpath_root:
+        - /media/wtp/Data/ref
+      pathincl:
+        - !regex '^.*.pdf$'
+      direxcl:
+        - !regex '^\..*$'
+        - !regex '^.*\.egg-info$'
+        - !regex '^.pytest-cache$'
+        - !regex '^\.cache$'
+        - !regex '^\.git$'
+        - !regex '^\.tox$'
+        - !regex '^\.vagrant$'
+        - !regex '^__pycache__$'
+      batch_size:    100
+      changes:       True
+      static_files:  True
+      repeat_static: True
+      halt_after:    False
+
+  # ---------------------------------------------------------------------------
+  hexdigest:
+    process:        monitor_process
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    xact.lib.fs.hexdigest
+    state_type:     py_dict
+
+  # ---------------------------------------------------------------------------
+  digestwriter:
+    process:        monitor_process
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    xact.app.acadasto.digestwriter
+    state_type:     py_dict
+    config:
+      filepath_db:  /media/wtp/Data/dev/xact_lib/src/xact/app/acadasto/ac.db
+
+  # ---------------------------------------------------------------------------
+  reporter_controller:
+    process:        reporter_process
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    xact.lib.util.simple_controller
+    state_type:     py_dict
+    config:
+      frequency_hz: 0.1
+
+  # ---------------------------------------------------------------------------
+  digestreader:
+    process:        reporter_process
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    xact.app.acadasto.digestreader
+    state_type:     py_dict
+    config:
+      filepath_db:  /media/wtp/Data/dev/xact_lib/src/xact/app/acadasto/ac.db
+      batch_size:   1
+
+  # ---------------------------------------------------------------------------
+  reporter:
+    process:        reporter_process
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    xact.lib.util.noop
+    state_type:     py_dict
+
+  # # ---------------------------------------------------------------------------
+  # renderer:
+  #   process:        ocr_worker_process
+  #   req_host_cfg:   default_configuration
+  #   functionality:
+  #     py_module:    xact.lib.pdf.renderer
+  #   state_type:     py_dict
+
+  # # ---------------------------------------------------------------------------
+  # ocr:
+  #   process:        ocr_worker_process
+  #   req_host_cfg:   default_configuration
+  #   functionality:
+  #     py_module:    xact.lib.ocr.tesseract
+  #   state_type:     py_dict
+
+  # # ---------------------------------------------------------------------------
+  # contentwriter:
+  #   process:        content_writer_process
+  #   req_host_cfg:   default_configuration
+  #   functionality:
+  #     py_module:    xact.app.acadasto.contentwriter
+  #   state_type:     py_dict
+  #   config:
+  #     filepath_db:  /media/wtp/Data/dev/xact_lib/src/xact/app/acadasto/acc.db
+
+
+###############################################################################
+edge:
+- owner: monitor_controller
+  data:  py_dict
+  src:   monitor_controller.outputs.control
+  dst:   fs_monitor.inputs.control
+
+- owner: fs_monitor
+  data:  py_dict
+  src:   fs_monitor.outputs.filepath
+  dst:   hexdigest.inputs.filepath
+
+- owner: hexdigest
+  data:  py_dict
+  src:   hexdigest.outputs.hexdigest
+  dst:   digestwriter.inputs.hexdigest
+
+- owner: reporter_controller
+  data:  py_dict
+  src:   reporter_controller.outputs.control
+  dst:   digestreader.inputs.control
+
+- owner: digestreader
+  data:  py_dict
+  src:   digestreader.outputs.hexdigest
+  dst:   reporter.inputs.hexdigest
+
+# - owner: reporter
+#   data:  py_dict
+#   src:   reporter.outputs.image
+#   dst:   ocr.inputs.image
+
+# - owner: ocr
+#   data:  py_dict
+#   src:   ocr.outputs.chunk
+#   dst:   contentwriter.inputs.chunk
+
+
+###############################################################################
+data:
+  py_dict:  py_dict
+  py_str:   py_str
+
+
+###############################################################################
+req_host_cfg:
+  default_configuration:
+    role:
+      - default_role
+
+
+###############################################################################
+role:
+  default_role:
+    tasks:
+      - name: Update apt-get repo and cache
+        become:        yes
+        become_user:   root
+        become_method: sudo
+        apt:
+          update_cache:     yes
+          force_apt_get:    yes
+          cache_valid_time: 3600

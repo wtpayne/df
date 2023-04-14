@@ -1,0 +1,347 @@
+system:
+  id_system: ratio
+
+
+###############################################################################
+host:
+  localhost:
+    hostname:        'localhost'
+    acct_run:        'wtp'
+    acct_provision:  'wtp'
+    port_range:      '8090-9000'
+    dirpath_log:     ''
+    launch_script:   'bowyer'
+    log_level:       'TRACE'
+
+
+###############################################################################
+process:
+  proc_main:
+    host: localhost
+
+
+###############################################################################
+node:
+
+  # ---------------------------------------------------------------------------
+  ctrl_sys:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.lib.control.system
+    state_type:     py_dict
+    config:
+      frequency_hz: 1
+      idx_max:      50000
+
+  # ---------------------------------------------------------------------------
+  ctrl_proc_main:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.lib.control.process
+    state_type:     py_dict
+
+  # ---------------------------------------------------------------------------
+  monitor:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.lib.fs.monitor
+    state_type:     py_dict
+    config:
+      dirpath_root:
+        - /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio
+      pathincl:
+        - !regex '^.*.cfg.yaml$'
+      direxcl:
+        - !regex '^\..*$'
+        - !regex '^.*\.egg-info$'
+        - !regex '^.pytest-cache$'
+        - !regex '^\.cache$'
+        - !regex '^\.git$'
+        - !regex '^\.tox$'
+        - !regex '^\.vagrant$'
+        - !regex '^__pycache__$'
+      batch_size:    2
+      changes:       True
+      static_files:  True
+      repeat_static: False
+      halt_after:    False
+
+  # ---------------------------------------------------------------------------
+  reader:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.lib.cfg.read
+    state_type:     py_dict
+
+  # ---------------------------------------------------------------------------
+  transformer:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.lib.util.live_reload
+    state_type:     py_dict
+    config:
+      py_module:    bowyer.lib.cfg.transform
+
+  # ---------------------------------------------------------------------------
+  denormalizer:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.lib.cfg.denorm
+    state_type:     py_dict
+
+  # ---------------------------------------------------------------------------
+  sketcher:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.lib.cfg.render.sketch
+    state_type:     py_dict
+
+  # ---------------------------------------------------------------------------
+  svg_renderer:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.lib.util.live_reload
+    state_type:     py_dict
+    config:
+      py_module:    bowyer.lib.cfg.render.svg
+
+  # ---------------------------------------------------------------------------
+  ui_vr:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.lib.util.live_reload
+    state_type:     py_dict
+    config:
+      py_module:    bowyer.app.ratio.ui_vr
+
+  # ---------------------------------------------------------------------------
+  ui_web:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.app.ratio.ui
+    state_type:     py_dict
+
+  # ---------------------------------------------------------------------------
+  static_files:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.lib.ui.web.resource_from_file
+    state_type:     py_dict
+    config:
+      list:
+      - id_resource:  tailwind.css
+        media_type:   text/css
+        is_binary:    false
+        filepath:     /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/static/tailwind/v2.2.19/tailwind.css
+
+      - id_resource:  hyperscript.js
+        media_type:   text/javascript
+        is_binary:    false
+        filepath:     /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/static/_hyperscript/0.9.7/_hyperscript.min.js
+
+      - id_resource:  htmx.js
+        media_type:   text/javascript
+        is_binary:    false
+        filepath:     /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/static/htmx/v1.8.2/htmx.js
+
+      - id_resource:  sse.js
+        media_type:   text/javascript
+        is_binary:    false
+        filepath:     /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/static/htmx/v1.8.2/ext/sse.js
+
+      - id_resource:  ws.js
+        media_type:   text/javascript
+        is_binary:    false
+        filepath:     /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/static/htmx/v1.8.2/ext/ws.js
+
+      - id_resource:  aframe.js
+        media_type:   text/javascript
+        is_binary:    false
+        filepath:     /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/static/aframe/v1.3.0/aframe.js
+
+      - id_resource:  aframe.js.map
+        media_type:   application/json
+        is_binary:    false
+        filepath:     /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/static/aframe/v1.3.0/aframe.js.map
+
+      - id_resource:  aframe_extras.js
+        media_type:   text/javascript
+        is_binary:    false
+        filepath:     /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/static/aframe_extras/v6.1.1/aframe_extras.js
+
+      - id_resource:  aframe_animation_component.js
+        media_type:   text/javascript
+        is_binary:    false
+        filepath:     /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/static/aframe_animation_component/5.1.2/aframe_animation_component.js
+
+      - id_resource:  super_hands.js
+        media_type:   text/javascript
+        is_binary:    false
+        filepath:     /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/static/super_hands/v3.0.3/super_hands.js
+
+      - id_resource:  ratio.js
+        media_type:   text/javascript
+        is_binary:    false
+        filepath:     /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/ratio.js
+
+      - id_resource:  tecnicofino.woff2
+        media_type:   font/woff2
+        is_binary:    true
+        filepath:     /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/static/fonts/tecnicofino/1.3/tecnico.fino-webfont.woff2
+
+  # ---------------------------------------------------------------------------
+  server:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.lib.web.server
+    state_type:     py_dict
+    config:
+      host:         0.0.0.0
+      port:         8080
+      session_key:  7A8F&+ey789dfgh+32d233shja67s843g1
+      debug:        True
+      log_level:    'debug'
+      ssl_keyfile:  /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/key.pem
+      ssl_certfile: /media/wtp/Data/dev/bowyer_lib/src/bowyer/app/ratio/server.pem
+
+  # ---------------------------------------------------------------------------
+  ui_input_handler:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    bowyer.app.ratio.ui_input_handler
+    state_type:     py_dict
+
+
+###############################################################################
+edge:
+
+# Control net - root.
+
+- owner: ctrl_sys
+  data:  py_dict
+  src:   ctrl_sys.outputs.control_00
+  dst:   ctrl_proc_main.inputs.control
+
+# Control net - main process.
+
+- owner: ctrl_proc_main
+  data:  py_dict
+  src:   ctrl_proc_main.outputs.ctrl_reader
+  dst:   monitor.inputs.control
+
+- owner: ctrl_proc_main
+  data:  py_dict
+  src:   ctrl_proc_main.outputs.ctrl_static_files
+  dst:   static_files.inputs.control
+
+- owner: ctrl_proc_main
+  data:  py_dict
+  src:   ctrl_proc_main.outputs.ctrl_transformer
+  dst:   transformer.inputs.control
+
+
+# Main config data processing pipeline.
+
+- owner: monitor
+  data:  py_dict
+  src:   monitor.outputs.filepath
+  dst:   reader.inputs.filepath
+
+- owner: reader
+  data:  py_dict
+  src:   reader.outputs.cfg
+  dst:   transformer.inputs.cfg
+
+- owner: transformer
+  data:  py_dict
+  src:   transformer.outputs.cfg
+  dst:   denormalizer.inputs.cfg
+
+- owner: denormalizer
+  data:  py_dict
+  src:   denormalizer.outputs.cfg
+  dst:   sketcher.inputs.cfg
+
+- owner: sketcher
+  data:  py_dict
+  src:   sketcher.outputs.cfg_svg_renderer
+  dst:   svg_renderer.inputs.cfg
+
+- owner: sketcher
+  data:  py_dict
+  src:   sketcher.outputs.cfg_ui_vr
+  dst:   ui_vr.inputs.cfg
+
+- owner: svg_renderer
+  data:  py_dict
+  src:   svg_renderer.outputs.svg
+  dst:   ui_web.inputs.svg
+
+# System I/O via ASGI Web-server.
+
+- owner: ui_web
+  data:  py_dict
+  src:   ui_web.outputs.resources
+  dst:   server.inputs.ui_web
+
+- owner: ui_vr
+  data:  py_dict
+  src:   ui_vr.outputs.resources
+  dst:   server.inputs.ui_vr
+
+- owner: static_files
+  data:  py_dict
+  src:   static_files.outputs.resources
+  dst:   server.inputs.static_files
+
+- owner: server
+  data:  py_dict
+  src:   server.outputs.requests
+  dst:   ui_input_handler.inputs.requests
+
+- owner: ui_input_handler
+  data:  py_dict
+  src:   ui_input_handler.outputs.cmd
+  dst:   transformer.inputs.cmd
+  dirn:  feedback
+
+
+###############################################################################
+data:
+  py_list:  py_list
+  py_dict:  py_dict
+  py_str:   py_str
+
+
+###############################################################################
+req_host_cfg:
+  default_configuration:
+    role:
+      - default_role
+
+
+###############################################################################
+role:
+  default_role:
+    tasks:
+      - name: Update apt-get repo and cache
+        become:        yes
+        become_user:   root
+        become_method: sudo
+        apt:
+          update_cache:     yes
+          force_apt_get:    yes
+          cache_valid_time: 3600

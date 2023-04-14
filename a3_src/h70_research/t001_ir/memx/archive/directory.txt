@@ -1,0 +1,39 @@
+memex/
+│
+├── agents/
+│   ├── __init__.py
+│   ├── memex_agent.py
+│   ├── rss_feed_summarizer.py
+│   └── video_summarizer.py
+│
+├── chatroom/
+│   ├── __init__.py
+│   └── chatroom.py
+│
+├── core/
+│   ├── __init__.py
+│   ├── embeddings.py
+│   └── utils.py
+│
+├── data/
+│   ├── __init__.py
+│   ├── prompts/
+│   └── models/
+│
+├── templates/
+│   ├── index.html
+│   ├── chatroom.html
+│   ├── video_summary.html
+│   └── rss_feed_summary.html
+│
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── img/
+│
+├── logs/
+├── tests/
+├── setup.py
+├── run_memex.py
+├── README.md
+└── requirements.txt

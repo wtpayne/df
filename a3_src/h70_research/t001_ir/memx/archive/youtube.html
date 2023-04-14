@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Talk to Video</title>
+    <link rel="stylesheet" href="talk_to_video.css">
+</head>
+<body>
+	<header>
+		<h1>Talk to Video</h1>
+	</header>
+	<main>
+		<div id="player"></div>
+		<div id="chat-container"><iframe id="chatbot" src="about:blank"></iframe></div>
+		<form>
+			<label for="video-url">Enter YouTube video URL:</label>
+			<input type="text" id="video-url">
+			<button type="submit">Load Video</button>
+		</form>
+	</main>
+	<script src="app.js"></script>
+</body>
+</html>
