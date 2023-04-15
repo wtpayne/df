@@ -87,20 +87,20 @@ def add_demos(grp_parent):
         filename_py  = '{id}.py'.format(id = id_demo)
         filepath_py  = os.path.join(dirpath_demo, filename_py)
 
-        # Add run function.
+        # Add start command for a standalone (or wrapper) script.
         #
         if os.path.exists(filepath_py):
             callback = functools.partial(_run_script, filepath_py)
             grp_demo.add_command(
-                name = 'run',
+                name = 'start',
                 cmd  = click.Command(
-                        name     = 'run',
+                        name     = 'start',
                         callback = callback,
-                        help     = 'Run {id} script.'.format(id = id_demo)))
+                        help     = 'Start {id}.'.format(id = id_demo)))
 
-        # Start stableflow system.
+        # Add start command for a stableflow configuration file.
         #
-        if os.path.exists(filepath_cfg):
+        elif os.path.exists(filepath_cfg):
             callback = functools.partial(da.stableflow.start,
                                          path_cfg = filepath_cfg)
             grp_demo.add_command(
@@ -108,9 +108,9 @@ def add_demos(grp_parent):
                 cmd  = click.Command(
                         name     = 'start',
                         callback = callback,
-                        help     = 'Start {id} system.'.format(id = id_demo)))
+                        help     = 'Start {id}.'.format(id = id_demo)))
 
-        # Stop stableflow system.
+        # Add stop command for a stableflow configuration file.
         #
         if os.path.exists(filepath_cfg):
             callback = functools.partial(da.stableflow.stop,
@@ -120,7 +120,7 @@ def add_demos(grp_parent):
                 cmd  = click.Command(
                         name     = 'stop',
                         callback = callback,
-                        help     = 'Stop {id} system.'.format(id = id_demo)))
+                        help     = 'Stop {id}.'.format(id = id_demo)))
 
 
 # -----------------------------------------------------------------------------
