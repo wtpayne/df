@@ -237,6 +237,7 @@ if [[ ${is_stale_venv} == 1 ]]; then
 
     pip3 install -e "${WORKSPACE}/a3_src/h90_internal"
     python3 -m da.env.update "${WORKSPACE}" "${id_env}"
+    # TODO: ENSURE da.env.update RETURNS ERROR CODE AND HALT IF A PROBLEM
 
 fi
 

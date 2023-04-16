@@ -184,7 +184,7 @@ def _bash(dirpath_root, id_env):
     dirpath_self  = os.path.dirname(os.path.realpath(__file__))
     filepath_init = os.path.join(dirpath_self, 'bash_init.sh')
     cmd           = 'bash --init-file {file}'.format(file = filepath_init)
-    da.env.run(dirpath_root, id_env, cmd)
+    da.env.do_run(dirpath_root, id_env, cmd)
 
 
 # -----------------------------------------------------------------------------

@@ -84,7 +84,7 @@ def run_python(dirpath_root, id_env, py_src = None):
 
 
 # -----------------------------------------------------------------------------
-def run(rootpath, id_env, cmd):
+def do_run(rootpath, id_env, cmd):
     """
     Update the specified environment, activate it and run a command.
 
@@ -381,27 +381,31 @@ def _install_requirements(rootpath, id_env, filepath_reqs):
     installed.
 
     """
-    dirpath_env       = _dirpath_env(rootpath, id_env)
-    filepath_activate = os.path.join(dirpath_env, 'bin', 'activate')
-    filepath_pip      = os.path.join(dirpath_env, 'bin', 'pip3')
+    dirpath_env        = _dirpath_env(rootpath, id_env)
+    filepath_activate  = os.path.join(dirpath_env, 'bin', 'activate')
+    filepath_pip       = os.path.join(dirpath_env, 'bin', 'pip3')
 
-    cmd_activate      = '. {act}'.format(
-                                        act    = filepath_activate)
+    cmd_activate       = '. {act}'.format(
+                                    act = filepath_activate)
 
-    cmd_pip_self      = '{pip} install --upgrade pip'.format(
-                                        pip    = filepath_pip)
+    cmd_pip_self       = '{pip} install pip==22.3.1'.format(
+                                    pip = filepath_pip)
 
-    cmd_pip_wheel     = '{pip} install --upgrade pip'.format(
-                                        pip    = filepath_pip)
+    cmd_pip_wheel      = '{pip} install wheel==0.38.4'.format(
+                                    pip = filepath_pip)
 
-    cmd_pip_reqs      = '{pip} install -r {reqs}'.format(
-                                        pip    = filepath_pip,
-                                        reqs   = filepath_reqs)
+    cmd_pip_setuptools = '{pip} install setuptools==66.1.1'.format(
+                                    pip = filepath_pip)
 
-    cmd_full          = '{act} && {pip} && {wheel} && {reqs}'.format(
-                                        act   = cmd_activate,
-                                        pip   = cmd_pip_self,
-                                        wheel = cmd_pip_wheel,
-                                        reqs  = cmd_pip_reqs)
+    cmd_pip_reqs       = '{pip} install -r {reqs}'.format(
+                                    pip  = filepath_pip,
+                                    reqs = filepath_reqs)
+
+    cmd_full           = '{act} && {self} && {whl} && {stls} && {reqs}'.format(
+                                    act  = cmd_activate,
+                                    self = cmd_pip_self,
+                                    whl  = cmd_pip_wheel,
+                                    stls = cmd_pip_setuptools,
+                                    reqs = cmd_pip_reqs)
 
     subprocess.run(cmd_full, shell = True)

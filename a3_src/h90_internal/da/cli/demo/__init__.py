@@ -46,81 +46,48 @@ license:
 """
 
 
+import functools
+import importlib
+import inspect
 import os
 import os.path
-import functools
 
 import click
 
 import da.cli.group
 import da.stableflow
-import stableflow.cfg
-import stableflow.cfg.exception
-import stableflow.log
-import stableflow.sys
 
 
 # -----------------------------------------------------------------------------
 def add_demos(grp_parent):
     """
+    Add a command group for each demo.
+
     """
-    rootpath_demo = os.path.join(
-                            _dirpath_root(), 'a3_src', 'h80_demonstration')
+    dirpath_root  = _dirpath_root()
+    rootpath_demo = os.path.join(dirpath_root, 'a3_src', 'h80_demonstration')
 
-    for name in sorted(os.listdir(rootpath_demo)):
+    for id_demo in sorted(os.listdir(rootpath_demo)):
 
-        path    = os.path.join(rootpath_demo, name)
-        is_demo = os.path.isdir(path) and name.startswith('dm')
-        if not is_demo:
-            continue
+        dirpath = os.path.join(rootpath_demo, id_demo)
 
-        id_demo      = name
-        dirpath_demo = path
+        if _is_demo_dir(dirpath):
+ 
+            grp_demo     = _create_group_for_demo(grp_parent, id_demo)
+            filepath_py  = _filepath_python_module(dirpath, id_demo)
+            filepath_cfg = _filepath_stableflow_config(dirpath, id_demo)
 
-        str_help     = 'Demo {id}.'.format(id = id_demo)
-        grp_demo     = da.cli.group.Ordered(id_demo, help = str_help)
-        num_demo     = id_demo.split(sep = '_', maxsplit = 1)[0]
-        grp_parent.add_command(grp_demo, name = num_demo)
-
-        filename_cfg = '{id}.stableflow.cfg.yaml'.format(id = id_demo)
-        filepath_cfg = os.path.join(dirpath_demo, filename_cfg)
-        filename_py  = '{id}.py'.format(id = id_demo)
-        filepath_py  = os.path.join(dirpath_demo, filename_py)
-
-        # Add start command for a standalone (or wrapper) script.
-        #
-        if os.path.exists(filepath_py):
-            callback = functools.partial(_run_script, filepath_py)
-            grp_demo.add_command(
-                name = 'start',
-                cmd  = click.Command(
-                        name     = 'start',
-                        callback = callback,
-                        help     = 'Start {id}.'.format(id = id_demo)))
-
-        # Add start command for a stableflow configuration file.
-        #
-        elif os.path.exists(filepath_cfg):
-            callback = functools.partial(da.stableflow.start,
-                                         path_cfg = filepath_cfg)
-            grp_demo.add_command(
-                name = 'start',
-                cmd  = click.Command(
-                        name     = 'start',
-                        callback = callback,
-                        help     = 'Start {id}.'.format(id = id_demo)))
-
-        # Add stop command for a stableflow configuration file.
-        #
-        if os.path.exists(filepath_cfg):
-            callback = functools.partial(da.stableflow.stop,
-                                         path_cfg = filepath_cfg)
-            grp_demo.add_command(
-                name = 'stop',
-                cmd  = click.Command(
-                        name     = 'stop',
-                        callback = callback,
-                        help     = 'Stop {id}.'.format(id = id_demo)))
+            if os.path.exists(filepath_py):
+                _add_functions_from_python_module_to_group(
+                                                    group    = grp_demo, 
+                                                    filepath = filepath_py, 
+                                                    rootpath = rootpath_demo)
+ 
+            elif os.path.exists(filepath_cfg):
+                _add_start_stop_commands_for_stableflow_config(
+                                                    group    = grp_demo,
+                                                    filepath = filepath_cfg, 
+                                                    id_demo  = id_demo)
 
 
 # -----------------------------------------------------------------------------
@@ -136,18 +103,118 @@ def _dirpath_root():
 
 
 # -----------------------------------------------------------------------------
-def _run_script(filepath_py):
+def _is_demo_dir(path):
     """
-    Run the specified entrypoint script in the current process.
+    Return true if and only if the specified directory name is a demo.
 
     """
-    import importlib
-    import os
-    import sys
+    dirname = os.path.basename(path)
+    is_demo = os.path.isdir(path) and dirname.startswith('dm')
+    return is_demo
 
-    (dirpath, filename_py) = os.path.split(filepath_py)
-    (modulename, _) = os.path.splitext(filename_py)
-    sys.path.append(dirpath)
-    module = importlib.import_module(modulename)
-    sys.argv[:] = [filepath_py]
-    return module.main()
+
+# -----------------------------------------------------------------------------
+def _create_group_for_demo(grp_parent, id_demo):
+    """
+    Return a click command group for the specified demo id.
+    
+    """
+    str_help     = 'Demo {id}.'.format(id = id_demo)
+    grp_demo     = da.cli.group.Ordered(id_demo, help = str_help)
+    num_demo     = id_demo.split(sep = '_', maxsplit = 1)[0]
+    grp_parent.add_command(grp_demo, name = num_demo)
+    return grp_demo
+
+
+# -----------------------------------------------------------------------------
+def _filepath_python_module(dirpath, id_demo):
+    """
+    Return the filepath of the demo entrypoint module.
+
+    """
+    return os.path.join(dirpath, '{id}.py'.format(id = id_demo))
+
+
+# -----------------------------------------------------------------------------
+def _filepath_stableflow_config(dirpath, id_demo):
+    """
+    Return the filepath of the demo stableflow configuration file.
+
+    """
+    return os.path.join(dirpath,
+                        '{id}.stableflow.cfg.yaml'.format(id = id_demo))
+
+
+# -----------------------------------------------------------------------------
+def _add_functions_from_python_module_to_group(group, filepath, rootpath):
+    """
+    Add functions from the specified python module to the group as commands.
+
+    """
+    spec_module  = _spec_module(filepath, rootpath)
+    module       = importlib.import_module(spec_module)
+    iter_members = inspect.getmembers(module)
+    list_fcn     = sorted((item for item in iter_members 
+                                                if inspect.isfunction(item[1])),
+                        key = lambda tup: inspect.getsourcelines(tup[1])[1])
+
+    for (name, callback) in list_fcn:
+        _add_command_to_group(group       = group, 
+                              spec_module = spec_module,
+                              name        = name,
+                              callback    = callback)
+
+
+# -----------------------------------------------------------------------------
+def _spec_module(filepath, rootpath):
+    """
+    Return the module spec for the specified python file and root directory.
+
+    """
+    rel_path = os.path.relpath(filepath, rootpath)
+    return rel_path[:-3].replace(os.sep, '.')
+    
+
+# -----------------------------------------------------------------------------
+def _add_command_to_group(group, spec_module, name, callback):
+    """
+    Add a command to the specified group using the provided parameters.
+
+    """
+    if hasattr(callback, '__doc__'):
+        str_help = callback.__doc__.strip()
+    else:
+        str_help = 'Call {mod}.{fcn}.'.format(
+                                        mod = spec_module,
+                                        fcn = name)
+
+    group.add_command(name = name,
+                      cmd  = click.Command(name     = name,
+                                           callback = callback,
+                                           help     = str_help))
+
+
+# -----------------------------------------------------------------------------
+def _add_start_stop_commands_for_stableflow_config(group, filepath, id_demo):
+    """
+    Add start and stop commands for the specified stableflow config.
+
+    """
+    fcn_start = functools.partial(da.stableflow.start, path_cfg = filepath)
+    group.add_command(
+        name = 'start',
+        cmd  = click.Command(
+                        name     = 'start',
+                        callback = fcn_start,
+                        help     = 'Start {id}.'.format(id = id_demo)))
+
+    fcn_stop = functools.partial(da.stableflow.stop, path_cfg = filepath)
+    group.add_command(
+        name = 'stop',
+        cmd  = click.Command(
+                        name     = 'stop',
+                        callback = fcn_stop,
+                        help     = 'Stop {id}.'.format(id = id_demo)))
+
+
+

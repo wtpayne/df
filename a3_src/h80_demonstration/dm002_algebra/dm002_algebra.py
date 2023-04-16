@@ -3,18 +3,14 @@
 """
 """
 
-
-import sys
-
-import flow_editor.cli
-
-
 # -----------------------------------------------------------------------------
 def main():
     """
     Run the flow_editor command line interface.
 
     """
+    import sys
+    import flow_editor.cli
     return flow_editor.cli.main()  # Uses sys.argv
 
 
