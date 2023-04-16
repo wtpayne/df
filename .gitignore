@@ -59,6 +59,10 @@
 !*.pyx
 !*.codon
 
+# Kivy UI design documents.
+#
+!*.kv
+
 # C/C++ design documents.
 #
 !*.h

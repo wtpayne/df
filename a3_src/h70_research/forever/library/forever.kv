@@ -1,0 +1,23 @@
+#:kivy 2.0.0
+
+<ParagraphScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            id: paragraph_label
+            text: root.current_paragraph_text
+            font_size: "20sp"
+            halign: "center"
+            valign: "middle"
+            text_size: self.width, None
+            size_hint_y: 0.9
+        BoxLayout:
+            size_hint_y: 0.1
+            Button:
+                text: "<"
+                font_size: "20sp"
+                on_press: root.previous_paragraph()
+            Button:
+                text: ">"
+                font_size: "20sp"
+                on_press: root.next_paragraph()
