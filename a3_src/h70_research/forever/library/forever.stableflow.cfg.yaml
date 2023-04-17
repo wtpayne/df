@@ -58,13 +58,13 @@ node:
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
-  # ASGI REST server.
+  # Resource server.
   #
-  asgi_server:
+  resource_server:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    forever.narrative.engine
+      py_module:    cl.web.server
     state_type:     py_dict
 
 
@@ -86,8 +86,12 @@ edge:
 - owner: main_process_controller
   data:  py_dict
   src:   main_process_controller.outputs.control_filesystem_watcher
-  dst:   debug_display.inputs.control
+  dst:   narrative_engine.inputs.control
 
+- owner: narrative_engine
+  data:  py_dict
+  src:   narrative_engine.outputs.res
+  dst:   resource_server.inputs.res
 
 ###############################################################################
 data:
