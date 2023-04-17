@@ -10,7 +10,8 @@ host:
     acct_provision:  'wtp'
     port_range:      '8090-9000'
     dirpath_log:     ''
-    launch_cmd:      './da stableflow'
+    environment:     'e002_general_research'
+    launch_cmd:      ''
     log_level:       'TRACE'
 
 
@@ -47,23 +48,23 @@ node:
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
-  # Simulator.
+  # Narrative engine.
   #
-  simulator:
+  narrative_engine:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.sim.pybullet.ic00_edict
+      py_module:    forever.narrative.engine
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
-  # Debug display.
+  # ASGI REST server.
   #
-  debug_display:
+  asgi_server:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.util.noop.ic00_edict
+      py_module:    forever.narrative.engine
     state_type:     py_dict
 
 
@@ -85,16 +86,7 @@ edge:
 - owner: main_process_controller
   data:  py_dict
   src:   main_process_controller.outputs.control_filesystem_watcher
-  dst:   simulator.inputs.control
-
-# -----------------------------------------------------------------------------
-# Simulation pipeline.
-#
-
-- owner: simulator
-  data:  py_dict
-  src:   simulator.outputs.sensor_data
-  dst:   debug_display.inputs.sensor_data
+  dst:   debug_display.inputs.control
 
 
 ###############################################################################

@@ -159,3 +159,10 @@ def python_module(module, id_env, id_env_boot, acct, host):
     subprocess.run(ssh_run_module, shell = True, check = True)
 
 
+# -----------------------------------------------------------------------------
+def stableflow_system(path):
+    """
+    Run a python module in the specified environment.
+
+    """
+    print('RUN SF SYSTEM')

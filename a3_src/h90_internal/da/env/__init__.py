@@ -71,8 +71,8 @@ def run_python(dirpath_root, id_env, py_src = None):
     Run a python command in the specified environment.
 
     """
-    dirpath_env       = os.path.join(dirpath_root, 'a0_env', 'venv', id_env)
-    filepath_python   = os.path.join(dirpath_env, 'bin', 'python3')
+    dirpath_env     = os.path.join(dirpath_root, 'a0_env', 'venv', id_env)
+    filepath_python = os.path.join(dirpath_env, 'bin', 'python3')
 
     if py_src is not None:
         cmd = '{py3} -c "{py_src}"'.format(py3    = filepath_python,
@@ -80,7 +80,7 @@ def run_python(dirpath_root, id_env, py_src = None):
     else:
         cmd = '{py3}'.format(py3 = filepath_python)
 
-    run(dirpath_root, id_env, cmd)
+    do_run(dirpath_root, id_env, cmd)
 
 
 # -----------------------------------------------------------------------------

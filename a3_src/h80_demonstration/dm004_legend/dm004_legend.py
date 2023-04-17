@@ -45,13 +45,14 @@ license:
 """
 
 
+import os
 import sys
 
 
 # -----------------------------------------------------------------------------
-def run():
+def app():
     """
-    Run dm004 mobile app locally.
+    Run dm004 frontend mobile app.
 
     """
     import da.env.run
@@ -64,12 +65,45 @@ def run():
 
 
 # -----------------------------------------------------------------------------
+def server_start():
+    """
+    Start dm004 backend server.
+
+    """
+    dirpath_self = os.path.dirname(os.path.realpath(__file__))
+    relpath_root = '../../..'
+    mixpath_root = os.path.join(dirpath_self, relpath_root)
+    dirpath_root = os.path.normpath(mixpath_root)
+    relpath_cfg  = 'a3_src/h70_research/forever/library'
+    filename_cfg = 'forever.stableflow.cfg.yaml'
+    filepath_cfg = os.path.join(dirpath_root, relpath_cfg, filename_cfg)
+    import da.stableflow
+    sys.exit(da.stableflow.start(path_cfg = filepath_cfg))
+
+
+# -----------------------------------------------------------------------------
+def server_stop():
+    """
+    Stop dm004 backend server.
+
+    """
+    dirpath_self = os.path.dirname(os.path.realpath(__file__))
+    relpath_root = '../../..'
+    mixpath_root = os.path.join(dirpath_self, relpath_root)
+    dirpath_root = os.path.normpath(mixpath_root)
+    relpath_cfg  = 'a3_src/h70_research/forever/library'
+    filename_cfg = 'forever.stableflow.cfg.yaml'
+    filepath_cfg = os.path.join(dirpath_root, relpath_cfg, filename_cfg)
+    import da.stableflow
+    sys.exit(da.stableflow.stop(path_cfg = filepath_cfg))
+
+
+# -----------------------------------------------------------------------------
 def build_android():
     """
     Build dm004 for Android.
 
     """
-    import os
     dirpath_self = os.path.dirname(os.path.realpath(__file__))
     relpath_root = '../../..'
     mixpath_root = os.path.join(dirpath_self, relpath_root)
@@ -98,16 +132,4 @@ def build_android():
                             host        = 'localhost'))
 
 
-# -----------------------------------------------------------------------------
-def build_ios():
-    """
-    Build dm004 for iOS.
 
-    """
-    import da.env.run
-    sys.exit(da.env.run.shell_command(
-                            command     = 'echo "Hello iOS build!"',
-                            id_env      = 'e002_general_research',
-                            id_env_boot = 'e000_design_automation_core',
-                            acct        = 'wtp',
-                            host        = 'localhost'))
