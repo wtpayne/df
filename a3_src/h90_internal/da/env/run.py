@@ -118,8 +118,8 @@ def stableflow_stop(path_cfg):
     with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
 
         try:
-            cfg = stableflow.cfg.prepare(path_cfg = path_cfg)
 
+            cfg = stableflow.cfg.prepare(path_cfg = path_cfg)
             _configure_all_launch_commands(cfg)
 
         except stableflow.cfg.exception.CfgError as err:
@@ -150,25 +150,10 @@ def _update_all_environments(cfg):
           setup of remote environments.
 
     """
-    dirpath_root = _dirpath_root()
-    id_env       = 'e000_design_automation_core'
-    dirpath_env  = _dirpath_env(dirpath_root, id_env)
-    filepath_py3 = os.path.join(dirpath_env, 'bin', 'python3')
-
     for cfg_host in cfg['host'].values():
-
-        remote_command = '{py3} -m {module} {root} {env}'.format(
-                                        py3    = filepath_py3,
-                                        module = 'da.env.ensure_updated',
-                                        root   = dirpath_root,
-                                        env    = cfg_host['environment'])
-
-        local_command  = 'ssh {acct}@{host} "{cmd}"'.format(
-                                        acct = cfg_host['acct_run'],
-                                        host = cfg_host['hostname'],
-                                        cmd  = remote_command)
-
-        subprocess.run(local_command, shell = True, check = True)
+        _update_env(id_env = cfg_host.get('environment', None),
+                    acct   = cfg_host.get('acct_run',    None),
+                    host   = cfg_host.get('hostname',    None))
 
 
 # -----------------------------------------------------------------------------
@@ -177,55 +162,15 @@ def _configure_all_launch_commands(cfg):
     Set each launch command as required for each host environment.
 
     """
-    dirpath_root = _dirpath_root()
+    dirpath_root = da.env.rootpath()
     for cfg_host in cfg['host'].values():
-
-        try:
-            id_env       = cfg_host['environment']
-            dirpath_env  = _dirpath_env(dirpath_root, id_env)
-            filepath_py3 = os.path.join(dirpath_env, 'bin', 'python3')
-            launch_cmd   = '{python} -m stableflow.cli.command'.format(
-                                                        python = filepath_py3)
-            cfg_host['launch_cmd'] = launch_cmd
-        except KeyError:
-            pass
-
-
-# -----------------------------------------------------------------------------
-def _dirpath_env(dirpath_root, id_env):
-    """
-    Return the path of the root directory of the environment filesystem.
-
-    """
-    return os.path.join(dirpath_root, 'a0_env', 'venv', id_env)
-
-
-# -----------------------------------------------------------------------------
-def _dirpath_root():
-    """
-    Return the path of the root directory of the design factory filesystem.
-
-    """
-    return os.path.normpath(os.path.join(_dirpath_self(), '../../../..'))
-
-
-# -----------------------------------------------------------------------------
-def _dirpath_self():
-    """
-    Return the directory path to the current module.
-
-    """
-    return os.path.dirname(os.path.realpath(__file__))
-
-
-
-
-
-
-
-
-
-
+        id_env = cfg_host.get('environment', None)
+        cmd    = '{python} -m {module}'.format(
+                            python = da.env.path(process_area = 'a0_env',
+                                                 id_env       = id_env,
+                                                 relpath      = 'bin/python3'),
+                            module = 'stableflow.cli.command')
+        cfg_host['launch_cmd'] = cmd
 
 
 # -----------------------------------------------------------------------------
