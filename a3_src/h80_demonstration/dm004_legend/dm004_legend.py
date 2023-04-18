@@ -67,13 +67,8 @@ def server_start():
     Start dm004 backend server.
 
     """
-    import da.env
     import da.env.run
-    dirpath_cfg  = da.env.path(process_area = 'a3_src',
-                               control_tier = 'h70_research',
-                               relpath      = 'forever/library')
-    filepath_cfg = os.path.join(dirpath_cfg, 'forever.stableflow.cfg.yaml')
-    sys.exit(da.env.run.stableflow_start(path_cfg = filepath_cfg))
+    sys.exit(da.env.run.stableflow_start(path_cfg = _filepath_cfg_server()))
 
 
 # -----------------------------------------------------------------------------
@@ -82,13 +77,21 @@ def server_stop():
     Stop dm004 backend server.
 
     """
-    import da.env
     import da.env.run
-    dirpath_cfg  = da.env.path(process_area = 'a3_src',
-                               control_tier = 'h70_research',
-                               relpath      = 'forever/library')
-    filepath_cfg = os.path.join(dirpath_cfg, 'forever.stableflow.cfg.yaml')
-    sys.exit(da.env.run.stableflow_stop(path_cfg = filepath_cfg))
+    sys.exit(da.env.run.stableflow_stop(path_cfg = _filepath_cfg_server()))
+
+
+# -----------------------------------------------------------------------------
+def _filepath_cfg_server():
+    """
+    Return the filepath to the backend server stableflow configuration file.
+
+    """
+    import da.env
+    return da.env.path(
+                process_area = 'a3_src',
+                control_tier = 'h70_research',
+                relpath      = 'forever/library/forever.stableflow.cfg.yaml')
 
 
 # -----------------------------------------------------------------------------

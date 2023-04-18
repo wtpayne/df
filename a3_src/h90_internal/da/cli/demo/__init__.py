@@ -159,10 +159,22 @@ def _add_functions_from_python_module_to_group(group, filepath, rootpath):
                         key = lambda tup: inspect.getsourcelines(tup[1])[1])
 
     for (name, callback) in list_fcn:
-        _add_command_to_group(group       = group, 
-                              spec_module = spec_module,
-                              name        = name,
-                              callback    = callback)
+
+        # Ignore all functions that start
+        # with an underscore as these are
+        # by convention considered to be
+        # private.
+        #
+        if name.startswith('_'):
+
+            continue
+
+        else:
+
+            _add_command_to_group(group       = group,
+                                  spec_module = spec_module,
+                                  name        = name,
+                                  callback    = callback)
 
 
 # -----------------------------------------------------------------------------
@@ -217,6 +229,3 @@ def _add_start_stop_commands_for_stableflow_config(group, filepath, id_demo):
                         name     = 'stop',
                         callback = fcn_stop,
                         help     = 'Stop {id}.'.format(id = id_demo)))
-
-
-
