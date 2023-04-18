@@ -66,47 +66,81 @@ import time
 
 
 # -----------------------------------------------------------------------------
-def run_python(dirpath_root, id_env, py_src = None):
+def path(process_area = 'a3_src',
+         control_tier = None,
+         id_env       = None,
+         relpath      = '.'):
     """
-    Run a python command in the specified environment.
+    Return an absolute file or directory path in the current workspace.
 
     """
-    dirpath_env     = os.path.join(dirpath_root, 'a0_env', 'venv', id_env)
-    filepath_python = os.path.join(dirpath_env, 'bin', 'python3')
+    dirpath_root = rootpath()
 
-    if py_src is not None:
-        cmd = '{py3} -c "{py_src}"'.format(py3    = filepath_python,
-                                           py_src = py_src)
+    # Ensure we have a valid process area.
+    #
+    tup_valid_process_area = ('a0_env',
+                              'a1_cfg',
+                              'a2_dat',
+                              'a3_src',
+                              'a4_tmp',
+                              'a5_cms')
+    assert process_area in tup_valid_process_area
+
+    # A control_tier only makes sense
+    # in the src and tmp process areas.
+    #
+    if process_area in ('a3_src', 'a4_tmp'):
+        tup_valid_control_tier = ('h00_thirdparty',
+                                  'h10_resource',
+                                  'h20_capability',
+                                  'h30_platform',
+                                  'h40_component',
+                                  'h50_product',
+                                  'h60_bespoke',
+                                  'h70_research',
+                                  'h80_demonstration',
+                                  'h90_internal')
+        assert control_tier in tup_valid_control_tier
+        tup_path_parts = (dirpath_root,
+                          process_area,
+                          control_tier,
+                          relpath)
+
+    # An id_env only makes sense in the
+    # a0_env process area
+    elif process_area in ('a0_env',):
+        assert id_env is not None and id_env.startswith('e')
+        tup_path_parts = (dirpath_root,
+                          process_area,
+                          'venv',
+                          id_env,
+                          relpath)
+
+    # All other process areas are
+    # currently more freeform.
+    #
     else:
-        cmd = '{py3}'.format(py3 = filepath_python)
+        tup_path_parts = (dirpath_root,
+                          process_area,
+                          relpath)
 
-    do_run(dirpath_root, id_env, cmd)
-
-
-# -----------------------------------------------------------------------------
-def do_run(rootpath, id_env, cmd):
-    """
-    Update the specified environment, activate it and run a command.
-
-    """
-    subprocess.run('python3 -m {module} {root} {env}'.format(
-                                        module = 'da.env.ensure_updated',
-                                        root   = rootpath,
-                                        env    = id_env),
-                   shell = True,
-                   check = True)
-    filepath_activate = os.path.join(
-                        rootpath, 'a0_env', 'venv', id_env, 'bin', 'activate')
-    subprocess.run('. {act} && {cmd}'.format(
-                                        act = filepath_activate,
-                                        cmd = cmd),
-                          shell = True,
-                          check = True)
-    return 0
+    return os.path.normpath(os.path.join(*tup_path_parts))
 
 
 # -----------------------------------------------------------------------------
-def do_ensure_updated(rootpath, id_env):
+def rootpath():
+    """
+    Return an absolute directory path to the root of the current workspace.
+
+    """
+    dirpath_self = os.path.dirname(os.path.realpath(__file__))
+    relpath_root = '../../../..'
+    dirpath_root = os.path.normpath(os.path.join(dirpath_self, relpath_root))
+    return dirpath_root
+
+
+# -----------------------------------------------------------------------------
+def do_ensure_updated(dirpath_root, id_env):
     """
     Ensure that the specified environment is up to date.
 
@@ -114,7 +148,7 @@ def do_ensure_updated(rootpath, id_env):
     factory to update environments as needed.
 
     """
-    dirpath_env = _dirpath_env(rootpath, id_env)
+    dirpath_env = _dirpath_env(dirpath_root, id_env)
 
     # Ensure the virtual environment exists,
     # recreating it from scratch if any problems
@@ -128,16 +162,16 @@ def do_ensure_updated(rootpath, id_env):
     # requirements file and pip installing
     # any newly added requirements.
     #
-    is_up_to_date    = _is_up_to_date(rootpath, id_env, dirpath_env)
+    is_up_to_date    = _is_up_to_date(dirpath_root, id_env, dirpath_env)
     is_stale         = not is_up_to_date
     is_update_needed = is_new_env or is_stale
 
     if is_update_needed:
-        do_update(rootpath, id_env)
+        do_update(dirpath_root, id_env)
 
 
 # -----------------------------------------------------------------------------
-def do_update(rootpath, id_env):
+def do_update(dirpath_root, id_env):
     """
     Update the specified environment with the latest envspec.
 
@@ -162,36 +196,36 @@ def do_update(rootpath, id_env):
 
     """
     filepath_envspec = _filepath_envspec(
-                                rootpath = rootpath,
-                                id_env   = id_env)
+                                dirpath_root = dirpath_root,
+                                id_env       = id_env)
 
     filepath_reqs    = _create_requirements_file(
-                                rootpath = rootpath,
-                                id_env   = id_env,
-                                envspec  = _load_envspec(filepath_envspec))
+                                dirpath_root = dirpath_root,
+                                id_env       = id_env,
+                                envspec      = _load_envspec(filepath_envspec))
 
     _touch(
         filepath   = filepath_envspec,
         delta_secs = -1) # Set mtime to one second in the past.
 
     _install_requirements(
-        rootpath      = rootpath,
+        dirpath_root  = dirpath_root,
         id_env        = id_env,
         filepath_reqs = filepath_reqs)
 
-    # dirpath_env      = _dirpath_env(rootpath, id_env)
+    # dirpath_env      = _dirpath_env(dirpath_root, id_env)
     # dirpath_venv_pkg = _dirpath_venv_pkg(dirpath_env)
     # dirpath_venv_whl = _dirpath_venv_whl(dirpath_env)
     # _touch(filepath  = dirpath_venv_pkg)
     # _touch(filepath  = dirpath_venv_whl)
 
 # -----------------------------------------------------------------------------
-def _dirpath_env(rootpath, id_env):
+def _dirpath_env(dirpath_root, id_env):
     """
     Return the directory path of the specified environment.
 
     """
-    return os.path.join(rootpath, "a0_env", "venv", id_env)
+    return os.path.join(dirpath_root, "a0_env", "venv", id_env)
 
 
 # -----------------------------------------------------------------------------
@@ -223,14 +257,14 @@ def _create_env_if_not_exists(dirpath_env):
 
 
 # -----------------------------------------------------------------------------
-def _is_up_to_date(rootpath, id_env, dirpath_env):
+def _is_up_to_date(dirpath_root, id_env, dirpath_env):
     """
     Return true if the specified environment is up to date, false otherwise.
 
     """
     mtime_venv_pkg  = os.path.getmtime(_dirpath_venv_pkg(dirpath_env))
     mtime_venv_whl  = os.path.getmtime(_dirpath_venv_whl(dirpath_env))
-    mtime_envspec   = os.path.getmtime(_filepath_envspec(rootpath, id_env))
+    mtime_envspec   = os.path.getmtime(_filepath_envspec(dirpath_root, id_env))
     is_updated_pkg  = mtime_venv_pkg > mtime_envspec
     is_updated_whl  = mtime_venv_whl > mtime_envspec
     is_updated_venv = is_updated_pkg or is_updated_whl
@@ -256,24 +290,27 @@ def _dirpath_venv_whl(dirpath_env):
 
 
 # -----------------------------------------------------------------------------
-def _filepath_envspec(rootpath, id_env):
+def _filepath_envspec(dirpath_root, id_env):
     """
     Return the filepath of the envspec file for the specified environment.
 
     """
     filename = '{id_env}.envspec.json'.format(id_env = id_env)
-    return os.path.join(
-                    rootpath, 'a3_src', 'h10_resource', 'envspec', filename)
+    return os.path.join(dirpath_root,
+                        'a3_src',
+                        'h10_resource',
+                        'envspec',
+                        filename)
 
 
 # -----------------------------------------------------------------------------
-def _create_requirements_file(rootpath, id_env, envspec):
+def _create_requirements_file(dirpath_root, id_env, envspec):
     """
     Return temporary requirements.txt filepath after writing envspec data to it.
 
     """
 
-    filepath = _filepath_requirements(rootpath, id_env)
+    filepath = _filepath_requirements(dirpath_root, id_env)
     dirpath  = os.path.dirname(filepath)
     if not os.path.exists(dirpath):
        os.makedirs(dirpath)
@@ -281,23 +318,23 @@ def _create_requirements_file(rootpath, id_env, envspec):
     with open(filepath, 'wt') as file_reqs:
         _write = lambda msg: print(msg, file = file_reqs)
         for item in envspec['list_item']:
-            _process_requirement_item(rootpath, item, _write)
+            _process_requirement_item(dirpath_root, item, _write)
         _write('')
 
     return filepath
 
 
 # -----------------------------------------------------------------------------
-def _filepath_requirements(rootpath, id_env):
+def _filepath_requirements(dirpath_root, id_env):
     """
     Return the path of the temporary requirements file for the specified env.
 
     """
-    return os.path.join(rootpath, 'a4_tmp', id_env, 'requirements.txt')
+    return os.path.join(dirpath_root, 'a4_tmp', id_env, 'requirements.txt')
 
 
 # -----------------------------------------------------------------------------
-def _process_requirement_item(rootpath, item, _write):
+def _process_requirement_item(dirpath_root, item, _write):
     """
     Write a single lines to the requirements file.
 
@@ -314,19 +351,19 @@ def _process_requirement_item(rootpath, item, _write):
 
 
         _write('-e {dirpath_dep}'.format(
-                    dirpath_dep = os.path.join(rootpath, item['relpath'])))
+                    dirpath_dep = os.path.join(dirpath_root, item['relpath'])))
 
     elif item['type'] == 'github':
 
         _write('-e {dirpath_dep}'.format(
                     dirpath_dep = _ensure_cloned_fron_github(
-                                                url_remote = item['remote'],
-                                                tag        = item['tag'],
-                                                rootpath   = rootpath)))
+                                            url_remote   = item['remote'],
+                                            tag          = item['tag'],
+                                            dirpath_root = dirpath_root)))
 
 
 # -----------------------------------------------------------------------------
-def _ensure_cloned_fron_github(url_remote, tag, rootpath):
+def _ensure_cloned_fron_github(url_remote, tag, dirpath_root):
     """
     Ensure that specified github repository is cloned to local storage.
 
@@ -334,7 +371,7 @@ def _ensure_cloned_fron_github(url_remote, tag, rootpath):
     (_, user_and_path) = url_remote.split(':')
     (user, repo_path)  = user_and_path.split('/', maxsplit = 1)
     (repo_name, _)     = repo_path.rsplit('.', maxsplit = 1)
-    dirpath_env        = os.path.join(rootpath, 'a0_env/src')
+    dirpath_env        = os.path.join(dirpath_root, 'a0_env/src')
     dirpath_dep        = os.path.join(dirpath_env, user, repo_name)
     is_already_cloned  = os.path.exists(dirpath_dep)
 
@@ -371,7 +408,7 @@ def _touch(filepath, delta_secs = 0):
 
 
 # -----------------------------------------------------------------------------
-def _install_requirements(rootpath, id_env, filepath_reqs):
+def _install_requirements(dirpath_root, id_env, filepath_reqs):
     """
     Install the dependencies specified in the given requirements file.
 
@@ -381,7 +418,7 @@ def _install_requirements(rootpath, id_env, filepath_reqs):
     installed.
 
     """
-    dirpath_env        = _dirpath_env(rootpath, id_env)
+    dirpath_env        = _dirpath_env(dirpath_root, id_env)
     filepath_activate  = os.path.join(dirpath_env, 'bin', 'activate')
     filepath_pip       = os.path.join(dirpath_env, 'bin', 'pip3')
 

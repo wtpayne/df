@@ -461,5 +461,3 @@ def _load_static(relpath_file, is_binary = False):
 
     with open(filepath, flags) as file:
         return file.read()
-
-

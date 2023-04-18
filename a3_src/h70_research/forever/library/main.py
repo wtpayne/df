@@ -4,8 +4,10 @@ import sys
 
 
 import kivy.app
+import kivy.clock
+import kivy.network.urlrequest
+import kivy.properties
 import kivy.uix.screenmanager
-import kivy.properties 
 
 # import kivy.uix.widget
 
@@ -15,7 +17,10 @@ import kivy.properties
 # import kivy.uix.label
 
 
+
+
 class ParagraphScreen(kivy.uix.screenmanager.Screen):
+
     paragraphs = kivy.properties.ListProperty([
         "This is the first paragraph.",
         "This is the second paragraph.",
@@ -37,8 +42,18 @@ class ParagraphScreen(kivy.uix.screenmanager.Screen):
 
 
 class ForeverApp(kivy.app.App):
+    def on_success(self, req, result):
+        # Schedule an update to the app state
+        kivy.clock.Clock.schedule_once(lambda dt: self.update_state(repr(result)))
+
+    def update_state(self, result):
+        # Update the app state
+        self.reader.paragraphs.append(result)
+
     def build(self):
-        return ParagraphScreen()
+        self.reader = ParagraphScreen()
+        req = kivy.network.urlrequest.UrlRequest('http://localhost:8080/story', on_success = self.on_success)
+        return self.reader
 
 
 if __name__ == '__main__':

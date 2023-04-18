@@ -100,7 +100,7 @@ def add_env_tools(grp_parent):
             #
             assert isinstance(tool_deps, tuple)
 
-            fcn_partial = functools.partial(callback, dirpath_root, id_env)
+            fcn_partial = functools.partial(callback, id_env)
 
             if set(tool_deps).issubset(set_env_deps):
                 grp_id_env.add_command(
@@ -176,61 +176,58 @@ def _iter_name_deps(cfg_env):
 
 
 # -----------------------------------------------------------------------------
-def _bash(dirpath_root, id_env):
+def _bash(id_env):
     """
     Start a bash shell.
 
     """
     dirpath_self  = os.path.dirname(os.path.realpath(__file__))
     filepath_init = os.path.join(dirpath_self, 'bash_init.sh')
-    cmd           = 'bash --init-file {file}'.format(file = filepath_init)
-    da.env.do_run(dirpath_root, id_env, cmd)
+    da.env.run.shell_command(
+            command = 'bash --init-file {file}'.format(file = filepath_init),
+            id_env  = id_env)
 
 
 # -----------------------------------------------------------------------------
-def _cpy(dirpath_root, id_env):
+def _cpy(id_env):
     """
     Start a cpython repl.
 
     """
-    return da.env.run_python(dirpath_root = dirpath_root,
-                             id_env       = id_env)
+    return da.env.run.python_interpreter(id_env = id_env)
 
 
 # -----------------------------------------------------------------------------
-def _ipy(dirpath_root, id_env):
+def _ipy(id_env):
     """
     Start a ipython repl.
 
     """
-    py_src = 'import ptpython.ipython; ptpython.ipython.embed()'
-    return da.env.run_python(dirpath_root = dirpath_root,
-                             id_env       = id_env,
-                             py_src       = py_src)
+    source = 'import ptpython.ipython; ptpython.ipython.embed()'
+    return da.env.run.python_source(source = source,
+                                    id_env = id_env)
 
 
 # -----------------------------------------------------------------------------
-def _ptpy(dirpath_root, id_env):
+def _ptpy(id_env):
     """
     Start a ptpython repl.
 
     """
-    py_src = 'import ptpython.repl; ptpython.repl.embed(globals(), locals())'
-    return da.env.run_python(dirpath_root = dirpath_root,
-                             id_env       = id_env,
-                             py_src       = py_src)
+    source = 'import ptpython.repl; ptpython.repl.embed(globals(), locals())'
+    return da.env.run.python_source(source = source,
+                                    id_env = id_env)
 
 
 # -----------------------------------------------------------------------------
-def _bpy(dirpath_root, id_env):
+def _bpy(id_env):
     """
     Start a bpython repl.
 
     """
-    py_src = 'import bpython; bpython.embed()'
-    return da.env.run_python(dirpath_root = dirpath_root,
-                             id_env       = id_env,
-                             py_src       = py_src)
+    source = 'import bpython; bpython.embed()'
+    return da.env.run.python_source(source = source,
+                                    id_env = id_env)
 
 
 # # -----------------------------------------------------------------------------

@@ -48,7 +48,7 @@ license:
 import os
 import sys
 
-import da.stableflow
+import da.env.run
 
 
 # -----------------------------------------------------------------------------
@@ -72,7 +72,7 @@ def start():
         'node.ui_discord_client.config.filepath_env',        _filepath_dotenv(),
         'node.design_index_db.config.filepath_db',           _filepath_db())
 
-    da.stableflow.start(
+    da.env.run.stableflow_start(
         path_cfg      = _filepath_system_cfg(),
         tup_overrides = tup_overrides)
 
@@ -83,7 +83,7 @@ def stop():
     Stop the process assistant service.
 
     """
-    da.stableflow.stop(path_cfg = _filepath_system_cfg())
+    da.env.run.stableflow_stop(path_cfg = _filepath_system_cfg())
 
 
 # -----------------------------------------------------------------------------

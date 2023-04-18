@@ -61,109 +61,359 @@ license:
 import os.path
 import subprocess
 
-# -----------------------------------------------------------------------------
+import da.env
+
 
 # -----------------------------------------------------------------------------
-def shell_command(command, id_env, id_env_boot, acct, host):
+def stableflow_start(path_cfg, tup_overrides = None):
+    """
+    Run a python module in the specified environment.
+
+    """
+    import stableflow.cfg
+    import stableflow.cfg.exception
+    import stableflow.log
+    import stableflow.sys
+
+    with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
+
+        try:
+
+            cfg = stableflow.cfg.prepare(
+                                    path_cfg      = path_cfg,
+                                    tup_overrides = tup_overrides)
+            _update_all_environments(cfg)
+            _configure_all_launch_commands(cfg)
+
+        except stableflow.cfg.exception.CfgError as err:
+            print(err, file = sys.stderr)  # Custom message (no stack trace)
+            return 1
+
+        else:
+            try:
+                return stableflow.sys.start(cfg)
+            except Exception as err:
+                # An exception will be thrown
+                # when we need to display either
+                # a custom error message, or no
+                # error message at all.
+                #
+                err_msg = str(err)
+                if err_msg != '':
+                    print(err_msg, file = sys.stderr)
+                return 1
+
+
+# -----------------------------------------------------------------------------
+def stableflow_stop(path_cfg):
+    """
+    Run a python module in the specified environment.
+
+    """
+    import stableflow.cfg
+    import stableflow.cfg.exception
+    import stableflow.log
+    import stableflow.sys
+
+    with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
+
+        try:
+            cfg = stableflow.cfg.prepare(path_cfg = path_cfg)
+
+            _configure_all_launch_commands(cfg)
+
+        except stableflow.cfg.exception.CfgError as err:
+            print(err, file = sys.stderr)  # Custom message (no stack trace)
+            return 1
+
+        else:
+            try:
+                return stableflow.sys.stop(cfg)
+            except Exception as err:
+                # An exception will be thrown
+                # when we need to display either
+                # a custom error message, or no
+                # error message at all.
+                #
+                err_msg = str(err)
+                if err_msg != '':
+                    print(err_msg, file = sys.stderr)
+                return 1
+
+
+# -----------------------------------------------------------------------------
+def _update_all_environments(cfg):
+    """
+    Update all environments used by the specified cfg.
+
+    TODO: We still need logic to bootstrap the
+          setup of remote environments.
+
+    """
+    dirpath_root = _dirpath_root()
+    id_env       = 'e000_design_automation_core'
+    dirpath_env  = _dirpath_env(dirpath_root, id_env)
+    filepath_py3 = os.path.join(dirpath_env, 'bin', 'python3')
+
+    for cfg_host in cfg['host'].values():
+
+        remote_command = '{py3} -m {module} {root} {env}'.format(
+                                        py3    = filepath_py3,
+                                        module = 'da.env.ensure_updated',
+                                        root   = dirpath_root,
+                                        env    = cfg_host['environment'])
+
+        local_command  = 'ssh {acct}@{host} "{cmd}"'.format(
+                                        acct = cfg_host['acct_run'],
+                                        host = cfg_host['hostname'],
+                                        cmd  = remote_command)
+
+        subprocess.run(local_command, shell = True, check = True)
+
+
+# -----------------------------------------------------------------------------
+def _configure_all_launch_commands(cfg):
+    """
+    Set each launch command as required for each host environment.
+
+    """
+    dirpath_root = _dirpath_root()
+    for cfg_host in cfg['host'].values():
+
+        try:
+            id_env       = cfg_host['environment']
+            dirpath_env  = _dirpath_env(dirpath_root, id_env)
+            filepath_py3 = os.path.join(dirpath_env, 'bin', 'python3')
+            launch_cmd   = '{python} -m stableflow.cli.command'.format(
+                                                        python = filepath_py3)
+            cfg_host['launch_cmd'] = launch_cmd
+        except KeyError:
+            pass
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_env(dirpath_root, id_env):
+    """
+    Return the path of the root directory of the environment filesystem.
+
+    """
+    return os.path.join(dirpath_root, 'a0_env', 'venv', id_env)
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_root():
+    """
+    Return the path of the root directory of the design factory filesystem.
+
+    """
+    return os.path.normpath(os.path.join(_dirpath_self(), '../../../..'))
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_self():
+    """
+    Return the directory path to the current module.
+
+    """
+    return os.path.dirname(os.path.realpath(__file__))
+
+
+
+
+
+
+
+
+
+
+
+
+# -----------------------------------------------------------------------------
+def python_interpreter(id_env,
+                       id_env_boot = None,
+                       acct        = None,
+                       host        = None):
+    """
+    Run a python interpreter in the specified environment.
+
+    """
+    _python(option      = '',
+            parameter   = '',
+            id_env      = id_env,
+            id_env_boot = id_env_boot,
+            acct        = acct,
+            host        = host)
+
+
+# -----------------------------------------------------------------------------
+def python_source(source,
+                  id_env,
+                  id_env_boot = None,
+                  acct        = None,
+                  host        = None):
+    """
+    Run a python source string in the specified environment.
+
+    """
+    _python(option      = '-c',
+            parameter   = "'{source}'".format(source = source),
+            id_env      = id_env,
+            id_env_boot = id_env_boot,
+            acct        = acct,
+            host        = host)
+
+
+# -----------------------------------------------------------------------------
+def python_module(module,
+                  id_env,
+                  id_env_boot = None,
+                  acct        = None,
+                  host        = None):
+    """
+    Run a python module in the specified environment.
+
+    """
+    _python(option      = '-m',
+            parameter   = module,
+            id_env      = id_env,
+            id_env_boot = id_env_boot,
+            acct        = acct,
+            host        = host)
+
+
+# -----------------------------------------------------------------------------
+def _python(option,
+            parameter,
+            id_env,
+            id_env_boot = None,
+            acct        = None,
+            host        = None):
+    """
+    Run a python module or source string in the specified environment.
+
+    """
+    import da.env
+    filepath_python = da.env.path(process_area = 'a0_env',
+                                  id_env       = id_env,
+                                  relpath      = 'bin/python3')
+
+    str_fmt = '{py3} {opt} {param}'
+
+    return shell_command(
+                str_fmt.format(
+                            py3   = filepath_python,
+                            opt   = option,
+                            param = parameter),
+                id_env      = id_env,
+                id_env_boot = id_env_boot,
+                acct        = acct,
+                host        = host)
+
+
+# -----------------------------------------------------------------------------
+def shell_command(command,
+                  id_env,
+                  id_env_boot = None,
+                  acct        = None,
+                  host        = None):
     """
     Run a shell command in the specified environment.
 
     """
-    dirpath_self      = os.path.dirname(os.path.realpath(__file__))
-    relpath_root      = '../../../..'
-    mixpath_root      = os.path.join(dirpath_self, relpath_root)
-    dirpath_root      = os.path.normpath(mixpath_root)
-    rootpath_venv     = os.path.join(dirpath_root, 'a0_env', 'venv')
+    (id_env_boot, acct, host) = _apply_defaults(id_env_boot, acct, host)
 
-    relpath_py        = os.path.join('bin', 'python3')
-    relpath_act       = os.path.join('bin', 'activate')
+    _update_env(
+            id_env      = id_env,
+            id_env_boot = id_env_boot,
+            acct        = acct,
+            host        = host)
 
-    filepath_py_boot  = os.path.join(rootpath_venv, id_env_boot, relpath_py)
-    filepath_act_boot = os.path.join(rootpath_venv, id_env_boot, relpath_act)
-    filepath_act      = os.path.join(rootpath_venv, id_env,      relpath_act)
+    is_remote = (acct is not None) and (host is not None)
+    if is_remote:
+        command.replace("'", "")
+        str_fmt = "{ssh} {acct}@{host} '. {activ} && {cmd}'"
+    else:
+        str_fmt = ". {activ} && {cmd}"
 
-    ssh               = 'ssh -X'
-    module_update     = 'da.env.ensure_updated'
-
-    cmd_update_env    = '. {act} && {py3} -m {module} {root} {env}'.format(
-                                            act     = filepath_act_boot,
-                                            py3     = filepath_py_boot,
-                                            module  = module_update,
-                                            root    = dirpath_root,
-                                            env     = id_env)
-    cmd_run_shell     = '. {act} && {command}'.format(
-                                            act     = filepath_act,
-                                            command = command)
-
-    ssh_update_env    = '{ssh} {acct}@{host} "{cmd}"'.format(
-                                            ssh     = ssh,
-                                            acct    = acct,
-                                            host    = host,
-                                            cmd     = cmd_update_env)
-    ssh_run_shell     = '{ssh} {acct}@{host} "{cmd}"'.format(
-                                            ssh     = ssh,
-                                            acct    = acct,
-                                            host    = host,
-                                            cmd     = cmd_run_shell)
-
-    subprocess.run(ssh_update_env, shell = True, check = True)
-    subprocess.run(ssh_run_shell,  shell = True, check = True)
+    return _run(str_fmt = str_fmt,
+                ssh     = 'ssh -X',
+                acct    = acct,
+                host    = host,
+                cmd     = command,
+                activ   = da.env.path(process_area = 'a0_env',
+                                      id_env       = id_env,
+                                      relpath      = 'bin/activate'))
 
 
 # -----------------------------------------------------------------------------
-def python_module(module, id_env, id_env_boot, acct, host):
+def _update_env(id_env,
+                id_env_boot = None,
+                acct        = None,
+                host        = None):
     """
-    Run a python module in the specified environment.
+    Update the specified environment.
+
+    A specific bootstrap environment can also be specified.
 
     """
-    dirpath_self      = os.path.dirname(os.path.realpath(__file__))
-    relpath_root      = '../../../..'
-    mixpath_root      = os.path.join(dirpath_self, relpath_root)
-    dirpath_root      = os.path.normpath(mixpath_root)
-    rootpath_venv     = os.path.join(dirpath_root, 'a0_env', 'venv')
+    (id_env_boot, acct, host) = _apply_defaults(id_env_boot, acct, host)
 
-    relpath_py        = os.path.join('bin', 'python3')
-    relpath_act       = os.path.join('bin', 'activate')
+    bootenv = da.env.path(process_area = 'a0_env',
+                          id_env       = id_env_boot)
 
-    filepath_py_boot  = os.path.join(rootpath_venv, id_env_boot, relpath_py)
-    filepath_py_env   = os.path.join(rootpath_venv, id_env,      relpath_py)
+    # Local or remote via SSH?
+    #
+    is_remote = (acct is not None) and (host is not None)
+    if is_remote:
+        str_fmt = "{ssh} {acct}@{host} '. {activ} && {py3} -m {mod} {root} {env}'"
+    else:
+        str_fmt = '. {activ} && {py3} -m {mod} {root} {env}'
 
-    filepath_act_boot = os.path.join(rootpath_venv, id_env_boot, relpath_act)
-    filepath_act      = os.path.join(rootpath_venv, id_env,      relpath_act)
-
-    ssh               = 'ssh -X'
-    module_update     = 'da.env.ensure_updated'
-
-    cmd_update_env    = '. {act} && {py3} -m {module} {root} {env}'.format(
-                                            act    = filepath_act_boot,
-                                            py3    = filepath_py_boot,
-                                            module = module_update,
-                                            root   = dirpath_root,
-                                            env    = id_env)
-    cmd_run_module    = '. {act} && {py3} -m {module}'.format(
-                                            act    = filepath_act,
-                                            py3    = filepath_py_env,
-                                            module = module)
-
-    ssh_update_env    = '{ssh} {acct}@{host} "{cmd}"'.format(
-                                            ssh    = ssh,
-                                            acct   = acct,
-                                            host   = host,
-                                            cmd    = cmd_update_env)
-    ssh_run_module    = '{ssh} {acct}@{host} "{cmd}"'.format(
-                                            ssh    = ssh,
-                                            acct   = acct,
-                                            host   = host,
-                                            cmd    = cmd_run_module)
-
-    subprocess.run(ssh_update_env, shell = True, check = True)
-    subprocess.run(ssh_run_module, shell = True, check = True)
+    return _run(str_fmt = str_fmt,
+                ssh     = 'ssh',
+                acct    = acct,
+                host    = host,
+                activ   = os.path.join(bootenv, 'bin/activate'),
+                py3     = os.path.join(bootenv, 'bin/python3'),
+                mod     = 'da.env.ensure_updated',
+                root    = da.env.rootpath(),
+                env     = id_env)
 
 
 # -----------------------------------------------------------------------------
-def stableflow_system(path):
+def _apply_defaults(id_env_boot, acct, host):
     """
-    Run a python module in the specified environment.
+    Apply default values for any missing parameters.
 
     """
-    print('RUN SF SYSTEM')
+    if id_env_boot is None:
+        id_env_boot = 'e000_design_automation_core'
+
+    if acct is not None or host is not None:
+        if acct is None:
+            acct = os.getlogin()
+
+        if host is None:
+            host = 'localhost'
+
+    return (id_env_boot, acct, host)
+
+
+# -----------------------------------------------------------------------------
+def _run(str_fmt, debug_print = False, **kwargs):
+    """
+    Format and run the specified string as a shell script in a subprocess.
+
+    This function exists so we can intercept
+    the command and print it if needed for
+    diagnostic and debugging purposes.
+
+    """
+    str_command = str_fmt.format(**kwargs)
+    if debug_print:
+        print(str_command)
+    try:
+        result = subprocess.run(str_command, shell = True, check = True)
+        return result.returncode
+    except subprocess.CalledProcessError as err:
+        return err.returncode

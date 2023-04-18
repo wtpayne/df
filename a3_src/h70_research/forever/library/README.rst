@@ -4,7 +4,7 @@ Developing the Forever Library
 
 
 Introduction
-=============
+============
 The Forever Library is an Android App that is
 written in Python using the Kivy UI framework.
 

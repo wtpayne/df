@@ -46,6 +46,7 @@ license:
 
 
 import os
+import shutil
 import sys
 
 
@@ -56,12 +57,8 @@ def app():
 
     """
     import da.env.run
-    sys.exit(da.env.run.python_module(
-                            module      = 'forever.library.main',
-                            id_env      = 'e002_general_research',
-                            id_env_boot = 'e000_design_automation_core',
-                            acct        = 'wtp',
-                            host        = 'localhost'))
+    sys.exit(da.env.run.python_module(module = 'forever.library.main',
+                                      id_env = 'e002_general_research'))
 
 
 # -----------------------------------------------------------------------------
@@ -70,15 +67,13 @@ def server_start():
     Start dm004 backend server.
 
     """
-    dirpath_self = os.path.dirname(os.path.realpath(__file__))
-    relpath_root = '../../..'
-    mixpath_root = os.path.join(dirpath_self, relpath_root)
-    dirpath_root = os.path.normpath(mixpath_root)
-    relpath_cfg  = 'a3_src/h70_research/forever/library'
-    filename_cfg = 'forever.stableflow.cfg.yaml'
-    filepath_cfg = os.path.join(dirpath_root, relpath_cfg, filename_cfg)
-    import da.stableflow
-    sys.exit(da.stableflow.start(path_cfg = filepath_cfg))
+    import da.env
+    import da.env.run
+    dirpath_cfg  = da.env.path(process_area = 'a3_src',
+                               control_tier = 'h70_research',
+                               relpath      = 'forever/library')
+    filepath_cfg = os.path.join(dirpath_cfg, 'forever.stableflow.cfg.yaml')
+    sys.exit(da.env.run.stableflow_start(path_cfg = filepath_cfg))
 
 
 # -----------------------------------------------------------------------------
@@ -87,15 +82,13 @@ def server_stop():
     Stop dm004 backend server.
 
     """
-    dirpath_self = os.path.dirname(os.path.realpath(__file__))
-    relpath_root = '../../..'
-    mixpath_root = os.path.join(dirpath_self, relpath_root)
-    dirpath_root = os.path.normpath(mixpath_root)
-    relpath_cfg  = 'a3_src/h70_research/forever/library'
-    filename_cfg = 'forever.stableflow.cfg.yaml'
-    filepath_cfg = os.path.join(dirpath_root, relpath_cfg, filename_cfg)
-    import da.stableflow
-    sys.exit(da.stableflow.stop(path_cfg = filepath_cfg))
+    import da.env
+    import da.env.run
+    dirpath_cfg  = da.env.path(process_area = 'a3_src',
+                               control_tier = 'h70_research',
+                               relpath      = 'forever/library')
+    filepath_cfg = os.path.join(dirpath_cfg, 'forever.stableflow.cfg.yaml')
+    sys.exit(da.env.run.stableflow_stop(path_cfg = filepath_cfg))
 
 
 # -----------------------------------------------------------------------------
@@ -104,32 +97,36 @@ def build_android():
     Build dm004 for Android.
 
     """
-    dirpath_self = os.path.dirname(os.path.realpath(__file__))
-    relpath_root = '../../..'
-    mixpath_root = os.path.join(dirpath_self, relpath_root)
-    dirpath_root = os.path.normpath(mixpath_root)
-    relpath_src  = 'a3_src/h70_research/forever/library'
-    dirpath_src  = os.path.join(dirpath_root, relpath_src)
-    relpath_tmp  = 'a4_tmp/h70_research/forever/library'
-    dirpath_tmp  = os.path.join(dirpath_root, relpath_tmp)
-    
-    # Recursively copy the source design documents
-    # to the temporary build area.
-    #
-    import shutil
-    shutil.copytree(dirpath_src, 
-                    dirpath_tmp,
-                    dirs_exist_ok = True)
+    import da.env
+    import da.env.run
 
+    # Recursively copy the source design
+    # documents to the temporary build
+    # area.
+    #
+    dirpath_src = da.env.path(process_area = 'a3_src',
+                              control_tier = 'h70_research',
+                              relpath      = 'forever/library')
+    dirpath_tmp = da.env.path(process_area = 'a4_tmp',
+                              control_tier = 'h70_research',
+                              relpath      = 'forever/library')
+    shutil.copytree(dirpath_src, dirpath_tmp, dirs_exist_ok = True)
+
+    # Now build from the temporary build area.
+    #
     command = 'cd {dir} && buildozer android debug deploy run'.format(
                                                             dir = dirpath_tmp)
-    import da.env.run
-    sys.exit(da.env.run.shell_command(
-                            command     = command,
-                            id_env      = 'e002_general_research',
-                            id_env_boot = 'e000_design_automation_core',
-                            acct        = 'wtp',
-                            host        = 'localhost'))
+    sys.exit(da.env.run.shell_command(command = command,
+                                      id_env  = 'e002_general_research'))
 
 
+# -----------------------------------------------------------------------------
+def test():
+    """
+    Run dm004 tests.
 
+    """
+    import da.env
+    dirpath = da.env.path(process_area = 'a3_src',
+                          control_tier = 'h70_research')
+    print(dirpath)

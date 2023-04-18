@@ -34,8 +34,8 @@ node:
       py_module:    cl.core.ctrl.sys.ic00_edict
     state_type:     py_dict
     config:
-      frequency_hz: 5
-      idx_max:      1000
+      frequency_hz: 0.5
+      idx_max:      10000
 
   # ---------------------------------------------------------------------------
   # State management for the main process.
@@ -66,6 +66,10 @@ node:
     functionality:
       py_module:    cl.web.server
     state_type:     py_dict
+    config:
+      host:         0.0.0.0
+      port:         8080
+      session_key:  7A8F&+ey789dfgh+32d233shja67s843g1
 
 
 ###############################################################################

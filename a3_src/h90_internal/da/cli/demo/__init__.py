@@ -55,7 +55,7 @@ import os.path
 import click
 
 import da.cli.group
-import da.stableflow
+import da.env.run
 
 
 # -----------------------------------------------------------------------------
@@ -200,7 +200,8 @@ def _add_start_stop_commands_for_stableflow_config(group, filepath, id_demo):
     Add start and stop commands for the specified stableflow config.
 
     """
-    fcn_start = functools.partial(da.stableflow.start, path_cfg = filepath)
+    fcn_start = functools.partial(da.env.run.stableflow_start,
+                                  path_cfg = filepath)
     group.add_command(
         name = 'start',
         cmd  = click.Command(
@@ -208,7 +209,8 @@ def _add_start_stop_commands_for_stableflow_config(group, filepath, id_demo):
                         callback = fcn_start,
                         help     = 'Start {id}.'.format(id = id_demo)))
 
-    fcn_stop = functools.partial(da.stableflow.stop, path_cfg = filepath)
+    fcn_stop = functools.partial(da.env.run.stableflow_stop,
+                                 path_cfg = filepath)
     group.add_command(
         name = 'stop',
         cmd  = click.Command(

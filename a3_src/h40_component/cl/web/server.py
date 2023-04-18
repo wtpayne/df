@@ -626,7 +626,6 @@ def _asgi_server_process(cfg, map_queues):
     ssl_keyfile  = cfg.get('ssl_keyfile',   None)
     ssl_certfile = cfg.get('ssl_certfile',  None)
     log_level    = cfg.get('debug_level',   'warning')
-    debug        = cfg.get('debug',         False)
     has_keyfile  = ssl_keyfile  is not None
     has_certfile = ssl_certfile is not None
     has_https    = has_keyfile and has_certfile
@@ -637,12 +636,10 @@ def _asgi_server_process(cfg, map_queues):
                              port         = port,
                              ssl_keyfile  = ssl_keyfile,
                              ssl_certfile = ssl_certfile,
-                             log_level    = log_level,
-                             debug        = debug)
+                             log_level    = log_level)
         else:
             uvicorn.run(app, host         = host,
                              port         = port,
-                             log_level    = log_level,
-                             debug        = debug)
+                             log_level    = log_level)
     except Exception as err:
         raise

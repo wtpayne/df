@@ -49,7 +49,7 @@ license:
 import os
 import sys
 
-import da.env
+import da.env.run
 
 
 # -----------------------------------------------------------------------------
@@ -66,8 +66,8 @@ def main():
     tup_overrides      = (
         'node.simulator.config.filepath_quadrotor', filepath_quadrotor)
 
-    da.stableflow.start(path_cfg      = filepath_cfg,
-                        tup_overrides = tup_overrides)
+    da.env.run.stableflow_start(path_cfg      = filepath_cfg,
+                                tup_overrides = tup_overrides)
 
 
 # -----------------------------------------------------------------------------
