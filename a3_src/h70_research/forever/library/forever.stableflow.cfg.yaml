@@ -50,12 +50,32 @@ node:
   # ---------------------------------------------------------------------------
   # Narrative engine.
   #
-  narrative_engine:
+  engine:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
       py_module:    forever.narrative.engine
     state_type:     py_dict
+
+  # ---------------------------------------------------------------------------
+  # OpenAI client.
+  #
+  client:
+    process:         proc_main
+    req_host_cfg:    default_configuration
+    functionality:
+      py_module:     agent.openai.ic00_edict
+    state_type:      py_dict
+    config:
+      filepath_env:  Null
+      envvar_key:    OPENAI_API_KEY
+      secs_interval: 5
+      default:
+        engine:       'text-davinci-002'
+        max_tokens:   100
+        n:            1
+        stop:         Null
+        temperature:  0.5
 
   # ---------------------------------------------------------------------------
   # Resource server.
@@ -90,12 +110,24 @@ edge:
 - owner: main_process_controller
   data:  py_dict
   src:   main_process_controller.outputs.control_filesystem_watcher
-  dst:   narrative_engine.inputs.control
+  dst:   engine.inputs.control
 
-- owner: narrative_engine
+- owner: engine
   data:  py_dict
-  src:   narrative_engine.outputs.res
-  dst:   resource_server.inputs.res
+  src:   engine.outputs.prompt
+  dst:   client.inputs.prompt
+
+- owner: client
+  data:  py_dict
+  src:   client.outputs.response
+  dst:   engine.inputs.response
+  dirn:  feedback
+
+- owner: engine
+  data:  py_dict
+  src:   engine.outputs.resource
+  dst:   resource_server.inputs.resource
+
 
 ###############################################################################
 data:

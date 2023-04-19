@@ -3,10 +3,10 @@
 ---
 
 title:
-    "Placeholder no-op stableflow-edict component."
+    "Discord integration stableflow-edict component."
 
 description:
-    "Placeholder no-op component. Does nothing"
+    "Discord integration"
 
 id:
     "8747de1c-76ac-4f63-a88d-f67a60515571"

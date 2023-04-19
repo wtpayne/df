@@ -44,16 +44,12 @@ license:
 """
 
 
-import cl.web.util
-
-
 # -----------------------------------------------------------------------------
 def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     """
     Narrative engine coroutine
 
     """
-
     # Initialize outputs.
     #
     signal = None
@@ -62,13 +58,21 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         outputs[id_out]['ts']   = dict()
         outputs[id_out]['list'] = list()
 
-    map_res = cl.web.util.ResMap()
+    item_request = dict(uid    = 'ABCDEF',
+                        prompt = "Please give me some lorem ipsum.")
+
+    list_item_request = list()
+    list_item_request.append(item_request)
 
     # Loop forever
     #
     while True:
 
         inputs = yield (outputs, signal)
+
+        if inputs['response']['ena']:
+            import pprint
+            pprint.pprint(inputs['response'])
 
         # Reset outputs.
         #
@@ -77,10 +81,8 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
             outputs[id_out]['ts'].clear()
             outputs[id_out]['list'].clear()
 
-        map_res.json(
-            story = '{"story": "Once upon a time, A narrative engine said Hello World"}')
-
-        for id_out in outputs.keys():
-            outputs[id_out]['ena']     = True
-            outputs[id_out]['list'][:] = [dict(map_res)]
-
+        # Output stuff.
+        #
+        if list_item_request:
+            outputs['prompt']['ena']     = True
+            outputs['prompt']['list'][:] = [list_item_request.pop()]

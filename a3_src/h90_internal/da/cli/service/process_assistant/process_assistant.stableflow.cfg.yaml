@@ -314,9 +314,9 @@ node:
       py_module:    cl.integration.discord.ic00_edict
     state_type:     py_dict
     config:
-      filepath_env:  Null
-      envvar_token:  TOKEN_DISCORD_PROCESS_ASSISTANT
-      secs_interval: 5
+      filepath_env:   Null
+      envvar_token:   TOKEN_DISCORD_PROCESS_ASSISTANT
+      secs_interval:  5
 
 
 ###############################################################################

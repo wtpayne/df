@@ -67,8 +67,13 @@ def server_start():
     Start dm004 backend server.
 
     """
+    tup_overrides = ('host.localhost.dirpath_log',      _dirpath_log_server(),
+                     'node.client.config.filepath_env', _filepath_dotenv())
+
     import da.env.run
-    sys.exit(da.env.run.stableflow_start(path_cfg = _filepath_cfg_server()))
+    sys.exit(da.env.run.stableflow_start(
+                                    path_cfg      = _filepath_cfg_server(),
+                                    tup_overrides = tup_overrides))
 
 
 # -----------------------------------------------------------------------------
@@ -79,6 +84,31 @@ def server_stop():
     """
     import da.env.run
     sys.exit(da.env.run.stableflow_stop(path_cfg = _filepath_cfg_server()))
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_log_server():
+    """
+    Return the directory path to the logging directory for this system.
+
+    """
+    import da.env
+    return da.env.path(process_area = 'a4_tmp',
+                       control_tier = 'h70_research',
+                       relpath      = 'forever/library')
+
+
+# -----------------------------------------------------------------------------
+def _filepath_dotenv():
+    """
+    Return the filepath to the dotenv .env file containing the API key.
+
+    """
+    import da.env
+    return da.env.path(
+                process_area = 'a3_src',
+                control_tier = 'h10_resource',
+                relpath      = 'keys/openai.env')
 
 
 # -----------------------------------------------------------------------------
