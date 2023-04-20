@@ -64,7 +64,7 @@ node:
     process:         proc_main
     req_host_cfg:    default_configuration
     functionality:
-      py_module:     agent.openai.ic00_edict
+      py_module:     cl.net.openai.ic00_edict
     state_type:      py_dict
     config:
       filepath_env:  Null
@@ -119,8 +119,8 @@ edge:
 
 - owner: client
   data:  py_dict
-  src:   client.outputs.response
-  dst:   engine.inputs.response
+  src:   client.outputs.result
+  dst:   engine.inputs.result
   dirn:  feedback
 
 - owner: engine

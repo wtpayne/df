@@ -48,7 +48,7 @@ import datetime
 import signal
 import time
 
-import stableflow.signal
+import pl.stableflow.signal
 
 
 # -----------------------------------------------------------------------------
@@ -141,4 +141,4 @@ def step(inputs, state, outputs):
         outputs[key_ctrl_out].update(inputs['control'])
 
     if inputs['control']['do_halt']:
-        return (stableflow.signal.exit_ok_controlled,)
+        return (pl.stableflow.signal.exit_ok_controlled,)

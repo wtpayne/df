@@ -70,28 +70,28 @@ def stableflow_start(path_cfg, tup_overrides = None):
     Run a python module in the specified environment.
 
     """
-    import stableflow.cfg
-    import stableflow.cfg.exception
-    import stableflow.log
-    import stableflow.sys
+    import pl.stableflow.cfg
+    import pl.stableflow.cfg.exception
+    import pl.stableflow.log
+    import pl.stableflow.sys
 
-    with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
+    with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
 
         try:
 
-            cfg = stableflow.cfg.prepare(
+            cfg = pl.stableflow.cfg.prepare(
                                     path_cfg      = path_cfg,
                                     tup_overrides = tup_overrides)
             _update_all_environments(cfg)
             _configure_all_launch_commands(cfg)
 
-        except stableflow.cfg.exception.CfgError as err:
+        except pl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             return 1
 
         else:
             try:
-                return stableflow.sys.start(cfg)
+                return pl.stableflow.sys.start(cfg)
             except Exception as err:
                 # An exception will be thrown
                 # when we need to display either
@@ -110,25 +110,25 @@ def stableflow_stop(path_cfg):
     Run a python module in the specified environment.
 
     """
-    import stableflow.cfg
-    import stableflow.cfg.exception
-    import stableflow.log
-    import stableflow.sys
+    import pl.stableflow.cfg
+    import pl.stableflow.cfg.exception
+    import pl.stableflow.log
+    import pl.stableflow.sys
 
-    with stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
+    with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
 
         try:
 
-            cfg = stableflow.cfg.prepare(path_cfg = path_cfg)
+            cfg = pl.stableflow.cfg.prepare(path_cfg = path_cfg)
             _configure_all_launch_commands(cfg)
 
-        except stableflow.cfg.exception.CfgError as err:
+        except pl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             return 1
 
         else:
             try:
-                return stableflow.sys.stop(cfg)
+                return pl.stableflow.sys.stop(cfg)
             except Exception as err:
                 # An exception will be thrown
                 # when we need to display either
@@ -169,7 +169,7 @@ def _configure_all_launch_commands(cfg):
                             python = da.env.path(process_area = 'a0_env',
                                                  id_env       = id_env,
                                                  relpath      = 'bin/python3'),
-                            module = 'stableflow.cli.command')
+                            module = 'pl.stableflow.cli.command')
         cfg_host['launch_cmd'] = cmd
 
 

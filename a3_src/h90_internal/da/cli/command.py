@@ -64,7 +64,7 @@ import click
 import da.cli.demo
 import da.cli.env
 import da.cli.group
-import stableflow.cli.command
+import pl.stableflow.cli.command
 
 
 # -----------------------------------------------------------------------------
@@ -229,8 +229,8 @@ def grp_demo():
 
 
 # -----------------------------------------------------------------------------
-stableflow.cli.command.grp_main.help = 'Stableflow system control.'
-grp_main.add_command(stableflow.cli.command.grp_main, name = 'stableflow')
+pl.stableflow.cli.command.grp_main.help = 'Stableflow system control.'
+grp_main.add_command(pl.stableflow.cli.command.grp_main, name = 'stableflow')
 
 da.cli.env.add_env_tools(grp_parent = grp_env)
 da.cli.demo.add_demos(grp_parent = grp_demo)

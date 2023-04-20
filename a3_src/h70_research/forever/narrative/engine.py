@@ -70,9 +70,9 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
         inputs = yield (outputs, signal)
 
-        if inputs['response']['ena']:
+        if inputs['result']['ena']:
             import pprint
-            pprint.pprint(inputs['response'])
+            pprint.pprint(inputs['result'])
 
         # Reset outputs.
         #
@@ -86,3 +86,9 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         if list_item_request:
             outputs['prompt']['ena']     = True
             outputs['prompt']['list'][:] = [list_item_request.pop()]
+
+
+# -----------------------------------------------------------------------------
+def make_prompt():
+    """
+    """
