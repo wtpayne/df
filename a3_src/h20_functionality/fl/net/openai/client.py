@@ -3,11 +3,72 @@
 ---
 
 title:
-    "OpenAI client module."
+    "OpenAI API support module."
 
 description:
-    "This module contains functionality for
-    interacting with the OpenAI web API."
+    "This Python module is designed to interact
+    with the OpenAI API using a separate process
+    for handling requests and responses. It uses
+    the multiprocessing and queue libraries to
+    manage inter-process communication, and the
+    openai library to interact with the OpenAI
+    API. The module defines three main functions:
+    coro, _daemon, and _process_request.
+
+    coro(cfg_client) is a coroutine function that
+    acts as a bridge between the main process and
+    the separate process running the OpenAI API
+    client. It takes a configuration dictionary
+    as input, initializes multiprocessing queues
+    for requests, results, and errors, and starts
+    the daemon process. It then enters a loop,
+    yielding results and errors to the calling
+    context while accepting new requests and
+    sending them to the daemon process.
+
+    _daemon(cfg) is the main function running in
+    the separate process. It takes a configuration
+    dictionary as input and services the request
+    queue by forwarding requests to the OpenAI
+    API. It processes each request, enqueues
+    results and errors onto their respective
+    queues, and sleeps for a specified interval
+    if no request is available.
+
+    _process_request(request, default) is a
+    helper function that processes a single
+    request, returning a dictionary with the
+    original request, response, and error
+    information. It first builds a dictionary
+    of keyword arguments for the OpenAI API call,
+    using default values for any unspecified
+    parameters. It then calls the OpenAI API
+    with the constructed keyword arguments,
+    catches any errors, and returns the result
+    dictionary containing the original request,
+    the API response, and any error encountered."
+
+    Here is an example of a result data structure:
+
+    {'error':       None,
+     'request':     {'engine':      '<OPENAI_MODEL_ID>',
+                     'max_tokens':  100,
+                     'n':           1,
+                     'prompt':      '<PROMPT_TEXT>.',
+                     'stop':        None,
+                     'temperature': 0.5},
+     'response':    {'choices':     [{'finish_reason':  'stop',
+                                      'index':          0,
+                                      'logprobs':       None,
+                                      'text':           '<RESPONSE_TEXT>'}],
+                     'created':    1682122855,
+                     'id':         'cmpl-77vHj30k0S1k8pqz2lHUueiQDMSZj',
+                     'model':      '<OPENAI_MODEL_ID>',
+                     'object':     'text_completion',
+                     'usage':      {'completion_tokens':   57,
+                                    'prompt_tokens':       9,
+                                    'total_tokens':        66}}}
+
 
 id:
     "555345dc-41c5-4810-a4fc-7ccbcde432af"
@@ -56,7 +117,7 @@ import fl.util
 
 # -----------------------------------------------------------------------------
 @fl.util.coroutine
-def coro(cfg_client):
+def coro(cfg):
     """
     Yield results for requests sent to the OpenAI web API.
 
@@ -67,15 +128,24 @@ def coro(cfg_client):
 
     """
 
+    assert 'api_key'       in cfg
+    assert 'secs_interval' in cfg
+    assert 'default'       in cfg
+    assert 'engine'        in cfg['default']
+    assert 'max_tokens'    in cfg['default']
+    assert 'n'             in cfg['default']
+    assert 'stop'          in cfg['default']
+    assert 'temperature'   in cfg['default']
+
     # Configure queues and start the
     # client in a separate process.
     #
-    cfg_client['queue_request'] = multiprocessing.Queue()  # coro   --> daemon
-    cfg_client['queue_result']  = multiprocessing.Queue()  # daemon --> coro
-    cfg_client['queue_error']   = multiprocessing.Queue()  # daemon --> coro
+    cfg['queue_request'] = multiprocessing.Queue()  # coro   --> daemon
+    cfg['queue_result']  = multiprocessing.Queue()  # daemon --> coro
+    cfg['queue_error']   = multiprocessing.Queue()  # daemon --> coro
 
     daemon = multiprocessing.Process(target = _daemon,
-                                     args   = (cfg_client,),
+                                     args   = (cfg,),
                                      name   = 'openai-client',
                                      daemon = True)
     daemon.start()
@@ -105,7 +175,7 @@ def coro(cfg_client):
         #
         for item_request in list_item_request:
             try:
-                cfg_client['queue_request'].put(item_request, block = False)
+                cfg['queue_request'].put(item_request, block = False)
             except queue.Full as err:
                 list_item_error.append(err)
 
@@ -114,15 +184,14 @@ def coro(cfg_client):
         #
         while True:
             try:
-                list_item_result.append(cfg_client['queue_result'].get(
-                                                                block = False))
+                result = cfg['queue_result'].get(block = False)
+                list_item_result.append(result)
             except queue.Empty:
                 break
 
         while True:
             try:
-                list_item_error.append(cfg_client['queue_error'].get(
-                                                                block = False))
+                list_item_error.append(cfg['queue_error'].get(block = False))
             except queue.Empty:
                 break
 
@@ -159,12 +228,12 @@ def _daemon(cfg):
         result = _process_request(request, default = cfg['default'])
 
         if result['error'] is not None:
-            cfg['queue_error'].put(result['error'])
+            cfg['queue_error'].put(result['error'], block = False)
 
         try:
             cfg['queue_result'].put(result, block = False)
         except queue.Full as error:
-            cfg['queue_error'].put(error)
+            cfg['queue_error'].put(error, block = False)
 
 
 # -----------------------------------------------------------------------------
@@ -210,10 +279,8 @@ def _process_request(request, default):
                   error    = None)
 
     try:
-
         result['response'] = openai.Completion.create(**kwargs)
-
-    except openai.OpenAIError as ex:
-        result['error'] = ex.user_message
+    except openai.OpenAIError as err:
+        result['error'] = err.user_message
 
     return result

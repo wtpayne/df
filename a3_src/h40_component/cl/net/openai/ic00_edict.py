@@ -55,13 +55,33 @@ import fl.net.openai.client
 # -----------------------------------------------------------------------------
 def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     """
-    OpenAI agent coroutine
+    OpenAI agent coroutine.
 
     """
 
-    # loading secrets
-    # from a .env file in the configured
-    # location.
+    # Initialize 'database' of prompt templates.
+    #
+    # Prompt templates are persisted
+    # in memory so they don't need to
+    # be provided anew at each time step.
+    #
+    # It is envisaged that the templates
+    # will be updated from time to time
+    # as part of a continuous improvement
+    # process.
+    #
+    # We also keep a per-template token
+    # budget, and a per-template record
+    # of how many tokens have been spent
+    # on that template as well.
+    #
+    map_map_template = dict()  # id_prompt -> dict with template & metadata.
+    map_budget       = dict()  # id_prompt -> spend
+    map_spend        = dict()  # id_prompt -> budget
+
+    # Initialize the OpenAI client coroutine
+    # using an API key loaded from a .env
+    # file in configured location.
     #
     dotenv.load_dotenv(dotenv_path = cfg['filepath_env'],
                        verbose     = True,
@@ -71,8 +91,7 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     cfg_client['api_key']        = os.environ[cfg['envvar_key']]
     cfg_client['secs_interval']  = cfg.get('secs_interval', 5)
     cfg_client['default']        = cfg['default']
-
-    client = fl.net.openai.client.coro(cfg_client)
+    client = fl.net.openai.client.coro(cfg = cfg_client)
 
     # Initialize outputs.
     #
@@ -93,24 +112,93 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
             outputs[id_out]['ts'].clear()
             outputs[id_out]['list'].clear()
 
-        # Get stuff
+        # Update map_map_template with new
+        # and updated templates. Any old
+        # templates with the same id_prompt
+        # get overwritten.
         #
-        map_ts            = dict()
-        list_item_error   = list()
-        list_item_request = list()
-        for (id_in, packet_in) in inputs.items():
-            if packet_in['ena']:
-                map_ts = packet_in['ts']
-                list_item_request.extend(packet_in['list'])
+        map_ts = dict()
+        if inputs['template']['ena']:
+            map_ts = inputs['template']['ts']
+            for map_map_tmpl_in in inputs['template']['list']:
+                for (id_prompt, map_tmpl) in map_map_tmpl_in.items():
+                    map_map_template[id_prompt] = map_tmpl
 
-        (list_item_result, list_item_error) = client.send(list_item_request)
+        # Add a spend record if none exists.
+        #
+        # TODO: Think about breaking down spend
+        #       by template version, so we can
+        #       track efficiency as templates
+        #       change.
+        #
+        for id_prompt in map_map_template.keys():
+            if id_prompt not in map_spend:
+                map_spend[id_prompt] = 0
 
-        if list_item_result and ('result' in outputs):
+        # Apply parameters to prompt templates
+        # to get prompts. Prompts are packaged
+        # up alongside metadata in a 'request'
+        # structure.
+        #
+        list_request = list()
+        if inputs['param']['ena']:
+            map_ts = inputs['param']['ts']
+            for map_map_param in inputs['param']['list']:
+                for id_prompt in map_map_param.keys():
+                    if id_prompt not in map_map_template:
+                        continue
+
+                    # TODO: Check budget against spend and
+                    #       discard the request if we've gone
+                    #       over budget either for the template
+                    #       or overall.
+                    #
+                    #       We also need a way of setting
+                    #       and renewing the budget.
+                    #
+                    list_request.append(
+                        _build_map_request(
+                                    id_prompt    = id_prompt,
+                                    map_template = map_map_template[id_prompt],
+                                    map_param    = map_map_param[id_prompt]))
+
+        # Send the request to the OpenAI API.
+        #
+        (list_result, list_error) = client.send(list_request)
+
+        # Update the spend record.
+        #
+        for result in list_result:
+            id_prompt   = result['request']['id_prompt']
+            tokens_used = result['response']['usage']['total_tokens']
+            map_spend[id_prompt] += tokens_used
+
+        # Update outputs.
+        #
+        if ('result' in outputs) and list_result:
             outputs['result']['ena'] = True
             outputs['result']['ts'].update(map_ts)
-            outputs['result']['list'][:] = list_item_result
-
-        if list_item_error and ('error' in outputs):
+            outputs['result']['list'][:] = list_result
+        if ('error' in outputs) and list_error:
             outputs['error']['ena'] = True
             outputs['error']['ts'].update(map_ts)
-            outputs['error']['list'][:] = list_item_error
+            outputs['error']['list'][:] = list_error
+
+
+# -----------------------------------------------------------------------------
+def _build_map_request(id_prompt, map_template, map_param):
+    """
+    Return a map_request dict.
+
+    """
+    map_request = {
+        '_id_prompt':  id_prompt,
+        '_template':   map_template,
+        '_param':      map_param,
+        'prompt':      map_template['template'].format(**map_param)
+    }
+
+    if '_options' in map_param:
+        map_request.update(**map_param['_options'])
+
+    return map_request

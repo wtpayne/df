@@ -58,11 +58,30 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         outputs[id_out]['ts']   = dict()
         outputs[id_out]['list'] = list()
 
-    item_request = dict(uid    = 'ABCDEF',
-                        prompt = "Please give me some lorem ipsum.")
 
-    list_item_request = list()
-    list_item_request.append(item_request)
+    id_prompt = 'test_prompt'
+
+    list_template = list()
+    list_param = list()
+
+    def _add_param(id_prompt, **kwargs):
+        list_param.append({id_prompt: kwargs})
+
+
+    def _add_template(id_prompt, str_template):
+        list_template.append({id_prompt: {'guid':      'test_guid_string',
+                                          'version':   'test_version_string',
+                                          'template':  str_template}})
+
+
+    _add_template(id_prompt    = id_prompt,
+                  str_template = 'Please tell me some facts about {topic}.')
+
+    _add_param(id_prompt = id_prompt,
+               topic     = 'Cars',
+               _options  = { 'engine': 'text-curie-001' })
+    _add_param(id_prompt = id_prompt, topic = 'Lorries')
+
 
     # Loop forever
     #
@@ -71,8 +90,10 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         inputs = yield (outputs, signal)
 
         if inputs['result']['ena']:
+            print('#' * 80)
             import pprint
             pprint.pprint(inputs['result'])
+            print('#' * 80)
 
         # Reset outputs.
         #
@@ -83,12 +104,13 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
         # Output stuff.
         #
-        if list_item_request:
-            outputs['prompt']['ena']     = True
-            outputs['prompt']['list'][:] = [list_item_request.pop()]
+        if list_template:
+            outputs['template']['ena']     = True
+            outputs['template']['list'][:] = [list_template.pop()]
+
+        if list_param:
+            outputs['param']['ena']     = True
+            outputs['param']['list'][:] = [list_param.pop()]
 
 
-# -----------------------------------------------------------------------------
-def make_prompt():
-    """
-    """
+

@@ -34,8 +34,8 @@ node:
       py_module:    cl.core.ctrl.sys.ic00_edict
     state_type:     py_dict
     config:
-      frequency_hz: 0.5
-      idx_max:      10000
+      frequency_hz: 100
+      idx_max:      1000000
 
   # ---------------------------------------------------------------------------
   # State management for the main process.
@@ -69,9 +69,9 @@ node:
     config:
       filepath_env:  Null
       envvar_key:    OPENAI_API_KEY
-      secs_interval: 5
+      secs_interval: 0.1
       default:
-        engine:       'text-davinci-002'
+        engine:       'text-babbage-001'
         max_tokens:   100
         n:            1
         stop:         Null
@@ -114,13 +114,24 @@ edge:
 
 - owner: engine
   data:  py_dict
-  src:   engine.outputs.prompt
-  dst:   client.inputs.prompt
+  src:   engine.outputs.template
+  dst:   client.inputs.template
+
+- owner: engine
+  data:  py_dict
+  src:   engine.outputs.param
+  dst:   client.inputs.param
 
 - owner: client
   data:  py_dict
   src:   client.outputs.result
   dst:   engine.inputs.result
+  dirn:  feedback
+
+- owner: client
+  data:  py_dict
+  src:   client.outputs.error
+  dst:   engine.inputs.error
   dirn:  feedback
 
 - owner: engine
