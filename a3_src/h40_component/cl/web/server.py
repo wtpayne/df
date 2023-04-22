@@ -131,7 +131,8 @@ def step(inputs, state, outputs):
     list_map_request = list()
     while True:
         try:
-            list_map_request.append(state['queue_requests'].get(block = False))
+            request = state['queue_requests'].get(block = False)
+            list_map_request.append(request)
         except queue.Empty:
             break
 
@@ -140,7 +141,6 @@ def step(inputs, state, outputs):
             outputs[id_out]['ena'] = True
             outputs[id_out]['ts']  = map_ts
             outputs[id_out]['list'].extend(list_map_request)
-
 
 # -----------------------------------------------------------------------------
 def finalize(runtime, config, inputs, state, outputs):

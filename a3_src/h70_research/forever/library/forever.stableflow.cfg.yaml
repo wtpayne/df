@@ -34,8 +34,8 @@ node:
       py_module:    cl.core.ctrl.sys.ic00_edict
     state_type:     py_dict
     config:
-      frequency_hz: 100
-      idx_max:      1000000
+      frequency_hz: 0.5
+      idx_max:      1000
 
   # ---------------------------------------------------------------------------
   # State management for the main process.
@@ -48,7 +48,17 @@ node:
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
-  # Narrative engine.
+  # Parameter generator.
+  #
+  genparams:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    forever.narrative.parameter_generator
+    state_type:     py_dict
+
+  # ---------------------------------------------------------------------------
+  # Workflow engine.
   #
   engine:
     process:        proc_main
@@ -91,6 +101,16 @@ node:
       port:         8080
       session_key:  7A8F&+ey789dfgh+32d233shja67s843g1
 
+  # ---------------------------------------------------------------------------
+  # Server debug print.
+  #
+  server_debug_print:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    forever.narrative.server_debug_print
+    state_type:     py_dict
+
 
 ###############################################################################
 edge:
@@ -110,7 +130,12 @@ edge:
 - owner: main_process_controller
   data:  py_dict
   src:   main_process_controller.outputs.control_filesystem_watcher
-  dst:   engine.inputs.control
+  dst:   genparams.inputs.control
+
+- owner: genparams
+  data:  py_dict
+  src:   genparams.outputs.param
+  dst:   engine.inputs.param
 
 - owner: engine
   data:  py_dict
@@ -138,6 +163,11 @@ edge:
   data:  py_dict
   src:   engine.outputs.resource
   dst:   resource_server.inputs.resource
+
+- owner: resource_server
+  data:  py_dict
+  src:   resource_server.outputs.request
+  dst:   server_debug_print.inputs.request
 
 
 ###############################################################################

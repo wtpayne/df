@@ -61,7 +61,7 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     # This will generate new prompts
     #
     cfg_engine = dict()
-    engine     = fl.net.openai.workflow.engine(cfg = cfg_engine)
+    engine     = fl.net.openai.workflow.Engine(cfg = cfg_engine)
 
     # Initialize outputs.
     #

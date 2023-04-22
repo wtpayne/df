@@ -12,3 +12,7 @@ register:
   z0001_atlas:
     name: "atlas"
     desc: "Midi tower workstation with NVIDIA RTX2080Ti GPU."
+
+  z0002_golem:
+    name: "golem"
+    desc: "ASUS ROG G703GX laptop with NVIDIA RTX2080 GPU."
