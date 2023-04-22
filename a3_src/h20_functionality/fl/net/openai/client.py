@@ -46,7 +46,7 @@ description:
     with the constructed keyword arguments,
     catches any errors, and returns the result
     dictionary containing the original request,
-    the API response, and any error encountered."
+    the API response, and any error encountered.
 
     Here is an example of a result data structure:
 
@@ -67,7 +67,7 @@ description:
                      'object':     'text_completion',
                      'usage':      {'completion_tokens':   57,
                                     'prompt_tokens':       9,
-                                    'total_tokens':        66}}}
+                                    'total_tokens':        66}}}"
 
 
 id:
@@ -158,6 +158,8 @@ def coro(cfg):
     list_item_result = list()
     list_item_error  = list()
 
+    # Loop forever
+    #
     while True:
 
         # At each step, yield results

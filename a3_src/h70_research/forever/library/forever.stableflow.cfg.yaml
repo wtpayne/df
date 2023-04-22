@@ -54,7 +54,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    forever.narrative.engine
+      py_module:    cl.net.openai.workflow.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -64,7 +64,7 @@ node:
     process:         proc_main
     req_host_cfg:    default_configuration
     functionality:
-      py_module:     cl.net.openai.ic00_edict
+      py_module:     cl.net.openai.client.ic00_edict
     state_type:      py_dict
     config:
       filepath_env:  Null
