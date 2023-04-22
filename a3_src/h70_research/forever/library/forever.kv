@@ -21,3 +21,92 @@
                 text: ">"
                 font_size: "20sp"
                 on_press: root.next_paragraph()
+<ConfigScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+
+        Label:
+            text: 'Configure your preferences'
+            font_size: 30
+            color: 0.5, 0.5, 0.5, 1
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: 30
+            
+            Label:
+                text: 'Theme'
+                
+            Spinner:
+                id: theme_spinner
+                text: 'Select Theme'
+                values: root.theme_values
+        
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: 30
+            
+            Label:
+                text: 'Style'
+                
+            Spinner:
+                id: style_spinner
+                text: 'Select Style'
+                values: root.style_values
+        
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: 30
+            
+            Label:
+                text: 'Inspiration'
+                
+            Spinner:
+                id: inspiration_spinner
+                text: 'Select Inspiration'
+                values: root.inspiration_values
+                
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: 30
+            
+            Label:
+                text: 'Teaching'
+                
+            Spinner:
+                id: teaching_spinner
+                text: 'Select Teaching'
+                values: root.teaching_values
+        
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: 30
+            
+            Label:
+                text: 'Age'
+                
+            Spinner:
+                id: age_spinner
+                text: 'Select Age'
+                values: root.age_values
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: 30
+            
+            Label:
+                text: 'Text Input'
+                
+            TextInput:
+                id: text_input
+        Button:          
+            text: 'Submit'
+            size_hint_y: None
+            height: 30
+            on_press: root.submit()
