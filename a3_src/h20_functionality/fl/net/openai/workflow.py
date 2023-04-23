@@ -152,12 +152,26 @@ template_paragraph = textwrap.dedent("""
     ## Scene {scene_number}:
     """)
 
+template_rewrite = textwrap.dedent("""
+    You are an editor. As an editor, you edit draft scripts to convert them to final drafts.
+    Characters: {characters}
+    Story Outline: {outline}
+    The theme is {theme}, in the style of a {style} story, inspired by {inspiration}.
+    The story is meant to teach the kid about {teaching}
+    Pretend you are reading it to a {age}-year-old kid.
+    Story: {story} End of Story
+    Make sure to add connecting sentences between scenes, and create a flowing story.
+    Keep a balance between dialog, descriptions, and narration in the final draft.
+    Keep chapter titles in your story.
+    Proceed with the rewrite of the story.
+    The story should be at least {len(story)} words long.
+    """)
 
 list_template_default = [{
         'characters': {'template': template_characters},
         'outline':    {'template': template_outline},
-        'paragraph':  {'template': template_paragraph}}]
-
+        'paragraph':  {'template': template_paragraph},
+        'rewrite':    {'template': template_rewrite}}]
 
 import fl.util
 
@@ -217,10 +231,10 @@ def _get_params(result):
     if id_prompt == 'outline':
         story_outline = result['response']['choices'][0]['text']
 
+        queue_param = list()
         for (chapter_title, subchapter_list) in story_outline.items():
             for (scene_number, subchapter_title) in enumerate(subchapter_list):
-
-                queue_param = list()
+                queue_param.append()
 
 
             # chapter_text = generate_paragraph(
@@ -241,23 +255,6 @@ def _get_params(result):
 
 
     return chapters, story_characters, story_outline
-
-
-def rewrite_story(outline, story, characters, theme, style, inspiration, teaching, age):
-    prompt = f"You are an editor. As an editor, you edit draft scripts to convert them to final drafts.\
-    \nCharacters: {characters}\
-    \nStory Outline: {outline}\
-    \nThe theme is {theme}, in the style of a {style} story, inspired by {inspiration}.\
-    \nThe story is meant to teach the kid about {teaching}\
-    \nPretend you are reading it to a {age}-year-old kid. \
-    \n\nStory: {story}\n End of S
-
-    if id_prompt == 'paragraph':
-    #     pass
-
-    return param
-
-
 
 
 
