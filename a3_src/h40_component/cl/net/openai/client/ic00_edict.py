@@ -145,19 +145,6 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
             map_ts = inputs['param']['ts']
             for map_map_param in inputs['param']['list']:
 
-                print('')
-                print('+' * 80)
-                print('')
-                import pprint
-                pprint.pprint(map_map_param)
-                print('')
-                print('-' * 80)
-                print('')
-                pprint.pprint(map_map_template)
-                print('')
-                print('+' * 80)
-                print('')
-
                 for id_prompt in map_map_param.keys():
                     if id_prompt not in map_map_template:
                         continue
@@ -182,10 +169,10 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
         # Update the spend record.
         #
-        for result in list_result:
-            id_prompt   = result['request']['_id_prompt']
-            tokens_used = result['response']['usage']['total_tokens']
-            map_spend[id_prompt] += tokens_used
+        # for result in list_result:
+        #     id_prompt   = result['request']['_id_prompt']
+        #     tokens_used = result['response']['usage']['total_tokens']
+        #     map_spend[id_prompt] += tokens_used
 
         # Update outputs.
         #
@@ -209,8 +196,9 @@ def _build_map_request(id_prompt, map_template, map_param):
         '_id_prompt':  id_prompt,
         '_template':   map_template,
         '_param':      map_param,
-        'prompt':      map_template['template'].format(**map_param)
-    }
+        'messages':    [{
+                'role':     'system',
+                'content':  map_template['template'].format(**map_param)}]}
 
     if '_options' in map_param:
         map_request.update(**map_param['_options'])

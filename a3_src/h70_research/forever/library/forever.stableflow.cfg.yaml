@@ -81,11 +81,13 @@ node:
       envvar_key:    OPENAI_API_KEY
       secs_interval: 0.1
       default:
-        engine:       'text-babbage-001'
-        max_tokens:   100
-        n:            1
-        stop:         Null
-        temperature:  0.5
+        model:             'gpt-3.5-turbo'
+        temperature:       1
+        n:                 1
+        stream:            False
+        presence_penalty:  0
+        frequency_penalty: 0
+        user:              ''
 
   # ---------------------------------------------------------------------------
   # Resource server.

@@ -46,8 +46,8 @@ license:
 """
 
 import copy
-import pprint
 import textwrap
+import json
 
 
 # Load initial prompt templates.
@@ -253,9 +253,18 @@ def _get_next_outputs(result):
 
     ### CHARACTERS ###
     if id_prompt == 'characters':
+
+        print('')
+        print('CHARACTERS')
+        import pprint
+        pprint.pprint(result['response'])
+        print('')
+
         story_characters          = result['response']['choices'][0]['text']
         param                     = result['request']['_param']
         param['story_characters'] = story_characters
+
+
         return ({'outline': param}, None)
 
     ### OUTLINE ###
@@ -264,7 +273,13 @@ def _get_next_outputs(result):
         param              = result['request']['_param']
         list_chapter_param = list()
 
-        for (chapter_title, subchapter_list) in story_outline.items():
+        try:
+            map_story_outline = json.loads(story_outline)
+        except json.JSONDecodeError:
+            print("JSONDecodeError - Retry generation.")
+            return ({'outline': param}, None)
+
+        for (chapter_title, subchapter_list) in map_story_outline.items():
             for (scene_number, subchapter_title) in enumerate(subchapter_list):
                 param['story_outline']    = story_outline
                 param['chapter_title']    = chapter_title

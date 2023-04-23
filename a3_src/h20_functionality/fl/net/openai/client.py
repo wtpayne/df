@@ -127,15 +127,17 @@ def coro(cfg):
     followed by a list of errors encountered.
 
     """
-
-    assert 'api_key'       in cfg
-    assert 'secs_interval' in cfg
-    assert 'default'       in cfg
-    assert 'engine'        in cfg['default']
-    assert 'max_tokens'    in cfg['default']
-    assert 'n'             in cfg['default']
-    assert 'stop'          in cfg['default']
-    assert 'temperature'   in cfg['default']
+    assert 'api_key'           in cfg
+    assert 'secs_interval'     in cfg
+    assert 'default'           in cfg
+    assert 'model'             in cfg['default']
+    assert 'temperature'       in cfg['default']
+    assert 'top_p'             in cfg['default']
+    assert 'n'                 in cfg['default']
+    assert 'stream'            in cfg['default']
+    assert 'presence_penalty'  in cfg['default']
+    assert 'frequency_penalty' in cfg['default']
+    assert 'user'              in cfg['default']
 
     # Configure queues and start the
     # client in a separate process.
@@ -266,13 +268,16 @@ def _process_request(request, default):
     response.
 
     """
+    _get   = lambda key: request.get(key, default[key])
     kwargs = dict(
-            prompt      = request['prompt'],
-            engine      = request.get('engine',      default['engine']      ),
-            max_tokens  = request.get('max_tokens',  default['max_tokens']  ),
-            n           = request.get('n',           default['n']           ),
-            stop        = request.get('stop',        default['stop']        ),
-            temperature = request.get('temperature', default['temperature'] ))
+        messages          = request['messages'],
+        model             = _get('model'),
+        temperature       = _get('temperature'),
+        n                 = _get('n'),
+        stream            = _get('stream'),
+        presence_penalty  = _get('presence_penalty'),
+        frequency_penalty = _get('frequency_penalty'),
+        user              = _get('user'))
 
     request.update(kwargs)
 
@@ -281,7 +286,7 @@ def _process_request(request, default):
                   error    = None)
 
     try:
-        result['response'] = openai.Completion.create(**kwargs)
+        result['response'] = openai.ChatCompletion.create(**kwargs)
     except openai.OpenAIError as err:
         result['error'] = err.user_message
 
