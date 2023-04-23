@@ -9,6 +9,7 @@ import kivy.clock
 import kivy.network.urlrequest
 import kivy.properties
 import kivy.uix.screenmanager
+from kivy.uix.image import Image
 
 # import kivy.uix.widget
 
@@ -27,6 +28,7 @@ from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.network.urlrequest import UrlRequest
 from kivy.clock import Clock
+from kivy.uix.label import Label
 
 import codecs
 
@@ -42,7 +44,7 @@ class LoadingScreen(Screen):
         Clock.schedule_interval(lambda dt: self.check_results(hex_json), 1)
 
     def check_results(self, hex_json):
-        req = UrlRequest('http://localhost:8080/results/story:' + str(hex_json),
+        req = UrlRequest('http://localhost:8080/results:' + str(hex_json),
                          on_success=self.on_check_results_success)
 
     def on_check_results_success(self, req, result):
@@ -57,11 +59,18 @@ class LoadingScreen(Screen):
 
 class ConfigScreen(Screen):
     # Define dropdowns and text input as ObjectProperties
-    theme_values = ['Fairytale', 'Science Fiction Adventure']
-    style_values = ['J.K. Rowling', 'Agatha Christie', 'Stephen King']
-    inspiration_values = ['Harry Potter', 'Murder on the Orient Express', 'The Shining']
-    teaching_values = ['Honesty', 'Courage', 'Compassion']
-    age_values = ['Below 18', '18-25', '26-40', '41-60', 'Above 60']
+
+    theme_values = ['Fantasy', 'Sci-Fi', 'Mystery', 'Romance', 'Adventure']
+    style_values = ['J.K. Rowling', 'Neil Gaiman', 'Rick Riordan', 'Roald Dahl', 'Enid Blyton']
+    inspiration_values = ['Harry Potter series', 'Percy Jackson series', 'Charlie and the Chocolate Factory', 'The Famous Five', 'The Secret Seven']
+    teaching_values = ['Exploring the world with curiosity',
+                    'Building resilience to face challenges',
+                    'Practicing empathy and understanding',
+                    'Being kind, respectful, and inclusive',
+                    'Caring for the environment and being sustainable',
+                    'Using technology responsibly in today\'s world.']
+    age_values = ['Toddler', 'Preschool', 'Kindergarten', 'Early elementary', 'Upper elementary', 'Middle school', 'High school']
+
     
     def submit(self):
         app = App.get_running_app()
@@ -107,14 +116,16 @@ class ParagraphScreen(Screen):
     def previous_paragraph(self):
         app = App.get_running_app()
 
-        app.current_paragraph_index = (app.current_paragraph_index - 1) % len(app.paragraphs)
-        self.ids.paragraph_label.text = self.current_paragraph_text
+        if len(app.paragraphs) != 0:
+            app.current_paragraph_index = (app.current_paragraph_index - 1) % len(app.paragraphs)
+            self.ids.paragraph_label.text = self.current_paragraph_text
 
     def next_paragraph(self):
         app = App.get_running_app()
 
-        app.current_paragraph_index = (app.current_paragraph_index + 1) % len(app.paragraphs)
-        self.ids.paragraph_label.text = self.current_paragraph_text
+        if len(app.paragraphs) != 0:
+            app.current_paragraph_index = (app.current_paragraph_index + 1) % len(app.paragraphs)
+            self.ids.paragraph_label.text = self.current_paragraph_text
 
     def on_enter(self, *args):
         self.current_paragraph_text
@@ -151,11 +162,15 @@ class ForeverApp(App):
         # Create the navigation bar
         nav_bar = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))
         nav_bar.add_widget(Button(text='Reader', on_press=lambda *args: self.set_current_screen('reader')))
-        nav_bar.add_widget(Button(text='Config', on_press=lambda *args: self.set_current_screen('parameters')))
+        nav_bar.add_widget(Button(text='Narrative Settings', on_press=lambda *args: self.set_current_screen('parameters')))
         # nav_bar.add_widget(Button(text='Third', on_press=lambda *args: self.set_current_screen('third_screen'))))
+
+        # Create the title label
+        title_label = Label(text='Forever Library Narrative Engine 1.0', size_hint=(1, 0.05))
 
         # Create the main layout
         layout = BoxLayout(orientation='vertical')
+        layout.add_widget(title_label)
         layout.add_widget(self.screen_manager)
         layout.add_widget(nav_bar)
 
