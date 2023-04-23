@@ -1,7 +1,8 @@
 
 
 import sys
-
+import time
+import json
 
 import kivy.app
 import kivy.clock
@@ -16,45 +17,149 @@ import kivy.uix.screenmanager
 # import kivy.uix.button
 # import kivy.uix.label
 
+from kivy.app import App
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.dropdown import DropDown
+from kivy.uix.button import Button
+from kivy.uix.textinput import TextInput
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.properties import ObjectProperty
+from kivy.uix.boxlayout import BoxLayout
+from kivy.network.urlrequest import UrlRequest
+from kivy.clock import Clock
+
+import codecs
+
+class LoadingScreen(Screen):
+    def on_enter(self, *args):
+        app = App.get_running_app()
+
+        hex_json = codecs.encode(json.dumps(app.settings).encode(), "hex")
+
+        # Send request to backend and check results endpoint for response
+        req = UrlRequest('http://localhost:8080/story:' + str(hex_json), 
+                         on_success=self.on_success)
+        Clock.schedule_interval(lambda dt: self.check_results(hex_json), 1)
+
+    def check_results(self, hex_json):
+        req = UrlRequest('http://localhost:8080/results/story:' + str(hex_json),
+                         on_success=self.on_check_results_success)
+
+    def on_check_results_success(self, req, result):
+        if result is not None:
+            app = App.get_running_app()
+            app.paragraphs = result
+            screen_manager = self.manager
+            screen_manager.current = 'reader'
+
+    def on_success(self, req, result):
+        print("Request successful")
+
+class ConfigScreen(Screen):
+    # Define dropdowns and text input as ObjectProperties
+    theme_values = ['Fairytale', 'Science Fiction Adventure']
+    style_values = ['J.K. Rowling', 'Agatha Christie', 'Stephen King']
+    inspiration_values = ['Harry Potter', 'Murder on the Orient Express', 'The Shining']
+    teaching_values = ['Honesty', 'Courage', 'Compassion']
+    age_values = ['Below 18', '18-25', '26-40', '41-60', 'Above 60']
+    
+    def submit(self):
+        app = App.get_running_app()
+
+        # Get the selected values from the dropdowns and the text from the text input
+        theme_value = self.ids.theme_spinner.text
+        style_value = self.ids.style_spinner.text
+        inspiration_value = self.ids.inspiration_spinner.text
+        teaching_value = self.ids.teaching_spinner.text
+        age_value = self.ids.age_spinner.text
+        text_input_value = self.ids.text_input.text
+        
+        # Print the values to the console
+        print(f"Theme: {theme_value}")
+        print(f"Style: {style_value}")
+        print(f"Inspiration: {inspiration_value}")
+        print(f"Teaching: {teaching_value}")
+
+        screen_manager = self.manager
+        app.settings = {
+            "theme": theme_value,
+            "style": style_value,
+            "inspiration": inspiration_value,
+            "teaching": teaching_value,
+            "age": age_value,
+            "text_input": text_input_value        
+        }
+        screen_manager.current = 'loading'
 
 
-
-class ParagraphScreen(kivy.uix.screenmanager.Screen):
-
-    paragraphs = kivy.properties.ListProperty([
-        "This is the first paragraph.",
-        "This is the second paragraph.",
-        "This is the third paragraph."
-    ])
-    current_paragraph_index = 0
+class ParagraphScreen(Screen):
 
     @property
     def current_paragraph_text(self):
-        return self.paragraphs[self.current_paragraph_index]
+        app = App.get_running_app()
+        if len(app.paragraphs) == 0:
+            self.ids.paragraph_label.text = "No story loaded yet"
+            return "No story loaded yet"
+        else:
+            self.ids.paragraph_label.text = app.paragraphs[app.current_paragraph_index]
+            return app.paragraphs[app.current_paragraph_index]
 
     def previous_paragraph(self):
-        self.current_paragraph_index = (self.current_paragraph_index - 1) % len(self.paragraphs)
+        app = App.get_running_app()
+
+        app.current_paragraph_index = (app.current_paragraph_index - 1) % len(app.paragraphs)
         self.ids.paragraph_label.text = self.current_paragraph_text
 
     def next_paragraph(self):
-        self.current_paragraph_index = (self.current_paragraph_index + 1) % len(self.paragraphs)
+        app = App.get_running_app()
+
+        app.current_paragraph_index = (app.current_paragraph_index + 1) % len(app.paragraphs)
         self.ids.paragraph_label.text = self.current_paragraph_text
 
+    def on_enter(self, *args):
+        self.current_paragraph_text
 
-class ForeverApp(kivy.app.App):
-    def on_success(self, req, result):
-        # Schedule an update to the app state
-        kivy.clock.Clock.schedule_once(lambda dt: self.update_state(repr(result)))
+# class ForeverApp(kivy.app.App):
 
-    def update_state(self, result):
-        # Update the app state
-        self.reader.paragraphs.append(result)
+#     def build(self):
+#         self.reader = ConfigScreen()
+#         req = kivy.network.urlrequest.UrlRequest('http://localhost:8080/story', on_success = self.on_success)
+#         return self.reader
+
+class ForeverApp(App):
+    def set_current_screen(self, screen_name):
+        self.screen_manager.current = screen_name
 
     def build(self):
-        self.reader = ParagraphScreen()
-        req = kivy.network.urlrequest.UrlRequest('http://localhost:8080/story', on_success = self.on_success)
-        return self.reader
+        self.settings = {}
+        self.paragraphs = []
+        self.current_paragraph_index = 0
 
+        # Create the screen manager
+        self.screen_manager = ScreenManager()
+
+        # Create the screens
+        second_screen = ConfigScreen(name='parameters')
+        third_screen = LoadingScreen(name='loading')
+        main_screen = ParagraphScreen(name='reader')
+
+        # Add the screens to the screen manager
+        self.screen_manager.add_widget(second_screen)
+        self.screen_manager.add_widget(third_screen)
+        self.screen_manager.add_widget(main_screen)
+
+        # Create the navigation bar
+        nav_bar = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))
+        nav_bar.add_widget(Button(text='Reader', on_press=lambda *args: self.set_current_screen('reader')))
+        nav_bar.add_widget(Button(text='Config', on_press=lambda *args: self.set_current_screen('parameters')))
+        # nav_bar.add_widget(Button(text='Third', on_press=lambda *args: self.set_current_screen('third_screen'))))
+
+        # Create the main layout
+        layout = BoxLayout(orientation='vertical')
+        layout.add_widget(self.screen_manager)
+        layout.add_widget(nav_bar)
+
+        return layout
 
 if __name__ == '__main__':
     ForeverApp().run()
