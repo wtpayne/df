@@ -263,12 +263,17 @@ def _is_up_to_date(dirpath_root, id_env, dirpath_env):
     Return true if the specified environment is up to date, false otherwise.
 
     """
-    mtime_venv_pkg  = os.path.getmtime(_dirpath_venv_pkg(dirpath_env))
-    mtime_venv_whl  = os.path.getmtime(_dirpath_venv_whl(dirpath_env))
-    mtime_envspec   = os.path.getmtime(_filepath_envspec(dirpath_root, id_env))
-    is_updated_pkg  = mtime_venv_pkg > mtime_envspec
-    is_updated_whl  = mtime_venv_whl > mtime_envspec
-    is_updated_venv = is_updated_pkg or is_updated_whl
+    mtime_envspec  = os.path.getmtime(_filepath_envspec(dirpath_root, id_env))
+    mtime_venv_pkg = os.path.getmtime(_dirpath_venv_pkg(dirpath_env))
+    is_updated_pkg = mtime_venv_pkg > mtime_envspec
+
+    dirpath_venv_whl = _dirpath_venv_whl(dirpath_env)
+    if os.path.exists(dirpath_venv_whl):
+        mtime_venv_whl  = os.path.getmtime(dirpath_venv_whl)
+        is_updated_whl  = mtime_venv_whl > mtime_envspec
+        is_updated_venv = is_updated_pkg or is_updated_whl
+    else:
+        is_updated_venv = is_updated_pkg
     return is_updated_venv
 
 
