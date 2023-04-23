@@ -55,7 +55,8 @@ template_characters = textwrap.dedent("""
     Generate a list of 3-5 characters for a story based on the following description:
 
           "A {style} story about {theme} suitable for an {age}-year old
-          inspired by {inspiration} that teaches {teaching}"
+          inspired by {inspiration} that teaches {teaching}. 
+          Customise the story so that {custom_instruction}"
 
           The story should have five characters, each with a unique
           personality, backstory, and motivation.
@@ -101,27 +102,27 @@ template_outline = textwrap.dedent("""
 
         The chapter structure JSON should look like this:
         {{
-         "Act 1: Act Title": [
-          Scene 1: Scene description - Introduce the protagonist and setting
-          Scene 2: Scene description - Establish the conflict and introduce the antagonist
-          Scene 3: Scene description - Raise the stakes and create a point of no return for the protagonist
-          Scene 4: Scene description - Develop the conflict further and increase the tension
-          Scene 5: Scene description - End Act 1 with a cliffhanger or a major turning point
-         ],
-         "Act 2: Act Title": [
-          Scene 1: Scene description - Show the protagonist reacting to the events of Act 1 and establishing a plan
-          Scene 2: Scene description - Introduce complications and obstacles that make the protagonist's goal more difficult to achieve
-          Scene 3: Scene description - Increase the stakes and create more tension
-          Scene 4: Scene description - Show the protagonist facing their lowest point, with seemingly insurmountable obstacles
-          Scene 5: Scene description - End Act 2 with a twist or a new complication that sets up the climax
-         ],
-         "Act 3: Act Title": [
-          Scene 1: Scene description - Show the protagonist preparing for the final confrontation
-          Scene 2: Scene description - Introduce the final obstacle or antagonist
-          Scene 3: Scene description - The final confrontation, with the protagonist using everything they've learned to overcome the obstacle or defeat the antagonist
-          Scene 4: Scene description - Show the aftermath of the confrontation and tie up any loose ends
-          Scene 5: Scene description - End the story with a satisfying resolution or a hint at a new beginning
-         ]
+        "Act 1: Act Title" : [ # Establishing the World and the Characters
+        "Scene 1": "Scene description" # Introduce the protagonist and their ordinary world, highlighting their strengths, flaws, and desires.
+        "Scene 2": "Scene description" # Inciting incident: Disrupt the protagonist's world and establish the conflict, introducing the antagonist or obstacles.
+        "Scene 3": "Scene description" # Raise the stakes and establish the point of no return for the protagonist.
+        "Scene 4": "Scene description" # Protagonist's initial response to the conflict, highlighting their strengths and weaknesses.
+        "Scene 5": "Scene description" # End Act 1 with a major turning point or a cliffhanger that sets up the rest of the story
+        ],
+        "Act 2: Act Title" : [ # Confronting the Obstacles and Building Tension
+        "Scene 1": "Scene description" # The protagonist's plan to overcome the obstacle, showcasing their resourcefulness and creativity.
+        "Scene 2": "Scene description" # Introduce complications, obstacles, and setbacks that challenge the protagonist's plan and increase the stakes.
+        "Scene 3": "Scene description" # The protagonist faces their lowest point, with seemingly insurmountable obstacles and doubts about their ability to succeed.
+        "Scene 4": "Scene description" # The protagonist regroups and renews their commitment to their goal, finding inspiration and support from allies.
+        "Scene 5": "Scene description" # End Act 2 with a twist or a new complication that sets up the climax
+        ],
+        "Act 3: Act Title" : [ # The Final Confrontation and Resolution
+        "Scene 1": "Scene description" # Show the protagonist preparing for the final confrontation, reflecting on their journey and growth.
+        "Scene 2": "Scene description" # Introduce the final obstacle or antagonist, challenging the protagonist in unexpected ways.
+        "Scene 3": "Scene description" # The final confrontation, with the protagonist using everything they've learned to overcome the obstacle or defeat the antagonist.
+        "Scene 4": "Scene description" # Show the aftermath of the confrontation and tie up any loose ends, resolving subplots and character arcs.
+        "Scene 5": "Scene description" # End the story with a satisfying resolution or a hint at a new beginning that shows the protagonist's growth and transformation
+        ]
         }}
         chapter_outline_json = """)
 
@@ -159,6 +160,7 @@ template_rewrite = textwrap.dedent("""
     The theme is {theme}, in the style of a {style} story, inspired by {inspiration}.
     The story is meant to teach the kid about {teaching}
     Pretend you are reading it to a {age}-year-old kid.
+    Customise the story so that {custom_instruction}.
     Story: {story} End of Story
     Make sure to add connecting sentences between scenes, and create a flowing story.
     Keep a balance between dialog, descriptions, and narration in the final draft.
