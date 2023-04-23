@@ -277,7 +277,9 @@ def _dirpath_venv_pkg(dirpath_env):
     Return the path of the virtual environment site packages directory.
 
     """
-    return os.path.join(dirpath_env, 'lib', 'python3.8', 'site-packages')
+    version_python = '.'.join(sys.version.split('.')[0:2])
+    dirname_python = 'python{version}'.format(version = version_python)
+    return os.path.join(dirpath_env, 'lib', dirname_python, 'site-packages')
 
 
 # -----------------------------------------------------------------------------

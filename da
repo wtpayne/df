@@ -184,13 +184,30 @@ fi
 #
 dirpath_envspec="${WORKSPACE}/a3_src/h10_resource/envspec"
 filepath_envspec="${dirpath_envspec}/${id_env}.envspec.json"
-dirpath_pkg="${dirpath_venv}/lib/python3.8/site-packages";
+dirname_py3="python$(python3 --version | cut -d " " -f2 | cut -d "." -f1,2)"
+dirpath_pkg="${dirpath_venv}/lib/${dirname_py3}/site-packages";
+if [[ ${filepath_envspec} -nt ${dirpath_pkg}       ]]; then
+    is_stale_pkg=1;
+else
+    is_stale_pkg=0;
+fi
+
+has_dirpath_whl=0;
 dirpath_whl="${dirpath_venv}/share/python-wheels";
-is_stale_pkg=0;
-is_stale_whl=0;
-if [[ ${filepath_envspec} -nt ${dirpath_pkg}       ]]; then is_stale_pkg=1;  fi
-if [[ ${filepath_envspec} -nt ${dirpath_whl}       ]]; then is_stale_whl=1;  fi
-if [[ ${is_stale_pkg} == 1 && ${is_stale_whl} == 1 ]]; then is_stale_venv=1; fi
+if [ -d "${dirpath_whl}" ]; then
+    if [[ ${filepath_envspec} -nt ${dirpath_whl}       ]]; then
+        is_stale_whl=1;
+    else
+        is_stale_whl=0;
+    fi
+    if [[ ${is_stale_pkg} == 1 && ${is_stale_whl} == 1 ]]; then
+        is_stale_venv=1;
+    fi
+else
+    if [[ ${is_stale_pkg} == 1 ]]; then
+        is_stale_venv=1;
+    fi
+fi
 
 
 # -----------------------------------------------------------------------------
