@@ -301,7 +301,10 @@ def _get_next_outputs(result):
             print('PARAGRAPH')
             return ({'paragraph': param}, None)
         else:
-            print('REWRITE')
             final_text = result['response']['choices'][0]['message']['content']
+
             print('FINAL TEXT')
+            with open('/home/wtp/story.txt', 'wt') as file:
+                file.write(final_text)
+
             return (None, final_text)

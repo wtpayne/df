@@ -63,6 +63,11 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     cfg_engine = dict()
     engine     = fl.net.openai.workflow.coro(cfg = cfg_engine)
 
+    # Load some initial data.
+    #
+    with open('/home/wtp/story_example_1.txt', 'rt') as file:
+        story_data = file.read()
+
     # Initialize outputs.
     #
     signal = None
@@ -104,16 +109,18 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         list_templ_output    = list()
         list_param_output    = list()
         list_resource_output = list()
-        for map_result in list_result_input:
-            (list_template, list_param, list_resource) = engine.send((map_result, None))
-            list_templ_output.extend(list_template)
-            list_param_output.extend(list_param)
-            list_resource_output.extend(list_resource)
-        for map_param in list_param_input:
-            (list_template, list_param, list_resource) = engine.send((None, map_param))
-            list_templ_output.extend(list_template)
-            list_param_output.extend(list_param)
-            list_resource_output.extend(list_resource)
+        # for map_result in list_result_input:
+        #     (list_template, list_param, list_resource) = engine.send((map_result, None))
+        #     list_templ_output.extend(list_template)
+        #     list_param_output.extend(list_param)
+        #     list_resource_output.extend(list_resource)
+        # for map_param in list_param_input:
+        #     (list_template, list_param, list_resource) = engine.send((None, map_param))
+        #     list_templ_output.extend(list_template)
+        #     list_param_output.extend(list_param)
+        #     list_resource_output.extend(list_resource)
+
+        list_resource_output.append({'story': ('text/javascript', story_data)})
 
         # Output any new templates which have
         # been generated.
