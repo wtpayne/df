@@ -18,3 +18,11 @@ register:
       - wtp
       - williampayne
     project:
+
+  t001_ir:
+    name:
+      Yiannis Ravanis
+    email:
+      Yiannis.rav@gmail.com
+    alias:
+    project:
