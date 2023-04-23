@@ -61,7 +61,7 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     # This will generate new prompts
     #
     cfg_engine = dict()
-    engine     = fl.net.openai.workflow.Engine(cfg = cfg_engine)
+    engine     = fl.net.openai.workflow.coro(cfg = cfg_engine)
 
     # Initialize outputs.
     #
@@ -104,11 +104,11 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         list_templ_output = list()
         list_param_output = list()
         for map_result in list_result_input:
-            (list_template, list_param) = engine.update(result = map_result)
+            (list_template, list_param) = engine.send((map_result, None))
             list_templ_output.extend(list_template)
             list_param_output.extend(list_param)
         for map_param in list_param_input:
-            (list_template, list_param) = engine.update(param = map_param)
+            (list_template, list_param) = engine.send((None, map_param))
             list_templ_output.extend(list_template)
             list_param_output.extend(list_param)
 

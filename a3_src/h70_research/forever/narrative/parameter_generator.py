@@ -43,12 +43,13 @@ license:
 ...
 """
 
-list_param_preset = [
-    dict(theme       = "Join Lily and her friends on a journey through time and space as they discover how our universe came to be.",
-         style       = "Science-fiction adventure",
-         inspiration = "The Magic School Bus by Joanna Cole and Bruce Degen",
-         teaching    = "Lily and her friends learn about the big bang theory and the origins of the universe, emphasizing the importance of scientific curiosity and critical thinking.",
-         age         = 9)]
+list_param_preset = [{
+    'characters': {
+        'theme':       'Join Lily and her friends on a journey through time and space as they discover how our universe came to be.',
+        'style':       'Science-fiction adventure',
+        'inspiration': 'The Magic School Bus by Joanna Cole and Bruce Degen',
+        'teaching':    'Lily and her friends learn about the big bang theory and the origins of the universe, emphasizing the importance of scientific curiosity and critical thinking.',
+        'age':         9}}]
 
 # -----------------------------------------------------------------------------
 def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613

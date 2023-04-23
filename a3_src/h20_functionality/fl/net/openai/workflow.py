@@ -45,7 +45,7 @@ license:
 ...
 """
 
-
+import pprint
 import textwrap
 
 
@@ -152,72 +152,144 @@ template_paragraph = textwrap.dedent("""
     ## Scene {scene_number}:
     """)
 
-list_template_default = [{'characters': template_characters,
-                          'outline':    template_outline,
-                          'paragraph':  template_paragraph}]
+
+list_template_default = [{
+        'characters': {'template': template_characters},
+        'outline':    {'template': template_outline},
+        'paragraph':  {'template': template_paragraph}}]
 
 
+import fl.util
 
-# =============================================================================
-class Engine():
+
+# -----------------------------------------------------------------------------
+@fl.util.coroutine
+def coro(cfg):
     """
-    OpenAI workflow engine class.
+    OpenAI workflow engine coroutine.
 
     """
 
-    # -------------------------------------------------------------------------
-    def __init__(self, cfg):
-        """
-        """
-        self.cfg = cfg
+    list_template = list()
+    list_param    = list()
 
-    # -------------------------------------------------------------------------
-    def update(self, result = None, param = None):
-        """
-        Here is an example of a result data structure:
+    while True:
 
-        {'error':       None,
-         'request':     {'engine':      '<OPENAI_MODEL_ID>',
-                         'max_tokens':  100,
-                         'n':           1,
-                         'prompt':      '<PROMPT_TEXT>.',
-                         'stop':        None,
-                         'temperature': 0.5},
-         'response':    {'choices':     [{'finish_reason':  'stop',
-                                          'index':          0,
-                                          'logprobs':       None,
-                                          'text':           '<RESPONSE_TEXT>'}],
-                         'created':    1682122855,
-                         'id':         'cmpl-77vHj30k0S1k8pqz2lHUueiQDMSZj',
-                         'model':      '<OPENAI_MODEL_ID>',
-                         'object':     'text_completion',
-                         'usage':      {'completion_tokens':   57,
-                                        'prompt_tokens':       9,
-                                        'total_tokens':        66}}}"
+        (result, param) = yield (list_template, list_param)
 
-        """
-        list_template = list_template_default
-        list_template_default.clear()
-        list_param    = []
-        list_param.append(param)
+        list_template.clear()
+        list_param.clear()
 
-        return (list_template, list_param)
+        # Default templates.
+        #
+        if list_template_default:
+            list_template.extend(list_template_default)
+            list_template_default.clear()
+
+        # Parameters from outside (e.g. user)
+        #
+        if param is not None:
+            list_param.append(param)
+
+        # Parameters from OpenAI result (i.e. prev step)
+        #
+        if result is not None:
+            param_new = _get_params(result)
+            if param_new is not None:
+                list_param.append(param_new)
 
 
+# -----------------------------------------------------------------------------
+def _get_params(result):
+    """
+    """
+    id_prompt = result['request']['_id_prompt']
+    param     = result['request']['_param']
+
+
+    if id_prompt == 'characters':
+        story_characters = result['response']['choices'][0]['text']
+        param['story_characters'] = story_characters
+        return {
+            'outline': param
+        }
+
+    if id_prompt == 'outline':
+        story_outline = result['response']['choices'][0]['text']
+
+        for (chapter_title, subchapter_list) in story_outline.items():
+            for (scene_number, subchapter_title) in enumerate(subchapter_list):
+
+                queue_param = list()
+
+
+            # chapter_text = generate_paragraph(
+            #     story_description, story_outline, story_characters, chapter_title, subchapter_title, scene_number+1, history_summary)
+            # history_summary = summarise(history_summary + chapter_text)
+            # print()
+            # print(chapter_text)
+            # print()
+            # # chapter = rewrite_chapter(story_outline, chapter_number, chapter_title)
+            # history += chapter_text
+
+
+        param['story_outline'] = story_outline
+        return {
+            'something': param
+        }
 
 
 
-        # 1. check param - What do we do with it?
-
-        # 2. check result - What do we do with it?
+    return chapters, story_characters, story_outline
 
 
+def rewrite_story(outline, story, characters, theme, style, inspiration, teaching, age):
+    prompt = f"You are an editor. As an editor, you edit draft scripts to convert them to final drafts.\
+    \nCharacters: {characters}\
+    \nStory Outline: {outline}\
+    \nThe theme is {theme}, in the style of a {style} story, inspired by {inspiration}.\
+    \nThe story is meant to teach the kid about {teaching}\
+    \nPretend you are reading it to a {age}-year-old kid. \
+    \n\nStory: {story}\n End of S
+
+    if id_prompt == 'paragraph':
+    #     pass
+
+    return param
 
 
 
-    # id_prompt     = 'test_prompt'
-    # list_template = list()
-    # list_param    = list()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # def _add_param(id_prompt, **kwargs):
     #     list_param.append({id_prompt: kwargs})
