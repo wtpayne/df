@@ -25,24 +25,35 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivy.network.urlrequest import UrlRequest
+from kivy.clock import Clock
+
+import codecs
 
 class LoadingScreen(Screen):
     def on_enter(self, *args):
         app = App.get_running_app()
 
-        # TODO: Send request to backend and generate paragraphs
-        time.sleep(5)
+        hex_json = codecs.encode(json.dumps(app.settings).encode(), "hex")
 
-        paragraphs = [
-            json.dumps(app.settings),
-            "paragraph 1",
-            "paragraph 2"
-        ]
+        # Send request to backend and check results endpoint for response
+        req = UrlRequest('http://localhost:8080/story:' + str(hex_json), 
+                         on_success=self.on_success)
+        Clock.schedule_interval(lambda dt: self.check_results(hex_json), 1)
 
-        app.paragraphs = paragraphs #kivy.properties.ListProperty(paragraphs)
-        screen_manager = self.manager
-        print(screen_manager.current) 
-        screen_manager.current = 'reader'
+    def check_results(self, hex_json):
+        req = UrlRequest('http://localhost:8080/results/story:' + str(hex_json),
+                         on_success=self.on_check_results_success)
+
+    def on_check_results_success(self, req, result):
+        if result is not None:
+            app = App.get_running_app()
+            app.paragraphs = result
+            screen_manager = self.manager
+            screen_manager.current = 'reader'
+
+    def on_success(self, req, result):
+        print("Request successful")
 
 class ConfigScreen(Screen):
     # Define dropdowns and text input as ObjectProperties

@@ -3,12 +3,25 @@
 <LoadingScreen>:
     BoxLayout:
         orientation: 'vertical'
-        Spinner:
-            size_hint: None, None
-            size: dp(100), dp(100)
-            active: True
+        spacing: dp(10)
+        padding: dp(30)
         Label:
             text: 'Loading...'
+            font_size: sp(20)
+            halign: 'center'
+            valign: 'middle'
+            text_size: self.width, None
+
+<CardListScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        ScrollView:
+            BoxLayout:
+                id: cards_layout
+                orientation: 'vertical'
+                size_hint_y: None
+                spacing: 10
+
 <ParagraphScreen>:
     BoxLayout:
         orientation: "vertical"
