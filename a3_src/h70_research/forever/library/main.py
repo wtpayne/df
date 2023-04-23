@@ -30,18 +30,16 @@ class LoadingScreen(Screen):
     def on_enter(self, *args):
         app = App.get_running_app()
 
-        # screen_manager = self.parent
-        # screen_manager = self.manager #self.parent
-
         # TODO: Send request to backend and generate paragraphs
         time.sleep(5)
 
         paragraphs = [
-            json.dumps(app.settings)
+            json.dumps(app.settings),
+            "paragraph 1",
+            "paragraph 2"
         ]
 
-        # screen_manager.get_screen('reader').paragraphs = paragraphs
-        app.paragraphs = kivy.properties.ListProperty(paragraphs)
+        app.paragraphs = paragraphs #kivy.properties.ListProperty(paragraphs)
         screen_manager = self.manager
         print(screen_manager.current) 
         screen_manager.current = 'reader'
@@ -71,9 +69,7 @@ class ConfigScreen(Screen):
         print(f"Inspiration: {inspiration_value}")
         print(f"Teaching: {teaching_value}")
 
-        screen_manager = self.manager #self.parent
-        # screen_manager.get_screen('loading')
-        # screen_manager.current = 'loading'
+        screen_manager = self.manager
         app.settings = {
             "theme": theme_value,
             "style": style_value,
@@ -90,10 +86,11 @@ class ParagraphScreen(Screen):
     @property
     def current_paragraph_text(self):
         app = App.get_running_app()
-
         if len(app.paragraphs) == 0:
+            self.ids.paragraph_label.text = "No story loaded yet"
             return "No story loaded yet"
         else:
+            self.ids.paragraph_label.text = app.paragraphs[app.current_paragraph_index]
             return app.paragraphs[app.current_paragraph_index]
 
     def previous_paragraph(self):
@@ -104,9 +101,12 @@ class ParagraphScreen(Screen):
 
     def next_paragraph(self):
         app = App.get_running_app()
+
         app.current_paragraph_index = (app.current_paragraph_index + 1) % len(app.paragraphs)
         self.ids.paragraph_label.text = self.current_paragraph_text
 
+    def on_enter(self, *args):
+        self.current_paragraph_text
 
 # class ForeverApp(kivy.app.App):
 
@@ -116,13 +116,16 @@ class ParagraphScreen(Screen):
 #         return self.reader
 
 class ForeverApp(App):
+    def set_current_screen(self, screen_name):
+        self.screen_manager.current = screen_name
+
     def build(self):
         self.settings = {}
         self.paragraphs = []
         self.current_paragraph_index = 0
 
         # Create the screen manager
-        screen_manager = ScreenManager()
+        self.screen_manager = ScreenManager()
 
         # Create the screens
         second_screen = ConfigScreen(name='parameters')
@@ -130,19 +133,19 @@ class ForeverApp(App):
         main_screen = ParagraphScreen(name='reader')
 
         # Add the screens to the screen manager
-        screen_manager.add_widget(second_screen)
-        screen_manager.add_widget(third_screen)
-        screen_manager.add_widget(main_screen)
+        self.screen_manager.add_widget(second_screen)
+        self.screen_manager.add_widget(third_screen)
+        self.screen_manager.add_widget(main_screen)
 
         # Create the navigation bar
         nav_bar = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))
-        nav_bar.add_widget(Button(text='Reader', on_press=lambda *args: screen_manager.switch_to(main_screen)))
-        nav_bar.add_widget(Button(text='Config', on_press=lambda *args: screen_manager.switch_to(second_screen)))
-        # nav_bar.add_widget(Button(text='Third', on_press=lambda *args: screen_manager.switch_to(third_screen)))
+        nav_bar.add_widget(Button(text='Reader', on_press=lambda *args: self.set_current_screen('reader')))
+        nav_bar.add_widget(Button(text='Config', on_press=lambda *args: self.set_current_screen('parameters')))
+        # nav_bar.add_widget(Button(text='Third', on_press=lambda *args: self.set_current_screen('third_screen'))))
 
         # Create the main layout
         layout = BoxLayout(orientation='vertical')
-        layout.add_widget(screen_manager)
+        layout.add_widget(self.screen_manager)
         layout.add_widget(nav_bar)
 
         return layout
