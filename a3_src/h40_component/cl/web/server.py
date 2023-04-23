@@ -33,18 +33,19 @@ import starlette.websockets
 import uvicorn
 
 
-_DEFAULT_DOC = ('text/html',
-"""<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>No content</title>
-  </head>
-  <body>
-    No content.
-  </body>
-</html>
-""")
+# _DEFAULT_DOC = ('text/html',
+# """<!DOCTYPE html>
+# <html lang="en">
+#   <head>
+#     <meta charset="utf-8">
+#     <title>No content</title>
+#   </head>
+#   <body>
+#     No content.
+#   </body>
+# </html>
+# """)
+_DEFAULT_DOC = ('text/html', "")
 
 _ID_COOKIE_SESSION = 'xw_sid'
 _ID_COOKIE_USER    = 'xw_uid'
@@ -238,12 +239,16 @@ def _asgi_server_process(cfg, map_queues):
         Return a response for the specified id_resource param.
 
         """
+
+        print('ROUTE!!')
+
         tasks = _ensure_continuously_updated()
 
         (id_session, id_user) = _get_cookies(request)
 
         if request is None:
             id_resource = 'default'
+
         else:
             url_path    = request.url.path.strip('/')
             id_resource = request.path_params.get('id_resource', url_path)
@@ -337,6 +342,7 @@ def _asgi_server_process(cfg, map_queues):
     #--------------------------------------------------------------------------
     def _update_topics(set_id_topic_changed):
         """
+
         Bring the topic lookups up to date with the latest changes.
 
         First, we determine if any active
@@ -631,6 +637,7 @@ def _asgi_server_process(cfg, map_queues):
     has_https    = has_keyfile and has_certfile
 
     try:
+
         if has_https:
             uvicorn.run(app, host         = host,
                              port         = port,

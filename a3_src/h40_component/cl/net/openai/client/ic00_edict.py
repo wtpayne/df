@@ -169,10 +169,13 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
         # Update the spend record.
         #
-        # for result in list_result:
-        #     id_prompt   = result['request']['_id_prompt']
-        #     tokens_used = result['response']['usage']['total_tokens']
-        #     map_spend[id_prompt] += tokens_used
+        for result in list_result:
+            try:
+                id_prompt   = result['request']['_id_prompt']
+                tokens_used = result['response']['usage']['total_tokens']
+                map_spend[id_prompt] += tokens_used
+            except (KeyError, TypeError):
+                pass
 
         # Update outputs.
         #

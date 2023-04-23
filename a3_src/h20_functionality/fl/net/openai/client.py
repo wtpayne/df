@@ -132,7 +132,6 @@ def coro(cfg):
     assert 'default'           in cfg
     assert 'model'             in cfg['default']
     assert 'temperature'       in cfg['default']
-    assert 'top_p'             in cfg['default']
     assert 'n'                 in cfg['default']
     assert 'stream'            in cfg['default']
     assert 'presence_penalty'  in cfg['default']

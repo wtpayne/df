@@ -56,7 +56,7 @@ template_characters = textwrap.dedent("""
     Generate a list of 3-5 characters for a story based on the following description:
 
           "A {style} story about {theme} suitable for an {age}-year old
-          inspired by {inspiration} that teaches {teaching}. 
+          inspired by {inspiration} that teaches {teaching}.
           Customise the story so that {custom_instruction}"
 
           The story should have five characters, each with a unique
@@ -86,7 +86,10 @@ template_characters = textwrap.dedent("""
               }},
               ...
           ]
-          character_list = """)
+
+          character_list =
+
+          Remember to ensure that all quotes inside the JSON are properly escaped.""")
 
 template_outline = textwrap.dedent("""
 
@@ -94,8 +97,7 @@ template_outline = textwrap.dedent("""
     for a story based on the following description
     and the Hero's Journey:
 
-        "A {style} story about {theme} suitable for an {age}-year old
-        inspired by {inspiration} that teaches {teaching}"
+        "A {style} story about {theme} suitable for an {age}-year old inspired by {inspiration} that teaches {teaching}"
 
         The following characters take part in the story:
 
@@ -104,28 +106,31 @@ template_outline = textwrap.dedent("""
         The chapter structure JSON should look like this:
         {{
         "Act 1: Act Title" : [ # Establishing the World and the Characters
-        "Scene 1": "Scene description" # Introduce the protagonist and their ordinary world, highlighting their strengths, flaws, and desires.
-        "Scene 2": "Scene description" # Inciting incident: Disrupt the protagonist's world and establish the conflict, introducing the antagonist or obstacles.
-        "Scene 3": "Scene description" # Raise the stakes and establish the point of no return for the protagonist.
-        "Scene 4": "Scene description" # Protagonist's initial response to the conflict, highlighting their strengths and weaknesses.
-        "Scene 5": "Scene description" # End Act 1 with a major turning point or a cliffhanger that sets up the rest of the story
+            "Scene 1 - Scene description", # Introduce the protagonist and their ordinary world, highlighting their strengths, flaws, and desires.
+            "Scene 2 - Scene description", # Inciting incident: Disrupt the protagonists world and establish the conflict, introducing the antagonist or obstacles.
+            "Scene 3 - Scene description", # Raise the stakes and establish the point of no return for the protagonist.
+            "Scene 4 - Scene description", # Protagonists initial response to the conflict, highlighting their strengths and weaknesses.
+            "Scene 5 - Scene description", # End Act 1 with a major turning point or a cliffhanger that sets up the rest of the story
         ],
         "Act 2: Act Title" : [ # Confronting the Obstacles and Building Tension
-        "Scene 1": "Scene description" # The protagonist's plan to overcome the obstacle, showcasing their resourcefulness and creativity.
-        "Scene 2": "Scene description" # Introduce complications, obstacles, and setbacks that challenge the protagonist's plan and increase the stakes.
-        "Scene 3": "Scene description" # The protagonist faces their lowest point, with seemingly insurmountable obstacles and doubts about their ability to succeed.
-        "Scene 4": "Scene description" # The protagonist regroups and renews their commitment to their goal, finding inspiration and support from allies.
-        "Scene 5": "Scene description" # End Act 2 with a twist or a new complication that sets up the climax
+            "Scene 1 - Scene description", # The protagonists plan to overcome the obstacle, showcasing their resourcefulness and creativity.
+            "Scene 2 - Scene description", # Introduce complications, obstacles, and setbacks that challenge the protagonists plan and increase the stakes.
+            "Scene 3 - Scene description", # The protagonist faces their lowest point, with seemingly insurmountable obstacles and doubts about their ability to succeed.
+            "Scene 4 - Scene description", # The protagonist regroups and renews their commitment to their goal, finding inspiration and support from allies.
+            "Scene 5 - Scene description", # End Act 2 with a twist or a new complication that sets up the climax
         ],
         "Act 3: Act Title" : [ # The Final Confrontation and Resolution
-        "Scene 1": "Scene description" # Show the protagonist preparing for the final confrontation, reflecting on their journey and growth.
-        "Scene 2": "Scene description" # Introduce the final obstacle or antagonist, challenging the protagonist in unexpected ways.
-        "Scene 3": "Scene description" # The final confrontation, with the protagonist using everything they've learned to overcome the obstacle or defeat the antagonist.
-        "Scene 4": "Scene description" # Show the aftermath of the confrontation and tie up any loose ends, resolving subplots and character arcs.
-        "Scene 5": "Scene description" # End the story with a satisfying resolution or a hint at a new beginning that shows the protagonist's growth and transformation
+            "Scene 1 - Scene description", # Show the protagonist preparing for the final confrontation, reflecting on their journey and growth.
+            "Scene 2 - Scene description", # Introduce the final obstacle or antagonist, challenging the protagonist in unexpected ways.
+            "Scene 3 - Scene description", # The final confrontation, with the protagonist using everything theyve learned to overcome the obstacle or defeat the antagonist.
+            "Scene 4 - Scene description", # Show the aftermath of the confrontation and tie up any loose ends, resolving subplots and character arcs.
+            "Scene 5 - Scene description", # End the story with a satisfying resolution or a hint at a new beginning that shows the protagonists growth and transformation
         ]
         }}
-        chapter_outline_json = """)
+
+        chapter_outline_json =
+
+        Remember to ensure that all quotes inside the JSON are properly escaped.""")
 
 
 template_paragraph = textwrap.dedent("""
@@ -164,42 +169,11 @@ template_summary = textwrap.dedent("""
 
     """)
 
-template_rewrite = textwrap.dedent("""
-    You are an editor. As an editor, you edit
-    draft scripts to convert them to final
-    drafts.
-
-    Characters: {characters}
-
-    Story Outline: {outline}
-
-    The theme is {theme}, in the style of a
-    {style} story, inspired by {inspiration}.
-
-    The story is meant to teach the kid about {teaching}
-
-    Pretend you are reading it to a {age}-year-old kid.
-    Customise the story so that {custom_instruction}.
-
-    Story: {story}
-    End of Story
-
-    Make sure to add connecting sentences between
-    scenes, and create a flowing story. Keep a
-    balance between dialog, descriptions, and
-    narration in the final draft.
-
-    Keep chapter titles in your story.
-    Proceed with the rewrite of the story.
-    The story should be at least {story_length} words long.
-    """)
-
 list_template_default = [{
         'characters': {'template': template_characters},
         'outline':    {'template': template_outline},
         'paragraph':  {'template': template_paragraph},
-        'summary':    {'template': template_summary},
-        'rewrite':    {'template': template_rewrite}}]
+        'summary':    {'template': template_summary}}]
 
 import fl.util
 
@@ -254,29 +228,39 @@ def _get_next_outputs(result):
     ### CHARACTERS ###
     if id_prompt == 'characters':
 
-        print('')
-        print('CHARACTERS')
-        import pprint
-        pprint.pprint(result['response'])
-        print('')
+        # print('')
+        # print('CHARACTERS')
+        # import pprint
+        # pprint.pprint(result['response'])
+        # print('')
 
-        story_characters          = result['response']['choices'][0]['text']
+        if result['response'] is None:
+            import pprint
+            pprint.pprint(result)
+            return (None, None)
+
+        story_characters          = result['response']['choices'][0]['message']['content']
         param                     = result['request']['_param']
         param['story_characters'] = story_characters
-
-
+        print('OUTLINE')
         return ({'outline': param}, None)
 
     ### OUTLINE ###
     if id_prompt == 'outline':
-        story_outline      = result['response']['choices'][0]['text']
+        story_outline      = result['response']['choices'][0]['message']['content']
         param              = result['request']['_param']
         list_chapter_param = list()
 
+        # story_outline = story_outline.replace("'", r"\'")
         try:
             map_story_outline = json.loads(story_outline)
         except json.JSONDecodeError:
             print("JSONDecodeError - Retry generation.")
+            print('')
+            print('')
+            print(story_outline)
+            print('')
+            print('')
             return ({'outline': param}, None)
 
         for (chapter_title, subchapter_list) in map_story_outline.items():
@@ -287,36 +271,37 @@ def _get_next_outputs(result):
                 param['scene_number']     = scene_number + 1
                 list_chapter_param.append(copy.deepcopy(param))
 
-        param_new                     = list_chapter_param.pop(0)
-        param_new['_queue']           = list_chapter_param
-        param_new['_chapter_text']    = ""
-        param_new['_history_summary'] = ""
-        param_new['_history']         = ""
+        param_new                    = list_chapter_param.pop(0)
+        param_new['_queue']          = list_chapter_param
+        param_new['_chapter_text']   = ""
+        param_new['history_summary'] = ""
+        param_new['_history']        = ""
+        print('PARAGRAPH')
         return ({'paragraph': param_new}, None)
 
     ### PARAGRAPH ###
     if id_prompt == 'paragraph':
-        chapter_text               = result['response']['choices'][0]['text']
+        chapter_text               = result['response']['choices'][0]['message']['content']
         param                      = result['request']['_param']
         list_chapter_param         = param['_queue']
         param_new                  = list_chapter_param.pop(0)
         param_new['_queue']        = list_chapter_param
-        param_new['summary_input'] = param['_history_summary'] + chapter_text
+        param_new['summary_input'] = param['history_summary'] + chapter_text
         param_new['_history']      = param['_history']         + chapter_text
         param_new['_chapter_text'] = chapter_text
+        print('SUMMARY')
         return ({'summary': param_new}, None)
 
     ### PARAGRAPH SUMMARY ###
     if id_prompt == 'summary':
-        summary_text              = result['response']['choices'][0]['text']
-        param                     = result['request']['_param']
-        param['_history_summary'] = summary_text
+        summary_text             = result['response']['choices'][0]['message']['content']
+        param                    = result['request']['_param']
+        param['history_summary'] = summary_text
         if param['_queue']:
+            print('PARAGRAPH')
             return ({'paragraph': param}, None)
         else:
-            return ({'rewrite': param}, None)
-
-    ### REWRITE ###
-    if id_prompt == 'rewrite':
-        final_text = result['response']['choices'][0]['text']
-        return (None, final_text)
+            print('REWRITE')
+            final_text = result['response']['choices'][0]['message']['content']
+            print('FINAL TEXT')
+            return (None, final_text)

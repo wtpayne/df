@@ -59,16 +59,16 @@ class LoadingScreen(Screen):
                 "Eliana, Kai, Zara, and Rami stood victorious over the defeated Emrys. The magical creatures cheered and applauded, grateful for their heroism. As they made their way back to the portal that would take them home, Eliana reflected on her journey. She had faced her fears and doubts, and had come out stronger on the other side. She now accepted her dyslexia as a part of who she was, and saw it as an advantage in the magical world. \n\n\"Thank you all for everything,\" Eliana said, turning to her friends. \"I couldn't have done it without you.\"\n\n\"Hey, we're a team, remember?\" Kai said with a grin.\n\n\"Always,\" Zara added, beaming.\n\n\"And we're not done yet,\" Rami said, nodding toward the portal. \"Who knows what other adventures await us?\"\n\nEliana smiled, feeling a sense of excitement and possibility. She now knew that she was capable of anything, as long as she had the support and love of her friends. As they stepped through the portal and returned to their ordinary world, Eliana felt a newfound sense of confidence and purpose. She knew that she would continue to go on adventures and help others, now with a deep understanding of the importance of inclusivity and celebrating differences."
         ]
 
-        app.paragraphs = story
-        screen_manager = self.manager
-        screen_manager.current = 'reader'
+        # app.paragraphs = story
+        # screen_manager = self.manager
+        # screen_manager.current = 'reader'
 
-        # hex_json = codecs.encode(json.dumps(app.settings).encode(), "hex")
+        hex_json = codecs.encode(json.dumps(app.settings).encode(), "hex")
 
-        # # Send request to backend and check results endpoint for response
-        # req = UrlRequest('http://localhost:8080/story:' + str(hex_json), 
-        #                  on_success=self.on_success)
-        # Clock.schedule_interval(lambda dt: self.check_results(hex_json), 1)
+        # Send request to backend and check results endpoint for response
+        req = UrlRequest('http://localhost:8080/story:' + str(hex_json),
+                         on_success=self.on_success)
+        Clock.schedule_interval(lambda dt: self.check_results(hex_json), 1)
 
     def check_results(self, hex_json):
         req = UrlRequest('http://localhost:8080/results:' + str(hex_json),
@@ -76,6 +76,9 @@ class LoadingScreen(Screen):
 
     def on_check_results_success(self, req, result):
         if result is not None:
+
+            print(result)
+
             app = App.get_running_app()
             app.paragraphs = result
             screen_manager = self.manager
@@ -106,7 +109,7 @@ class ConfigScreen(Screen):
         teaching_value = self.ids.teaching_spinner.text
         age_value = self.ids.age_spinner.text
         text_input_value = self.ids.text_input.text
-        
+
         # Print the values to the console
         print(f"Theme: {theme_value}")
         print(f"Style: {style_value}")
@@ -120,7 +123,7 @@ class ConfigScreen(Screen):
             "inspiration": inspiration_value,
             "teaching": teaching_value,
             "age": age_value,
-            "text_input": text_input_value        
+            "text_input": text_input_value
         }
         screen_manager.current = 'loading'
 
