@@ -1,20 +1,19 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 ---
 
 title:
-    "dm001_student demonstration launcher script."
+    "dm001_student demo commands."
 
 description:
-    "This script is used to launch the
+    "This module defines commands for the
     dm001_student demonstration."
 
 id:
     "7b26801b-4f12-4102-9b4e-6bee29b73746"
 
 type:
-    dt001_python_script
+    dt003_python_module
 
 validation_level:
     v00_minimum
@@ -23,7 +22,7 @@ protection:
     k00_general
 
 copyright:
-    "Copyright 2015-2022 William Payne"
+    "Copyright 2015-2023 William Payne"
 
 license:
     "Licensed under the Apache License, Version
@@ -53,23 +52,52 @@ import da.env.run
 
 
 # -----------------------------------------------------------------------------
-def main():
+def start():
     """
-    Run the dm001_student demonstration.
+    Start dm001 system.
 
     """
     dirpath_self       = os.path.dirname(os.path.realpath(__file__))
-    filename_cfg       = 'dm001_student.stableflow.cfg.yaml'
-    filepath_cfg       = os.path.join(dirpath_self, filename_cfg)
     filename_quadrotor = 'quadrotor.urdf'
     filepath_quadrotor = os.path.join(dirpath_self, filename_quadrotor)
     tup_overrides      = (
+       'host.localhost.dirpath_log',                _dirpath_log(),
         'node.simulator.config.filepath_quadrotor', filepath_quadrotor)
-
-    da.env.run.stableflow_start(path_cfg      = filepath_cfg,
-                                tup_overrides = tup_overrides)
+    import da.env.run
+    sys.exit(da.env.run.stableflow_start(path_cfg      = _filepath_cfg(),
+                                         tup_overrides = tup_overrides))
 
 
 # -----------------------------------------------------------------------------
-if __name__ == '__main__':
-    main()
+def stop():
+    """
+    Stop dm001 system.
+
+    """
+    import da.env.run
+    sys.exit(da.env.run.stableflow_stop(path_cfg = _filepath_cfg()))
+
+
+# -----------------------------------------------------------------------------
+def _filepath_cfg():
+    """
+    Return the filepath to the system stableflow configuration file.
+
+    """
+    import da.env
+    return da.env.path(
+            process_area = 'a3_src',
+            control_tier = 'h80_demonstration',
+            relpath      = 'dm001_student/dm001_student.stableflow.cfg.yaml')
+
+
+# -----------------------------------------------------------------------------
+def _dirpath_log():
+    """
+    Return the directory path to the logging directory for this system.
+
+    """
+    import da.env
+    return da.env.path(process_area = 'a4_tmp',
+                       control_tier = 'h80_demonstration',
+                       relpath      = 'dm001_student')
