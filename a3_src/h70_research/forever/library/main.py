@@ -1,10 +1,11 @@
 
 
+import json
+import os
 import sys
 import time
-import json
-import openai
 
+import openai
 import kivy.app
 import kivy.clock
 import kivy.network.urlrequest
@@ -36,7 +37,7 @@ from io import BytesIO
 import codecs
 import dotenv
 
-dotenv.load_dotenv(dotenv_path="\home\wtp\dev\.env")
+dotenv.load_dotenv(dotenv_path="/home/wtp/dev/.env")
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def generate_image_tool( input):
@@ -83,7 +84,7 @@ class LoadingScreen(Screen):
 
         ## For when the backend works
         # hex_json = codecs.encode(json.dumps(app.settings).encode(), "hex")
-        # req = UrlRequest('http://localhost:8080/story:' + str(hex_json), 
+        # req = UrlRequest('http://localhost:8080/story:' + str(hex_json),
         #                  on_success=self.on_success)
         # Clock.schedule_interval(lambda dt: self.check_results(hex_json), 1)
 
