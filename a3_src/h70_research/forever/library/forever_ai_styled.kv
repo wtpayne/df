@@ -1,0 +1,193 @@
+#: kivy 2.0.0
+
+<LoadingScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(20)
+        padding: dp(40)
+        canvas.before:
+            Color:
+                rgba: 0.2, 0.2, 0.2, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'Loading...'
+            font_size: sp(24)
+            halign: 'center'
+            valign: 'middle'
+            text_size: self.width, None
+            bold: True
+            color: 1, 1, 1, 1
+
+<CardListScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.9, 0.9, 0.9, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        ScrollView:
+            BoxLayout:
+                id: cards_layout
+                orientation: 'vertical'
+                size_hint_y: None
+                spacing: 15
+                padding: dp(10)
+
+<ParagraphScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        canvas.before:
+            Color:
+                rgba: 0.9, 0.9, 0.9, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            id: paragraph_label
+            text: root.current_paragraph_text
+            font_size: "22sp"
+            halign: "center"
+            valign: "middle"
+            text_size: self.width, None
+            size_hint_y: 0.9
+            color: 0.1, 0.1, 0.1, 1
+        BoxLayout:
+            size_hint_y: 0.1
+            Button:
+                text: "<"
+                font_size: "24sp"
+                background_normal: ''
+                background_color: 0.2, 0.2, 0.2, 1
+                color: 1, 1, 1, 1
+                on_press: root.previous_paragraph()
+            Button:
+                text: ">"
+                font_size: "24sp"
+                background_normal: ''
+                background_color: 0.2, 0.2, 0.2, 1
+                color: 1, 1, 1, 1
+                on_press: root.next_paragraph()
+
+<ConfigScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(20)
+        canvas.before:
+            Color:
+                rgba: 0.9, 0.9, 0.9, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: 'Configure your preferences'
+            font_size: sp(32)
+            color: 0.3, 0.3, 0.3, 1
+            bold: True
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: sp(40)
+
+            Label:
+                text: 'Theme'
+                color: 0.2, 0.2, 0.2, 1
+
+            Spinner:
+                id: theme_spinner
+                text: 'Select Theme'
+                values: root.theme_values
+                background_color: 0.2, 0.2, 0.2, 1
+                color: 1, 1, 1, 1
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: sp(40)
+        Label:
+            text: 'Style'
+            color: 0.2, 0.2, 0.2, 1
+
+        Spinner:
+            id: style_spinner
+            text: 'Select Style'
+            values: root.style_values
+            background_color: 0.2, 0.2, 0.2, 1
+            color: 1, 1, 1, 1
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: sp(40)
+
+        Label:
+            text: 'Inspiration'
+            color: 0.2, 0.2, 0.2, 1
+
+        Spinner:
+            id: inspiration_spinner
+            text: 'Select Inspiration'
+            values: root.inspiration_values
+            background_color: 0.2, 0.2, 0.2, 1
+            color: 1, 1, 1, 1
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: sp(40)
+
+        Label:
+            text: 'Teaching'
+            color: 0.2, 0.2, 0.2, 1
+
+        Spinner:
+            id: teaching_spinner
+            text: 'Select Teaching'
+            values: root.teaching_values
+            background_color: 0.2, 0.2, 0.2, 1
+            color: 1, 1, 1, 1
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: sp(40)
+
+        Label:
+            text: 'Age'
+            color: 0.2, 0.2, 0.2, 1
+
+        Spinner:
+            id: age_spinner
+            text: 'Select Age'
+            values: root.age_values
+            background_color: 0.2, 0.2, 0.2, 1
+            color: 1, 1, 1, 1
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: sp(40)
+
+        Label:
+            text: 'Text Input'
+            color: 0.2, 0.2, 0.2, 1
+
+        TextInput:
+            id: text_input
+            multiline: False
+            background_color: 1, 1, 1, 1
+            cursor_color: 0.1, 0.1, 0.1, 1
+
+    Button:
+        text: 'Submit'
+        size_hint_y: None
+        height: sp(40)
+        background_normal: ''
+        background_color: 0.2, 0.2, 0.2, 1
+        color: 1, 1, 1, 1
+        on_press: root.submit()
