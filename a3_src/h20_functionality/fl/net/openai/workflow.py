@@ -45,6 +45,7 @@ license:
 ...
 """
 
+import copy
 import pprint
 import textwrap
 
@@ -137,7 +138,10 @@ template_paragraph = textwrap.dedent("""
 
     {story_characters}
 
-    The story should be {story_description}.
+    The story should be a {style} story about
+    {theme} suitable for an {age}-year old inspired
+    by {inspiration} that teaches {teaching}
+
     The scene should have a topic sentence,
     supporting content, and a concluding sentence.
     The scene content should be between 100 and
@@ -153,26 +157,48 @@ template_paragraph = textwrap.dedent("""
     ## Scene {scene_number}:
     """)
 
+template_summary = textwrap.dedent("""
+    Please summarize the events in the following story:
+
+    {summary_input}
+
+    """)
+
 template_rewrite = textwrap.dedent("""
-    You are an editor. As an editor, you edit draft scripts to convert them to final drafts.
+    You are an editor. As an editor, you edit
+    draft scripts to convert them to final
+    drafts.
+
     Characters: {characters}
+
     Story Outline: {outline}
-    The theme is {theme}, in the style of a {style} story, inspired by {inspiration}.
+
+    The theme is {theme}, in the style of a
+    {style} story, inspired by {inspiration}.
+
     The story is meant to teach the kid about {teaching}
+
     Pretend you are reading it to a {age}-year-old kid.
     Customise the story so that {custom_instruction}.
-    Story: {story} End of Story
-    Make sure to add connecting sentences between scenes, and create a flowing story.
-    Keep a balance between dialog, descriptions, and narration in the final draft.
+
+    Story: {story}
+    End of Story
+
+    Make sure to add connecting sentences between
+    scenes, and create a flowing story. Keep a
+    balance between dialog, descriptions, and
+    narration in the final draft.
+
     Keep chapter titles in your story.
     Proceed with the rewrite of the story.
-    The story should be at least {len(story)} words long.
+    The story should be at least {story_length} words long.
     """)
 
 list_template_default = [{
         'characters': {'template': template_characters},
         'outline':    {'template': template_outline},
         'paragraph':  {'template': template_paragraph},
+        'summary':    {'template': template_summary},
         'rewrite':    {'template': template_rewrite}}]
 
 import fl.util
@@ -188,13 +214,15 @@ def coro(cfg):
 
     list_template = list()
     list_param    = list()
+    list_resource = list()
 
     while True:
 
-        (result, param) = yield (list_template, list_param)
+        (result, param) = yield (list_template, list_param, list_resource)
 
         list_template.clear()
         list_param.clear()
+        list_resource.clear()
 
         # Default templates.
         #
@@ -210,102 +238,70 @@ def coro(cfg):
         # Parameters from OpenAI result (i.e. prev step)
         #
         if result is not None:
-            param_new = _get_params(result)
+            (param_new, final_text) = _get_next_outputs(result)
             if param_new is not None:
                 list_param.append(param_new)
+            if final_text is not None:
+                list_resource.append(final_text)
 
 
 # -----------------------------------------------------------------------------
-def _get_params(result):
+def _get_next_outputs(result):
     """
     """
     id_prompt = result['request']['_id_prompt']
-    param     = result['request']['_param']
 
-
+    ### CHARACTERS ###
     if id_prompt == 'characters':
-        story_characters = result['response']['choices'][0]['text']
+        story_characters          = result['response']['choices'][0]['text']
+        param                     = result['request']['_param']
         param['story_characters'] = story_characters
-        return {
-            'outline': param
-        }
+        return ({'outline': param}, None)
 
+    ### OUTLINE ###
     if id_prompt == 'outline':
-        story_outline = result['response']['choices'][0]['text']
+        story_outline      = result['response']['choices'][0]['text']
+        param              = result['request']['_param']
+        list_chapter_param = list()
 
-        queue_param = list()
         for (chapter_title, subchapter_list) in story_outline.items():
             for (scene_number, subchapter_title) in enumerate(subchapter_list):
-                queue_param.append()
+                param['story_outline']    = story_outline
+                param['chapter_title']    = chapter_title
+                param['subchapter_title'] = subchapter_title
+                param['scene_number']     = scene_number + 1
+                list_chapter_param.append(copy.deepcopy(param))
 
+        param_new                     = list_chapter_param.pop(0)
+        param_new['_queue']           = list_chapter_param
+        param_new['_chapter_text']    = ""
+        param_new['_history_summary'] = ""
+        param_new['_history']         = ""
+        return ({'paragraph': param_new}, None)
 
-            # chapter_text = generate_paragraph(
-            #     story_description, story_outline, story_characters, chapter_title, subchapter_title, scene_number+1, history_summary)
-            # history_summary = summarise(history_summary + chapter_text)
-            # print()
-            # print(chapter_text)
-            # print()
-            # # chapter = rewrite_chapter(story_outline, chapter_number, chapter_title)
-            # history += chapter_text
+    ### PARAGRAPH ###
+    if id_prompt == 'paragraph':
+        chapter_text               = result['response']['choices'][0]['text']
+        param                      = result['request']['_param']
+        list_chapter_param         = param['_queue']
+        param_new                  = list_chapter_param.pop(0)
+        param_new['_queue']        = list_chapter_param
+        param_new['summary_input'] = param['_history_summary'] + chapter_text
+        param_new['_history']      = param['_history']         + chapter_text
+        param_new['_chapter_text'] = chapter_text
+        return ({'summary': param_new}, None)
 
+    ### PARAGRAPH SUMMARY ###
+    if id_prompt == 'summary':
+        summary_text              = result['response']['choices'][0]['text']
+        param                     = result['request']['_param']
+        param['_history_summary'] = summary_text
+        if param['_queue']:
+            return ({'paragraph': param}, None)
+        else:
+            return ({'rewrite': param}, None)
 
-        param['story_outline'] = story_outline
-        return {
-            'something': param
-        }
-
-
-
-    return chapters, story_characters, story_outline
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # def _add_param(id_prompt, **kwargs):
-    #     list_param.append({id_prompt: kwargs})
-
-
-    # def _add_template(id_prompt, str_template):
-    #     list_template.append({id_prompt: {'guid':      'test_guid_string',
-    #                                       'version':   'test_version_string',
-    #                                       'template':  str_template}})
-
-
-    # _add_template(id_prompt    = id_prompt,
-    #               str_template = 'Please tell me some facts about {topic}.')
-
-    # _add_param(id_prompt = id_prompt,
-    #            topic     = 'Cars',
-    #            _options  = { 'engine': 'text-curie-001' })
-    # _add_param(id_prompt = id_prompt, topic = 'Lorries')
-
-
+    ### REWRITE ###
+    if id_prompt == 'rewrite':
+        final_text = result['response']['choices'][0]['text']
+        return (None, final_text)
