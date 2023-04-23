@@ -1,7 +1,8 @@
 
 
 import sys
-
+import time
+import json
 
 import kivy.app
 import kivy.clock
@@ -18,13 +19,32 @@ import kivy.uix.screenmanager
 
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
-from kivy.properties import ObjectProperty
 from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
+
+class LoadingScreen(Screen):
+    def on_enter(self, *args):
+        app = App.get_running_app()
+
+        # screen_manager = self.parent
+        # screen_manager = self.manager #self.parent
+
+        # TODO: Send request to backend and generate paragraphs
+        time.sleep(5)
+
+        paragraphs = [
+            json.dumps(app.settings)
+        ]
+
+        # screen_manager.get_screen('reader').paragraphs = paragraphs
+        app.paragraphs = kivy.properties.ListProperty(paragraphs)
+        screen_manager = self.manager
+        print(screen_manager.current) 
+        screen_manager.current = 'reader'
 
 class ConfigScreen(Screen):
     # Define dropdowns and text input as ObjectProperties
@@ -35,6 +55,8 @@ class ConfigScreen(Screen):
     age_values = ['Below 18', '18-25', '26-40', '41-60', 'Above 60']
     
     def submit(self):
+        app = App.get_running_app()
+
         # Get the selected values from the dropdowns and the text from the text input
         theme_value = self.ids.theme_spinner.text
         style_value = self.ids.style_spinner.text
@@ -49,25 +71,40 @@ class ConfigScreen(Screen):
         print(f"Inspiration: {inspiration_value}")
         print(f"Teaching: {teaching_value}")
 
-class ParagraphScreen(Screen):
+        screen_manager = self.manager #self.parent
+        # screen_manager.get_screen('loading')
+        # screen_manager.current = 'loading'
+        app.settings = {
+            "theme": theme_value,
+            "style": style_value,
+            "inspiration": inspiration_value,
+            "teaching": teaching_value,
+            "age": age_value,
+            "text_input": text_input_value        
+        }
+        screen_manager.current = 'loading'
 
-    paragraphs = kivy.properties.ListProperty([
-        "This is the first paragraph.",
-        "This is the second paragraph.",
-        "This is the third paragraph."
-    ])
-    current_paragraph_index = 0
+
+class ParagraphScreen(Screen):
 
     @property
     def current_paragraph_text(self):
-        return self.paragraphs[self.current_paragraph_index]
+        app = App.get_running_app()
+
+        if len(app.paragraphs) == 0:
+            return "No story loaded yet"
+        else:
+            return app.paragraphs[app.current_paragraph_index]
 
     def previous_paragraph(self):
-        self.current_paragraph_index = (self.current_paragraph_index - 1) % len(self.paragraphs)
+        app = App.get_running_app()
+
+        app.current_paragraph_index = (app.current_paragraph_index - 1) % len(app.paragraphs)
         self.ids.paragraph_label.text = self.current_paragraph_text
 
     def next_paragraph(self):
-        self.current_paragraph_index = (self.current_paragraph_index + 1) % len(self.paragraphs)
+        app = App.get_running_app()
+        app.current_paragraph_index = (app.current_paragraph_index + 1) % len(app.paragraphs)
         self.ids.paragraph_label.text = self.current_paragraph_text
 
 
@@ -80,18 +117,22 @@ class ParagraphScreen(Screen):
 
 class ForeverApp(App):
     def build(self):
+        self.settings = {}
+        self.paragraphs = []
+        self.current_paragraph_index = 0
+
         # Create the screen manager
         screen_manager = ScreenManager()
 
         # Create the screens
-        main_screen = ParagraphScreen(name='reader')
         second_screen = ConfigScreen(name='parameters')
-        # third_screen = ThirdScreen(name='third')
+        third_screen = LoadingScreen(name='loading')
+        main_screen = ParagraphScreen(name='reader')
 
         # Add the screens to the screen manager
-        screen_manager.add_widget(main_screen)
         screen_manager.add_widget(second_screen)
-        # screen_manager.add_widget(third_screen)
+        screen_manager.add_widget(third_screen)
+        screen_manager.add_widget(main_screen)
 
         # Create the navigation bar
         nav_bar = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))

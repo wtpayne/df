@@ -1,5 +1,14 @@
 #:kivy 2.0.0
 
+<LoadingScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        Spinner:
+            size_hint: None, None
+            size: dp(100), dp(100)
+            active: True
+        Label:
+            text: 'Loading...'
 <ParagraphScreen>:
     BoxLayout:
         orientation: "vertical"
