@@ -263,11 +263,11 @@ def _is_up_to_date(dirpath_root, id_env, dirpath_env):
 
     """
     mtime_venv_pkg  = os.path.getmtime(_dirpath_venv_pkg(dirpath_env))
-    mtime_venv_whl  = os.path.getmtime(_dirpath_venv_whl(dirpath_env))
+    # mtime_venv_whl  = os.path.getmtime(_dirpath_venv_whl(dirpath_env))
     mtime_envspec   = os.path.getmtime(_filepath_envspec(dirpath_root, id_env))
     is_updated_pkg  = mtime_venv_pkg > mtime_envspec
-    is_updated_whl  = mtime_venv_whl > mtime_envspec
-    is_updated_venv = is_updated_pkg or is_updated_whl
+    # is_updated_whl  = mtime_venv_whl > mtime_envspec
+    is_updated_venv = is_updated_pkg #or is_updated_whl
     return is_updated_venv
 
 
@@ -277,7 +277,7 @@ def _dirpath_venv_pkg(dirpath_env):
     Return the path of the virtual environment site packages directory.
 
     """
-    return os.path.join(dirpath_env, 'lib', 'python3.8', 'site-packages')
+    return os.path.join(dirpath_env, 'lib', 'python3.10', 'site-packages')
 
 
 # -----------------------------------------------------------------------------
