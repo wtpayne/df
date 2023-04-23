@@ -101,16 +101,19 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         # Step the workflow engine for each
         # input received.
         #
-        list_templ_output = list()
-        list_param_output = list()
+        list_templ_output    = list()
+        list_param_output    = list()
+        list_resource_output = list()
         for map_result in list_result_input:
-            (list_template, list_param) = engine.send((map_result, None))
+            (list_template, list_param, list_resource) = engine.send((map_result, None))
             list_templ_output.extend(list_template)
             list_param_output.extend(list_param)
+            list_resource_output.extend(list_resource)
         for map_param in list_param_input:
-            (list_template, list_param) = engine.send((None, map_param))
+            (list_template, list_param, list_resource) = engine.send((None, map_param))
             list_templ_output.extend(list_template)
             list_param_output.extend(list_param)
+            list_resource_output.extend(list_resource)
 
         # Output any new templates which have
         # been generated.
@@ -118,10 +121,9 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         if list_templ_output:
             outputs['template']['ena']     = True
             outputs['template']['list'][:] = list_templ_output
-
-        # Output any new parameters which have
-        # been generated.
-        #
         if list_param_output:
-            outputs['param']['ena']     = True
-            outputs['param']['list'][:] = list_param_output
+            outputs['param']['ena']        = True
+            outputs['param']['list'][:]    = list_param_output
+        if list_resource_output:
+            outputs['resource']['ena']     = True
+            outputs['resource']['list'][:] = list_resource_output
