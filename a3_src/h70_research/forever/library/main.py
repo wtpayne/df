@@ -3,6 +3,7 @@
 import sys
 import time
 import json
+import openai
 
 import kivy.app
 import kivy.clock
@@ -29,8 +30,24 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.network.urlrequest import UrlRequest
 from kivy.clock import Clock
 from kivy.uix.label import Label
+from kivy.uix.image import AsyncImage
+from io import BytesIO
 
 import codecs
+import dotenv
+
+dotenv.load_dotenv(dotenv_path="\home\wtp\dev\.env")
+openai.api_key = os.getenv('OPENAI_API_KEY')
+
+def generate_image_tool( input):
+    prompt = f"{input}"
+    response = openai.Image.create(
+        prompt=prompt[:900] + ". IN THE STYLE OF CHILDRENS BOOK ILLUSTRATION BY Ernest Howard Shepard",
+        size="512x512"
+    )
+
+    image_url = response['data'][0]['url']
+    return image_url
 
 class LoadingScreen(Screen):
     def on_enter(self, *args):
@@ -59,21 +76,17 @@ class LoadingScreen(Screen):
         #         "Eliana, Kai, Zara, and Rami stood victorious over the defeated Emrys. The magical creatures cheered and applauded, grateful for their heroism. As they made their way back to the portal that would take them home, Eliana reflected on her journey. She had faced her fears and doubts, and had come out stronger on the other side. She now accepted her dyslexia as a part of who she was, and saw it as an advantage in the magical world. \n\n\"Thank you all for everything,\" Eliana said, turning to her friends. \"I couldn't have done it without you.\"\n\n\"Hey, we're a team, remember?\" Kai said with a grin.\n\n\"Always,\" Zara added, beaming.\n\n\"And we're not done yet,\" Rami said, nodding toward the portal. \"Who knows what other adventures await us?\"\n\nEliana smiled, feeling a sense of excitement and possibility. She now knew that she was capable of anything, as long as she had the support and love of her friends. As they stepped through the portal and returned to their ordinary world, Eliana felt a newfound sense of confidence and purpose. She knew that she would continue to go on adventures and help others, now with a deep understanding of the importance of inclusivity and celebrating differences."
         # ]
 
-        # # app.paragraphs = story
-        # # screen_manager = self.manager
-        # # screen_manager.current = 'reader'
+        # app.paragraphs = story
+        # screen_manager = self.manager
+        # screen_manager.current = 'reader'
 
-        ## disable for demo
-        hex_json = codecs.encode(json.dumps(app.settings).encode(), "hex")
-
-        # # Send request to backend and check results endpoint for response
+        ## For when the backend works
+        # hex_json = codecs.encode(json.dumps(app.settings).encode(), "hex")
         # req = UrlRequest('http://localhost:8080/story:' + str(hex_json), 
         #                  on_success=self.on_success)
+        # Clock.schedule_interval(lambda dt: self.check_results(hex_json), 1)
+
         Clock.schedule_interval(lambda dt: self.check_results(), 1)
-        # Send request to backend and check results endpoint for response
-        req = UrlRequest('http://localhost:8080/story:' + str(hex_json),
-                         on_success=self.on_success)
-        Clock.schedule_interval(lambda dt: self.check_results(hex_json), 1)
 
     def check_results(self):
         req = UrlRequest('http://172.27.190.0:8080/story',
@@ -152,6 +165,14 @@ class ParagraphScreen(Screen):
         if len(app.paragraphs) != 0:
             app.current_paragraph_index = (app.current_paragraph_index - 1) % len(app.paragraphs)
             self.ids.paragraph_label.text = self.current_paragraph_text
+            self.ids.page_label.text = f"{app.current_paragraph_index+1}/{len(app.paragraphs)}"
+
+            image_url = generate_image_tool(self.ids.paragraph_label.text)
+            # Create and add the AsyncImage widget to the layout
+            image = AsyncImage(source=image_url, size_hint_y=1.0)
+            self.ids.image_box.clear_widgets()
+            self.ids.image_box.add_widget(image)
+
 
     def next_paragraph(self):
         app = App.get_running_app()
@@ -159,9 +180,25 @@ class ParagraphScreen(Screen):
         if len(app.paragraphs) != 0:
             app.current_paragraph_index = (app.current_paragraph_index + 1) % len(app.paragraphs)
             self.ids.paragraph_label.text = self.current_paragraph_text
+            self.ids.page_label.text = f"{app.current_paragraph_index+1}/{len(app.paragraphs)}"
+
+            image_url = generate_image_tool(self.ids.paragraph_label.text)
+            # Create and add the AsyncImage widget to the layout
+            image = AsyncImage(source=image_url, size_hint_y=1.0)
+            self.ids.image_box.clear_widgets()
+            self.ids.image_box.add_widget(image)
+
 
     def on_enter(self, *args):
-        self.current_paragraph_text
+        self.ids.paragraph_label.text = self.current_paragraph_text
+        app = App.get_running_app()
+        self.ids.page_label.text = f"{app.current_paragraph_index+1}/{len(app.paragraphs)}"
+        # Load image data and create a file-like object from it
+        image_url = generate_image_tool(self.ids.paragraph_label.text)
+        # Create and add the AsyncImage widget to the layout
+        image = AsyncImage(source=image_url, size_hint_y=1.0)
+        self.ids.image_box.clear_widgets()
+        self.ids.image_box.add_widget(image)
 
 # class ForeverApp(kivy.app.App):
 
