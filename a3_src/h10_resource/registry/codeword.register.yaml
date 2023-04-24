@@ -17,7 +17,7 @@ register:
     legend:     [dm004_legend]
     invicta:    [p0000_invicta]
     atlas:      [z0001_atlas]
-    chicago:    Null
+    chicago:    [dm005_chicago]
     viking:     Null
     dragon:     Null
     cipher:     Null
