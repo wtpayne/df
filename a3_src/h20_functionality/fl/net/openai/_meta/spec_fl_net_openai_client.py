@@ -65,6 +65,7 @@ class SpecifyOpenAiClient:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_supports_import_of_openai_client(self):
         """
         fl.net.openai.client can be imported.
@@ -73,6 +74,7 @@ class SpecifyOpenAiClient:
         import fl.net.openai.client
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_supports_creation_of_the_main_coroutine(self, cfg_valid):
         """
         fl.net.openai.client coro() can be created.
@@ -83,6 +85,7 @@ class SpecifyOpenAiClient:
         assert inspect.isgenerator(client)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_validates_provided_configuration(self, cfg_invalid):
         """
         fl.net.openai.client coro() can be created.

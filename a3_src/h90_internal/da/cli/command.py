@@ -181,8 +181,8 @@ def all():
     Run all tests.
 
     """
-    import da.cli.test
-    sys.exit(da.cli.test.all(dirpath_src = _dirpath_src()))
+    import da.test
+    sys.exit(da.test.all())
 
 
 # -----------------------------------------------------------------------------

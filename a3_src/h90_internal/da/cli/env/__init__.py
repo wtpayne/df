@@ -55,6 +55,7 @@ import subprocess
 import click
 
 import da.cli.group
+import da.env
 
 
 # -----------------------------------------------------------------------------
@@ -63,8 +64,7 @@ def add_env_tools(grp_parent):
     Add environment specific tools to the specified click command group.
 
     """
-    dirpath_root = _dirpath_root()
-    for (id_env, cfg_env) in _gen_cfg_env(dirpath_root):
+    for (id_env, cfg_env) in da.env.iter_cfg_env():
 
         # Add a click command group for each
         # environment with an envspec file in
@@ -111,38 +111,6 @@ def add_env_tools(grp_parent):
                             help     = 'Start a {name} {type}.'.format(
                                                             name = toolname,
                                                             type = tooltype)))
-
-
-# -----------------------------------------------------------------------------
-def _dirpath_root():
-    """
-    Return the directory path of the root of the repository.
-
-    """
-    dirpath_self = os.path.dirname(os.path.realpath(__file__))
-    relpath_root = '../../../../..'
-    dirpath_root = os.path.normpath(os.path.join(dirpath_self, relpath_root))
-    return dirpath_root
-
-
-# -----------------------------------------------------------------------------
-def _gen_cfg_env(dirpath_root):
-    """
-    Yield an id_env, cfg_env pair for each managed environment.
-
-    """
-    relpath_spec = 'a3_src/h10_resource/envspec'
-    dirpath_spec = os.path.join(dirpath_root, relpath_spec)
-    str_ext      = '.envspec.json'
-    num_ext      = len(str_ext)
-
-    for name in sorted(os.listdir(dirpath_spec)):
-        if name.endswith(str_ext):
-            id_env   = name[0:-num_ext]
-            filepath = os.path.join(dirpath_spec, name)
-            with open(filepath, 'rt') as file:
-                cfg_env = json.load(file)
-            yield (id_env, cfg_env)
 
 
 # -----------------------------------------------------------------------------

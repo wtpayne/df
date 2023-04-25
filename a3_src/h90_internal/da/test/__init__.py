@@ -46,6 +46,41 @@ license:
 
 
 # -----------------------------------------------------------------------------
+def all():
+    """
+    """
+    import da.env
+    tup_id_env         = tuple(da.env.iter_id_env())
+    list_retval        = list()
+    tup_id_tier_ignore = ('h00_thirdparty',
+                          'h10_resource',
+                          'h70_research')
+    tup_id_env_ignore  = ('e000_design_automation_core',
+                          'e001_process_assistant')
+    for id_tier in da.env.tup_control_tier():
+
+        if id_tier in tup_id_tier_ignore:
+            continue
+
+        for id_env in tup_id_env:
+
+            if id_env in tup_id_env_ignore:
+                continue
+
+            list_retval.append(run_pytest(
+                    path         = da.env.path(
+                                        process_area = 'a3_src',
+                                        control_tier = id_tier,
+                                        relpath      = '.'),
+                    filepath_cfg = da.env.path(
+                                        process_area = 'a3_src',
+                                        control_tier = 'h90_internal',
+                                        relpath      = 'da/test/pytest.ini'),
+                    id_env       = id_env,
+                    expr_mark    = id_env))
+
+
+# -----------------------------------------------------------------------------
 def run(control_tier, relpath, id_env):
     """
     Run test.

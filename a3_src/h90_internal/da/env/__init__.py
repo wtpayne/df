@@ -67,6 +67,58 @@ import time
 
 
 # -----------------------------------------------------------------------------
+def tup_control_tier():
+    """
+    Return a tuple with all control tiers in it.
+
+    """
+    return ('h00_thirdparty',
+            'h10_resource',
+            'h20_functionality',
+            'h30_platform',
+            'h40_component',
+            'h50_product',
+            'h60_bespoke',
+            'h70_research',
+            'h80_demonstration',
+            'h90_internal')
+
+# -----------------------------------------------------------------------------
+def iter_id_env():
+    """
+    Yield all known id_env in the current workspace.
+
+    """
+    str_ext = '.envspec.json'
+    num_ext = len(str_ext)
+
+    for name in sorted(os.listdir(path(process_area = 'a3_src',
+                                       control_tier = 'h10_resource',
+                                       relpath      = 'envspec'))):
+        if name.endswith(str_ext):
+            id_env = name[0:-num_ext]
+            yield id_env
+
+
+# -----------------------------------------------------------------------------
+def iter_cfg_env():
+    """
+    Yield all known env config in the current workspace.
+
+    """
+    str_ext = '.envspec.json'
+    num_ext = len(str_ext)
+    dirpath = path(process_area = 'a3_src',
+                   control_tier = 'h10_resource',
+                   relpath      = 'envspec')
+    for name in sorted(os.listdir(dirpath)):
+        if name.endswith(str_ext):
+            id_env = name[0:-num_ext]
+            with open(os.path.join(dirpath, name), 'rt') as file:
+                yield (id_env, json.load(file))
+
+
+# -----------------------------------------------------------------------------
 def path(process_area = 'a3_src',
          control_tier = None,
          id_env       = None,
@@ -91,17 +143,7 @@ def path(process_area = 'a3_src',
     # in the src and tmp process areas.
     #
     if process_area in ('a3_src', 'a4_tmp'):
-        tup_valid_control_tier = ('h00_thirdparty',
-                                  'h10_resource',
-                                  'h20_functionality',
-                                  'h30_platform',
-                                  'h40_component',
-                                  'h50_product',
-                                  'h60_bespoke',
-                                  'h70_research',
-                                  'h80_demonstration',
-                                  'h90_internal')
-        assert control_tier in tup_valid_control_tier
+        assert control_tier in tup_control_tier()
         tup_path_parts = (dirpath_root,
                           process_area,
                           control_tier,
