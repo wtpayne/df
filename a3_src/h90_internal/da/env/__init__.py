@@ -93,7 +93,7 @@ def path(process_area = 'a3_src',
     if process_area in ('a3_src', 'a4_tmp'):
         tup_valid_control_tier = ('h00_thirdparty',
                                   'h10_resource',
-                                  'h20_capability',
+                                  'h20_functionality',
                                   'h30_platform',
                                   'h40_component',
                                   'h50_product',

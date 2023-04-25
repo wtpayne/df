@@ -45,13 +45,16 @@ license:
 """
 
 
+import sys
+
+
 # -----------------------------------------------------------------------------
 def test():
     """
     Run dm005 tests.
 
     """
-    import da.env
-    dirpath = da.env.path(process_area = 'a3_src',
-                          control_tier = 'h70_research')
-    print(dirpath)
+    import da.test
+    sys.exit(da.test.run(control_tier = 'h20_functionality',
+                         relpath      = 'fl/net/openai',
+                         id_env       = 'e002_general_research'))

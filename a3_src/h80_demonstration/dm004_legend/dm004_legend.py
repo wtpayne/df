@@ -159,7 +159,7 @@ def test():
     Run dm004 tests.
 
     """
-    import da.env
-    dirpath = da.env.path(process_area = 'a3_src',
-                          control_tier = 'h70_research')
-    print(dirpath)
+    import da.test
+    sys.exit(da.test.run(control_tier = 'h70_research',
+                         relpath      = 'forever/library',
+                         id_env       = 'e002_general_research'))
