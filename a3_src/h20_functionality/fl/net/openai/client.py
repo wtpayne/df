@@ -129,6 +129,7 @@ def coro(cfg):
     """
     assert 'api_key'           in cfg
     assert 'secs_interval'     in cfg
+    assert 'is_bit'            in cfg
     assert 'default'           in cfg
     assert 'model'             in cfg['default']
     assert 'temperature'       in cfg['default']
@@ -228,7 +229,9 @@ def _daemon(cfg):
             time.sleep(cfg['secs_interval'])
             continue
 
-        result = _process_request(request, default = cfg['default'])
+        result = _process_request(request,
+                                  default = cfg['default'],
+                                  is_bit  = cfg['is_bit'])
 
         if result['error'] is not None:
             cfg['queue_error'].put(result['error'], block = False)
@@ -240,7 +243,7 @@ def _daemon(cfg):
 
 
 # -----------------------------------------------------------------------------
-def _process_request(request, default):
+def _process_request(request, default, is_bit):
     """
     Process a single request, returning a (result, error) pair.
 
@@ -283,10 +286,23 @@ def _process_request(request, default):
     result = dict(request  = request,
                   response = None,
                   error    = None)
-
-    try:
-        result['response'] = openai.ChatCompletion.create(**kwargs)
-    except openai.OpenAIError as err:
-        result['error'] = err.user_message
+    if is_bit:
+        result['response'] = {
+                "id":       "chatcmpl-abc123",
+                "object":   "chat.completion",
+                "created":  1677858242,
+                "model":    "gpt-3.5-turbo-0301",
+                "usage":    { "prompt_tokens":     13,
+                              "completion_tokens": 7,
+                              "total_tokens":      20},
+                "choices":  [ { "message":         { "role":    "assistant",
+                                                     "content": "\n\nTest"},
+                                "finish_reason":   "stop",
+                                "index":           0}]}
+    else:
+        try:
+            result['response'] = openai.ChatCompletion.create(**kwargs)
+        except openai.OpenAIError as err:
+            result['error'] = err.user_message
 
     return result

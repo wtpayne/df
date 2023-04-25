@@ -5,7 +5,36 @@ Functional specification for fl.net.openai.client
 """
 
 
+import inspect
+
 import pytest
+
+
+# -----------------------------------------------------------------------------
+@pytest.fixture
+def cfg_valid():
+    """
+    """
+    return {
+        'is_bit':           True,
+        'api_key':          'test_api_key',
+        'secs_interval':    0.01,
+        'default':          {
+            'model':             'gpt-3.5-turbo',
+            'temperature':       0.7,
+            'n':                 1,
+            'stream':            'test_stream',
+            'presence_penalty':  'test_presence_penalty',
+            'frequency_penalty': 'test_frequency_penalty',
+            'user':              'test_user'}}
+
+# -----------------------------------------------------------------------------
+@pytest.fixture
+def cfg_invalid():
+    """
+    """
+    return {}
+
 
 
 # =============================================================================
@@ -24,42 +53,22 @@ class SpecifyOpenAiClient:
         import fl.net.openai.client
 
     # -------------------------------------------------------------------------
-    def it_supports_creation_of_the_main_coroutine(self):
+    def it_supports_creation_of_the_main_coroutine(self, cfg_valid):
         """
         fl.net.openai.client coro() can be created.
 
         """
         import fl.net.openai.client
-        client = fl.net.openai.client.coro(cfg = {})
+        client = fl.net.openai.client.coro(cfg = cfg_valid)
+        assert inspect.isgenerator(client)
 
     # -------------------------------------------------------------------------
-    def it_validates_provided_configuration(self):
+    def it_validates_provided_configuration(self, cfg_invalid):
         """
         fl.net.openai.client coro() can be created.
 
         """
         import fl.net.openai.client
-        client = fl.net.openai.client.coro(cfg = {})
+        with pytest.raises(AssertionError):
+            fl.net.openai.client.coro(cfg = cfg_invalid)
 
-
-# {
-#    "id":       "chatcmpl-abc123",
-#    "object":   "chat.completion",
-#    "created":  1677858242,
-#    "model":    "gpt-3.5-turbo-0301",
-#    "usage": {
-#       "prompt_tokens":13,
-#       "completion_tokens":7,
-#       "total_tokens":20
-#    },
-#    "choices":[
-#       {
-#          "message":{
-#             "role":"assistant",
-#             "content":"\n\nThis is a test!"
-#          },
-#          "finish_reason":"stop",
-#          "index":0
-#       }
-#    ]
-# }
