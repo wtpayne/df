@@ -14,6 +14,8 @@ import pytest
 @pytest.fixture
 def cfg_valid():
     """
+    Return some valid configuration.
+
     """
     return {
         'is_bit':           True,
@@ -28,18 +30,13 @@ def cfg_valid():
             'frequency_penalty': 'test_frequency_penalty',
             'user':              'test_user'}}
 
+
 # -----------------------------------------------------------------------------
 @pytest.fixture
 def cfg_invalid():
     """
-    """
-    return {}
+    Return some invalid configuration.
 
-
-# -----------------------------------------------------------------------------
-@pytest.fixture
-def request_valid():
-    """
     """
     return {}
 
@@ -58,9 +55,9 @@ def expected_bit_response():
 
 
 # =============================================================================
-class SpecifyOpenAiClient:
+class SpecifyFlNetOpenAiClient:
     """
-    Spec for openai client functionality.
+    Spec for the fl.net.openai.client package.
 
     """
 

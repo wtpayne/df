@@ -45,6 +45,7 @@ license:
 """
 
 
+import os
 import sys
 
 
@@ -54,7 +55,20 @@ def test():
     Run dm005 tests.
 
     """
+    EXIT_SUCCESS = 0
+    EXIT_FAILURE = 1
+
     import da.test
-    sys.exit(da.test.run(control_tier = 'h20_functionality',
-                         relpath      = 'fl/net/openai',
-                         id_env       = 'e002_general_research'))
+    retcode_fl = da.test.run(control_tier = 'h20_functionality',
+                             relpath      = 'fl/net/openai',
+                             id_env       = 'e002_general_research')
+    is_ok_fl   = retcode_fl == EXIT_SUCCESS
+    retcode_cl = da.test.run(control_tier = 'h40_component',
+                             relpath      = 'cl/net/openai',
+                             id_env       = 'e002_general_research')
+    is_ok_cl   = retcode_cl == EXIT_SUCCESS
+
+    if is_ok_fl and is_ok_cl:
+        return EXIT_SUCCESS
+    else:
+        return EXIT_FAILURE
