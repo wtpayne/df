@@ -163,19 +163,100 @@ def kivy(control_tier,
     assert do_android_p4a    in (True, False)
     assert isinstance(android_p4a_args, (str, NONETYPE))
 
+    list_opts = _build_list_opts(profile           = profile,
+                                 do_verbose        = do_verbose,
+                                 target            = target,
+                                 build             = build,
+                                 do_appclean       = do_appclean,
+                                 do_distclean      = do_distclean,
+                                 do_help           = do_help,
+                                 do_init           = do_init,
+                                 do_serve          = do_serve,
+                                 do_setdefault     = do_setdefault,
+                                 do_version        = do_version,
+                                 do_clean          = do_clean,
+                                 do_update         = do_update,
+                                 do_deploy         = do_deploy,
+                                 do_run            = do_run,
+                                 do_android_adb    = do_android_adb,
+                                 do_android_clean  = do_android_clean,
+                                 do_android_logcat = do_android_logcat,
+                                 do_android_p4a    = do_android_p4a,
+                                 android_adb_args  = android_adb_args,
+                                 android_p4a_args  = android_p4a_args,
+                                 do_ios_list_ident = do_ios_list_ident,
+                                 do_ios_open_xcode = do_ios_open_xcode)
 
-    # Recursively copy the source design
-    # documents to the temporary build
-    # area.
-    #
-    dirpath_src = da.env.path(process_area = 'a3_src',
-                              control_tier = control_tier,
-                              relpath      = relpath)
-    dirpath_tmp = da.env.path(process_area = 'a4_tmp',
-                              control_tier = control_tier,
-                              relpath      = relpath)
-    shutil.copytree(dirpath_src, dirpath_tmp, dirs_exist_ok = True)
+    if do_display_cmd:
+        str_option_delimiter = ' \\\n   '  # Newlines to make it readable.
+    else:
+        str_option_delimiter = ' '
 
+    command = 'cd {dir}{delim}&&{delim}buildozer{delim}{opts}'.format(
+                                dir   = da.env.path(
+                                                process_area = 'a4_tmp',
+                                                control_tier = control_tier,
+                                                relpath      = relpath),
+                                opts  = str_option_delimiter.join(list_opts),
+                                delim = str_option_delimiter)
+
+    if do_display_cmd:
+        print(command)
+
+    _copy_to_temporary_build_area(
+                            control_tier = control_tier,
+                            relpath      = relpath)
+
+    return da.env.run.shell_command(
+                            command = command,
+                            id_env  = id_env_build)
+
+
+# -----------------------------------------------------------------------------
+def _copy_to_temporary_build_area(control_tier, relpath):
+    """
+    Recursively copy the source design
+    documents to the temporary build
+    area.
+
+    """
+    shutil.copytree(da.env.path(process_area = 'a3_src',
+                                control_tier = control_tier,
+                                relpath      = relpath),
+                    da.env.path(process_area = 'a4_tmp',
+                                control_tier = control_tier,
+                                relpath      = relpath),
+                    dirs_exist_ok = True)
+
+
+# -----------------------------------------------------------------------------
+def _build_list_opts(profile,
+                     do_verbose,
+                     target,
+                     build,
+                     do_appclean,
+                     do_distclean,
+                     do_help,
+                     do_init,
+                     do_serve,
+                     do_setdefault,
+                     do_version,
+                     do_clean,
+                     do_update,
+                     do_deploy,
+                     do_run,
+                     do_android_adb,
+                     do_android_clean,
+                     do_android_logcat,
+                     do_android_p4a,
+                     android_adb_args,
+                     android_p4a_args,
+                     do_ios_list_ident,
+                     do_ios_open_xcode):
+    """
+    Build a list of command options and positional args.
+
+    """
 
     list_command_options = list()  # Command options come before the '--'.
     list_positional_args = list()  # Positional args come after the '--'.
@@ -240,25 +321,9 @@ def kivy(control_tier,
                 if is_ena:
                     list_command_options.append(str_cmd)
 
-
     if list_positional_args:
         list_opts = list_command_options + ['--'] + list_positional_args
     else:
         list_opts = list_command_options
 
-    if do_display_cmd:
-        str_option_delimiter = ' \\\n   '  # Newlines to make it readable.
-    else:
-        str_option_delimiter = ' '
-
-    str_opts    = str_option_delimiter.join(list_opts)
-
-    str_command = 'cd {dir}{delim}&&{delim}buildozer{delim}{opts}'.format(
-                                                dir   = dirpath_tmp,
-                                                opts  = str_opts,
-                                                delim = str_option_delimiter)
-    # Now build from the temporary build area.
-    #
-    return da.env.run.shell_command(command = str_command,
-                                    id_env  = id_env_build)
-
+    return list_opts

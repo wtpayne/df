@@ -50,6 +50,10 @@ import shutil
 import sys
 
 
+ID_ENV       = 'e002_general_research'
+ID_ENV_BUILD = ID_ENV
+
+
 # -----------------------------------------------------------------------------
 def app():
     """
@@ -58,7 +62,7 @@ def app():
     """
     import da.env.run
     sys.exit(da.env.run.python_module(module = 'forever.library.main',
-                                      id_env = 'e002_general_research'))
+                                      id_env = ID_ENV))
 
 
 # -----------------------------------------------------------------------------
@@ -84,6 +88,33 @@ def server_stop():
     """
     import da.env.run
     sys.exit(da.env.run.stableflow_stop(path_cfg = _filepath_cfg_server()))
+
+
+# -----------------------------------------------------------------------------
+def build_android():
+    """
+    Build dm004 for Android.
+
+    """
+    import da.build
+    sys.exit(da.build.kivy(control_tier   = 'h70_research',
+                           relpath        = 'forever/library',
+                           target         = 'android',
+                           build          = 'debug',
+                           do_deploy      = False,
+                           id_env_build   = ID_ENV_BUILD))
+
+
+# -----------------------------------------------------------------------------
+def test():
+    """
+    Run dm004 tests.
+
+    """
+    import da.test
+    sys.exit(da.test.run(control_tier = 'h70_research',
+                         relpath      = 'forever/library',
+                         id_env       = ID_ENV))
 
 
 # -----------------------------------------------------------------------------
@@ -122,31 +153,3 @@ def _filepath_cfg_server():
                 process_area = 'a3_src',
                 control_tier = 'h70_research',
                 relpath      = 'forever/library/forever.stableflow.cfg.yaml')
-
-
-# -----------------------------------------------------------------------------
-def build_android():
-    """
-    Build dm004 for Android.
-
-    """
-    import da.build
-
-    sys.exit(da.build.kivy(control_tier = 'h70_research',
-                           relpath      = 'forever/library',
-                           target       = 'android',
-                           build        = 'debug',
-                           do_deploy    = False,
-                           id_env_build = 'e002_general_research'))
-
-
-# -----------------------------------------------------------------------------
-def test():
-    """
-    Run dm004 tests.
-
-    """
-    import da.test
-    sys.exit(da.test.run(control_tier = 'h70_research',
-                         relpath      = 'forever/library',
-                         id_env       = 'e002_general_research'))
