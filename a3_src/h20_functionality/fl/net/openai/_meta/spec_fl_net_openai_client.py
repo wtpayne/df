@@ -36,6 +36,26 @@ def cfg_invalid():
     return {}
 
 
+# -----------------------------------------------------------------------------
+@pytest.fixture
+def request_valid():
+    """
+    """
+    return {}
+
+
+# -----------------------------------------------------------------------------
+@pytest.fixture
+def expected_bit_response():
+    """
+    """
+    import fl.net.openai.client
+    return {
+        'request':   {},  # TBD
+        'response':  fl.net.openai.client.bit_response(),
+        'error':     None
+    }
+
 
 # =============================================================================
 class SpecifyOpenAiClient:

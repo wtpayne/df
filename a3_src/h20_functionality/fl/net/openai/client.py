@@ -287,18 +287,7 @@ def _process_request(request, default, is_bit):
                   response = None,
                   error    = None)
     if is_bit:
-        result['response'] = {
-                "id":       "chatcmpl-abc123",
-                "object":   "chat.completion",
-                "created":  1677858242,
-                "model":    "gpt-3.5-turbo-0301",
-                "usage":    { "prompt_tokens":     13,
-                              "completion_tokens": 7,
-                              "total_tokens":      20},
-                "choices":  [ { "message":         { "role":    "assistant",
-                                                     "content": "\n\nTest"},
-                                "finish_reason":   "stop",
-                                "index":           0}]}
+        result['response'] = bit_response()
     else:
         try:
             result['response'] = openai.ChatCompletion.create(**kwargs)
@@ -306,3 +295,22 @@ def _process_request(request, default, is_bit):
             result['error'] = err.user_message
 
     return result
+
+# -----------------------------------------------------------------------------
+def bit_response():
+    """
+    Return the built-in-test response.
+
+    """
+    return {
+        "id":       "chatcmpl-abc123",
+        "object":   "chat.completion",
+        "created":  1677858242,
+        "model":    "gpt-3.5-turbo-0301",
+        "usage":    { "prompt_tokens":     13,
+                      "completion_tokens": 7,
+                      "total_tokens":      20},
+        "choices":  [ { "message":         { "role":    "assistant",
+                                             "content": "\n\nTest"},
+                        "finish_reason":   "stop",
+                        "index":           0}]}

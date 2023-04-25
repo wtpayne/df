@@ -130,27 +130,14 @@ def build_android():
     Build dm004 for Android.
 
     """
-    import da.env
-    import da.env.run
+    import da.build
 
-    # Recursively copy the source design
-    # documents to the temporary build
-    # area.
-    #
-    dirpath_src = da.env.path(process_area = 'a3_src',
-                              control_tier = 'h70_research',
-                              relpath      = 'forever/library')
-    dirpath_tmp = da.env.path(process_area = 'a4_tmp',
-                              control_tier = 'h70_research',
-                              relpath      = 'forever/library')
-    shutil.copytree(dirpath_src, dirpath_tmp, dirs_exist_ok = True)
-
-    # Now build from the temporary build area.
-    #
-    command = 'cd {dir} && buildozer android debug deploy run'.format(
-                                                            dir = dirpath_tmp)
-    sys.exit(da.env.run.shell_command(command = command,
-                                      id_env  = 'e002_general_research'))
+    sys.exit(da.build.kivy(control_tier = 'h70_research',
+                           relpath      = 'forever/library',
+                           target       = 'android',
+                           build        = 'debug',
+                           do_deploy    = False,
+                           id_env_build = 'e002_general_research'))
 
 
 # -----------------------------------------------------------------------------

@@ -148,7 +148,7 @@ def run_pytest(
         log_auto_indent    = None,  # --log-auto-indent
         log_disable        = None,  # --log-disable    Disable a logger.
         id_env             = 'e000_design_automation_core',
-        do_display_command = False):
+        do_display_cmd     = False):
     """
     usage: pytest [options] [file_or_dir] [file_or_dir] [...]
 
@@ -611,7 +611,7 @@ def run_pytest(
     for (closure_append, option_argument, option) in tup_tup_opthandler:
         closure_append(option, option_argument)
 
-    if do_display_command:
+    if do_display_cmd:
         str_option_delimiter = ' \\\n   '  # Newlines to make it readable.
     else:
         str_option_delimiter = ' '
@@ -632,7 +632,7 @@ def run_pytest(
                                                 path  = str_path,
                                                 delim = str_option_delimiter)
 
-    if do_display_command:
+    if do_display_cmd:
         print(str_command)
 
     import da.env
