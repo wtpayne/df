@@ -88,13 +88,14 @@ def run(control_tier, relpath, id_env):
     """
     import da.env
     return run_pytest(
-            path         = da.env.path(process_area = 'a3_src',
-                                       control_tier = control_tier,
-                                       relpath      = relpath),
-            filepath_cfg = da.env.path(process_area = 'a3_src',
-                                       control_tier = 'h90_internal',
-                                       relpath      = 'da/test/pytest.ini'),
-            id_env       = id_env)
+            path          = da.env.path(process_area = 'a3_src',
+                                        control_tier = control_tier,
+                                        relpath      = relpath),
+            filepath_cfg  = da.env.path(process_area = 'a3_src',
+                                        control_tier = 'h90_internal',
+                                        relpath      = 'da/test/pytest.ini'),
+            id_env        = id_env,
+            verbose_level = 4)
 
 
 # -----------------------------------------------------------------------------

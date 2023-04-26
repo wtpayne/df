@@ -138,6 +138,7 @@ def coro(cfg):
     assert 'presence_penalty'  in cfg['default']
     assert 'frequency_penalty' in cfg['default']
     assert 'user'              in cfg['default']
+    assert 'metadata'          in cfg['default']
 
     # Configure queues and start the
     # client in a separate process.
@@ -154,11 +155,10 @@ def coro(cfg):
 
     # Loop forever, sending data to
     # and from the openai client via
-    # the two multiprocessing queue
-    # objects.
+    # the multiprocessing queues.
     #
-    list_item_result = list()
-    list_item_error  = list()
+    list_item_result  = list()
+    list_item_error   = list()
 
     # Loop forever
     #
@@ -245,17 +245,14 @@ def _daemon(cfg):
 # -----------------------------------------------------------------------------
 def _process_request(request, default, is_bit):
     """
-    Process a single request, returning a (result, error) pair.
+    Process a single request, returning a result dict.
 
-    We start by building a kwargs dict,
-    falling back on default parameter
-    values if any are not specified by
-    the request input. We use a separate
-    kwargs dict rather than just passing
-    in the request dict directly so that
-    the request can be augmented with
-    additional fields for book-keeping
-    purposes.
+    We start by building a 'request_full'
+    dict, falling back on default parameter
+    values if any are missing in the input
+    request dict.
+
+    The result contains
 
     We update the request dict with the
     kwargs dictionary to ensure that the
@@ -270,34 +267,34 @@ def _process_request(request, default, is_bit):
     response.
 
     """
-    _get   = lambda key: request.get(key, default[key])
-    kwargs = dict(
-        messages          = request['messages'],
-        model             = _get('model'),
-        temperature       = _get('temperature'),
-        n                 = _get('n'),
-        stream            = _get('stream'),
-        presence_penalty  = _get('presence_penalty'),
-        frequency_penalty = _get('frequency_penalty'),
-        user              = _get('user'))
+    _get         = lambda key: request.get(key, default[key])
+    request_full = dict(messages          = request['messages'],
+                        model             = _get('model'),
+                        temperature       = _get('temperature'),
+                        n                 = _get('n'),
+                        stream            = _get('stream'),
+                        presence_penalty  = _get('presence_penalty'),
+                        frequency_penalty = _get('frequency_penalty'),
+                        user              = _get('user'))
 
-    request.update(kwargs)
-
-    result = dict(request  = request,
+    result = dict(request  = request_full,
                   response = None,
-                  error    = None)
+                  error    = None,
+                  metadata = _get('metadata'))
+
     if is_bit:
-        result['response'] = bit_response()
+        result['response'] = built_in_test_response()
     else:
         try:
-            result['response'] = openai.ChatCompletion.create(**kwargs)
+            result['response'] = openai.ChatCompletion.create(**request_full)
         except openai.OpenAIError as err:
             result['error'] = err.user_message
 
     return result
 
+
 # -----------------------------------------------------------------------------
-def bit_response():
+def built_in_test_response():
     """
     Return the built-in-test response.
 
