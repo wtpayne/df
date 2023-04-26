@@ -47,12 +47,43 @@ def cfg_invalid():
 @pytest.fixture
 def expected_bit_response():
     """
+    Return an expected response to a built-in-test request.
+
     """
     import fl.net.openai.client
     return {'request':   {},  # Needs to be filled in the test case.
             'response':  fl.net.openai.client.built_in_test_response(),
             'error':     None,
             'metadata':  {}}
+
+
+# -----------------------------------------------------------------------------
+@pytest.fixture
+def testrunner_singleshot():
+    """
+    Return a single-shot test runner fixture.
+
+    """
+    # -------------------------------------------------------------------------
+    def _get_one_result(cfg,
+                        list_item_request,
+                        maxiter     = 500,
+                        delay_secs  = 0.01):
+        """
+        Run the openAI client and wait for the first set of responses.
+
+        """
+        import fl.net.openai.client
+        client                   = fl.net.openai.client.coro(cfg = cfg)
+        list_item_result         = list()
+        delay_per_iteration_secs = 0.01
+        for _ in range(maxiter):
+            (list_item_result, list_item_error) = client.send(list_item_request)
+            if (len(list_item_result) > 0) or (len(list_item_error) > 0):
+                return (list_item_result, list_item_error)
+            time.sleep(delay_secs)
+
+    return _get_one_result
 
 
 # =============================================================================
@@ -87,36 +118,29 @@ class SpecifyFlNetOpenAiClient:
     @pytest.mark.e002_general_research
     def it_yields_expected_bit_response(self,
                                         cfg_valid_bit_enabled,
+                                        testrunner_singleshot,
                                         expected_bit_response):
         """
         fl.net.openai.client coro() yields the expected BIT response.
 
-        """
-        import fl.net.openai.client
-        client = fl.net.openai.client.coro(cfg = cfg_valid_bit_enabled)
+        When configured with built-in-test enabled,
+        the system shall return the expected
+        prepopulated built-in-test response.
 
-        test_list_messages       = ['test_request']
-        item_request             = {'messages': test_list_messages}
-        list_item_request        = [item_request]
-        list_item_result         = list()
-        max_iterations           = 500
-        delay_per_iteration_secs = 0.01
-        for _ in range(max_iterations):
-            (list_item_result, list_item_error) = client.send(list_item_request)
-            list_item_request.clear()
-            if len(list_item_result) == 0:
-                time.sleep(delay_per_iteration_secs)
-                continue
-            else:
-                break
+        """
+        test_list_messages = ['test_request']
+        item_request       = {'messages': test_list_messages}
+        (list_item_result,
+         list_item_error)  = testrunner_singleshot(
+                                    cfg               = cfg_valid_bit_enabled,
+                                    list_item_request = [item_request])
+        assert len(list_item_result) == 1
+        assert len(list_item_error)  == 0
 
         expected_bit_response['request'] = cfg_valid_bit_enabled['default']
         expected_bit_response['request'].pop('metadata', None)
         expected_bit_response['request']['messages'] = test_list_messages
-
-        assert len(list_item_result) == 1
         assert list_item_result[0] == expected_bit_response
-
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
@@ -128,4 +152,3 @@ class SpecifyFlNetOpenAiClient:
         import fl.net.openai.client
         with pytest.raises(AssertionError):
             fl.net.openai.client.coro(cfg = cfg_invalid)
-
