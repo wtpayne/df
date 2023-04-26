@@ -23,14 +23,15 @@ def cfg_valid_bit_enabled():
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
-            'model':             'gpt-3.5-turbo',
-            'temperature':       0.7,
-            'n':                 1,
-            'stream':            'test_stream',
-            'presence_penalty':  'test_presence_penalty',
-            'frequency_penalty': 'test_frequency_penalty',
-            'user':              'test_user',
-            'metadata':          dict()}}
+            'endpoint':           'chat_completions',
+            'model':              'gpt-3.5-turbo',
+            'temperature':        0.7,
+            'n':                  1,
+            'stream':             False,
+            'presence_penalty':   0.0,
+            'frequency_penalty':  0.0,
+            'user':               'test_user',
+            'metadata':           dict()}}
 
 
 # -----------------------------------------------------------------------------
@@ -67,7 +68,7 @@ def testrunner_singleshot():
     # -------------------------------------------------------------------------
     def _get_one_result(cfg,
                         list_item_request,
-                        maxiter     = 500,
+                        maxiter     = 50,
                         delay_secs  = 0.01):
         """
         Run the openAI client and wait for the first set of responses.
@@ -138,8 +139,10 @@ class SpecifyFlNetOpenAiClient:
         assert len(list_item_error)  == 0
 
         expected_bit_response['request'] = cfg_valid_bit_enabled['default']
+        expected_bit_response['request'].pop('endpoint', None)
         expected_bit_response['request'].pop('metadata', None)
         expected_bit_response['request']['messages'] = test_list_messages
+
         assert list_item_result[0] == expected_bit_response
 
     # -------------------------------------------------------------------------

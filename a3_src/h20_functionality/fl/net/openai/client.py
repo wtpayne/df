@@ -267,31 +267,189 @@ def _process_request(request, default, is_bit):
     response.
 
     """
-    _get         = lambda key: request.get(key, default[key])
-    request_full = dict(messages          = request['messages'],
-                        model             = _get('model'),
-                        temperature       = _get('temperature'),
-                        n                 = _get('n'),
-                        stream            = _get('stream'),
-                        presence_penalty  = _get('presence_penalty'),
-                        frequency_penalty = _get('frequency_penalty'),
-                        user              = _get('user'))
+    (fcn_endpoint,
+     request_new,
+     metadata) = _build_callback_request_and_metadata(request_raw = request,
+                                                      default     = default)
 
-    result = dict(request  = request_full,
-                  response = None,
-                  error    = None,
-                  metadata = _get('metadata'))
+    result  = dict(request  = request_new,
+                   response = None,
+                   error    = None,
+                   metadata = metadata)
 
     if is_bit:
         result['response'] = built_in_test_response()
     else:
         try:
-            result['response'] = openai.ChatCompletion.create(**request_full)
+            result['response'] = fcn_endpoint(**request_new)
         except openai.OpenAIError as err:
             result['error'] = err.user_message
 
+    # TODO: Update budget/spend?
+
     return result
 
+
+# -----------------------------------------------------------------------------
+def _build_callback_request_and_metadata(request_raw, default):
+    """
+    Return a tuple with endpoint function, updated request and metadata.
+
+    This information is extracted from the input
+    request_raw structure and any default values
+    from the supplied configuration.
+
+    """
+
+    # Determine which endpoint is being requested.
+    #
+    id_endpoint = request_raw.get('endpoint', None)
+    if id_endpoint is None:
+        id_endpoint = default.get('endpoint', None)
+    if id_endpoint is None:
+        raise RuntimeError('Could not determine endpoint.')
+
+    # Determine which endpoint API callback to use.
+    #
+    map_fcn_endpoint = dict(
+        completions           = openai.Completion.create,
+        chat_completions      = openai.ChatCompletion.create,
+        edits                 = openai.Edit.create,
+        images_generations    = openai.Image.create,
+        images_edits          = openai.Image.create_edit,
+        images_variations     = openai.Image.create_variation,
+        embeddings            = openai.Embedding.create,
+        audio_transcriptions  = openai.Audio.transcribe,
+        audio_translations    = openai.Audio.translate)
+    fcn_endpoint = map_fcn_endpoint[id_endpoint]
+
+    # Determine how to handle request parameters.
+    #
+    # Tuple is (required-internally, required-OpenAI, name-in-api, type)
+    #
+    Y = True
+    N = False
+    map_tup_tup_params = dict(  # RI, RO, name-api,           type
+        completions           = (( N,  Y, 'model',             (str,)      ),
+                                 ( Y,  N, 'prompt',            (str, list) ),
+                                 ( N,  N, 'suffix',            (str,)      ),
+                                 ( N,  N, 'max_tokens',        (int,)      ),
+                                 ( N,  N, 'temperature',       (float,)    ),
+                                 ( N,  N, 'top_p',             (float,)    ),
+                                 ( N,  N, 'n',                 (int,)      ),
+                                 ( N,  N, 'stream',            (bool,)     ),
+                                 ( N,  N, 'logprobs',          (int,)      ),
+                                 ( N,  N, 'echo',              (bool,)     ),
+                                 ( N,  N, 'stop',              (str, list) ),
+                                 ( N,  N, 'presence_penalty',  (float,)    ),
+                                 ( N,  N, 'frequency_penalty', (float,)    ),
+                                 ( N,  N, 'best_of',           (int,)      ),
+                                 ( N,  N, 'logit_bias',        (dict,)     ),
+                                 ( N,  N, 'user',              (str,)      )),
+        chat_completions      = (( N,  Y, 'model',             (str,)      ),
+                                 ( Y,  Y, 'messages',          (list,)     ),
+                                 ( N,  N, 'temperature',       (float,)    ),
+                                 ( N,  N, 'top_p',             (float,)    ),
+                                 ( N,  N, 'n',                 (int,)      ),
+                                 ( N,  N, 'stream',            (bool,)     ),
+                                 ( N,  N, 'stop',              (str, list) ),
+                                 ( N,  N, 'max_tokens',        (int,)      ),
+                                 ( N,  N, 'presence_penalty',  (float,)    ),
+                                 ( N,  N, 'frequency_penalty', (float,)    ),
+                                 ( N,  N, 'logit_bias',        (dict,)     ),
+                                 ( N,  N, 'user',              (str,)      )),
+        edits                 = (( N,  Y, 'model',             (str,)      ),
+                                 ( Y,  N, 'input',             (str,)      ),
+                                 ( Y,  Y, 'instruction',       (str,)      ),
+                                 ( N,  N, 'n',                 (int,)      ),
+                                 ( N,  N, 'temperature',       (float,)    ),
+                                 ( N,  N, 'top_p',             (float,)    )),
+        images_generations    = (( Y,  Y, 'prompt',            (str,)      ),
+                                 ( N,  N, 'n',                 (int,)      ),
+                                 ( N,  N, 'size',              (str,)      ),
+                                 ( N,  N, 'response_format',   (str,)      ),
+                                 ( N,  N, 'user',              (str,)      )),
+        images_edits          = (( Y,  Y, 'image',             (str,)      ),
+                                 ( N,  N, 'mask',              (str,)      ),
+                                 ( Y,  Y, 'prompt',            (str,)      ),
+                                 ( N,  N, 'n',                 (int,)      ),
+                                 ( N,  N, 'size',              (str,)      ),
+                                 ( N,  N, 'response_format',   (str,)      ),
+                                 ( N,  N, 'user',              (str,)      )),
+        images_variations     = (( Y,  Y, 'image',             (str,)      ),
+                                 ( N,  N, 'n',                 (int,)      ),
+                                 ( N,  N, 'size',              (str,)      ),
+                                 ( N,  N, 'response_format',   (str,)      ),
+                                 ( N,  N, 'user',              (str,)      )),
+        embeddings            = (( N,  Y, 'model',             (str,)      ),
+                                 ( Y,  Y, 'input',             (str,list)  ),
+                                 ( N,  N, 'user',              (str,)      )),
+        audio_transcriptions  = (( Y,  Y, 'file',              (str,)      ),
+                                 ( N,  Y, 'model',             (str,)      ),
+                                 ( N,  N, 'prompt',            (str,)      ),
+                                 ( N,  N, 'response_format',   (str,)      ),
+                                 ( N,  N, 'temperature',       (float,)    ),
+                                 ( N,  N, 'language',          (str,)      )),
+        audio_translations    = (( Y,  Y, 'file',              (str,)      ),
+                                 ( N,  Y, 'model',             (str,)      ),
+                                 ( N,  N, 'prompt',            (str,)      ),
+                                 ( N,  N, 'response_format',   (str,)      ),
+                                 ( N,  N, 'temperature',       (float,)    )))
+
+    # Build the request_new structure.
+    #
+    request_new    = dict()
+    tup_tup_params = map_tup_tup_params[id_endpoint]
+    for (is_required_by_internal_api,  # Cannot be given a default value.
+         is_required_by_openai_api,    # Must be given a value of some sort.
+         id_param,
+         tup_type) in tup_tup_params:
+
+        # Try to get value from request_raw.
+        #
+        param = request_raw.get(id_param, None)
+        if param is not None:
+            _check_type(id_param, param, tup_type)
+            request_new[id_param] = param
+            continue
+
+        if is_required_by_internal_api:
+            raise RuntimeError('{id} not in request_raw'.format(id = id_param))
+
+        # Try to get value from default.
+        #
+        param = default.get(id_param, None)
+        if param is not None:
+            _check_type(id_param, param, tup_type)
+            request_new[id_param] = param
+            continue
+
+        if is_required_by_openai_api:
+            raise RuntimeError('{id} not in request_raw or default'.format(
+                                                                id = id_param))
+
+    metadata = request_raw.get('metadata', None)
+    if metadata is None:
+        metadata = default.get('metadata', None)
+    if metadata is None:
+        metadata = dict()  # TODO: Work out if this should be dict() or None?
+
+    return (fcn_endpoint, request_new, metadata)
+
+
+# -----------------------------------------------------------------------------
+def _check_type(id_param, param, tup_type):
+    """
+    Raise an exception if param is not in tup_type.
+
+    """
+    if isinstance(param, tup_type):
+        return
+    raise RuntimeError(
+        'Type error for request["{id}"]: ({typename} != {reqired})'.format(
+                                                    id       = id_param,
+                                                    typename = type(param),
+                                                    required = repr(tup_type)))
 
 # -----------------------------------------------------------------------------
 def built_in_test_response():
