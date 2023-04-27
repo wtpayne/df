@@ -143,14 +143,15 @@ def coro(cfg):
         (list_param, list_template) = yield (list_result, list_error)
 
         for template in list_template:
-            map_template[template['_id']] = template
+            map_template[template['uid_template']] = template
 
         list_request = list()
         for param in list_param:
             try:
                 list_request.append(
-                        _build_request(template = map_template[param['_id']],
-                                       param    = param))
+                        _build_request(
+                            template = map_template[param['uid_template']],
+                            param    = param))
             except KeyError:
                 pass  # TODO: Raise or log error?
 
@@ -162,48 +163,82 @@ def _build_request(template, param):
     """
     Return a request dict.
 
+    Firstly, we create a skeleton request
+    using kwargs taken from the template
+    data structure, and overriding them
+    with kwargs taken from the param data
+    structure.
+
+    param takes priority, followed by
+    template, followed by the defaults
+    specified in the config.
+
+    TODO: Defaults specified in the config
+          could be applied here as well
+          instead of in the daemon.
+
+    Then fill in the template as needed
+    for each OpenAI request type.
+
     """
     id_endpoint = template['id_endpoint']
+    request = dict(**template['kwargs_req'])
+    request.update(**param['kwargs_req'])
+    request['id_endpoint'] = id_endpoint
+    request['metadata']    = param['metadata']
 
+    # ~~~~<+>~~~~ completions          ~~~~<+>~~~~
     if id_endpoint == 'completions':
         request['prompt'] = template['prompt'].format(
-                                                **param['params'])
+                                                **param['kwargs_tmpl'])
 
+    # ~~~~<+>~~~~ chat_completions     ~~~~<+>~~~~
     if id_endpoint == 'chat_completions':
-        pass
-        # LOOP OVER MESSAGES
-        # request['messages'] = template['prompt'].format(
-        #                                         **param['params'])
+        request['messages'] = list()
+        for tmpl_msg in template['messages']:
+            req_msg = {
+                'role':    tmpl_msg['role'],
+                'content': tmpl_msg['content'].format(
+                                                **param['kwargs_tmpl'])}
+            if 'name' in tmpl_msg:
+                req_msg['name'] = tmpl_msg['name']
+            request['messages'].append(req_msg)
 
+    # ~~~~<+>~~~~ edits                ~~~~<+>~~~~
     if id_endpoint == 'edits':
-        request['input'] = template['input'].format(
-                                                **param['params'])
+        request['input']       = template['input'].format(
+                                                **param['kwargs_tmpl'])
         request['instruction'] = template['instruction'].format(
-                                                **param['params'])
+                                                **param['kwargs_tmpl'])
 
+    # ~~~~<+>~~~~ images_generations   ~~~~<+>~~~~
     if id_endpoint == 'images_generations':
         request['prompt'] = template['prompt'].format(
-                                                **param['params'])
+                                                **param['kwargs_tmpl'])
 
+    # ~~~~<+>~~~~ images_edits         ~~~~<+>~~~~
     if id_endpoint == 'images_edits':
         request['prompt'] = template['prompt'].format(
-                                                **param['params'])
+                                                **param['kwargs_tmpl'])
 
+    # ~~~~<+>~~~~ images_variations    ~~~~<+>~~~~
     if id_endpoint == 'images_variations':
-        request['prompt'] = template['prompt'].format(
-                                                **param['params'])
+        pass # No text prompt
 
+    # ~~~~<+>~~~~ embeddings           ~~~~<+>~~~~
     if id_endpoint == 'embeddings':
-        request['prompt'] = template['prompt'].format(
-                                                **param['params'])
+        request['input'] = template['input'].format(
+                                                **param['kwargs_tmpl'])
 
+    # ~~~~<+>~~~~ audio_transcriptions ~~~~<+>~~~~
     if id_endpoint == 'audio_transcriptions':
         request['prompt'] = template['prompt'].format(
-                                                **param['params'])
+                                                **param['kwargs_tmpl'])
 
+    # ~~~~<+>~~~~ audio_translations   ~~~~<+>~~~~
     if id_endpoint == 'audio_translations':
         request['prompt'] = template['prompt'].format(
-                                                **param['params'])
+                                                **param['kwargs_tmpl'])
 
     return request
 
@@ -393,9 +428,9 @@ def _build_endpoint_specific_parameters(request_raw, default):
 
     # Determine which endpoint is being requested.
     #
-    id_endpoint = request_raw.get('endpoint', None)
+    id_endpoint = request_raw.get('id_endpoint', None)
     if id_endpoint is None:
-        id_endpoint = default.get('endpoint', None)
+        id_endpoint = default.get('id_endpoint', None)
     if id_endpoint is None:
         raise RuntimeError('Could not determine endpoint.')
 

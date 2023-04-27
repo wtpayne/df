@@ -13,6 +13,41 @@ import pytest
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
+def template_completions_valid():
+    """
+    Return a valid template data structure.
+
+    """
+    template = {
+        'type':         {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
+        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
+        'id_endpoint':  'completions',
+        'kwargs_req':    dict(),
+        'prompt':       'test_prompt'
+    }
+    return template
+
+
+# -----------------------------------------------------------------------------
+@pytest.fixture
+def param_valid():
+    """
+    Return a valid parameter data structure.
+
+    """
+    param = {
+        'type':         {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
+        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
+        'kwargs_tmpl':  dict(), # <-- Things for template
+        'kwargs_req':   dict(), # <-- Things for OpenAI request
+        'metadata':     dict()  # <-- Tracking metadata
+    }
+    return param
+
+# -----------------------------------------------------------------------------
+@pytest.fixture
 def cfg_valid_bit_enabled():
     """
     Return some valid configuration.
@@ -23,7 +58,7 @@ def cfg_valid_bit_enabled():
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
-            'endpoint':           'chat_completions',
+            'id_endpoint':        'chat_completions',
             'model':              'gpt-3.5-turbo',
             'temperature':        0.7,
             'n':                  1,
@@ -140,8 +175,8 @@ class SpecifyFlNetOpenAiClient:
         assert len(list_error)  == 0
 
         expected_bit_response['request'] = cfg_valid_bit_enabled['default']
-        expected_bit_response['request'].pop('endpoint', None)
-        expected_bit_response['request'].pop('metadata', None)
+        expected_bit_response['request'].pop('id_endpoint', None)
+        expected_bit_response['request'].pop('metadata',    None)
         expected_bit_response['request']['messages'] = test_list_messages
 
         assert list_result[0] == expected_bit_response
