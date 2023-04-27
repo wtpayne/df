@@ -135,6 +135,7 @@ def coro(cfg):
     """
     map_template = dict()  # id_prompt -> dict with template & metadata.
     ipc_handler  = _coro_daemon_ipc_handler(cfg)
+    list_request = list()
     list_result  = list()
     list_error   = list()
 
@@ -145,7 +146,7 @@ def coro(cfg):
         for template in list_template:
             map_template[template['uid_template']] = template
 
-        list_request = list()
+        list_request.clear()
         for param in list_param:
             try:
                 list_request.append(
@@ -281,8 +282,9 @@ def _coro_daemon_ipc_handler(cfg):
     # and from the openai client via
     # the multiprocessing queues.
     #
-    list_result = list()
-    list_error  = list()
+    list_request = list()
+    list_result  = list()
+    list_error   = list()
 
     # Loop forever
     #
@@ -294,6 +296,7 @@ def _coro_daemon_ipc_handler(cfg):
         # requests to send to the client
         # process.
         #
+        list_request.clear()
         list_request = yield (list_result, list_error)
         list_result.clear()
         list_error.clear()
