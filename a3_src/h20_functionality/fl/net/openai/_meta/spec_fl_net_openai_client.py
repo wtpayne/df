@@ -51,23 +51,25 @@ def expected_bit_response():
     Return an expected response to a built-in-test request.
 
     """
+    id_endpoint = 'chat_completions'
     import fl.net.openai.client
-    return {'request':   {},  # Needs to be filled in the test case.
-            'response':  fl.net.openai.client.built_in_test_response(),
-            'error':     None,
-            'metadata':  {}}
+    return {
+        'request':   {},  # Needs to be filled in the test case.
+        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
+        'error':     None,
+        'metadata':  {}}
 
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def testrunner_singleshot():
+def testrunner_singleshot_ipc():
     """
     Return a single-shot test runner fixture.
 
     """
     # -------------------------------------------------------------------------
     def _get_one_result(cfg,
-                        list_item_request,
+                        list_request,
                         maxiter     = 50,
                         delay_secs  = 0.01):
         """
@@ -75,13 +77,13 @@ def testrunner_singleshot():
 
         """
         import fl.net.openai.client
-        client                   = fl.net.openai.client.coro(cfg = cfg)
-        list_item_result         = list()
-        delay_per_iteration_secs = 0.01
+
+        ipc_handler = fl.net.openai.client._coro_daemon_ipc_handler(cfg = cfg)
+
         for _ in range(maxiter):
-            (list_item_result, list_item_error) = client.send(list_item_request)
-            if (len(list_item_result) > 0) or (len(list_item_error) > 0):
-                return (list_item_result, list_item_error)
+            (list_result, list_error) = ipc_handler.send(list_request)
+            if (len(list_result) > 0) or (len(list_error) > 0):
+                return (list_result, list_error)
             time.sleep(delay_secs)
 
     return _get_one_result
@@ -119,7 +121,7 @@ class SpecifyFlNetOpenAiClient:
     @pytest.mark.e002_general_research
     def it_yields_expected_bit_response(self,
                                         cfg_valid_bit_enabled,
-                                        testrunner_singleshot,
+                                        testrunner_singleshot_ipc,
                                         expected_bit_response):
         """
         fl.net.openai.client coro() yields the expected BIT response.
@@ -130,20 +132,19 @@ class SpecifyFlNetOpenAiClient:
 
         """
         test_list_messages = ['test_request']
-        item_request       = {'messages': test_list_messages}
-        (list_item_result,
-         list_item_error)  = testrunner_singleshot(
-                                    cfg               = cfg_valid_bit_enabled,
-                                    list_item_request = [item_request])
-        assert len(list_item_result) == 1
-        assert len(list_item_error)  == 0
+        request            = {'messages': test_list_messages}
+        (list_result, list_error)  = testrunner_singleshot_ipc(
+                                        cfg          = cfg_valid_bit_enabled,
+                                        list_request = [request])
+        assert len(list_result) == 1
+        assert len(list_error)  == 0
 
         expected_bit_response['request'] = cfg_valid_bit_enabled['default']
         expected_bit_response['request'].pop('endpoint', None)
         expected_bit_response['request'].pop('metadata', None)
         expected_bit_response['request']['messages'] = test_list_messages
 
-        assert list_item_result[0] == expected_bit_response
+        assert list_result[0] == expected_bit_response
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research

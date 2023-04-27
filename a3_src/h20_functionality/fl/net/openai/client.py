@@ -51,6 +51,7 @@ description:
     Here is an example of a result data structure:
 
     {'error':       None,
+     'metadata':    {},
      'request':     {'engine':      '<OPENAI_MODEL_ID>',
                      'max_tokens':  100,
                      'n':           1,
@@ -114,10 +115,102 @@ import openai
 
 import fl.util
 
-
 # -----------------------------------------------------------------------------
 @fl.util.coroutine
 def coro(cfg):
+    """
+    Yield results for requests sent to the OpenAI web API.
+
+    Initialize 'database' of prompt templates.
+
+    Prompt templates are persisted
+    in memory so they don't need to
+    be provided anew at each time step.
+
+    It is envisaged that the templates
+    will be updated from time to time
+    as part of a continuous improvement
+    process.
+
+    """
+    map_template = dict()  # id_prompt -> dict with template & metadata.
+    ipc_handler  = _coro_daemon_ipc_handler(cfg)
+    list_result  = list()
+    list_error   = list()
+
+    while True:
+
+        (list_param, list_template) = yield (list_result, list_error)
+
+        for template in list_template:
+            map_template[template['_id']] = template
+
+        list_request = list()
+        for param in list_param:
+            try:
+                list_request.append(
+                        _build_request(template = map_template[param['_id']],
+                                       param    = param))
+            except KeyError:
+                pass  # TODO: Raise or log error?
+
+        (list_result, list_error) = ipc_handler.send(list_request)
+
+
+# -----------------------------------------------------------------------------
+def _build_request(template, param):
+    """
+    Return a request dict.
+
+    """
+    id_endpoint = template['id_endpoint']
+
+    if id_endpoint == 'completions':
+        request['prompt'] = template['prompt'].format(
+                                                **param['params'])
+
+    if id_endpoint == 'chat_completions':
+        pass
+        # LOOP OVER MESSAGES
+        # request['messages'] = template['prompt'].format(
+        #                                         **param['params'])
+
+    if id_endpoint == 'edits':
+        request['input'] = template['input'].format(
+                                                **param['params'])
+        request['instruction'] = template['instruction'].format(
+                                                **param['params'])
+
+    if id_endpoint == 'images_generations':
+        request['prompt'] = template['prompt'].format(
+                                                **param['params'])
+
+    if id_endpoint == 'images_edits':
+        request['prompt'] = template['prompt'].format(
+                                                **param['params'])
+
+    if id_endpoint == 'images_variations':
+        request['prompt'] = template['prompt'].format(
+                                                **param['params'])
+
+    if id_endpoint == 'embeddings':
+        request['prompt'] = template['prompt'].format(
+                                                **param['params'])
+
+    if id_endpoint == 'audio_transcriptions':
+        request['prompt'] = template['prompt'].format(
+                                                **param['params'])
+
+    if id_endpoint == 'audio_translations':
+        request['prompt'] = template['prompt'].format(
+                                                **param['params'])
+
+    return request
+
+
+# -----------------------------------------------------------------------------
+@fl.util.coroutine
+def _coro_daemon_ipc_handler(cfg):
     """
     Yield results for requests sent to the OpenAI web API.
 
@@ -126,19 +219,15 @@ def coro(cfg):
     tuple containing a list of result items
     followed by a list of errors encountered.
 
+    This coroutine is responsible
+    for inter process communication
+    with the OpenAI client daemon
+    process.
+
     """
-    assert 'api_key'           in cfg
-    assert 'secs_interval'     in cfg
-    assert 'is_bit'            in cfg
-    assert 'default'           in cfg
-    assert 'model'             in cfg['default']
-    assert 'temperature'       in cfg['default']
-    assert 'n'                 in cfg['default']
-    assert 'stream'            in cfg['default']
-    assert 'presence_penalty'  in cfg['default']
-    assert 'frequency_penalty' in cfg['default']
-    assert 'user'              in cfg['default']
-    assert 'metadata'          in cfg['default']
+    assert 'api_key'       in cfg
+    assert 'secs_interval' in cfg
+    assert 'is_bit'        in cfg
 
     # Configure queues and start the
     # client in a separate process.
@@ -147,7 +236,7 @@ def coro(cfg):
     cfg['queue_result']  = multiprocessing.Queue()  # daemon --> coro
     cfg['queue_error']   = multiprocessing.Queue()  # daemon --> coro
 
-    daemon = multiprocessing.Process(target = _daemon,
+    daemon = multiprocessing.Process(target = _daemon_main,
                                      args   = (cfg,),
                                      name   = 'openai-client',
                                      daemon = True)
@@ -157,8 +246,8 @@ def coro(cfg):
     # and from the openai client via
     # the multiprocessing queues.
     #
-    list_item_result  = list()
-    list_item_error   = list()
+    list_result = list()
+    list_error  = list()
 
     # Loop forever
     #
@@ -170,18 +259,18 @@ def coro(cfg):
         # requests to send to the client
         # process.
         #
-        list_item_request = yield (list_item_result, list_item_error)
-        list_item_result.clear()
-        list_item_error.clear()
+        list_request = yield (list_result, list_error)
+        list_result.clear()
+        list_error.clear()
 
         # Enqueue any newly submitted
         # requests.
         #
-        for item_request in list_item_request:
+        for request in list_request:
             try:
-                cfg['queue_request'].put(item_request, block = False)
+                cfg['queue_request'].put(request, block = False)
             except queue.Full as err:
-                list_item_error.append(err)
+                list_error.append(err)
 
         # Dequeue any newly returned
         # results and errors.
@@ -189,19 +278,19 @@ def coro(cfg):
         while True:
             try:
                 result = cfg['queue_result'].get(block = False)
-                list_item_result.append(result)
+                list_result.append(result)
             except queue.Empty:
                 break
 
         while True:
             try:
-                list_item_error.append(cfg['queue_error'].get(block = False))
+                list_error.append(cfg['queue_error'].get(block = False))
             except queue.Empty:
                 break
 
 
 # -----------------------------------------------------------------------------
-def _daemon(cfg):
+def _daemon_main(cfg):
     """
     Service the request queue, forwarding requests to the OpenAI API.
 
@@ -229,9 +318,9 @@ def _daemon(cfg):
             time.sleep(cfg['secs_interval'])
             continue
 
-        result = _process_request(request,
-                                  default = cfg['default'],
-                                  is_bit  = cfg['is_bit'])
+        result = _process_one_request(request_raw = request,
+                                      default     = cfg['default'],
+                                      is_bit      = cfg['is_bit'])
 
         if result['error'] is not None:
             cfg['queue_error'].put(result['error'], block = False)
@@ -243,61 +332,62 @@ def _daemon(cfg):
 
 
 # -----------------------------------------------------------------------------
-def _process_request(request, default, is_bit):
+def _process_one_request(request_raw, default, is_bit):
     """
-    Process a single request, returning a result dict.
+    Process a single request dict, returning a result dict.
 
-    We start by building a 'request_full'
-    dict, falling back on default parameter
-    values if any are missing in the input
-    request dict.
+    The request_raw data structure is augmented
+    with information taken from the configured
+    default parameter values to produce a fully
+    specified request_full data structre.
 
-    The result contains
-
-    We update the request dict with the
-    kwargs dictionary to ensure that the
-    request dict accurately reflects the
-    values that were actually sent to the
-    OpenAI API.
-
-    This request dict is then used as book
-    keeping information, returned along
-    with the response so we can keep track
-    of which request relates to which
-    response.
+    At the same time, we determine the function
+    to call to interact with the required OpenAI
+    endpoint, any metadata from request_raw to
+    keep for book-keeping purposes, and the
+    built-in-test response to return if the bit
+    flag is set.
 
     """
     (fcn_endpoint,
-     request_new,
-     metadata) = _build_callback_request_and_metadata(request_raw = request,
-                                                      default     = default)
+     request_full,
+     metadata,
+     response_bit) = _build_endpoint_specific_parameters(
+                                                    request_raw = request_raw,
+                                                    default     = default)
 
-    result  = dict(request  = request_new,
+    result  = dict(request  = request_full,
                    response = None,
                    error    = None,
                    metadata = metadata)
 
     if is_bit:
-        result['response'] = built_in_test_response()
+        result['response'] = response_bit
     else:
         try:
-            result['response'] = fcn_endpoint(**request_new)
+            result['response'] = fcn_endpoint(**request_full)
         except openai.OpenAIError as err:
             result['error'] = err.user_message
-
-    # TODO: Update budget/spend?
 
     return result
 
 
 # -----------------------------------------------------------------------------
-def _build_callback_request_and_metadata(request_raw, default):
+def _build_endpoint_specific_parameters(request_raw, default):
     """
-    Return a tuple with endpoint function, updated request and metadata.
+    Return a length 4 tuple with endpoint specific parameters.
 
-    This information is extracted from the input
-    request_raw structure and any default values
-    from the supplied configuration.
+    The returned tuple contains:-
+
+        1. The openai function to call for the requested endpoint.
+        2. The request parameters fully fleshed out with default values.
+        3. Metadata for tracking the request and the response.
+        4. A built-in-test response to use when the bit flag is enabled.
+
+    This information is extracted from the
+    input request_raw structure combined with
+    default values extracted from the supplied
+    configuration data.
 
     """
 
@@ -396,9 +486,10 @@ def _build_callback_request_and_metadata(request_raw, default):
                                  ( N,  N, 'response_format',   (str,)      ),
                                  ( N,  N, 'temperature',       (float,)    )))
 
-    # Build the request_new structure.
+    # Build the fully fleshed out request_full
+    # data structure.
     #
-    request_new    = dict()
+    request_full    = dict()
     tup_tup_params = map_tup_tup_params[id_endpoint]
     for (is_required_by_internal_api,  # Cannot be given a default value.
          is_required_by_openai_api,    # Must be given a value of some sort.
@@ -410,7 +501,7 @@ def _build_callback_request_and_metadata(request_raw, default):
         param = request_raw.get(id_param, None)
         if param is not None:
             _check_type(id_param, param, tup_type)
-            request_new[id_param] = param
+            request_full[id_param] = param
             continue
 
         if is_required_by_internal_api:
@@ -421,7 +512,7 @@ def _build_callback_request_and_metadata(request_raw, default):
         param = default.get(id_param, None)
         if param is not None:
             _check_type(id_param, param, tup_type)
-            request_new[id_param] = param
+            request_full[id_param] = param
             continue
 
         if is_required_by_openai_api:
@@ -434,13 +525,18 @@ def _build_callback_request_and_metadata(request_raw, default):
     if metadata is None:
         metadata = dict()  # TODO: Work out if this should be dict() or None?
 
-    return (fcn_endpoint, request_new, metadata)
+    # Work out the response to give when the
+    # built-in-test flag is enabled.
+    #
+    response_bit = built_in_test_response(id_endpoint)
+
+    return (fcn_endpoint, request_full, metadata, response_bit)
 
 
 # -----------------------------------------------------------------------------
 def _check_type(id_param, param, tup_type):
     """
-    Raise an exception if param is not in tup_type.
+    Raise an exception if param is not in the specified tup_type.
 
     """
     if isinstance(param, tup_type):
@@ -452,20 +548,77 @@ def _check_type(id_param, param, tup_type):
                                                     required = repr(tup_type)))
 
 # -----------------------------------------------------------------------------
-def built_in_test_response():
+def built_in_test_response(id_endpoint, id_version = 'v1'):
     """
-    Return the built-in-test response.
+    Return the built-in-test response for the specified endpoint.
 
     """
-    return {
-        "id":       "chatcmpl-abc123",
-        "object":   "chat.completion",
-        "created":  1677858242,
-        "model":    "gpt-3.5-turbo-0301",
-        "usage":    { "prompt_tokens":     13,
-                      "completion_tokens": 7,
-                      "total_tokens":      20},
-        "choices":  [ { "message":         { "role":    "assistant",
-                                             "content": "\n\nTest"},
-                        "finish_reason":   "stop",
-                        "index":           0}]}
+    map_bit_endpoint = {
+        ('v1', 'completions'): {
+            'id':       'cmpl-uqkvlQyYK7bGYrRHQ0eXlWi7',
+            'object':   'text_completion',
+            'created':  1589478378,
+            'model':    'text-davinci-003',
+            'choices':  [ { 'text':                 '\n\nThis is a test',
+                            'index':                0,
+                            'logprobs':             None,
+                            'finish_reason':        'length'}],
+            'usage':    {   'prompt_tokens':        10,
+                            'completion_tokens':    20,
+                            'total_tokens':         30 }},
+
+        ('v1', 'chat_completions'): {
+            'id':       'chatcmpl-abc123',
+            'object':   'chat.completion',
+            'created':  1677858242,
+            'model':    'gpt-3.5-turbo-0301',
+            'choices':  [ { 'message':              { 'role':    'assistant',
+                                                      'content': '\n\nTest'},
+                            'finish_reason':        'stop',
+                            'index':                0}],
+            'usage':    {   'prompt_tokens':        10,
+                            'completion_tokens':    20,
+                            'total_tokens':         30}},
+
+        ('v1', 'edits'): {
+            'object':   'edit',
+            'created':  1589478378,
+            'choices':  [ { 'text':                 'Test edit response',
+                            'index':                0}],
+            'usage':    {   'prompt_tokens':        10,
+                            'completion_tokens':    20,
+                            'total_tokens':         30}},
+
+        ('v1', 'images_generations'): {
+            'created': 1589478378,
+            'data':     [ { 'url': 'https://random_test_url_424242.co.uk' },
+                          { 'url': 'https://random_test_url_424242.co.uk' }]},
+
+        ('v1', 'images_edits'): {
+            'created': 1589478378,
+            'data':     [ { 'url': 'https://random_test_url_424242.co.uk' },
+                          { 'url': 'https://random_test_url_424242.co.uk' }]},
+
+        ('v1', 'images_variations'): {
+            'created': 1589478378,
+            'data':     [ { 'url': 'https://random_test_url_424242.co.uk' },
+                          { 'url': 'https://random_test_url_424242.co.uk' }]},
+
+        ('v1', 'embeddings'): {
+            'object':   'list',
+            'model':    'text-embedding-ada-002',
+            'data':     [ { 'object':               'embedding',
+                            'embedding':            [ 0.0023064255,
+                                                     -0.009327292,
+                                                     -0.0028842222],
+                            'index':                0}],
+            'usage':    {   'prompt_tokens':        10,
+                            'total_tokens':         20}},
+
+        ('v1', 'audio_transcriptions'): {
+            'text':     'Test transcription response.' },
+
+        ('v1', 'audio_translations'): {
+            'text':     'Test translation response' }}
+
+    return map_bit_endpoint[(id_version, id_endpoint)]
