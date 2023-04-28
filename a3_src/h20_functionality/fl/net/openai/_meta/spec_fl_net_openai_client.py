@@ -13,29 +13,76 @@ import pytest
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def template_completions_valid():
+def testvector_completions_valid_bit():
     """
     Return a valid template data structure for the completions endpoint.
 
+    Sets the built-in-test flag to true so no
+    actual call to the OpenAI server is made.
+
     """
-    return {
-        'id_endpoint':  'completions',
+    import fl.net.openai.client
+    id_endpoint = 'completions'
+
+    cfg_valid = {
+        'is_bit':           True,
+        'api_key':          'test_api_key',
+        'secs_interval':    0.01,
+        'default':          {
+            'id_endpoint': id_endpoint,
+            'model':       'text-davinci-003'}}
+
+    template_valid = {
+        'id_endpoint':  id_endpoint,
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {'model': 'text-davinci-003'},
         'prompt':       'test_prompt'}
 
+    params_valid = {
+        'type':         {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
+        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
+        'kwargs_tmpl':  dict(), # <-- Args for template
+        'kwargs_req':   dict(), # <-- Args for OpenAI request
+        'state':        dict()} # <-- Process state
+
+    result_valid = [{
+        'error':     None,
+        'request':   {'model':  'text-davinci-003',
+                      'prompt': 'test_prompt'},
+        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
+        'state':     {}}]
+
+    error_valid  = []
+
+    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def template_chat_completions_valid():
+def testvector_chat_completions_valid_bit():
     """
     Return a valid template data structure for the chat completions endpoint.
 
+    Sets the built-in-test flag to true so no
+    actual call to the OpenAI server is made.
+
     """
-    return {
-        'id_endpoint':  'chat_completions',
+    import fl.net.openai.client
+    id_endpoint = 'chat_completions'
+
+    cfg_valid = {
+        'is_bit':           True,
+        'api_key':          'test_api_key',
+        'secs_interval':    0.01,
+        'default':          {
+            'id_endpoint': id_endpoint,
+            'model':       'gpt-3.5-turbo-0301'}}
+
+    template_valid = {
+        'id_endpoint':  id_endpoint,
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
@@ -43,16 +90,50 @@ def template_chat_completions_valid():
         'messages':     [{'role':    'system',
                           'content': 'test_content'}] }
 
+    params_valid = {
+        'type':         {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
+        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
+        'kwargs_tmpl':  dict(), # <-- Args for template
+        'kwargs_req':   dict(), # <-- Args for OpenAI request
+        'state':        dict()} # <-- Process state
+
+    result_valid = [{
+        'error':     None,
+        'request':   {'model':      'gpt-3.5-turbo-0301',
+                      'messages':   [{'role':    'system',
+                                      'content': 'test_content'}]},
+        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
+        'state':     {}}]
+
+    error_valid  = []
+
+    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def template_edits_valid():
+def testvector_edits_valid_bit():
     """
     Return a valid template data structure for the edits endpoint.
 
+    Sets the built-in-test flag to true so no
+    actual call to the OpenAI server is made.
+
     """
-    return {
-        'id_endpoint':  'edits',
+    import fl.net.openai.client
+    id_endpoint = 'edits'
+
+    cfg_valid = {
+        'is_bit':           True,
+        'api_key':          'test_api_key',
+        'secs_interval':    0.01,
+        'default':          {
+            'id_endpoint': id_endpoint,
+            'model':       'text-davinci-edit-001'}}
+
+    template_valid = {
+        'id_endpoint':  id_endpoint,
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
@@ -60,196 +141,356 @@ def template_edits_valid():
         'input':        'test_input',
         'instruction':  'test_instruction' }
 
+    params_valid = {
+        'type':         {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
+        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
+        'kwargs_tmpl':  dict(), # <-- Args for template
+        'kwargs_req':   dict(), # <-- Args for OpenAI request
+        'state':        dict()} # <-- Process state
+
+    result_valid = [{
+        'error':     None,
+        'request':   {'model':        'text-davinci-edit-001',
+                      'input':        'test_input',
+                      'instruction':  'test_instruction' },
+        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
+        'state':     {}}]
+
+    error_valid  = []
+
+    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def template_images_generations_valid():
+def testvector_images_generations_valid_bit():
     """
     Return a valid template data structure for the images_generations endpoint.
 
+    Sets the built-in-test flag to true so no
+    actual call to the OpenAI server is made.
+
     """
-    return {
-        'id_endpoint':  'images_generations',
+    import fl.net.openai.client
+    id_endpoint = 'images_generations'
+
+    cfg_valid = {
+        'is_bit':           True,
+        'api_key':          'test_api_key',
+        'secs_interval':    0.01,
+        'default':          {
+            'id_endpoint': id_endpoint}}
+
+    template_valid = {
+        'id_endpoint':  id_endpoint,
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {},
         'prompt':       'prompt' }
 
+    params_valid = {
+        'type':         {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
+        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
+        'kwargs_tmpl':  dict(), # <-- Args for template
+        'kwargs_req':   dict(), # <-- Args for OpenAI request
+        'state':        dict()} # <-- Process state
+
+    result_valid = [{
+        'error':     None,
+        'request':   {'prompt': 'prompt' },
+        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
+        'state':     {}}]
+
+    error_valid  = []
+
+    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def template_images_edits_valid():
+def testvector_images_edits_valid_bit():
     """
     Return a valid template data structure for the images_edits endpoint.
 
+    Sets the built-in-test flag to true so no
+    actual call to the OpenAI server is made.
+
     """
-    return {
-        'id_endpoint':  'images_edits',
+    import fl.net.openai.client
+    id_endpoint = 'images_edits'
+
+    cfg_valid = {
+        'is_bit':           True,
+        'api_key':          'test_api_key',
+        'secs_interval':    0.01,
+        'default':          {
+            'id_endpoint': id_endpoint,
+            'model':       'text-davinci-003'}}
+
+    template_valid = {
+        'id_endpoint':  id_endpoint,
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {'image':  'test_image'},
         'prompt':       'test_prompt'}
 
+    params_valid = {
+        'type':         {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
+        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
+        'kwargs_tmpl':  dict(), # <-- Args for template
+        'kwargs_req':   dict(), # <-- Args for OpenAI request
+        'state':        dict()} # <-- Process state
+
+    result_valid = [{
+        'error':     None,
+        'request':   {'image':  'test_image',
+                      'prompt': 'test_prompt' },
+        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
+        'state':     {}}]
+
+    error_valid  = []
+
+    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def template_images_variations_valid():
+def testvector_images_variations_valid_bit():
     """
     Return a valid template data structure for the images_variations endpoint.
 
+    Sets the built-in-test flag to true so no
+    actual call to the OpenAI server is made.
+
     """
-    return {
-        'id_endpoint':  'images_variations',
+    import fl.net.openai.client
+    id_endpoint = 'images_variations'
+
+    cfg_valid = {
+        'is_bit':           True,
+        'api_key':          'test_api_key',
+        'secs_interval':    0.01,
+        'default':          {
+            'id_endpoint': id_endpoint,
+            'model':       'text-davinci-003'}}
+
+    template_valid = {
+        'id_endpoint':  id_endpoint,
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {'image':  'test_image'}}
 
+    params_valid = {
+        'type':         {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
+        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
+        'kwargs_tmpl':  dict(), # <-- Args for template
+        'kwargs_req':   dict(), # <-- Args for OpenAI request
+        'state':        dict()} # <-- Process state
+
+    result_valid = [{
+        'error':     None,
+        'request':   {'image': 'test_image'},
+        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
+        'state':     {}}]
+
+    error_valid  = []
+
+    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def template_embeddings_valid():
+def testvector_embeddings_valid_bit():
     """
     Return a valid template data structure for the embeddings endpoint.
 
+    Sets the built-in-test flag to true so no
+    actual call to the OpenAI server is made.
+
     """
-    return {
-        'id_endpoint':  'embeddings',
+    import fl.net.openai.client
+    id_endpoint = 'embeddings'
+
+    cfg_valid = {
+        'is_bit':           True,
+        'api_key':          'test_api_key',
+        'secs_interval':    0.01,
+        'default':          {
+            'id_endpoint': id_endpoint,
+            'model':       'text-embedding-ada-002'}}
+
+    template_valid = {
+        'id_endpoint':  id_endpoint,
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {'model': 'text-embedding-ada-002'},
         'input':        'test_input'}
 
-
-# -----------------------------------------------------------------------------
-@pytest.fixture
-def template_audio_transcriptions_valid():
-    """
-    Return valid template data structure for the audio_transcriptions endpoint.
-
-    """
-    return {
-        'id_endpoint':  'audio_transcriptions',
-        'type':         {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
-        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
-        'kwargs_req':   {'file':  'test_audio_file',
-                         'model': 'whisper-1'},
-        'prompt':       'test_prompt'}
-
-
-# -----------------------------------------------------------------------------
-@pytest.fixture
-def template_audio_translations_valid():
-    """
-    Return a valid template data structure for the audio_translations endpoint.
-
-    """
-    return {
-        'id_endpoint':  'audio_translations',
-        'type':         {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
-        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
-        'kwargs_req':   {'file':  'test_audio_file',
-                         'model': 'whisper-1'},
-        'prompt':       'test_prompt'}
-
-
-# -----------------------------------------------------------------------------
-@pytest.fixture
-def param_valid():
-    """
-    Return a valid parameter data structure.
-
-    """
-    return {
+    params_valid = {
         'type':         {'id': 'prompt_params', 'ver': '1.0'},
         'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
-        'kwargs_tmpl':  dict(), # <-- Things for template
-        'kwargs_req':   dict(), # <-- Things for OpenAI request
-        'metadata':     dict()} # <-- Tracking metadata
+        'kwargs_tmpl':  dict(), # <-- Args for template
+        'kwargs_req':   dict(), # <-- Args for OpenAI request
+        'state':        dict()} # <-- Process state
+
+    result_valid = [{
+        'error':     None,
+        'request':   {'model': 'text-embedding-ada-002',
+                      'input': 'test_input'},
+        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
+        'state':     {}}]
+
+    error_valid  = []
+
+    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
 
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def cfg_valid_bit_enabled():
+def testvector_audio_transcriptions_valid_bit():
     """
-    Return some valid configuration.
+    Return valid template data structure for the audio_transcriptions endpoint.
+
+    Sets the built-in-test flag to true so no
+    actual call to the OpenAI server is made.
 
     """
-    return {
+    import fl.net.openai.client
+    id_endpoint = 'audio_transcriptions'
+
+    cfg_valid = {
         'is_bit':           True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
-            'id_endpoint':        'chat_completions',
-            'model':              'gpt-3.5-turbo',
-            'temperature':        0.7,
-            'n':                  1,
-            'stream':             False,
-            'presence_penalty':   0.0,
-            'frequency_penalty':  0.0,
-            'user':               'test_user',
-            'metadata':           dict()}}
+            'id_endpoint': id_endpoint,
+            'model':       'text-davinci-003'}}
 
+    template_valid = {
+        'id_endpoint':  id_endpoint,
+        'type':         {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
+        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
+        'kwargs_req':   {'file':  'test_audio_file',
+                         'model': 'whisper-1'},
+        'prompt':       'test_prompt'}
 
-# -----------------------------------------------------------------------------
-@pytest.fixture
-def cfg_invalid():
-    """
-    Return some invalid configuration.
+    params_valid = {
+        'type':         {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
+        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
+        'kwargs_tmpl':  dict(), # <-- Args for template
+        'kwargs_req':   dict(), # <-- Args for OpenAI request
+        'state':        dict()} # <-- Process state
 
-    """
-    return {}
-
-
-# -----------------------------------------------------------------------------
-@pytest.fixture
-def expected_bit_response():
-    """
-    Return an expected response to a built-in-test request.
-
-    """
-    id_endpoint = 'chat_completions'
-    import fl.net.openai.client
-    return {
-        'request':   {},  # Needs to be filled in the test case.
-        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
+    result_valid = [{
         'error':     None,
-        'metadata':  {}}
+        'request':   {'file':   'test_audio_file',
+                      'model':  'whisper-1',
+                      'prompt': 'test_prompt'},
+        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
+        'state':     {}}]
+
+    error_valid  = []
+
+    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
 
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def testrunner_singleshot_ipc():
+def testvector_audio_translations_valid_bit():
     """
-    Return a single-shot test runner fixture.
+    Return a valid template data structure for the audio_translations endpoint.
+
+    Sets the built-in-test flag to true so no
+    actual call to the OpenAI server is made.
+
+    """
+    import fl.net.openai.client
+    id_endpoint = 'audio_translations'
+
+    cfg_valid = {
+        'is_bit':           True,
+        'api_key':          'test_api_key',
+        'secs_interval':    0.01,
+        'default':          {
+            'id_endpoint': id_endpoint,
+            'model':       'text-davinci-003'}}
+
+    template_valid = {
+        'id_endpoint':  id_endpoint,
+        'type':         {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
+        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
+        'kwargs_req':   {'file':  'test_audio_file',
+                         'model': 'whisper-1'},
+        'prompt':       'test_prompt'}
+
+    params_valid = {
+        'type':         {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
+        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
+        'kwargs_tmpl':  dict(), # <-- Args for template
+        'kwargs_req':   dict(), # <-- Args for OpenAI request
+        'state':        dict()} # <-- Process state
+
+    result_valid = [{
+        'error':     None,
+        'request':   {'file':   'test_audio_file',
+                      'model':  'whisper-1',
+                      'prompt': 'test_prompt'},
+        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
+        'state':     {}}]
+
+    error_valid  = []
+
+    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+
+
+# -----------------------------------------------------------------------------
+@pytest.fixture
+def testrunner_coro_string_template_handler_singleshot():
+    """
+    Return a single-shot test runner fixture for the coro couroutine.
 
     """
     # -------------------------------------------------------------------------
-    def _get_one_result(cfg,
-                        list_request,
-                        maxiter     = 50,
-                        delay_secs  = 0.01):
+    def _get_result_singleshot(cfg,
+                               list_template,
+                               list_param,
+                               maxiter     = 100,
+                               delay_secs  = 0.001):
         """
         Run the openAI client and wait for the first set of responses.
 
         """
         import fl.net.openai.client
+        list_test_input = list()
+        list_test_input.append((list_template, list_param))
 
-        ipc_handler = fl.net.openai.client._coro_daemon_ipc_handler(cfg = cfg)
-
+        client = fl.net.openai.client.coro_string_template_handler(cfg = cfg)
         for _ in range(maxiter):
-            (list_result, list_error) = ipc_handler.send(list_request)
+
+            if list_test_input:
+                (list_result, list_error) = client.send(list_test_input.pop())
+            else:
+                (list_result, list_error) = client.send(([], []))
+
             if (len(list_result) > 0) or (len(list_error) > 0):
                 return (list_result, list_error)
+
             time.sleep(delay_secs)
 
-    return _get_one_result
+    return _get_result_singleshot
 
 
 # =============================================================================
@@ -261,7 +502,7 @@ class SpecifyFlNetOpenAiClient:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_supports_import_of_openai_client(self):
+    def it_supports_import_of_fl_net_openai_client(self):
         """
         fl.net.openai.client can be imported.
 
@@ -270,52 +511,245 @@ class SpecifyFlNetOpenAiClient:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_supports_creation_of_the_main_coroutine(self,
-                                                   cfg_valid_bit_enabled):
+    def it_supports_creation_of_the_main_coroutine(
+                                            self,
+                                            testvector_completions_valid_bit):
         """
         fl.net.openai.client coro() can be created.
 
         """
         import fl.net.openai.client
-        client = fl.net.openai.client.coro(cfg = cfg_valid_bit_enabled)
+        (cfg_valid, _, _, _, _) = testvector_completions_valid_bit
+        client = fl.net.openai.client.coro_string_template_handler(
+                                                            cfg = cfg_valid)
         assert inspect.isgenerator(client)
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_yields_expected_bit_response(self,
-                                        cfg_valid_bit_enabled,
-                                        testrunner_singleshot_ipc,
-                                        expected_bit_response):
-        """
-        fl.net.openai.client coro() yields the expected BIT response.
-
-        When configured with built-in-test enabled,
-        the system shall return the expected
-        prepopulated built-in-test response.
-
-        """
-        test_list_messages = ['test_request']
-        request            = {'messages': test_list_messages}
-        (list_result, list_error)  = testrunner_singleshot_ipc(
-                                        cfg          = cfg_valid_bit_enabled,
-                                        list_request = [request])
-        assert len(list_result) == 1
-        assert len(list_error)  == 0
-
-        expected_bit_response['request'] = cfg_valid_bit_enabled['default']
-        expected_bit_response['request'].pop('id_endpoint', None)
-        expected_bit_response['request'].pop('metadata',    None)
-        expected_bit_response['request']['messages'] = test_list_messages
-
-        assert list_result[0] == expected_bit_response
-
-    # -------------------------------------------------------------------------
-    @pytest.mark.e002_general_research
-    def it_validates_provided_configuration(self, cfg_invalid):
+    def it_validates_provided_configuration(self,
+                                            testvector_completions_valid_bit):
         """
         fl.net.openai.client coro() can be created.
 
         """
         import fl.net.openai.client
+        (cfg_valid, _, _, _, _) = testvector_completions_valid_bit
+        cfg_invalid = cfg_valid
         with pytest.raises(AssertionError):
-            fl.net.openai.client.coro(cfg = cfg_invalid)
+            fl.net.openai.client.coro_string_template_handler(cfg = {})
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_yields_expected_bit_response_for_valid_completions_input(
+                        self,
+                        testvector_completions_valid_bit,
+                        testrunner_coro_string_template_handler_singleshot):
+        """
+        When valid completions input sent, valid bit output yielded.
+
+        """
+        (cfg_valid,
+         template_valid,
+         params_valid,
+         list_result_expected,
+         list_error_expected) = testvector_completions_valid_bit
+        (list_result,
+         list_error) = testrunner_coro_string_template_handler_singleshot(
+                                                            cfg_valid,
+                                                            [template_valid],
+                                                            [params_valid])
+        assert list_result == list_result_expected
+        assert list_error  == list_error_expected
+
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_yields_expected_bit_response_for_valid_chat_completions_input(
+                        self,
+                        testvector_chat_completions_valid_bit,
+                        testrunner_coro_string_template_handler_singleshot):
+        """
+        When valid chat_completions input sent, valid bit output yielded.
+
+        """
+        (cfg_valid,
+         template_valid,
+         params_valid,
+         list_result_expected,
+         list_error_expected) = testvector_chat_completions_valid_bit
+        (list_result,
+         list_error) = testrunner_coro_string_template_handler_singleshot(
+                                                            cfg_valid,
+                                                            [template_valid],
+                                                            [params_valid])
+        assert list_result == list_result_expected
+        assert list_error  == list_error_expected
+
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_yields_expected_bit_response_for_valid_edits_input(
+                        self,
+                        testvector_edits_valid_bit,
+                        testrunner_coro_string_template_handler_singleshot):
+        """
+        When valid edits input sent, valid bit output yielded.
+
+        """
+        (cfg_valid,
+         template_valid,
+         params_valid,
+         list_result_expected,
+         list_error_expected) = testvector_edits_valid_bit
+        (list_result,
+         list_error) = testrunner_coro_string_template_handler_singleshot(
+                                                            cfg_valid,
+                                                            [template_valid],
+                                                            [params_valid])
+        assert list_result == list_result_expected
+        assert list_error  == list_error_expected
+
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_yields_expected_bit_response_for_valid_images_generations_input(
+                        self,
+                        testvector_images_generations_valid_bit,
+                        testrunner_coro_string_template_handler_singleshot):
+        """
+        When valid images_generations input sent, valid bit output yielded.
+
+        """
+        (cfg_valid,
+         template_valid,
+         params_valid,
+         list_result_expected,
+         list_error_expected) = testvector_images_generations_valid_bit
+        (list_result,
+         list_error) = testrunner_coro_string_template_handler_singleshot(
+                                                            cfg_valid,
+                                                            [template_valid],
+                                                            [params_valid])
+        assert list_result == list_result_expected
+        assert list_error  == list_error_expected
+
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_yields_expected_bit_response_for_valid_images_edits_input(
+                        self,
+                        testvector_images_edits_valid_bit,
+                        testrunner_coro_string_template_handler_singleshot):
+        """
+        When valid images_edits input sent, valid bit output yielded.
+
+        """
+        (cfg_valid,
+         template_valid,
+         params_valid,
+         list_result_expected,
+         list_error_expected) = testvector_images_edits_valid_bit
+        (list_result,
+         list_error) = testrunner_coro_string_template_handler_singleshot(
+                                                            cfg_valid,
+                                                            [template_valid],
+                                                            [params_valid])
+
+        assert list_result == list_result_expected
+        assert list_error  == list_error_expected
+
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_yields_expected_bit_response_for_valid_images_variations_input(
+                        self,
+                        testvector_images_variations_valid_bit,
+                        testrunner_coro_string_template_handler_singleshot):
+        """
+        When valid images_variations input sent, valid bit output yielded.
+
+        """
+        (cfg_valid,
+         template_valid,
+         params_valid,
+         list_result_expected,
+         list_error_expected) = testvector_images_variations_valid_bit
+        (list_result,
+         list_error) = testrunner_coro_string_template_handler_singleshot(
+                                                            cfg_valid,
+                                                            [template_valid],
+                                                            [params_valid])
+        assert list_result == list_result_expected
+        assert list_error  == list_error_expected
+
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_yields_expected_bit_response_for_valid_embeddings_input(
+                        self,
+                        testvector_embeddings_valid_bit,
+                        testrunner_coro_string_template_handler_singleshot):
+        """
+        When valid embeddings input sent, valid bit output yielded.
+
+        """
+        (cfg_valid,
+         template_valid,
+         params_valid,
+         list_result_expected,
+         list_error_expected) = testvector_embeddings_valid_bit
+        (list_result,
+         list_error) = testrunner_coro_string_template_handler_singleshot(
+                                                            cfg_valid,
+                                                            [template_valid],
+                                                            [params_valid])
+        assert list_result == list_result_expected
+        assert list_error  == list_error_expected
+
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_yields_expected_bit_response_for_valid_audio_transcriptions_input(
+                        self,
+                        testvector_audio_transcriptions_valid_bit,
+                        testrunner_coro_string_template_handler_singleshot):
+        """
+        When valid audio_transcriptions input sent, valid bit output yielded.
+
+        """
+        (cfg_valid,
+         template_valid,
+         params_valid,
+         list_result_expected,
+         list_error_expected) = testvector_audio_transcriptions_valid_bit
+        (list_result,
+         list_error) = testrunner_coro_string_template_handler_singleshot(
+                                                            cfg_valid,
+                                                            [template_valid],
+                                                            [params_valid])
+        assert list_result == list_result_expected
+        assert list_error  == list_error_expected
+
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_yields_expected_bit_response_for_valid_audio_translations_input(
+                        self,
+                        testvector_audio_translations_valid_bit,
+                        testrunner_coro_string_template_handler_singleshot):
+        """
+        When valid audio_translations input sent, valid bit output yielded.
+
+        """
+        (cfg_valid,
+         template_valid,
+         params_valid,
+         list_result_expected,
+         list_error_expected) = testvector_audio_translations_valid_bit
+        (list_result,
+         list_error) = testrunner_coro_string_template_handler_singleshot(
+                                                            cfg_valid,
+                                                            [template_valid],
+                                                            [params_valid])
+        assert list_result == list_result_expected
+        assert list_error  == list_error_expected

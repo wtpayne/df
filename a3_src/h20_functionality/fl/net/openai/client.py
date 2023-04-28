@@ -51,7 +51,7 @@ description:
     Here is an example of a result data structure:
 
     {'error':       None,
-     'metadata':    {},
+     'state':       {},
      'request':     {'engine':      '<OPENAI_MODEL_ID>',
                      'max_tokens':  100,
                      'n':           1,
@@ -117,9 +117,9 @@ import fl.util
 
 # -----------------------------------------------------------------------------
 @fl.util.coroutine
-def coro(cfg):
+def coro_string_template_handler(cfg):
     """
-    Yield results for requests sent to the OpenAI web API.
+    Yield results for templates/parameters sent to the OpenAI web API.
 
     Initialize 'database' of prompt templates.
 
@@ -133,15 +133,15 @@ def coro(cfg):
     process.
 
     """
-    map_template = dict()  # id_prompt -> dict with template & metadata.
-    ipc_handler  = _coro_daemon_ipc_handler(cfg)
-    list_request = list()
-    list_result  = list()
-    list_error   = list()
+    map_template    = dict()  # id_prompt -> dict with template.
+    request_handler = coro_request_handler(cfg)
+    list_request    = list()
+    list_result     = list()
+    list_error      = list()
 
     while True:
 
-        (list_param, list_template) = yield (list_result, list_error)
+        (list_template, list_param) = yield (list_result, list_error)
 
         for template in list_template:
             map_template[template['uid_template']] = template
@@ -156,7 +156,7 @@ def coro(cfg):
             except KeyError:
                 pass  # TODO: Raise or log error?
 
-        (list_result, list_error) = ipc_handler.send(list_request)
+        (list_result, list_error) = request_handler.send(list_request)
 
 
 # -----------------------------------------------------------------------------
@@ -186,14 +186,14 @@ def _build_request(template, param):
     request = dict(**template['kwargs_req'])
     request.update(**param['kwargs_req'])
     request['id_endpoint'] = id_endpoint
-    request['metadata']    = param['metadata']
+    request['state']       = param['state']
 
-    # ~~~~<+>~~~~ completions          ~~~~<+>~~~~
+    # completions --------------------------------
     if id_endpoint == 'completions':
         request['prompt'] = template['prompt'].format(
                                                 **param['kwargs_tmpl'])
 
-    # ~~~~<+>~~~~ chat_completions     ~~~~<+>~~~~
+    # chat_completions ---------------------------
     if id_endpoint == 'chat_completions':
         request['messages'] = list()
         for tmpl_msg in template['messages']:
@@ -205,38 +205,38 @@ def _build_request(template, param):
                 req_msg['name'] = tmpl_msg['name']
             request['messages'].append(req_msg)
 
-    # ~~~~<+>~~~~ edits                ~~~~<+>~~~~
+    # edits --------------------------------------
     if id_endpoint == 'edits':
         request['input']       = template['input'].format(
                                                 **param['kwargs_tmpl'])
         request['instruction'] = template['instruction'].format(
                                                 **param['kwargs_tmpl'])
 
-    # ~~~~<+>~~~~ images_generations   ~~~~<+>~~~~
+    # images_generations -------------------------
     if id_endpoint == 'images_generations':
         request['prompt'] = template['prompt'].format(
                                                 **param['kwargs_tmpl'])
 
-    # ~~~~<+>~~~~ images_edits         ~~~~<+>~~~~
+    # images_edits -------------------------------
     if id_endpoint == 'images_edits':
         request['prompt'] = template['prompt'].format(
                                                 **param['kwargs_tmpl'])
 
-    # ~~~~<+>~~~~ images_variations    ~~~~<+>~~~~
+    # images_variations --------------------------
     if id_endpoint == 'images_variations':
         pass # No text prompt
 
-    # ~~~~<+>~~~~ embeddings           ~~~~<+>~~~~
+    # embeddings ---------------------------------
     if id_endpoint == 'embeddings':
         request['input'] = template['input'].format(
                                                 **param['kwargs_tmpl'])
 
-    # ~~~~<+>~~~~ audio_transcriptions ~~~~<+>~~~~
+    # audio_transcriptions -----------------------
     if id_endpoint == 'audio_transcriptions':
         request['prompt'] = template['prompt'].format(
                                                 **param['kwargs_tmpl'])
 
-    # ~~~~<+>~~~~ audio_translations   ~~~~<+>~~~~
+    # audio_translations -------------------------
     if id_endpoint == 'audio_translations':
         request['prompt'] = template['prompt'].format(
                                                 **param['kwargs_tmpl'])
@@ -246,7 +246,7 @@ def _build_request(template, param):
 
 # -----------------------------------------------------------------------------
 @fl.util.coroutine
-def _coro_daemon_ipc_handler(cfg):
+def coro_request_handler(cfg):
     """
     Yield results for requests sent to the OpenAI web API.
 
@@ -298,12 +298,11 @@ def _coro_daemon_ipc_handler(cfg):
         #
         list_request.clear()
         list_request = yield (list_result, list_error)
-        list_result.clear()
-        list_error.clear()
 
         # Enqueue any newly submitted
         # requests.
         #
+        list_error.clear()
         for request in list_request:
             try:
                 cfg['queue_request'].put(request, block = False)
@@ -313,10 +312,10 @@ def _coro_daemon_ipc_handler(cfg):
         # Dequeue any newly returned
         # results and errors.
         #
+        list_result.clear()
         while True:
             try:
-                result = cfg['queue_result'].get(block = False)
-                list_result.append(result)
+                list_result.append(cfg['queue_result'].get(block = False))
             except queue.Empty:
                 break
 
@@ -381,15 +380,15 @@ def _process_one_request(request_raw, default, is_bit):
 
     At the same time, we determine the function
     to call to interact with the required OpenAI
-    endpoint, any metadata from request_raw to
-    keep for book-keeping purposes, and the
+    endpoint, any process state from request_raw
+    to pass back to the process engine, and the
     built-in-test response to return if the bit
     flag is set.
 
     """
     (fcn_endpoint,
      request_full,
-     metadata,
+     state,
      response_bit) = _build_endpoint_specific_parameters(
                                                     request_raw = request_raw,
                                                     default     = default)
@@ -397,7 +396,7 @@ def _process_one_request(request_raw, default, is_bit):
     result  = dict(request  = request_full,
                    response = None,
                    error    = None,
-                   metadata = metadata)
+                   state    = state)
 
     if is_bit:
         result['response'] = response_bit
@@ -419,7 +418,7 @@ def _build_endpoint_specific_parameters(request_raw, default):
 
         1. The openai function to call for the requested endpoint.
         2. The request parameters fully fleshed out with default values.
-        3. Metadata for tracking the request and the response.
+        3. Process state.
         4. A built-in-test response to use when the bit flag is enabled.
 
     This information is extracted from the
@@ -558,18 +557,14 @@ def _build_endpoint_specific_parameters(request_raw, default):
             raise RuntimeError('{id} not in request_raw or default'.format(
                                                             id = id_param))
 
-    metadata = request_raw.get('metadata', None)
-    if metadata is None:
-        metadata = default.get('metadata', None)
-    if metadata is None:
-        metadata = dict()  # TODO: Work out if this should be dict() or None?
+    state = request_raw.get('state', {})
 
     # Work out the response to give when the
     # built-in-test flag is enabled.
     #
     response_bit = built_in_test_response(id_endpoint)
 
-    return (fcn_endpoint, request_full, metadata, response_bit)
+    return (fcn_endpoint, request_full, state, response_bit)
 
 
 # -----------------------------------------------------------------------------
