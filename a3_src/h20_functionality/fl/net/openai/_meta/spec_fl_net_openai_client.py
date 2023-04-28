@@ -22,40 +22,49 @@ def testvector_completions_valid_bit():
 
     """
     import fl.net.openai.client
-    id_endpoint = 'completions'
+    id_endpoint  = 'completions'
+    uid_template = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
+    uid_variant  = '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3'
+    uid_params   = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
+    id_model     = 'text-davinci-003'
+    prompt_test  = 'completions_test_prompt_text'
 
     cfg_valid = {
         'is_bit':           True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
-            'id_endpoint': id_endpoint,
-            'model':       'text-davinci-003'}}
+            'id_endpoint':  id_endpoint,
+            'model':        id_model}}
 
     template_valid = {
-        'id_endpoint':  id_endpoint,
-        'type':         {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
-        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
-        'kwargs_req':   {'model': 'text-davinci-003'},
-        'prompt':       'test_prompt'}
+        'id_endpoint':      id_endpoint,
+        'type':             {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_template':     uid_template, # Process step.
+        'uid_variant':      uid_variant,  # Improvement.
+        'kwargs_req':       {'model': id_model},
+        'prompt':           prompt_test}
 
     params_valid = {
-        'type':         {'id': 'prompt_params', 'ver': '1.0'},
-        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
-        'kwargs_tmpl':  dict(), # <-- Args for template
-        'kwargs_req':   dict(), # <-- Args for OpenAI request
-        'state':        dict()} # <-- Process state
+        'type':             {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':       uid_params,
+        'uid_template':     uid_template,
+        'kwargs_tmpl':      dict(), # <-- Args for template
+        'kwargs_req':       dict(), # <-- Args for OpenAI request
+        'state':            dict()} # <-- Process state
+
+    request_valid = {
+        'model':            id_model,
+        'prompt':           prompt_test}
 
     result_valid = [{
-        'error':     None,
-        'request':   {'model':  'text-davinci-003',
-                      'prompt': 'test_prompt'},
-        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
-        'state':     {}}]
+        'error':            None,
+        'request':          request_valid,
+        'response':         fl.net.openai.client.built_in_test_response(
+                                                                id_endpoint),
+        'state':            {}}]
 
-    error_valid  = []
+    error_valid = []
 
     return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
 
@@ -71,42 +80,50 @@ def testvector_chat_completions_valid_bit():
 
     """
     import fl.net.openai.client
-    id_endpoint = 'chat_completions'
+    id_endpoint   = 'chat_completions'
+    uid_template  = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
+    uid_variant   = '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3'
+    uid_params    = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
+    id_model      = 'text-davinci-003'
+    messages_test = [{'role':    'system',
+                      'content': 'chat_completions_test_msg_content'}]
 
     cfg_valid = {
         'is_bit':           True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
-            'id_endpoint': id_endpoint,
-            'model':       'gpt-3.5-turbo-0301'}}
+            'id_endpoint':  id_endpoint,
+            'model':        id_model}}
 
     template_valid = {
-        'id_endpoint':  id_endpoint,
-        'type':         {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
-        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
-        'kwargs_req':   {'model': 'gpt-3.5-turbo-0301'},
-        'messages':     [{'role':    'system',
-                          'content': 'test_content'}] }
+        'id_endpoint':      id_endpoint,
+        'type':             {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_template':     uid_template, # Process step.
+        'uid_variant':      uid_variant,  # Improvement.
+        'kwargs_req':       {'model': id_model},
+        'messages':         messages_test }
 
     params_valid = {
-        'type':         {'id': 'prompt_params', 'ver': '1.0'},
-        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
-        'kwargs_tmpl':  dict(), # <-- Args for template
-        'kwargs_req':   dict(), # <-- Args for OpenAI request
-        'state':        dict()} # <-- Process state
+        'type':             {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':       uid_params,
+        'uid_template':     uid_template,
+        'kwargs_tmpl':      dict(), # <-- Args for template
+        'kwargs_req':       dict(), # <-- Args for OpenAI request
+        'state':            dict()} # <-- Process state
+
+    request_valid = {
+        'model':            id_model,
+        'messages':         messages_test}
 
     result_valid = [{
-        'error':     None,
-        'request':   {'model':      'gpt-3.5-turbo-0301',
-                      'messages':   [{'role':    'system',
-                                      'content': 'test_content'}]},
-        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
-        'state':     {}}]
+        'error':            None,
+        'request':          request_valid,
+        'response':         fl.net.openai.client.built_in_test_response(
+                                                                id_endpoint),
+        'state':            {}}]
 
-    error_valid  = []
+    error_valid = []
 
     return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
 
@@ -122,42 +139,52 @@ def testvector_edits_valid_bit():
 
     """
     import fl.net.openai.client
-    id_endpoint = 'edits'
+    id_endpoint      = 'edits'
+    uid_template     = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
+    uid_variant      = '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3'
+    uid_params       = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
+    id_model         = 'text-davinci-edit-001'
+    input_test       = 'edits_test_input_text'
+    instruction_test = 'edits_test_instruction_text'
 
     cfg_valid = {
         'is_bit':           True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
-            'id_endpoint': id_endpoint,
-            'model':       'text-davinci-edit-001'}}
+            'id_endpoint':  id_endpoint,
+            'model':        id_model}}
 
     template_valid = {
-        'id_endpoint':  id_endpoint,
-        'type':         {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
-        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
-        'kwargs_req':   {'model': 'text-davinci-edit-001'},
-        'input':        'test_input',
-        'instruction':  'test_instruction' }
+        'id_endpoint':      id_endpoint,
+        'type':             {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_template':     uid_template, # Process step.
+        'uid_variant':      uid_variant,  # Improvement.
+        'kwargs_req':       {'model': id_model},
+        'input':            input_test,
+        'instruction':      instruction_test }
 
     params_valid = {
-        'type':         {'id': 'prompt_params', 'ver': '1.0'},
-        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
-        'kwargs_tmpl':  dict(), # <-- Args for template
-        'kwargs_req':   dict(), # <-- Args for OpenAI request
-        'state':        dict()} # <-- Process state
+        'type':             {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':       uid_params,
+        'uid_template':     uid_template,
+        'kwargs_tmpl':      dict(), # <-- Args for template
+        'kwargs_req':       dict(), # <-- Args for OpenAI request
+        'state':            dict()} # <-- Process state
+
+    request_valid = {
+        'model':            id_model,
+        'input':            input_test,
+        'instruction':      instruction_test}
 
     result_valid = [{
-        'error':     None,
-        'request':   {'model':        'text-davinci-edit-001',
-                      'input':        'test_input',
-                      'instruction':  'test_instruction' },
-        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
-        'state':     {}}]
+        'error':            None,
+        'request':          request_valid,
+        'response':         fl.net.openai.client.built_in_test_response(
+                                                                id_endpoint),
+        'state':            {}}]
 
-    error_valid  = []
+    error_valid = []
 
     return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
 
@@ -173,36 +200,44 @@ def testvector_images_generations_valid_bit():
 
     """
     import fl.net.openai.client
-    id_endpoint = 'images_generations'
+    id_endpoint  = 'images_generations'
+    uid_template = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
+    uid_variant  = '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3'
+    uid_params   = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
+    prompt_test  = 'images_generations_test_prompt_text'
 
     cfg_valid = {
         'is_bit':           True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
-            'id_endpoint': id_endpoint}}
+            'id_endpoint':  id_endpoint}}
 
     template_valid = {
-        'id_endpoint':  id_endpoint,
-        'type':         {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
-        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
-        'kwargs_req':   {},
-        'prompt':       'prompt' }
+        'id_endpoint':      id_endpoint,
+        'type':             {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_template':     uid_template, # Process step.
+        'uid_variant':      uid_variant,  # Improvement.
+        'kwargs_req':       {},
+        'prompt':           prompt_test }
 
     params_valid = {
-        'type':         {'id': 'prompt_params', 'ver': '1.0'},
-        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
-        'kwargs_tmpl':  dict(), # <-- Args for template
-        'kwargs_req':   dict(), # <-- Args for OpenAI request
-        'state':        dict()} # <-- Process state
+        'type':             {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':       uid_params,
+        'uid_template':     uid_template,
+        'kwargs_tmpl':      dict(), # <-- Args for template
+        'kwargs_req':       dict(), # <-- Args for OpenAI request
+        'state':            dict()} # <-- Process state
+
+    request_valid = {
+        'prompt':           prompt_test}
 
     result_valid = [{
-        'error':     None,
-        'request':   {'prompt': 'prompt' },
-        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
-        'state':     {}}]
+        'error':            None,
+        'request':          request_valid,
+        'response':         fl.net.openai.client.built_in_test_response(
+                                                                id_endpoint),
+        'state':            {}}]
 
     error_valid  = []
 
@@ -220,40 +255,48 @@ def testvector_images_edits_valid_bit():
 
     """
     import fl.net.openai.client
-    id_endpoint = 'images_edits'
+    id_endpoint  = 'images_edits'
+    uid_template = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
+    uid_variant  = '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3'
+    uid_params   = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
+    image_test   = 'images_edits_test_image_data'
+    prompt_test  = 'images_edits_test_prompt_text'
 
     cfg_valid = {
         'is_bit':           True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
-            'id_endpoint': id_endpoint,
-            'model':       'text-davinci-003'}}
+            'id_endpoint':  id_endpoint}}
 
     template_valid = {
-        'id_endpoint':  id_endpoint,
-        'type':         {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
-        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
-        'kwargs_req':   {'image':  'test_image'},
-        'prompt':       'test_prompt'}
+        'id_endpoint':      id_endpoint,
+        'type':             {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_template':     uid_template, # Process step.
+        'uid_variant':      uid_variant,  # Improvement.
+        'kwargs_req':       {'image': image_test},
+        'prompt':           prompt_test}
 
     params_valid = {
-        'type':         {'id': 'prompt_params', 'ver': '1.0'},
-        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
-        'kwargs_tmpl':  dict(), # <-- Args for template
-        'kwargs_req':   dict(), # <-- Args for OpenAI request
-        'state':        dict()} # <-- Process state
+        'type':             {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':       uid_params,
+        'uid_template':     uid_template,
+        'kwargs_tmpl':      dict(), # <-- Args for template
+        'kwargs_req':       dict(), # <-- Args for OpenAI request
+        'state':            dict()} # <-- Process state
+
+    request_valid = {
+        'image':            image_test,
+        'prompt':           prompt_test}
 
     result_valid = [{
-        'error':     None,
-        'request':   {'image':  'test_image',
-                      'prompt': 'test_prompt' },
-        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
-        'state':     {}}]
+        'error':            None,
+        'request':          request_valid,
+        'response':         fl.net.openai.client.built_in_test_response(
+                                                                id_endpoint),
+        'state':            {}}]
 
-    error_valid  = []
+    error_valid = []
 
     return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
 
@@ -269,38 +312,45 @@ def testvector_images_variations_valid_bit():
 
     """
     import fl.net.openai.client
-    id_endpoint = 'images_variations'
+    id_endpoint  = 'images_variations'
+    uid_template = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
+    uid_variant  = '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3'
+    uid_params   = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
+    image_test   = 'images_variations_test_image_data'
 
     cfg_valid = {
         'is_bit':           True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
-            'id_endpoint': id_endpoint,
-            'model':       'text-davinci-003'}}
+            'id_endpoint':  id_endpoint}}
 
     template_valid = {
-        'id_endpoint':  id_endpoint,
-        'type':         {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
-        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
-        'kwargs_req':   {'image':  'test_image'}}
+        'id_endpoint':      id_endpoint,
+        'type':             {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_template':     uid_template, # Process step.
+        'uid_variant':      uid_variant,  # Improvement.
+        'kwargs_req':       {'image':  image_test}}
 
     params_valid = {
-        'type':         {'id': 'prompt_params', 'ver': '1.0'},
-        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
-        'kwargs_tmpl':  dict(), # <-- Args for template
-        'kwargs_req':   dict(), # <-- Args for OpenAI request
-        'state':        dict()} # <-- Process state
+        'type':             {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':       uid_params,
+        'uid_template':     uid_template,
+        'kwargs_tmpl':      dict(), # <-- Args for template
+        'kwargs_req':       dict(), # <-- Args for OpenAI request
+        'state':            dict()} # <-- Process state
+
+    request_valid = {
+        'image':            image_test}
 
     result_valid = [{
-        'error':     None,
-        'request':   {'image': 'test_image'},
-        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
-        'state':     {}}]
+        'error':            None,
+        'request':          request_valid,
+        'response':         fl.net.openai.client.built_in_test_response(
+                                                                id_endpoint),
+        'state':            {}}]
 
-    error_valid  = []
+    error_valid = []
 
     return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
 
@@ -316,40 +366,49 @@ def testvector_embeddings_valid_bit():
 
     """
     import fl.net.openai.client
-    id_endpoint = 'embeddings'
+    id_endpoint  = 'embeddings'
+    uid_template = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
+    uid_variant  = '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3'
+    uid_params   = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
+    id_model     = 'text-embedding-ada-002'
+    input_test   = 'embeddings_test_input_text'
 
     cfg_valid = {
         'is_bit':           True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
-            'id_endpoint': id_endpoint,
-            'model':       'text-embedding-ada-002'}}
+            'id_endpoint':  id_endpoint,
+            'model':        id_model}}
 
     template_valid = {
-        'id_endpoint':  id_endpoint,
-        'type':         {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
-        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
-        'kwargs_req':   {'model': 'text-embedding-ada-002'},
-        'input':        'test_input'}
+        'id_endpoint':      id_endpoint,
+        'type':             {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_template':     uid_template, # Process step.
+        'uid_variant':      uid_variant,  # Improvement.
+        'kwargs_req':       {'model': id_model},
+        'input':            input_test}
 
     params_valid = {
-        'type':         {'id': 'prompt_params', 'ver': '1.0'},
-        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
-        'kwargs_tmpl':  dict(), # <-- Args for template
-        'kwargs_req':   dict(), # <-- Args for OpenAI request
-        'state':        dict()} # <-- Process state
+        'type':             {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':       uid_params,
+        'uid_template':     uid_template,
+        'kwargs_tmpl':      dict(), # <-- Args for template
+        'kwargs_req':       dict(), # <-- Args for OpenAI request
+        'state':            dict()} # <-- Process state
+
+    request_valid = {
+        'model':            id_model,
+        'input':            input_test}
 
     result_valid = [{
-        'error':     None,
-        'request':   {'model': 'text-embedding-ada-002',
-                      'input': 'test_input'},
-        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
-        'state':     {}}]
+        'error':            None,
+        'request':          request_valid,
+        'response':         fl.net.openai.client.built_in_test_response(
+                                                                id_endpoint),
+        'state':            {}}]
 
-    error_valid  = []
+    error_valid = []
 
     return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
 
@@ -365,42 +424,52 @@ def testvector_audio_transcriptions_valid_bit():
 
     """
     import fl.net.openai.client
-    id_endpoint = 'audio_transcriptions'
+    id_endpoint     = 'audio_transcriptions'
+    uid_template    = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
+    uid_variant     = '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3'
+    uid_params      = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
+    id_model        = 'whisper-1'
+    audio_file_test = 'audio_transcriptions_test_audio_file_data'
+    prompt_test     = 'audio_transcriptions_test_prompt_text'
 
     cfg_valid = {
         'is_bit':           True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
-            'id_endpoint': id_endpoint,
-            'model':       'text-davinci-003'}}
+            'id_endpoint':  id_endpoint,
+            'model':        id_model}}
 
     template_valid = {
-        'id_endpoint':  id_endpoint,
-        'type':         {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
-        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
-        'kwargs_req':   {'file':  'test_audio_file',
-                         'model': 'whisper-1'},
-        'prompt':       'test_prompt'}
+        'id_endpoint':      id_endpoint,
+        'type':             {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_template':     uid_template, # Process step.
+        'uid_variant':      uid_variant,  # Improvement.
+        'kwargs_req':       {'file':  audio_file_test,
+                             'model': id_model},
+        'prompt':           prompt_test}
 
     params_valid = {
-        'type':         {'id': 'prompt_params', 'ver': '1.0'},
-        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
-        'kwargs_tmpl':  dict(), # <-- Args for template
-        'kwargs_req':   dict(), # <-- Args for OpenAI request
-        'state':        dict()} # <-- Process state
+        'type':             {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':       uid_params,
+        'uid_template':     uid_template,
+        'kwargs_tmpl':      dict(), # <-- Args for template
+        'kwargs_req':       dict(), # <-- Args for OpenAI request
+        'state':            dict()} # <-- Process state
+
+    request_valid = {
+        'file':             audio_file_test,
+        'model':            id_model,
+        'prompt':           prompt_test}
 
     result_valid = [{
-        'error':     None,
-        'request':   {'file':   'test_audio_file',
-                      'model':  'whisper-1',
-                      'prompt': 'test_prompt'},
-        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
-        'state':     {}}]
+        'error':            None,
+        'request':          request_valid,
+        'response':         fl.net.openai.client.built_in_test_response(
+                                                                id_endpoint),
+        'state':            {}}]
 
-    error_valid  = []
+    error_valid = []
 
     return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
 
@@ -416,40 +485,50 @@ def testvector_audio_translations_valid_bit():
 
     """
     import fl.net.openai.client
-    id_endpoint = 'audio_translations'
+    id_endpoint     = 'audio_translations'
+    uid_template    = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
+    uid_variant     = '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3'
+    uid_params      = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
+    id_model        = 'whisper-1'
+    audio_file_test = 'audio_translations_test_audio_file_data'
+    prompt_test     = 'audio_translations_test_prompt_text'
 
     cfg_valid = {
         'is_bit':           True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
-            'id_endpoint': id_endpoint,
-            'model':       'text-davinci-003'}}
+            'id_endpoint':  id_endpoint,
+            'model':        id_model}}
 
     template_valid = {
-        'id_endpoint':  id_endpoint,
-        'type':         {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
-        'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
-        'kwargs_req':   {'file':  'test_audio_file',
-                         'model': 'whisper-1'},
-        'prompt':       'test_prompt'}
+        'id_endpoint':      id_endpoint,
+        'type':             {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_template':     uid_template, # Process step.
+        'uid_variant':      uid_variant,  # Improvement.
+        'kwargs_req':       {'file':  audio_file_test,
+                             'model': id_model},
+        'prompt':           prompt_test}
 
     params_valid = {
-        'type':         {'id': 'prompt_params', 'ver': '1.0'},
-        'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
-        'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
-        'kwargs_tmpl':  dict(), # <-- Args for template
-        'kwargs_req':   dict(), # <-- Args for OpenAI request
-        'state':        dict()} # <-- Process state
+        'type':             {'id': 'prompt_params', 'ver': '1.0'},
+        'uid_params':       uid_params,
+        'uid_template':     uid_template,
+        'kwargs_tmpl':      dict(), # <-- Args for template
+        'kwargs_req':       dict(), # <-- Args for OpenAI request
+        'state':            dict()} # <-- Process state
+
+    request_valid = {
+        'file':             audio_file_test,
+        'model':            id_model,
+        'prompt':           prompt_test}
 
     result_valid = [{
-        'error':     None,
-        'request':   {'file':   'test_audio_file',
-                      'model':  'whisper-1',
-                      'prompt': 'test_prompt'},
-        'response':  fl.net.openai.client.built_in_test_response(id_endpoint),
-        'state':     {}}]
+        'error':            None,
+        'request':          request_valid,
+        'response':         fl.net.openai.client.built_in_test_response(
+                                                                id_endpoint),
+        'state':            {}}]
 
     error_valid  = []
 
@@ -474,17 +553,18 @@ def testrunner_coro_string_template_handler_singleshot():
 
         """
         import fl.net.openai.client
-        list_test_input = list()
-        list_test_input.append((list_template, list_param))
+        list_tup_input_test = list()
+        list_tup_input_test.append((list_template, list_param))
 
         client = fl.net.openai.client.coro_string_template_handler(cfg = cfg)
         for _ in range(maxiter):
 
-            if list_test_input:
-                (list_result, list_error) = client.send(list_test_input.pop())
+            if list_tup_input_test:
+                tup_input_test = list_tup_input_test.pop()
             else:
-                (list_result, list_error) = client.send(([], []))
+                tup_input_test = ([], [])
 
+            (list_result, list_error) = client.send(tup_input_test)
             if (len(list_result) > 0) or (len(list_error) > 0):
                 return (list_result, list_error)
 
