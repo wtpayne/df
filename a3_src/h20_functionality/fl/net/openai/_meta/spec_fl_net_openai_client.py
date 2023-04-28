@@ -18,15 +18,13 @@ def template_completions_valid():
     Return a valid template data structure for the completions endpoint.
 
     """
-    template = {
+    return {
         'id_endpoint':  'completions',
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {'model': 'text-davinci-003'},
-        'prompt':       'test_prompt'
-    }
-    return template
+        'prompt':       'test_prompt'}
 
 
 # -----------------------------------------------------------------------------
@@ -36,16 +34,14 @@ def template_chat_completions_valid():
     Return a valid template data structure for the chat completions endpoint.
 
     """
-    template = {
+    return {
         'id_endpoint':  'chat_completions',
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {'model': 'gpt-3.5-turbo-0301'},
         'messages':     [{'role':    'system',
-                          'content': 'test_content'}]
-    }
-    return template
+                          'content': 'test_content'}] }
 
 
 # -----------------------------------------------------------------------------
@@ -55,16 +51,14 @@ def template_edits_valid():
     Return a valid template data structure for the edits endpoint.
 
     """
-    template = {
+    return {
         'id_endpoint':  'edits',
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {'model': 'text-davinci-edit-001'},
         'input':        'test_input',
-        'instruction':  'test_instruction'
-    }
-    return template
+        'instruction':  'test_instruction' }
 
 
 # -----------------------------------------------------------------------------
@@ -74,15 +68,13 @@ def template_images_generations_valid():
     Return a valid template data structure for the images_generations endpoint.
 
     """
-    template = {
+    return {
         'id_endpoint':  'images_generations',
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {},
-        'prompt':       'prompt'
-    }
-    return template
+        'prompt':       'prompt' }
 
 
 # -----------------------------------------------------------------------------
@@ -92,15 +84,13 @@ def template_images_edits_valid():
     Return a valid template data structure for the images_edits endpoint.
 
     """
-    template = {
+    return {
         'id_endpoint':  'images_edits',
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {'image':  'test_image'},
-        'prompt':       'test_prompt'
-    }
-    return template
+        'prompt':       'test_prompt'}
 
 
 # -----------------------------------------------------------------------------
@@ -110,14 +100,12 @@ def template_images_variations_valid():
     Return a valid template data structure for the images_variations endpoint.
 
     """
-    template = {
+    return {
         'id_endpoint':  'images_variations',
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
-        'kwargs_req':   {'image':  'test_image'}
-    }
-    return template
+        'kwargs_req':   {'image':  'test_image'}}
 
 
 # -----------------------------------------------------------------------------
@@ -127,15 +115,13 @@ def template_embeddings_valid():
     Return a valid template data structure for the embeddings endpoint.
 
     """
-    template = {
+    return {
         'id_endpoint':  'embeddings',
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {'model': 'text-embedding-ada-002'},
-        'input':        'test_input'
-    }
-    return template
+        'input':        'test_input'}
 
 
 # -----------------------------------------------------------------------------
@@ -145,16 +131,15 @@ def template_audio_transcriptions_valid():
     Return valid template data structure for the audio_transcriptions endpoint.
 
     """
-    template = {
+    return {
         'id_endpoint':  'audio_transcriptions',
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {'file':  'test_audio_file',
                          'model': 'whisper-1'},
-        'prompt':       'test_prompt'
-    }
-    return template
+        'prompt':       'test_prompt'}
+
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
@@ -163,16 +148,14 @@ def template_audio_translations_valid():
     Return a valid template data structure for the audio_translations endpoint.
 
     """
-    template = {
+    return {
         'id_endpoint':  'audio_translations',
         'type':         {'id': 'prompt_template', 'ver': '1.0'},
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2', # Process step.
         'uid_variant':  '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3', # Improvement.
         'kwargs_req':   {'file':  'test_audio_file',
                          'model': 'whisper-1'},
-        'prompt':       'test_prompt'
-    }
-    return template
+        'prompt':       'test_prompt'}
 
 
 # -----------------------------------------------------------------------------
@@ -182,15 +165,14 @@ def param_valid():
     Return a valid parameter data structure.
 
     """
-    param = {
+    return {
         'type':         {'id': 'prompt_params', 'ver': '1.0'},
         'uid_params':   'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce',
         'uid_template': 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2',
         'kwargs_tmpl':  dict(), # <-- Things for template
         'kwargs_req':   dict(), # <-- Things for OpenAI request
-        'metadata':     dict()  # <-- Tracking metadata
-    }
-    return param
+        'metadata':     dict()} # <-- Tracking metadata
+
 
 # -----------------------------------------------------------------------------
 @pytest.fixture

@@ -543,7 +543,8 @@ def _build_endpoint_specific_parameters(request_raw, default):
             continue
 
         if is_required_by_internal_api:
-            raise RuntimeError('{id} not in request_raw'.format(id = id_param))
+            raise RuntimeError('{id} not in request_raw'.format(
+                                                            id = id_param))
 
         # Try to get value from default.
         #
@@ -555,7 +556,7 @@ def _build_endpoint_specific_parameters(request_raw, default):
 
         if is_required_by_openai_api:
             raise RuntimeError('{id} not in request_raw or default'.format(
-                                                                id = id_param))
+                                                            id = id_param))
 
     metadata = request_raw.get('metadata', None)
     if metadata is None:
