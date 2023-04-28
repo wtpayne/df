@@ -66,7 +66,12 @@ def testvector_completions_valid_bit():
 
     error_valid = []
 
-    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+    return (cfg_valid,
+            template_valid,
+            params_valid,
+            request_valid,
+            result_valid,
+            error_valid)
 
 
 # -----------------------------------------------------------------------------
@@ -125,7 +130,12 @@ def testvector_chat_completions_valid_bit():
 
     error_valid = []
 
-    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+    return (cfg_valid,
+            template_valid,
+            params_valid,
+            request_valid,
+            result_valid,
+            error_valid)
 
 
 # -----------------------------------------------------------------------------
@@ -186,7 +196,12 @@ def testvector_edits_valid_bit():
 
     error_valid = []
 
-    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+    return (cfg_valid,
+            template_valid,
+            params_valid,
+            request_valid,
+            result_valid,
+            error_valid)
 
 
 # -----------------------------------------------------------------------------
@@ -241,7 +256,12 @@ def testvector_images_generations_valid_bit():
 
     error_valid  = []
 
-    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+    return (cfg_valid,
+            template_valid,
+            params_valid,
+            request_valid,
+            result_valid,
+            error_valid)
 
 
 # -----------------------------------------------------------------------------
@@ -298,7 +318,12 @@ def testvector_images_edits_valid_bit():
 
     error_valid = []
 
-    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+    return (cfg_valid,
+            template_valid,
+            params_valid,
+            request_valid,
+            result_valid,
+            error_valid)
 
 
 # -----------------------------------------------------------------------------
@@ -352,7 +377,12 @@ def testvector_images_variations_valid_bit():
 
     error_valid = []
 
-    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+    return (cfg_valid,
+            template_valid,
+            params_valid,
+            request_valid,
+            result_valid,
+            error_valid)
 
 
 # -----------------------------------------------------------------------------
@@ -410,7 +440,12 @@ def testvector_embeddings_valid_bit():
 
     error_valid = []
 
-    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+    return (cfg_valid,
+            template_valid,
+            params_valid,
+            request_valid,
+            result_valid,
+            error_valid)
 
 
 # -----------------------------------------------------------------------------
@@ -471,7 +506,12 @@ def testvector_audio_transcriptions_valid_bit():
 
     error_valid = []
 
-    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+    return (cfg_valid,
+            template_valid,
+            params_valid,
+            request_valid,
+            result_valid,
+            error_valid)
 
 
 # -----------------------------------------------------------------------------
@@ -532,14 +572,19 @@ def testvector_audio_translations_valid_bit():
 
     error_valid  = []
 
-    return (cfg_valid, template_valid, params_valid, result_valid, error_valid)
+    return (cfg_valid,
+            template_valid,
+            params_valid,
+            request_valid,
+            result_valid,
+            error_valid)
 
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def testrunner_coro_string_template_handler_singleshot():
+def testrunner_coro_template_handler_singleshot():
     """
-    Return a single-shot test runner fixture for the coro couroutine.
+    Return a single-shot test runner fixture for coro_template_handler.
 
     """
     # -------------------------------------------------------------------------
@@ -556,7 +601,7 @@ def testrunner_coro_string_template_handler_singleshot():
         list_tup_input_test = list()
         list_tup_input_test.append((list_template, list_param))
 
-        client = fl.net.openai.client.coro_string_template_handler(cfg = cfg)
+        client = fl.net.openai.client.coro_template_handler(cfg = cfg)
         for _ in range(maxiter):
 
             if list_tup_input_test:
@@ -565,6 +610,43 @@ def testrunner_coro_string_template_handler_singleshot():
                 tup_input_test = ([], [])
 
             (list_result, list_error) = client.send(tup_input_test)
+            if (len(list_result) > 0) or (len(list_error) > 0):
+                return (list_result, list_error)
+
+            time.sleep(delay_secs)
+
+    return _get_result_singleshot
+
+
+# -----------------------------------------------------------------------------
+@pytest.fixture
+def testrunner_coro_request_handler_singleshot():
+    """
+    Return a single-shot test runner fixture for coro_request_handler.
+
+    """
+    # -------------------------------------------------------------------------
+    def _get_result_singleshot(cfg,
+                               list_request,
+                               maxiter     = 100,
+                               delay_secs  = 0.001):
+        """
+        Run the openAI client and wait for the first set of responses.
+
+        """
+        import fl.net.openai.client
+        list_input_test = list()
+        list_input_test.append(list_request)
+
+        client = fl.net.openai.client.coro_request_handler(cfg = cfg)
+        for _ in range(maxiter):
+
+            if list_input_test:
+                input_test = list_input_test.pop()
+            else:
+                input_test = []
+
+            (list_result, list_error) = client.send(input_test)
             if (len(list_result) > 0) or (len(list_error) > 0):
                 return (list_result, list_error)
 
@@ -599,8 +681,8 @@ class SpecifyFlNetOpenAiClient:
 
         """
         import fl.net.openai.client
-        (cfg_valid, _, _, _, _) = testvector_completions_valid_bit
-        client = fl.net.openai.client.coro_string_template_handler(
+        (cfg_valid, _, _, _, _, _) = testvector_completions_valid_bit
+        client = fl.net.openai.client.coro_template_handler(
                                                             cfg = cfg_valid)
         assert inspect.isgenerator(client)
 
@@ -613,17 +695,18 @@ class SpecifyFlNetOpenAiClient:
 
         """
         import fl.net.openai.client
-        (cfg_valid, _, _, _, _) = testvector_completions_valid_bit
+        (cfg_valid, _, _, _, _, _) = testvector_completions_valid_bit
         cfg_invalid = cfg_valid
         with pytest.raises(AssertionError):
-            fl.net.openai.client.coro_string_template_handler(cfg = {})
+            fl.net.openai.client.coro_template_handler(cfg = {})
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
     def it_yields_expected_bit_response_for_valid_completions_input(
                         self,
                         testvector_completions_valid_bit,
-                        testrunner_coro_string_template_handler_singleshot):
+                        testrunner_coro_template_handler_singleshot,
+                        testrunner_coro_request_handler_singleshot):
         """
         When valid completions input sent, valid bit output yielded.
 
@@ -631,23 +714,40 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          template_valid,
          params_valid,
+         request_valid,
          list_result_expected,
          list_error_expected) = testvector_completions_valid_bit
-        (list_result,
-         list_error) = testrunner_coro_string_template_handler_singleshot(
+
+        # Check that the high-level string and
+        # template handler coroutine works when
+        # given valid input.
+        #
+        (list_result_1,
+         list_error_1) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
                                                             [params_valid])
-        assert list_result == list_result_expected
-        assert list_error  == list_error_expected
+        assert list_result_1 == list_result_expected
+        assert list_error_1  == list_error_expected
 
+        # Check that the lower-level request
+        # handler coroutine also works when
+        # given valid input.
+        #
+        (list_result_2,
+         list_error_2) = testrunner_coro_request_handler_singleshot(
+                                                            cfg_valid,
+                                                            [request_valid])
+        assert list_result_2 == list_result_expected
+        assert list_error_2  == list_error_expected
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
     def it_yields_expected_bit_response_for_valid_chat_completions_input(
                         self,
                         testvector_chat_completions_valid_bit,
-                        testrunner_coro_string_template_handler_singleshot):
+                        testrunner_coro_template_handler_singleshot,
+                        testrunner_coro_request_handler_singleshot):
         """
         When valid chat_completions input sent, valid bit output yielded.
 
@@ -655,23 +755,40 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          template_valid,
          params_valid,
+         request_valid,
          list_result_expected,
          list_error_expected) = testvector_chat_completions_valid_bit
-        (list_result,
-         list_error) = testrunner_coro_string_template_handler_singleshot(
+
+        # Check that the high-level string and
+        # template handler coroutine works when
+        # given valid input.
+        #
+        (list_result_1,
+         list_error_1) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
                                                             [params_valid])
-        assert list_result == list_result_expected
-        assert list_error  == list_error_expected
+        assert list_result_1 == list_result_expected
+        assert list_error_1  == list_error_expected
 
+        # Check that the lower-level request
+        # handler coroutine also works when
+        # given valid input.
+        #
+        (list_result_2,
+         list_error_2) = testrunner_coro_request_handler_singleshot(
+                                                            cfg_valid,
+                                                            [request_valid])
+        assert list_result_2 == list_result_expected
+        assert list_error_2  == list_error_expected
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
     def it_yields_expected_bit_response_for_valid_edits_input(
                         self,
                         testvector_edits_valid_bit,
-                        testrunner_coro_string_template_handler_singleshot):
+                        testrunner_coro_template_handler_singleshot,
+                        testrunner_coro_request_handler_singleshot):
         """
         When valid edits input sent, valid bit output yielded.
 
@@ -679,23 +796,40 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          template_valid,
          params_valid,
+         request_valid,
          list_result_expected,
          list_error_expected) = testvector_edits_valid_bit
-        (list_result,
-         list_error) = testrunner_coro_string_template_handler_singleshot(
+
+        # Check that the high-level string and
+        # template handler coroutine works when
+        # given valid input.
+        #
+        (list_result_1,
+         list_error_1) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
                                                             [params_valid])
-        assert list_result == list_result_expected
-        assert list_error  == list_error_expected
+        assert list_result_1 == list_result_expected
+        assert list_error_1  == list_error_expected
 
+        # Check that the lower-level request
+        # handler coroutine also works when
+        # given valid input.
+        #
+        (list_result_2,
+         list_error_2) = testrunner_coro_request_handler_singleshot(
+                                                            cfg_valid,
+                                                            [request_valid])
+        assert list_result_2 == list_result_expected
+        assert list_error_2  == list_error_expected
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
     def it_yields_expected_bit_response_for_valid_images_generations_input(
                         self,
                         testvector_images_generations_valid_bit,
-                        testrunner_coro_string_template_handler_singleshot):
+                        testrunner_coro_template_handler_singleshot,
+                        testrunner_coro_request_handler_singleshot):
         """
         When valid images_generations input sent, valid bit output yielded.
 
@@ -703,23 +837,40 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          template_valid,
          params_valid,
+         request_valid,
          list_result_expected,
          list_error_expected) = testvector_images_generations_valid_bit
-        (list_result,
-         list_error) = testrunner_coro_string_template_handler_singleshot(
+
+        # Check that the high-level string and
+        # template handler coroutine works when
+        # given valid input.
+        #
+        (list_result_1,
+         list_error_1) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
                                                             [params_valid])
-        assert list_result == list_result_expected
-        assert list_error  == list_error_expected
+        assert list_result_1 == list_result_expected
+        assert list_error_1  == list_error_expected
 
+        # Check that the lower-level request
+        # handler coroutine also works when
+        # given valid input.
+        #
+        (list_result_2,
+         list_error_2) = testrunner_coro_request_handler_singleshot(
+                                                            cfg_valid,
+                                                            [request_valid])
+        assert list_result_2 == list_result_expected
+        assert list_error_2  == list_error_expected
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
     def it_yields_expected_bit_response_for_valid_images_edits_input(
                         self,
                         testvector_images_edits_valid_bit,
-                        testrunner_coro_string_template_handler_singleshot):
+                        testrunner_coro_template_handler_singleshot,
+                        testrunner_coro_request_handler_singleshot):
         """
         When valid images_edits input sent, valid bit output yielded.
 
@@ -727,24 +878,41 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          template_valid,
          params_valid,
+         request_valid,
          list_result_expected,
          list_error_expected) = testvector_images_edits_valid_bit
-        (list_result,
-         list_error) = testrunner_coro_string_template_handler_singleshot(
+
+        # Check that the high-level string and
+        # template handler coroutine works when
+        # given valid input.
+        #
+        (list_result_1,
+         list_error_1) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
                                                             [params_valid])
 
-        assert list_result == list_result_expected
-        assert list_error  == list_error_expected
+        assert list_result_1 == list_result_expected
+        assert list_error_1  == list_error_expected
 
+        # Check that the lower-level request
+        # handler coroutine also works when
+        # given valid input.
+        #
+        (list_result_2,
+         list_error_2) = testrunner_coro_request_handler_singleshot(
+                                                            cfg_valid,
+                                                            [request_valid])
+        assert list_result_2 == list_result_expected
+        assert list_error_2  == list_error_expected
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
     def it_yields_expected_bit_response_for_valid_images_variations_input(
                         self,
                         testvector_images_variations_valid_bit,
-                        testrunner_coro_string_template_handler_singleshot):
+                        testrunner_coro_template_handler_singleshot,
+                        testrunner_coro_request_handler_singleshot):
         """
         When valid images_variations input sent, valid bit output yielded.
 
@@ -752,23 +920,40 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          template_valid,
          params_valid,
+         request_valid,
          list_result_expected,
          list_error_expected) = testvector_images_variations_valid_bit
-        (list_result,
-         list_error) = testrunner_coro_string_template_handler_singleshot(
+
+        # Check that the high-level string and
+        # template handler coroutine works when
+        # given valid input.
+        #
+        (list_result_1,
+         list_error_1) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
                                                             [params_valid])
-        assert list_result == list_result_expected
-        assert list_error  == list_error_expected
+        assert list_result_1 == list_result_expected
+        assert list_error_1  == list_error_expected
 
+        # Check that the lower-level request
+        # handler coroutine also works when
+        # given valid input.
+        #
+        (list_result_2,
+         list_error_2) = testrunner_coro_request_handler_singleshot(
+                                                            cfg_valid,
+                                                            [request_valid])
+        assert list_result_2 == list_result_expected
+        assert list_error_2  == list_error_expected
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
     def it_yields_expected_bit_response_for_valid_embeddings_input(
                         self,
                         testvector_embeddings_valid_bit,
-                        testrunner_coro_string_template_handler_singleshot):
+                        testrunner_coro_template_handler_singleshot,
+                        testrunner_coro_request_handler_singleshot):
         """
         When valid embeddings input sent, valid bit output yielded.
 
@@ -776,23 +961,40 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          template_valid,
          params_valid,
+         request_valid,
          list_result_expected,
          list_error_expected) = testvector_embeddings_valid_bit
-        (list_result,
-         list_error) = testrunner_coro_string_template_handler_singleshot(
+
+        # Check that the high-level string and
+        # template handler coroutine works when
+        # given valid input.
+        #
+        (list_result_1,
+         list_error_1) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
                                                             [params_valid])
-        assert list_result == list_result_expected
-        assert list_error  == list_error_expected
+        assert list_result_1 == list_result_expected
+        assert list_error_1  == list_error_expected
 
+        # Check that the lower-level request
+        # handler coroutine also works when
+        # given valid input.
+        #
+        (list_result_2,
+         list_error_2) = testrunner_coro_request_handler_singleshot(
+                                                            cfg_valid,
+                                                            [request_valid])
+        assert list_result_2 == list_result_expected
+        assert list_error_2  == list_error_expected
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
     def it_yields_expected_bit_response_for_valid_audio_transcriptions_input(
                         self,
                         testvector_audio_transcriptions_valid_bit,
-                        testrunner_coro_string_template_handler_singleshot):
+                        testrunner_coro_template_handler_singleshot,
+                        testrunner_coro_request_handler_singleshot):
         """
         When valid audio_transcriptions input sent, valid bit output yielded.
 
@@ -800,23 +1002,40 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          template_valid,
          params_valid,
+         request_valid,
          list_result_expected,
          list_error_expected) = testvector_audio_transcriptions_valid_bit
-        (list_result,
-         list_error) = testrunner_coro_string_template_handler_singleshot(
+
+        # Check that the high-level string and
+        # template handler coroutine works when
+        # given valid input.
+        #
+        (list_result_1,
+         list_error_1) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
                                                             [params_valid])
-        assert list_result == list_result_expected
-        assert list_error  == list_error_expected
+        assert list_result_1 == list_result_expected
+        assert list_error_1  == list_error_expected
 
+        # Check that the lower-level request
+        # handler coroutine also works when
+        # given valid input.
+        #
+        (list_result_2,
+         list_error_2) = testrunner_coro_request_handler_singleshot(
+                                                            cfg_valid,
+                                                            [request_valid])
+        assert list_result_2 == list_result_expected
+        assert list_error_2  == list_error_expected
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
     def it_yields_expected_bit_response_for_valid_audio_translations_input(
                         self,
                         testvector_audio_translations_valid_bit,
-                        testrunner_coro_string_template_handler_singleshot):
+                        testrunner_coro_template_handler_singleshot,
+                        testrunner_coro_request_handler_singleshot):
         """
         When valid audio_translations input sent, valid bit output yielded.
 
@@ -824,12 +1043,29 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          template_valid,
          params_valid,
+         request_valid,
          list_result_expected,
          list_error_expected) = testvector_audio_translations_valid_bit
-        (list_result,
-         list_error) = testrunner_coro_string_template_handler_singleshot(
+
+        # Check that the high-level string and
+        # template handler coroutine works when
+        # given valid input.
+        #
+        (list_result_1,
+         list_error_1) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
                                                             [params_valid])
-        assert list_result == list_result_expected
-        assert list_error  == list_error_expected
+        assert list_result_1 == list_result_expected
+        assert list_error_1  == list_error_expected
+
+        # Check that the lower-level request
+        # handler coroutine also works when
+        # given valid input.
+        #
+        (list_result_2,
+         list_error_2) = testrunner_coro_request_handler_singleshot(
+                                                            cfg_valid,
+                                                            [request_valid])
+        assert list_result_2 == list_result_expected
+        assert list_error_2  == list_error_expected

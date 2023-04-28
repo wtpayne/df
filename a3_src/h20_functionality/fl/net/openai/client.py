@@ -117,7 +117,7 @@ import fl.util
 
 # -----------------------------------------------------------------------------
 @fl.util.coroutine
-def coro_string_template_handler(cfg):
+def coro_template_handler(cfg):
     """
     Yield results for templates/parameters sent to the OpenAI web API.
 
@@ -143,6 +143,11 @@ def coro_string_template_handler(cfg):
 
         (list_template, list_param) = yield (list_result, list_error)
 
+        # Update map_map_template with new
+        # and updated templates. Any old
+        # templates with the same id_prompt
+        # get overwritten.
+        #
         for template in list_template:
             map_template[template['uid_template']] = template
 

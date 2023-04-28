@@ -70,8 +70,9 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     cfg_client                   = dict()
     cfg_client['api_key']        = os.environ[cfg['envvar_key']]
     cfg_client['secs_interval']  = cfg.get('secs_interval', 5)
+    cfg_client['is_bit']         = cfg.get('is_bit', True)
     cfg_client['default']        = cfg['default']
-    client = fl.net.openai.client.coro(cfg = cfg_client)
+    client = fl.net.openai.client.coro_template_handler(cfg = cfg_client)
 
     # Initialize outputs.
     #
@@ -92,43 +93,37 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
             outputs[id_out]['ts'].clear()
             outputs[id_out]['list'].clear()
 
-        # Update map_map_template with new
-        # and updated templates. Any old
-        # templates with the same id_prompt
-        # get overwritten.
+        # Grab any new template inputs.
         #
-        map_ts = dict()
+        map_ts        = dict()
+        list_template = list()
         if inputs['template']['ena']:
-            map_ts = inputs['template']['ts']
-            # for map_map_tmpl_in in inputs['template']['list']:
-            #     for (id_prompt, map_tmpl) in map_map_tmpl_in.items():
-            #         map_map_template[id_prompt] = map_tmpl
+            map_ts        = inputs['template']['ts']
+            list_template = inputs['template']['list']
 
-
-
-        # Send the request to the OpenAI API.
+        # Grab any new param inputs.
         #
-        (list_result, list_error) = client.send(list_request)
+        map_ts     = dict()
+        list_param = list()
+        if inputs['param']['ena']:
+            map_ts     = inputs['param']['ts']
+            list_param = inputs['param']['list']
 
-        # Update the spend record.
+        # Send the templates and parameters to
+        # the OpenAI API client.
         #
-        for result in list_result:
-            try:
-                id_prompt   = result['request']['_id_prompt']
-                tokens_used = result['response']['usage']['total_tokens']
-                map_spend[id_prompt] += tokens_used
-            except (KeyError, TypeError):
-                pass
+        (list_result, list_error) = client.send((list_template, list_param))
 
-        # Update outputs.
+        # Update result outputs.
         #
         if ('result' in outputs) and list_result:
             outputs['result']['ena'] = True
             outputs['result']['ts'].update(map_ts)
             outputs['result']['list'][:] = list_result
+
+        # Update error-reporting outputs.
+        #
         if ('error' in outputs) and list_error:
             outputs['error']['ena'] = True
             outputs['error']['ts'].update(map_ts)
             outputs['error']['list'][:] = list_error
-
-

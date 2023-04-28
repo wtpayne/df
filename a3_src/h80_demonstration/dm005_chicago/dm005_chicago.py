@@ -49,6 +49,9 @@ import os
 import sys
 
 
+ID_ENV = 'e002_general_research'
+
+
 # -----------------------------------------------------------------------------
 def test():
     """
@@ -61,14 +64,26 @@ def test():
     import da.test
     retcode_fl = da.test.run(control_tier = 'h20_functionality',
                              relpath      = 'fl/net/openai',
-                             id_env       = 'e002_general_research')
+                             id_env       = ID_ENV)
     is_ok_fl   = retcode_fl == EXIT_SUCCESS
     retcode_cl = da.test.run(control_tier = 'h40_component',
                              relpath      = 'cl/net/openai',
-                             id_env       = 'e002_general_research')
+                             id_env       = ID_ENV)
     is_ok_cl   = retcode_cl == EXIT_SUCCESS
 
     if is_ok_fl and is_ok_cl:
         return EXIT_SUCCESS
     else:
         return EXIT_FAILURE
+
+
+# -----------------------------------------------------------------------------
+def app():
+    """
+    Run dm005 UI.
+
+    """
+    import da.test
+    sys.exit(da.env.run.python_module(module = 'gradio_demo',
+                                      id_env = ID_ENV))
+
