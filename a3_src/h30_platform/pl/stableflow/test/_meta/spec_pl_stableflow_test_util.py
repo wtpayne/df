@@ -19,14 +19,14 @@ class SpecifySimplePipeline:
 
         """
         import pl.stableflow.test.util
-        import pl.stableflow.cfg.validate
+        import fl.stableflow.cfg.validate
         cfg = pl.stableflow.test.util.simple_pipeline(
                             repr           = 'py_dill',
                             iface          = 'step',
                             is_closed_loop = False,
                             proc_a         = {'node_a': simple_counter,
                                               'node_b': simple_messager})
-        pl.stableflow.cfg.validate.normalized(cfg)
+        fl.stableflow.cfg.validate.normalized(cfg)
 
 
 # -----------------------------------------------------------------------------

@@ -8,7 +8,7 @@ Module of functions for validating configuration data.
 import copy
 import jsonschema
 
-import pl.stableflow.cfg.exception
+import fl.stableflow.cfg.exception
 import pl.stableflow.log
 
 
@@ -46,7 +46,7 @@ def _validate_with_schema(cfg, schema):
         jsonschema.validate(cfg, schema)
     except jsonschema.exceptions.ValidationError as err:
         msg = '\n\n{msg}\n\n'.format(msg = str(err))
-        raise pl.stableflow.cfg.exception.CfgError(msg)
+        raise fl.stableflow.cfg.exception.CfgError(msg)
     _check_consistency(cfg)
     return cfg
 
@@ -432,11 +432,11 @@ def _check_edge_consistency(cfg):
 
         if cfg_edge['src'].split('.')[1] != 'outputs':
             msg = 'Edge source needs to be an output.'
-            raise pl.stableflow.cfg.exception.CfgError(msg)
+            raise fl.stableflow.cfg.exception.CfgError(msg)
 
         if cfg_edge['dst'].split('.')[1] != 'inputs':
             msg = 'Edge destination needs to be an input.'
-            raise pl.stableflow.cfg.exception.CfgError(msg)
+            raise fl.stableflow.cfg.exception.CfgError(msg)
 
 
 # -----------------------------------------------------------------------------
@@ -449,13 +449,13 @@ def _check_edge_end_uniqueness(cfg):
     for cfg_edge in cfg['edge']:
         if cfg_edge['src'] in set_edge_path:
             msg = 'Repeated edge source: {src}'.format(src = cfg_edge['src'])
-            raise pl.stableflow.cfg.exception.CfgError(msg)
+            raise fl.stableflow.cfg.exception.CfgError(msg)
         set_edge_path.add(cfg_edge['src'])
 
         if cfg_edge['dst'] in set_edge_path:
             msg = 'Repeated edge destination: {dst}'.format(
                                                         dst = cfg_edge['dst'])
-            raise pl.stableflow.cfg.exception.CfgError(msg)
+            raise fl.stableflow.cfg.exception.CfgError(msg)
         set_edge_path.add(cfg_edge['dst'])
 
 
@@ -473,7 +473,7 @@ def _check_required_host_configuration(cfg):
             for id_role in cfg_req_host_cfg['role']:
                 if id_role not in set_id_role:
                     msg = 'Unknown id_role in cfg: {id}'.format(id = id_role)
-                    raise pl.stableflow.cfg.exception.CfgError(msg)
+                    raise fl.stableflow.cfg.exception.CfgError(msg)
 
 
 # -----------------------------------------------------------------------------
@@ -483,4 +483,4 @@ def _check(item, set_valid, msg):
 
     """
     if item not in set_valid:
-        raise pl.stableflow.cfg.exception.CfgError(msg.format(id = item))
+        raise fl.stableflow.cfg.exception.CfgError(msg.format(id = item))

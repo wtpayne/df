@@ -49,32 +49,75 @@ import os
 import sys
 
 
-ID_ENV = 'e002_general_research'
+ID_ENV       = 'e002_general_research'
+EXIT_SUCCESS = 0
+EXIT_FAILURE = 1
 
 
 # -----------------------------------------------------------------------------
 def test():
     """
-    Run dm005 tests.
+    Run all dm005 tests.
 
     """
-    EXIT_SUCCESS = 0
-    EXIT_FAILURE = 1
-
     import da.test
-    retcode_fl = da.test.run(control_tier = 'h20_functionality',
-                             relpath      = 'fl/net/openai',
-                             id_env       = ID_ENV)
-    is_ok_fl   = retcode_fl == EXIT_SUCCESS
-    retcode_cl = da.test.run(control_tier = 'h40_component',
-                             relpath      = 'cl/net/openai',
-                             id_env       = ID_ENV)
-    is_ok_cl   = retcode_cl == EXIT_SUCCESS
-
-    if is_ok_fl and is_ok_cl:
+    if (     (unit_test()      == EXIT_SUCCESS)
+         and (component_test() == EXIT_SUCCESS)
+         and (system_test()    == EXIT_SUCCESS)):
         return EXIT_SUCCESS
     else:
         return EXIT_FAILURE
+
+
+# -----------------------------------------------------------------------------
+def test_test():
+    """
+    Run dm005 unit level tests.
+
+    """
+    import da.test
+    # return da.test.run(control_tier = 'h20_functionality',
+    #                    relpath      = 'fl/stableflow',
+    #                    id_env       = ID_ENV)
+    return da.test.run(control_tier = 'h20_functionality',
+                       relpath      = 'fl/test',
+                       id_env       = ID_ENV)
+
+
+# -----------------------------------------------------------------------------
+def unit_test():
+    """
+    Run dm005 unit level tests.
+
+    """
+    import da.test
+    return da.test.run(control_tier = 'h20_functionality',
+                       relpath      = 'fl/net/openai',
+                       id_env       = ID_ENV)
+
+
+# -----------------------------------------------------------------------------
+def component_test():
+    """
+    Run dm005 component level tests.
+
+    """
+    import da.test
+    return da.test.run(control_tier = 'h40_component',
+                       relpath      = 'cl/net/openai',
+                       id_env       = ID_ENV)
+
+
+# -----------------------------------------------------------------------------
+def system_test():
+    """
+    Run dm005 system level tests.
+
+    """
+    import da.test
+    return da.test.run(control_tier = 'h50_product',
+                       relpath      = '.',
+                       id_env       = ID_ENV)
 
 
 # -----------------------------------------------------------------------------

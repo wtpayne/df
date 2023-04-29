@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Functional specification for the pl.stableflow.cfg.override module.
+Functional specification for the fl.stableflow.cfg.override module.
 
 """
 
@@ -22,10 +22,10 @@ class SpecifyApply:
         Check apply makes no changes when the override is None.
 
         """
-        import pl.stableflow.cfg.override  # pylint: disable=C0415
+        import fl.stableflow.cfg.override  # pylint: disable=C0415
 
         cfg_orig = copy.deepcopy(valid_normalized_config)
-        cfg_mod = pl.stableflow.cfg.override.apply(valid_normalized_config, None)
+        cfg_mod = fl.stableflow.cfg.override.apply(valid_normalized_config, None)
 
         assert cfg_orig == cfg_mod
 
@@ -35,12 +35,12 @@ class SpecifyApply:
         Check apply makes no changes when the override is None.
 
         """
-        import pl.stableflow.cfg.override  # pylint: disable=C0415
+        import fl.stableflow.cfg.override  # pylint: disable=C0415
 
         cfg         = valid_normalized_config
         id_sys_orig = copy.deepcopy(cfg['system']['id_system'])
 
-        pl.stableflow.cfg.override.apply(
+        fl.stableflow.cfg.override.apply(
                                 cfg, ('system.id_system', 'some_other_name'))
 
         id_sys_mod  = cfg['system']['id_system']
@@ -53,13 +53,13 @@ class SpecifyApply:
         Check apply makes no changes when the override is None.
 
         """
-        import pl.stableflow.cfg.override  # pylint: disable=C0415
+        import fl.stableflow.cfg.override  # pylint: disable=C0415
 
         cfg           = valid_normalized_config
         id_sys_orig   = copy.deepcopy(cfg['system']['id_system'])
         hostname_orig = copy.deepcopy(cfg['host']['some_host']['hostname'])
 
-        pl.stableflow.cfg.override.apply(
+        fl.stableflow.cfg.override.apply(
                             cfg,
                             ('system:id_system', 'some_other_name',
                              'host:some_host:hostname', '111.111.111.111'),

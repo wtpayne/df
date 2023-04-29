@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Functional specification for the pl.stableflow.cfg.data package.
+Functional specification for the fl.stableflow.cfg.data package.
 
 """
 
@@ -8,7 +8,7 @@ Functional specification for the pl.stableflow.cfg.data package.
 # =============================================================================
 class SpecifyDenormalize:
     """
-    Spec for the pl.stableflow.cfg.data.denormalize function.
+    Spec for the fl.stableflow.cfg.data.denormalize function.
 
     """
 
@@ -18,17 +18,17 @@ class SpecifyDenormalize:
         Check denormalize returns a valid denormalized config structure.
 
         """
-        import pl.stableflow.cfg.data      # pylint: disable=C0415
-        import pl.stableflow.cfg.validate  # pylint: disable=C0415
-        denormalized_config = pl.stableflow.cfg.data.denormalize(
+        import fl.stableflow.cfg.data      # pylint: disable=C0415
+        import fl.stableflow.cfg.validate  # pylint: disable=C0415
+        denormalized_config = fl.stableflow.cfg.data.denormalize(
                                             valid_partly_denormalized_config)
-        pl.stableflow.cfg.validate.denormalized(denormalized_config)
+        fl.stableflow.cfg.validate.denormalized(denormalized_config)
 
 
 # =============================================================================
 class Specify_ExpandNode:
     """
-    Spec for the pl.stableflow.cfg.data.denormalize function.
+    Spec for the fl.stableflow.cfg.data.denormalize function.
 
     """
 
@@ -38,11 +38,11 @@ class Specify_ExpandNode:
         Check denormalize returns a valid denormalized config structure.
 
         """
-        import pl.stableflow.cfg.data  # pylint: disable=C0415
-        named_type = pl.stableflow.cfg.data.FieldCategory.named_type
-        SubsTab    = pl.stableflow.cfg.util.SubstitutionTable
-        output     = pl.stableflow.cfg.data._expand_node(
-                        node = pl.stableflow.cfg.data.Node(line     = 1,
+        import fl.stableflow.cfg.data  # pylint: disable=C0415
+        named_type = fl.stableflow.cfg.data.FieldCategory.named_type
+        SubsTab    = fl.stableflow.cfg.util.SubstitutionTable
+        output     = fl.stableflow.cfg.data._expand_node(
+                        node = fl.stableflow.cfg.data.Node(line     = 1,
                                                         col      = 2,
                                                         level    = 3,
                                                         path     = [],

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Functional specification for the pl.stableflow.cfg.edge module.
+Functional specification for the fl.stableflow.cfg.edge module.
 
 """
 
@@ -18,9 +18,9 @@ class SpecifyDenormalize:
         Check edge.denormalize adds fields to the config structure.
 
         """
-        import pl.stableflow.cfg.edge  # pylint: disable=C0415
+        import fl.stableflow.cfg.edge  # pylint: disable=C0415
 
-        cfg_denorm = pl.stableflow.cfg.edge.denormalize(valid_normalized_config)
+        cfg_denorm = fl.stableflow.cfg.edge.denormalize(valid_normalized_config)
 
         for cfg_edge in cfg_denorm['edge']:
             for key in ('id_edge',      'relpath_src', 'relpath_dst',

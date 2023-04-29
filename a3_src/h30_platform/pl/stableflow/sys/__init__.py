@@ -180,7 +180,7 @@ def _run_locally(cfg):
     for cfg_node in cfg['node'].values():
         cfg_node['process'] = id_process_local
 
-    cfg = pl.stableflow.cfg.denormalize(cfg)
+    cfg = fl.stableflow.cfg.denormalize(cfg)
 
     for cfg_edge in cfg['edge']:
         cfg_edge['ipc_type']        = 'intra_process'

@@ -7,7 +7,7 @@ type:
     python_extension
 
 name_extension:
-    pl.stableflow.cfg.load
+    fl.stableflow.cfg.load
 ...
 
 """
@@ -16,9 +16,9 @@ name_extension:
 import glob
 import os.path
 
-import pl.stableflow.cfg.util
+import fl.stableflow.cfg.util
 
-from pl.stableflow.cfg.exception import CfgError
+from fl.stableflow.cfg.exception import CfgError
 
 
 # -----------------------------------------------------------------------------
@@ -80,7 +80,7 @@ def from_dirpath(dirpath_cfg):
 
     cfg = dict()
     for (_, filepath_cfg, section_address) in sorted(list_fileinfo):
-        cfg = pl.stableflow.cfg.util.apply(cfg,
+        cfg = fl.stableflow.cfg.util.apply(cfg,
                                   section_address,
                                   from_filepath(filepath_cfg),
                                   delim_cfg_addr = '.')
@@ -165,7 +165,7 @@ def from_yaml_string(str_yaml, filepath_cfg = 'memory'):
                                                   column = mark.column + 1)
         else:
             location = ''
-        raise pl.stableflow.cfg.exception.CfgError(
+        raise fl.stableflow.cfg.exception.CfgError(
                 'Error reading file: {path} {loc}\n\n{msg}\n'.format(
                                                         path = filepath_cfg,
                                                         loc  = location,

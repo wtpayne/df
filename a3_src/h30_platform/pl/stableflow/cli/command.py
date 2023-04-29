@@ -204,8 +204,8 @@ def start(path_cfg       = None,  # pylint: disable=R0913
     > stableflow system start first:key first_value second:key second_value
 
     """
-    import pl.stableflow.cfg            # pylint: disable=C0415,W0621
-    import pl.stableflow.cfg.exception  # pylint: disable=C0415,W0621
+    import fl.stableflow.cfg            # pylint: disable=C0415,W0621
+    import fl.stableflow.cfg.exception  # pylint: disable=C0415,W0621
     import pl.stableflow.sys            # pylint: disable=C0415,W0621
 
 
@@ -214,13 +214,13 @@ def start(path_cfg       = None,  # pylint: disable=R0913
 
     with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
         try:
-            cfg = pl.stableflow.cfg.prepare(path_cfg       = path_cfg,
+            cfg = fl.stableflow.cfg.prepare(path_cfg       = path_cfg,
                                          string_cfg     = cfg,
                                          do_make_ready  = makeready,
                                          is_local       = local,
                                          delim_cfg_addr = delim_cfg_addr,
                                          tup_overrides  = cfg_override)
-        except pl.stableflow.cfg.exception.CfgError as err:
+        except fl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             sys.exit(1)
         else:
@@ -280,19 +280,19 @@ def stop(path_cfg       = None,
     Stop the specified system.
 
     """
-    import pl.stableflow.cfg            # pylint: disable=C0415,W0621
-    import pl.stableflow.cfg.exception  # pylint: disable=C0415,W0621
+    import fl.stableflow.cfg            # pylint: disable=C0415,W0621
+    import fl.stableflow.cfg.exception  # pylint: disable=C0415,W0621
     import pl.stableflow.sys            # pylint: disable=C0415,W0621
 
     with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
         try:
-            cfg = pl.stableflow.cfg.prepare(path_cfg       = path_cfg,
+            cfg = fl.stableflow.cfg.prepare(path_cfg       = path_cfg,
                                          string_cfg     = cfg,
                                          do_make_ready  = False,
                                          is_local       = False,
                                          delim_cfg_addr = delim_cfg_addr,
                                          tup_overrides  = cfg_override)
-        except pl.stableflow.cfg.exception.CfgError as err:
+        except fl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             sys.exit(1)
         else:
@@ -352,19 +352,19 @@ def pause(path_cfg       = None,
     Pause the specified system.
 
     """
-    import pl.stableflow.cfg            # pylint: disable=C0415,W0621
-    import pl.stableflow.cfg.exception  # pylint: disable=C0415,W0621
+    import fl.stableflow.cfg            # pylint: disable=C0415,W0621
+    import fl.stableflow.cfg.exception  # pylint: disable=C0415,W0621
     import pl.stableflow.sys            # pylint: disable=C0415,W0621
 
     with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
         try:
-            cfg = pl.stableflow.cfg.prepare(path_cfg       = path_cfg,
+            cfg = fl.stableflow.cfg.prepare(path_cfg       = path_cfg,
                                          string_cfg     = cfg,
                                          do_make_ready  = False,
                                          is_local       = False,
                                          delim_cfg_addr = delim_cfg_addr,
                                          tup_overrides  = cfg_override)
-        except pl.stableflow.cfg.exception.CfgError as err:
+        except fl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             sys.exit(1)
         else:
@@ -424,19 +424,19 @@ def step(path_cfg       = None,
     Single step the specified system.
 
     """
-    import pl.stableflow.cfg            # pylint: disable=C0415,W0621
-    import pl.stableflow.cfg.exception  # pylint: disable=C0415,W0621
+    import fl.stableflow.cfg            # pylint: disable=C0415,W0621
+    import fl.stableflow.cfg.exception  # pylint: disable=C0415,W0621
     import pl.stableflow.sys            # pylint: disable=C0415,W0621
 
     with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
         try:
-            cfg = pl.stableflow.cfg.prepare(path_cfg       = path_cfg,
+            cfg = fl.stableflow.cfg.prepare(path_cfg       = path_cfg,
                                          string_cfg     = cfg,
                                          do_make_ready  = False,
                                          is_local       = False,
                                          delim_cfg_addr = delim_cfg_addr,
                                          tup_overrides  = cfg_override)
-        except pl.stableflow.cfg.exception.CfgError as err:
+        except fl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             sys.exit(1)
         else:
@@ -496,19 +496,19 @@ def ps(path_cfg       = None,
     Print the process status for the the specified system.
 
     """
-    import pl.stableflow.cfg            # pylint: disable=C0415,W0621
-    import pl.stableflow.cfg.exception  # pylint: disable=C0415,W0621
+    import fl.stableflow.cfg            # pylint: disable=C0415,W0621
+    import fl.stableflow.cfg.exception  # pylint: disable=C0415,W0621
     import pl.stableflow.sys            # pylint: disable=C0415,W0621
 
     with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
         try:
-            cfg = pl.stableflow.cfg.prepare(path_cfg       = path_cfg,
+            cfg = fl.stableflow.cfg.prepare(path_cfg       = path_cfg,
                                          string_cfg     = cfg,
                                          do_make_ready  = False,
                                          is_local       = False,
                                          delim_cfg_addr = delim_cfg_addr,
                                          tup_overrides  = cfg_override)
-        except pl.stableflow.cfg.exception.CfgError as err:
+        except fl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             sys.exit(1)
         else:

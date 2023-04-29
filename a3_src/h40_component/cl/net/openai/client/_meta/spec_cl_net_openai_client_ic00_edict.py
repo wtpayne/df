@@ -19,6 +19,15 @@ class SpecifyClNetOpenAiClientIc00_edict:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
+    def it_supports_import_of_cl_net_openai_client_e00_edict(self):
+        """
+        cl.net.openai.client.ic00_edict can be imported.
+
+        """
+        import cl.net.openai.client.ic00_edict
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_supports_creation_of_the_main_coroutine(self):
         """
         cl.net.openai.client.ic00_edict:coro() can be created.

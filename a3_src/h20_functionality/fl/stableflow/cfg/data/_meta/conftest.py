@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Test fixtures for pl.stableflow.cfg.data package functional requirements tests.
+Test fixtures for fl.stableflow.cfg.data package functional requirements tests.
 
 """
 

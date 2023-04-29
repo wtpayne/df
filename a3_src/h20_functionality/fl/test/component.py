@@ -1,19 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Component test utilities for xact systems.
+Component test utilities for stableflow systems.
 
 """
 
 
-import pprint
+import fl.stableflow.cfg.builder
 
-import click.testing
-import pytest
-
-import xact.cfg.builder
-import xact.cfg.validate
-import xact.cli.command
-import xact.util.serialization
 
 
 # -----------------------------------------------------------------------------
@@ -77,21 +70,21 @@ def scripted(module, config, script):
             'path':   [name_output],
             'signal': list_output});
 
-    return pipeline_test(
-            list_pipeline_modules     = [module],
-            list_pipeline_node_config = [config],
-            list_pipeline_edge_info   = [],
-            list_test_vectors         = list_test_vectors,
-            list_expected_outputs     = list_expected_outputs)
+    return _pipeline_configuration(
+                        list_pipeline_modules     = [module],
+                        list_pipeline_node_config = [config],
+                        list_pipeline_edge_info   = [],
+                        list_test_vectors         = list_test_vectors,
+                        list_expected_outputs     = list_expected_outputs)
 
 
 # -----------------------------------------------------------------------------
-def pipeline_test(list_pipeline_modules,
-                  list_pipeline_node_config,
-                  list_test_vectors,
-                  list_expected_outputs,
-                  list_pipeline_edge_info = [],
-                  list_id_node_nocontrol  = []):
+def _pipeline_configuration(list_pipeline_modules,
+                            list_pipeline_node_config,
+                            list_test_vectors,
+                            list_expected_outputs,
+                            list_pipeline_edge_info = [],
+                            list_id_node_nocontrol  = []):
     """
     Return configuration for a pipeline test.
 
@@ -100,15 +93,15 @@ def pipeline_test(list_pipeline_modules,
     num_pipeline_config = len(list_pipeline_node_config)
     assert num_pipeline_nodes == num_pipeline_config
 
-    list_id_node       = ['signal_generator']
+    list_id_node = ['signal_generator']
     for idx in range(num_pipeline_nodes):
         node_name = 'pipeline_node_{idx:03d}'.format(idx = idx)
         list_id_node.append(node_name)
     list_id_node.append('output_evaluator')
 
-    list_py_module = ['xact.lib.test.signal_generator']
+    list_py_module = ['pl.stableflow.lib.test.signal_generator']
     list_py_module.extend(list_pipeline_modules)
-    list_py_module.append('xact.lib.test.signal_validator')
+    list_py_module.append('pl.stableflow.lib.test.signal_validator')
 
     list_config = [{ 'channels': list_test_vectors }]
     list_config.extend(list_pipeline_node_config)
@@ -138,8 +131,8 @@ def pipeline_test(list_pipeline_modules,
     list_edge_info.extend(list_pipeline_edge_info)
     list_edge_info.append(expected_output_edge_info)
 
-    cfg = _get_skeleton_component_test()
-    xact.cfg.builder.add_pipeline(cfg,
+    cfg = _baseline_configuration()
+    fl.stableflow.cfg.builder.add_pipeline(cfg,
             iter_id_node      = list_id_node,
             spec_id_process   = 'main_process',
             spec_req_host_cfg = 'test_configuration',
@@ -157,16 +150,84 @@ def pipeline_test(list_pipeline_modules,
             idx_max           = _num_samples(list_test_vectors,
                                              key = 'signal'))
 
-    try:
-        xact.cfg.validate.normalized(cfg)  # Sanity check
-    except xact.cfg.exception.CfgError as err:
+    return cfg
 
-        msg = pprint.pformat(cfg) + '\n\n' + str(err)
 
-        pytest.fail(msg = msg, pytrace = False)
+# -----------------------------------------------------------------------------
+def _baseline_configuration():
+    """
+    Return skeleton configuration for a component level test.
 
+    """
+    cfg = fl.stableflow.cfg.builder.get_skeleton_config()
+
+    fl.stableflow.cfg.builder.set_system_id(
+                                    cfg             = cfg,
+                                    id_system       = 'stableflow_test')
+
+    fl.stableflow.cfg.builder.add_host(
+                                    cfg             = cfg,
+                                    id_host         = 'localhost',
+                                    hostname        = '127.0.0.1',
+                                    acct_run        = 'stableflow',
+                                    acct_provision  = 'stableflow')
+
+    fl.stableflow.cfg.builder.add_process(
+                                    cfg             = cfg,
+                                    id_process      = 'main_process',
+                                    id_host         = 'localhost')
+
+    fl.stableflow.cfg.builder.add_data(
+                                    cfg             = cfg,
+                                    id_data         = 'python_dict',
+                                    spec_data       = 'py_dict')
+
+    cfg['req_host_cfg'] = { 'test_configuration': dict() }
 
     return cfg
+
+
+
+
+# -----------------------------------------------------------------------------
+def _add_controller(cfg, subordinate_nodes, idx_max):
+    """
+    Add a controller to the specified config.
+
+    """
+    fl.stableflow.cfg.builder.add_node(
+                    cfg          = cfg,
+                    id_node      = 'controller',
+                    id_process   = 'main_process',
+                    req_host_cfg = 'test_configuration',
+                    py_module    = 'pl.stableflow.lib.control.system',
+                    config       = { 'idx_max':  2 },
+                    state_type   = 'python_dict')
+
+    fl.stableflow.cfg.builder.add_node(
+                    cfg          = cfg,
+                    id_node      = 'controller_tee',
+                    id_process   = 'main_process',
+                    req_host_cfg = 'test_configuration',
+                    py_module    = 'pl.stableflow.lib.util.tee',
+                    state_type   = 'python_dict')
+
+    fl.stableflow.cfg.builder.add_edge(
+                    cfg          = cfg,
+                    id_src       = 'controller',
+                    src_ref      = 'outputs.control',
+                    id_dst       = 'controller_tee',
+                    dst_ref      = 'inputs.control',
+                    data         = 'python_dict')
+
+    for (idx, id_node) in enumerate(subordinate_nodes):
+        fl.stableflow.cfg.builder.add_edge(
+                    cfg          = cfg,
+                    id_src       = 'controller_tee',
+                    src_ref      = 'outputs.control_{x:03d}'.format(x = idx),
+                    id_dst       = id_node,
+                    dst_ref      = 'inputs.control',
+                    data         = 'python_dict')
 
 
 # -----------------------------------------------------------------------------
@@ -192,71 +253,19 @@ def _is_all_equal(itable):
     return all(item == item_first for item in iter_items)
 
 
-# -----------------------------------------------------------------------------
-def _get_skeleton_component_test():
-    """
-    Return configuration data for a skeleton local system.
+# import pprint
 
-    """
-    cfg = xact.cfg.builder.get_skeleton_config()
+# import click.testing
+# import pytest
 
-    xact.cfg.builder.set_system_id(cfg       = cfg,
-                                   id_system = 'xact_test')
-
-    xact.cfg.builder.add_host(cfg            = cfg,
-                              id_host        = 'localhost',
-                              hostname       = '127.0.0.1',
-                              acct_run       = 'xact',
-                              acct_provision = 'xact')
-
-    xact.cfg.builder.add_process(cfg        = cfg,
-                                 id_process = 'main_process',
-                                 id_host    = 'localhost')
-
-    xact.cfg.builder.add_data(cfg       = cfg,
-                              id_data   = 'python_dict',
-                              spec_data = 'py_dict')
-
-    cfg['req_host_cfg'] = { 'test_configuration': dict() }
-
-    return cfg
+# import fl.stableflow.cfg.builder
+# import pl.stableflow.cfg.validate
+# import pl.stableflow.cli.command
+# import pl.stableflow.util.serialization
 
 
-# -----------------------------------------------------------------------------
-def _add_controller(cfg, subordinate_nodes, idx_max):
-    """
-    Add a controller.
 
-    """
-    xact.cfg.builder.add_node(
-                        cfg          = cfg,
-                        id_node      = 'controller',
-                        id_process   = 'main_process',
-                        req_host_cfg = 'test_configuration',
-                        py_module    = 'xact.lib.control.system',
-                        config       = { 'idx_max':  2 },
-                        state_type   = 'python_dict')
-    xact.cfg.builder.add_node(
-                        cfg          = cfg,
-                        id_node      = 'controller_tee',
-                        id_process   = 'main_process',
-                        req_host_cfg = 'test_configuration',
-                        py_module    = 'xact.lib.util.tee',
-                        state_type   = 'python_dict')
 
-    xact.cfg.builder.add_edge(
-                        cfg     = cfg,
-                        id_src  = 'controller',
-                        src_ref = 'outputs.control',
-                        id_dst  = 'controller_tee',
-                        dst_ref = 'inputs.control',
-                        data    = 'python_dict')
 
-    for (idx, id_node) in enumerate(subordinate_nodes):
-        xact.cfg.builder.add_edge(
-                        cfg     = cfg,
-                        id_src  = 'controller_tee',
-                        src_ref = 'outputs.control_{idx:03d}'.format(idx = idx),
-                        id_dst  = id_node,
-                        dst_ref = 'inputs.control',
-                        data    = 'python_dict')
+
+

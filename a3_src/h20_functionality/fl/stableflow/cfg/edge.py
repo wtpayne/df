@@ -7,7 +7,7 @@ type:
     python_extension
 
 name_extension:
-    pl.stableflow.cfg.edge
+    fl.stableflow.cfg.edge
 ...
 
 """

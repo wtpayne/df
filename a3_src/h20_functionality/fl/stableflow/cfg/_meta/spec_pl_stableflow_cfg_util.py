@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Functional specification for the pl.stableflow.cfg.util module.
+Functional specification for the fl.stableflow.cfg.util module.
 
 """
 
@@ -8,7 +8,7 @@ Functional specification for the pl.stableflow.cfg.util module.
 # =============================================================================
 class SpecifyApply:
     """
-    Spec for the pl.stableflow.cfg.util.apply() function.
+    Spec for the fl.stableflow.cfg.util.apply() function.
 
     """
 
@@ -18,10 +18,10 @@ class SpecifyApply:
         Check apply can be used to modify nested struct fields.
 
         """
-        import pl.stableflow.cfg.util  # pylint: disable=C0415
+        import fl.stableflow.cfg.util  # pylint: disable=C0415
 
         data = {'a': {'b': 1}}
-        data = pl.stableflow.cfg.util.apply(data, 'a.b', 2)
+        data = fl.stableflow.cfg.util.apply(data, 'a.b', 2)
         assert data['a']['b'] == 2
 
     # -------------------------------------------------------------------------
@@ -30,9 +30,9 @@ class SpecifyApply:
         Check apply can be used to modify nested struct fields.
 
         """
-        import pl.stableflow.cfg.util  # pylint: disable=C0415
+        import fl.stableflow.cfg.util  # pylint: disable=C0415
 
         data = {'a': {'b': 1}}
-        data = pl.stableflow.cfg.util.apply(
+        data = fl.stableflow.cfg.util.apply(
                                         data, 'a:b', 2, delim_cfg_addr=':')
         assert data['a']['b'] == 2

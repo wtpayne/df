@@ -10,9 +10,9 @@ import copy
 import enum
 import itertools
 
-import pl.stableflow.cfg.data.atomic_types
-import pl.stableflow.cfg.data.gap_table
-import pl.stableflow.cfg.util
+import fl.stableflow.cfg.data.atomic_types
+import fl.stableflow.cfg.data.gap_table
+import fl.stableflow.cfg.util
 import pl.stableflow.util
 
 
@@ -28,9 +28,9 @@ def denormalize(cfg):
     """
     cfg_data   = cfg['data']
     parameters = dict()
-    subs       = pl.stableflow.cfg.util.SubstitutionTable(parameters)
-    typeinfo   = pl.stableflow.cfg.data.atomic_types.as_dict()
-    gap_table  = pl.stableflow.cfg.data.gap_table.GapTable()
+    subs       = fl.stableflow.cfg.util.SubstitutionTable(parameters)
+    typeinfo   = fl.stableflow.cfg.data.atomic_types.as_dict()
+    gap_table  = fl.stableflow.cfg.data.gap_table.GapTable()
     stack      = _init_stack(map = cfg_data)
     expanded   = pl.stableflow.util.PathDict()
 

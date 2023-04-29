@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Functional specification for the pl.stableflow.cfg.validate module.
+Functional specification for the fl.stableflow.cfg.validate module.
 
 """
 
@@ -21,9 +21,9 @@ class SpecifyNormalized:
         Check normalized does not throw when given valid data.
 
         """
-        import pl.stableflow.cfg.validate  # pylint: disable=C0415
+        import fl.stableflow.cfg.validate  # pylint: disable=C0415
 
-        pl.stableflow.cfg.validate.normalized(valid_normalized_config)
+        fl.stableflow.cfg.validate.normalized(valid_normalized_config)
 
     # -------------------------------------------------------------------------
     def it_rejects_invalid_data(self, invalid_config):
@@ -31,11 +31,11 @@ class SpecifyNormalized:
         Check normalized raises an exception when given invalid data.
 
         """
-        import pl.stableflow.cfg.exception  # pylint: disable=C0415
-        import pl.stableflow.cfg.validate   # pylint: disable=C0415
+        import fl.stableflow.cfg.exception  # pylint: disable=C0415
+        import fl.stableflow.cfg.validate   # pylint: disable=C0415
 
-        with pytest.raises(pl.stableflow.cfg.exception.CfgError):
-            pl.stableflow.cfg.validate.normalized(invalid_config)
+        with pytest.raises(fl.stableflow.cfg.exception.CfgError):
+            fl.stableflow.cfg.validate.normalized(invalid_config)
 
 
 # =============================================================================
@@ -51,12 +51,12 @@ class SpecifyDenormalized:
         Check normalized does not throw when given valid data.
 
         """
-        import pl.stableflow.cfg           # pylint: disable=C0415
-        import pl.stableflow.cfg.validate  # pylint: disable=C0415
+        import fl.stableflow.cfg           # pylint: disable=C0415
+        import fl.stableflow.cfg.validate  # pylint: disable=C0415
 
-        valid_denormalized_config = pl.stableflow.cfg.denormalize(
+        valid_denormalized_config = fl.stableflow.cfg.denormalize(
                                                     valid_normalized_config)
-        pl.stableflow.cfg.validate.denormalized(valid_denormalized_config)
+        fl.stableflow.cfg.validate.denormalized(valid_denormalized_config)
 
     # -------------------------------------------------------------------------
     def it_rejects_invalid_data(self, invalid_config):
@@ -64,8 +64,8 @@ class SpecifyDenormalized:
         Check normalized raises an exception when given invalid data.
 
         """
-        import pl.stableflow.cfg.exception  # pylint: disable=C0415
-        import pl.stableflow.cfg.validate   # pylint: disable=C0415
+        import fl.stableflow.cfg.exception  # pylint: disable=C0415
+        import fl.stableflow.cfg.validate   # pylint: disable=C0415
 
-        with pytest.raises(pl.stableflow.cfg.exception.CfgError):
-            pl.stableflow.cfg.validate.denormalized(invalid_config)
+        with pytest.raises(fl.stableflow.cfg.exception.CfgError):
+            fl.stableflow.cfg.validate.denormalized(invalid_config)

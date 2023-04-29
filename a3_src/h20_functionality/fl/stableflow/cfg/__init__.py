@@ -12,17 +12,17 @@ import os
 
 import loguru
 
-import pl.stableflow.cfg.data
-import pl.stableflow.cfg.edge
-import pl.stableflow.cfg.exception
-import pl.stableflow.cfg.load
-import pl.stableflow.cfg.override
-import pl.stableflow.cfg.queue
-import pl.stableflow.cfg.validate
+import fl.stableflow.cfg.data
+import fl.stableflow.cfg.edge
+import fl.stableflow.cfg.exception
+import fl.stableflow.cfg.load
+import fl.stableflow.cfg.override
+import fl.stableflow.cfg.queue
+import fl.stableflow.cfg.validate
 import pl.stableflow.util
 import pl.stableflow.util.serialization
 
-from pl.stableflow.cfg.exception import CfgError
+from fl.stableflow.cfg.exception import CfgError
 
 
 # -----------------------------------------------------------------------------
@@ -48,7 +48,7 @@ def prepare(path_cfg       = None,  # pylint: disable=R0913
     #
     cfg = dict()
     if has_cfg_files:
-        cfg_from_path = pl.stableflow.cfg.load.from_path(path_cfg)
+        cfg_from_path = fl.stableflow.cfg.load.from_path(path_cfg)
         if cfg_from_path:
             cfg = merge_dicts(cfg, cfg_from_path)
 
@@ -65,7 +65,7 @@ def prepare(path_cfg       = None,  # pylint: disable=R0913
     # overrides that may have been
     # supplied.
     #
-    cfg = pl.stableflow.cfg.override.apply(
+    cfg = fl.stableflow.cfg.override.apply(
                                         cfg            = cfg,
                                         tup_overrides  = tup_overrides,
                                         delim_cfg_addr = delim_cfg_addr)
@@ -100,10 +100,10 @@ def prepare(path_cfg       = None,  # pylint: disable=R0913
     cfg['runtime']['id']['id_run']         = '00000000'
 
     # cfg = pl.stableflow.util.format_all_strings(cfg)  # ???
-    cfg = pl.stableflow.cfg.validate.normalized(cfg)
+    cfg = fl.stableflow.cfg.validate.normalized(cfg)
 
     if cfg is None:
-        raise pl.stableflow.cfg.exception.CfgError('No config.')
+        raise fl.stableflow.cfg.exception.CfgError('No config.')
 
     return cfg
 
@@ -122,9 +122,9 @@ def denormalize(cfg):
     such information explicit.
 
     """
-    return pl.stableflow.cfg.queue.denormalize(
-                pl.stableflow.cfg.edge.denormalize(
-                    pl.stableflow.cfg.data.denormalize(cfg)))
+    return fl.stableflow.cfg.queue.denormalize(
+                fl.stableflow.cfg.edge.denormalize(
+                    fl.stableflow.cfg.data.denormalize(cfg)))
 
 
 # -----------------------------------------------------------------------------

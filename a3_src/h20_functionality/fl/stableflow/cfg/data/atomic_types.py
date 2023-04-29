@@ -69,7 +69,6 @@ def _as_tuple():
         ('py_list',      True,  False, True,  list,      None,             None,             ),   # noqa
         ('py_set',       True,  False, True,  set,       None,             None,             ),   # noqa
         ('bool_',        True,  False, False, bool,      numpy.bool_,      None,             ),   # noqa
-        ('bool8',        False, False, True,  bool,      numpy.bool8,      None,             ),   # noqa
         ('byte',         False, True,  True,  int,       numpy.byte,       'char',           ),   # noqa
         ('short',        False, True,  True,  int,       numpy.short,      'short',          ),   # noqa
         ('intc',         False, True,  True,  int,       numpy.intc,       'int',            ),   # noqa

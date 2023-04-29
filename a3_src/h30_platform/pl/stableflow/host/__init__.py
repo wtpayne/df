@@ -10,7 +10,7 @@ import os
 import platform
 import sys
 
-import pl.stableflow.cfg
+import fl.stableflow.cfg
 import pl.stableflow.host.util
 import pl.stableflow.log
 import pl.stableflow.proc
@@ -90,7 +90,7 @@ def _setup_host(cfg):
     Perform common setup actions and return id_host.
 
     """
-    cfg     = pl.stableflow.cfg.denormalize(cfg)
+    cfg     = fl.stableflow.cfg.denormalize(cfg)
     id_host = cfg['runtime']['id']['id_host']
     return id_host
 

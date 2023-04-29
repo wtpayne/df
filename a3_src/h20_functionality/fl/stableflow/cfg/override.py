@@ -5,7 +5,7 @@ Module for configuration override logic.
 """
 
 
-import pl.stableflow.cfg.util
+import fl.stableflow.cfg.util
 
 
 # -----------------------------------------------------------------------------
@@ -19,7 +19,7 @@ def apply(cfg, tup_overrides = None, delim_cfg_addr = '.'):
 
     for (address, value) in zip(tup_overrides[::2], tup_overrides[1::2]):
         try:
-            cfg = pl.stableflow.cfg.util.apply(
+            cfg = fl.stableflow.cfg.util.apply(
                                             data           = cfg,
                                             address        = address,
                                             value          = value,
