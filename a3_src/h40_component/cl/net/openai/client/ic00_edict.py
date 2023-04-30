@@ -70,7 +70,8 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     cfg_client                   = dict()
     cfg_client['api_key']        = os.environ[cfg['envvar_key']]
     cfg_client['secs_interval']  = cfg.get('secs_interval', 5)
-    cfg_client['is_bit']         = cfg.get('is_bit', True)
+    cfg_client['is_bit']         = cfg.get('is_bit',   True)  # Built-in-test
+    cfg_client['is_async']       = cfg.get('is_async', False) # Asynchronous
     cfg_client['default']        = cfg['default']
     client = fl.net.openai.client.coro_template_handler(cfg = cfg_client)
 

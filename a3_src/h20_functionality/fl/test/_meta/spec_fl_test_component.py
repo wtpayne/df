@@ -68,7 +68,8 @@ class SpecifyFlTestComponent_pipelineConfiguration:
 
         """
         import fl.test.component
-        controller           = 'cl.core.ctrl.proc.ic00_edict'
+        ctrl_sys             = 'cl.core.ctrl.sys.ic00_edict'
+        ctrl_proc            = 'cl.core.ctrl.proc.ic00_edict'
         signal_generator     = 'fl.test._meta.signal_generator'
         signal_validator     = 'fl.test._meta.signal_validator'
         component_under_test = 'fl.test._meta.multiply_by_two'
@@ -95,9 +96,15 @@ class SpecifyFlTestComponent_pipelineConfiguration:
                 'main_process':         {'host':            'localhost'}},
 
             'node': {
-                'controller': {
+                'ctrl_sys': {
                     'config':           {'idx_max': 2},
-                    'functionality':    {'py_module':    controller},
+                    'functionality':    {'py_module':    ctrl_sys},
+                    'process':          'main_process',
+                    'req_host_cfg':     'test_configuration',
+                    'state_type':       'python_dict'},
+                'ctrl_proc': {
+                    'config':           {},
+                    'functionality':    {'py_module':    ctrl_proc},
                     'process':          'main_process',
                     'req_host_cfg':     'test_configuration',
                     'state_type':       'python_dict'},
@@ -123,6 +130,22 @@ class SpecifyFlTestComponent_pipelineConfiguration:
                     'state_type':       'python_dict'}},
 
             'edge': [
+                {'owner':   'ctrl_sys',
+                 'src':     'ctrl_sys.outputs.ctrl',
+                 'dst':     'ctrl_proc.inputs.ctrl',
+                 'data':    'python_dict'},
+                {'owner':   'ctrl_proc',
+                 'src':     'ctrl_proc.outputs.ctrl_000',
+                 'dst':     'output_evaluator.inputs.ctrl',
+                 'data':    'python_dict'},
+                {'owner':   'ctrl_proc',
+                 'src':     'ctrl_proc.outputs.ctrl_001',
+                 'dst':     'pipeline_node_000.inputs.ctrl',
+                 'data':    'python_dict'},
+                {'owner':   'ctrl_proc',
+                 'src':     'ctrl_proc.outputs.ctrl_002',
+                 'dst':     'signal_generator.inputs.ctrl',
+                 'data':    'python_dict'},
                 {'owner':   'signal_generator',
                  'src':     'signal_generator.outputs.data',
                  'dst':     'pipeline_node_000.inputs.data',
@@ -130,18 +153,6 @@ class SpecifyFlTestComponent_pipelineConfiguration:
                 {'owner':   'pipeline_node_000',
                  'src':     'pipeline_node_000.outputs.data',
                  'dst':     'output_evaluator.inputs.data',
-                 'data':    'python_dict'},
-                {'owner':   'controller',
-                 'src':     'controller.outputs.control_000',
-                 'dst':     'output_evaluator.inputs.control',
-                 'data':    'python_dict'},
-                {'owner':   'controller',
-                 'src':     'controller.outputs.control_001',
-                 'dst':     'pipeline_node_000.inputs.control',
-                 'data':    'python_dict'},
-                {'owner':   'controller',
-                 'src':     'controller.outputs.control_002',
-                 'dst':     'signal_generator.inputs.control',
                  'data':    'python_dict'}],
 
             'data': {
@@ -150,7 +161,18 @@ class SpecifyFlTestComponent_pipelineConfiguration:
             'req_host_cfg': {
                 'test_configuration': {}}}
 
-        assert cfg_output == cfg_expected
+        assert cfg_output['system']       == cfg_expected['system']
+        assert cfg_output['host']         == cfg_expected['host']
+        assert cfg_output['process']      == cfg_expected['process']
+        assert cfg_output['node']         == cfg_expected['node']
+        assert cfg_output['data']         == cfg_expected['data']
+        assert cfg_output['req_host_cfg'] == cfg_expected['req_host_cfg']
+
+        for cfg_edge in cfg_output['edge']:
+            assert cfg_edge in cfg_expected['edge']
+
+        for cfg_edge in cfg_expected['edge']:
+            assert cfg_edge in cfg_output['edge']
 
     #--------------------------------------------------------------------------
     @pytest.mark.e002_general_research
@@ -160,7 +182,8 @@ class SpecifyFlTestComponent_pipelineConfiguration:
 
         """
         import fl.test.component
-        controller           = 'cl.core.ctrl.proc.ic00_edict'
+        ctrl_sys             = 'cl.core.ctrl.sys.ic00_edict'
+        ctrl_proc            = 'cl.core.ctrl.proc.ic00_edict'
         signal_generator     = 'fl.test._meta.signal_generator'
         signal_validator     = 'fl.test._meta.signal_validator'
         component_under_test = 'fl.test._meta.multiply_by_two'
@@ -170,7 +193,7 @@ class SpecifyFlTestComponent_pipelineConfiguration:
                                     script = [{'in':  { 'data':  1 },
                                                'out': { 'data':  2 }},
                                               {'in':  { 'data':  2 },
-                                               'out': { 'data':  3 }},
+                                               'out': { 'data':  4 }},
                                               {'in':  { 'data':  3 },
                                                'out': { 'data':  6 }},
                                               {'in':  { 'data':  4 },
@@ -191,9 +214,15 @@ class SpecifyFlTestComponent_pipelineConfiguration:
                 'main_process':         {'host':            'localhost'}},
 
             'node': {
-                'controller': {
+                'ctrl_sys': {
                     'config':           {'idx_max': 2},
-                    'functionality':    {'py_module':   controller},
+                    'functionality':    {'py_module':    ctrl_sys},
+                    'process':          'main_process',
+                    'req_host_cfg':     'test_configuration',
+                    'state_type':       'python_dict'},
+                'ctrl_proc': {
+                    'config':           {},
+                    'functionality':    {'py_module':    ctrl_proc},
                     'process':          'main_process',
                     'req_host_cfg':     'test_configuration',
                     'state_type':       'python_dict'},
@@ -206,19 +235,35 @@ class SpecifyFlTestComponent_pipelineConfiguration:
                     'state_type':       'python_dict'},
                 'pipeline_node_000': {
                     'config':           {},
-                    'functionality': {  'py_module':    component_under_test},
+                    'functionality':    {'py_module':   component_under_test},
                     'process':          'main_process',
                     'req_host_cfg':     'test_configuration',
                     'state_type':       'python_dict'},
                 'output_evaluator': {
                     'config':           {'channels':    [{'path': ['data'],
-                                         'signal':      [2, 3, 6, 8, 10]}]},
+                                         'signal':      [2, 4, 6, 8, 10]}]},
                     'functionality':    {'py_module':   signal_validator},
                     'process':          'main_process',
                     'req_host_cfg':     'test_configuration',
                     'state_type':       'python_dict'}},
 
             'edge': [
+                {'owner':   'ctrl_sys',
+                 'src':     'ctrl_sys.outputs.ctrl',
+                 'dst':     'ctrl_proc.inputs.ctrl',
+                 'data':    'python_dict'},
+                {'owner':   'ctrl_proc',
+                 'src':     'ctrl_proc.outputs.ctrl_000',
+                 'dst':     'output_evaluator.inputs.ctrl',
+                 'data':    'python_dict'},
+                {'owner':   'ctrl_proc',
+                 'src':     'ctrl_proc.outputs.ctrl_001',
+                 'dst':     'pipeline_node_000.inputs.ctrl',
+                 'data':    'python_dict'},
+                {'owner':   'ctrl_proc',
+                 'src':     'ctrl_proc.outputs.ctrl_002',
+                 'dst':     'signal_generator.inputs.ctrl',
+                 'data':    'python_dict'},
                 {'owner':   'signal_generator',
                  'src':     'signal_generator.outputs.data',
                  'dst':     'pipeline_node_000.inputs.data',
@@ -226,18 +271,6 @@ class SpecifyFlTestComponent_pipelineConfiguration:
                 {'owner':   'pipeline_node_000',
                  'src':     'pipeline_node_000.outputs.data',
                  'dst':     'output_evaluator.inputs.data',
-                 'data':    'python_dict'},
-                {'owner':   'controller',
-                 'src':     'controller.outputs.control_000',
-                 'dst':     'output_evaluator.inputs.control',
-                 'data':    'python_dict'},
-                {'owner':   'controller',
-                 'src':     'controller.outputs.control_001',
-                 'dst':     'pipeline_node_000.inputs.control',
-                 'data':    'python_dict'},
-                {'owner':   'controller',
-                 'src':     'controller.outputs.control_002',
-                 'dst':     'signal_generator.inputs.control',
                  'data':    'python_dict'}],
 
             'data': {
@@ -246,4 +279,17 @@ class SpecifyFlTestComponent_pipelineConfiguration:
             'req_host_cfg': {
                 'test_configuration': {}}}
 
-        assert cfg_output == cfg_expected
+        assert cfg_output['system']       == cfg_expected['system']
+        assert cfg_output['host']         == cfg_expected['host']
+        assert cfg_output['process']      == cfg_expected['process']
+        assert cfg_output['data']         == cfg_expected['data']
+        assert cfg_output['req_host_cfg'] == cfg_expected['req_host_cfg']
+
+        for id_node in cfg_output['node'].keys():
+            assert cfg_output['node'][id_node] == cfg_expected['node'][id_node]
+
+        for cfg_edge in cfg_output['edge']:
+            assert cfg_edge in cfg_expected['edge']
+
+        for cfg_edge in cfg_expected['edge']:
+            assert cfg_edge in cfg_output['edge']

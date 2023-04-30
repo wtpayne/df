@@ -89,7 +89,7 @@ def testvector_chat_completions_valid_bit():
     uid_template  = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
     uid_variant   = '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3'
     uid_params    = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
-    id_model      = 'text-davinci-003'
+    id_model      = 'gpt-3.5-turbo-0301'
     messages_test = [{'role':    'system',
                       'content': 'chat_completions_test_msg_content'}]
 

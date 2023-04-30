@@ -197,18 +197,35 @@ def _add_controller(cfg, subordinate_nodes, idx_max):
     """
     fl.stableflow.cfg.builder.add_node(
                     cfg          = cfg,
-                    id_node      = 'controller',
+                    id_node      = 'ctrl_sys',
+                    id_process   = 'main_process',
+                    req_host_cfg = 'test_configuration',
+                    py_module    = 'cl.core.ctrl.sys.ic00_edict',
+                    config       = { 'idx_max':  2 },
+                    state_type   = 'python_dict')
+
+    fl.stableflow.cfg.builder.add_node(
+                    cfg          = cfg,
+                    id_node      = 'ctrl_proc',
                     id_process   = 'main_process',
                     req_host_cfg = 'test_configuration',
                     py_module    = 'cl.core.ctrl.proc.ic00_edict',
-                    config       = { 'idx_max':  2 },
+                    config       = {},
                     state_type   = 'python_dict')
+
+    fl.stableflow.cfg.builder.add_edge(
+                    cfg          = cfg,
+                    id_src       = 'ctrl_sys',
+                    src_ref      = 'outputs.ctrl',
+                    id_dst       = 'ctrl_proc',
+                    dst_ref      = 'inputs.control',
+                    data         = 'python_dict')
 
     for (idx, id_node) in enumerate(subordinate_nodes):
         fl.stableflow.cfg.builder.add_edge(
                     cfg          = cfg,
-                    id_src       = 'controller',
-                    src_ref      = 'outputs.control_{x:03d}'.format(x = idx),
+                    id_src       = 'ctrl_proc',
+                    src_ref      = 'outputs.ctrl_{x:03d}'.format(x = idx),
                     id_dst       = id_node,
                     dst_ref      = 'inputs.control',
                     data         = 'python_dict')

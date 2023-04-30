@@ -269,6 +269,7 @@ def coro_request_handler(cfg):
     assert 'api_key'       in cfg
     assert 'secs_interval' in cfg
     assert 'is_bit'        in cfg
+    assert 'is_async'      in cfg
 
     # Configure queues and start the
     # client in a separate process.
@@ -277,11 +278,12 @@ def coro_request_handler(cfg):
     cfg['queue_result']  = multiprocessing.Queue()  # daemon --> coro
     cfg['queue_error']   = multiprocessing.Queue()  # daemon --> coro
 
-    daemon = multiprocessing.Process(target = _daemon_main,
-                                     args   = (cfg,),
-                                     name   = 'openai-client',
-                                     daemon = True)
-    daemon.start()
+    if cfg['is_async']:
+        daemon = multiprocessing.Process(target = _daemon_main,
+                                         args   = (cfg,),
+                                         name   = 'openai-client',
+                                         daemon = True)
+        daemon.start()
 
     # Loop forever, sending data to
     # and from the openai client via
@@ -298,37 +300,55 @@ def coro_request_handler(cfg):
         # At each step, yield results
         # and errors to the controlling
         # context, and get any new
-        # requests to send to the client
-        # process.
+        # requests to send to the client.
         #
         list_request.clear()
         list_request = yield (list_result, list_error)
 
         # Enqueue any newly submitted
-        # requests.
+        # requests to send to the
+        # daemon process, then dequeue
+        # any newly returned results
+        # and errors.
         #
-        list_error.clear()
-        for request in list_request:
-            try:
-                cfg['queue_request'].put(request, block = False)
-            except queue.Full as err:
-                list_error.append(err)
+        if cfg['is_async']:
 
-        # Dequeue any newly returned
-        # results and errors.
+            list_error.clear()
+            for request in list_request:
+                try:
+                    cfg['queue_request'].put(request, block = False)
+                except queue.Full as err:
+                    list_error.append(err)
+
+            list_result.clear()
+            while True:
+                try:
+                    list_result.append(cfg['queue_result'].get(block = False))
+                except queue.Empty:
+                    break
+
+            while True:
+                try:
+                    list_error.append(cfg['queue_error'].get(block = False))
+                except queue.Empty:
+                    break
+
+        # Synchronously process
+        # one request at a time,
+        # filling result and error
+        # lists as we go.
         #
-        list_result.clear()
-        while True:
-            try:
-                list_result.append(cfg['queue_result'].get(block = False))
-            except queue.Empty:
-                break
+        else:
 
-        while True:
-            try:
-                list_error.append(cfg['queue_error'].get(block = False))
-            except queue.Empty:
-                break
+            list_error.clear()
+            list_result.clear()
+            for request in list_request:
+                result = _process_one_request(request_raw = request,
+                                              default     = cfg['default'],
+                                              is_bit      = cfg['is_bit'])
+                list_result.append(result)
+                if result['error'] is not None:
+                    list_error.append(result['error'])
 
 
 # -----------------------------------------------------------------------------
