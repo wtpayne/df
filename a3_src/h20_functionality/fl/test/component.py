@@ -10,7 +10,7 @@ import fl.stableflow.cfg.builder
 
 
 # -----------------------------------------------------------------------------
-def functionalConfiguration(module, config, script):
+def functional_test_cfg(module, config, script):
     """
     Return configuration for a scripted functional component test.
 
@@ -70,7 +70,7 @@ def functionalConfiguration(module, config, script):
             'path':   [name_output],
             'signal': list_output});
 
-    return _pipeline_configuration(
+    return _pipeline_test_cfg(
                         list_pipeline_modules     = [module],
                         list_pipeline_node_config = [config],
                         list_pipeline_edge_info   = [],
@@ -79,12 +79,12 @@ def functionalConfiguration(module, config, script):
 
 
 # -----------------------------------------------------------------------------
-def _pipeline_configuration(list_pipeline_modules,
-                            list_pipeline_node_config,
-                            list_test_vectors,
-                            list_expected_outputs,
-                            list_pipeline_edge_info = [],
-                            list_id_node_nocontrol  = []):
+def _pipeline_test_cfg(list_pipeline_modules,
+                       list_pipeline_node_config,
+                       list_test_vectors,
+                       list_expected_outputs,
+                       list_pipeline_edge_info = [],
+                       list_id_node_nocontrol  = []):
     """
     Return configuration for a pipeline test.
 
@@ -99,9 +99,9 @@ def _pipeline_configuration(list_pipeline_modules,
         list_id_node.append(node_name)
     list_id_node.append('output_evaluator')
 
-    list_py_module = ['pl.stableflow.lib.test.signal_generator']
+    list_py_module = ['fl.test._meta.signal_generator']
     list_py_module.extend(list_pipeline_modules)
-    list_py_module.append('pl.stableflow.lib.test.signal_validator')
+    list_py_module.append('fl.test._meta.signal_validator')
 
     list_config = [{ 'channels': list_test_vectors }]
     list_config.extend(list_pipeline_node_config)
@@ -200,35 +200,14 @@ def _add_controller(cfg, subordinate_nodes, idx_max):
                     id_node      = 'controller',
                     id_process   = 'main_process',
                     req_host_cfg = 'test_configuration',
-                    py_module    = 'pl.stableflow.lib.control.system',
+                    py_module    = 'cl.core.ctrl.proc.ic00_edict',
                     config       = { 'idx_max':  2 },
                     state_type   = 'python_dict')
 
-    fl.stableflow.cfg.builder.add_node(
-                    cfg          = cfg,
-                    id_node      = 'controller_tee',
-                    id_process   = 'main_process',
-                    req_host_cfg = 'test_configuration',
-                    py_module    = 'pl.stableflow.lib.util.tee',
-                    state_type   = 'python_dict')
-
-    fl.stableflow.cfg.builder.add_edge(
-                    cfg          = cfg,
-                    id_src       = 'controller',
-                    src_ref      = 'outputs.control',
-                    id_dst       = 'controller_tee',
-                    dst_ref      = 'inputs.control',
-                    data         = 'python_dict')
-
     for (idx, id_node) in enumerate(subordinate_nodes):
-
-        print('--')
-        print(idx)
-        print(id_node)
-
         fl.stableflow.cfg.builder.add_edge(
                     cfg          = cfg,
-                    id_src       = 'controller_tee',
+                    id_src       = 'controller',
                     src_ref      = 'outputs.control_{x:03d}'.format(x = idx),
                     id_dst       = id_node,
                     dst_ref      = 'inputs.control',

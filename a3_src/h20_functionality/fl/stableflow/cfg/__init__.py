@@ -29,6 +29,7 @@ from fl.stableflow.cfg.exception import CfgError
 @loguru.logger.catch(exclude = CfgError)
 def prepare(path_cfg       = None,  # pylint: disable=R0913
             string_cfg     = None,
+            map_cfg        = None,
             do_make_ready  = False,
             is_local       = False,
             delim_cfg_addr = '.',
@@ -39,7 +40,8 @@ def prepare(path_cfg       = None,  # pylint: disable=R0913
     """
     has_cfg_files  = path_cfg is not None
     has_cfg_string = string_cfg is not None
-    has_cfg        = has_cfg_files or has_cfg_string
+    has_cfg_map    = map_cfg is not None
+    has_cfg        = has_cfg_files or has_cfg_string or has_cfg_map
     if not has_cfg:
         raise CfgError('No configuration data has been provided.')
 
@@ -57,9 +59,17 @@ def prepare(path_cfg       = None,  # pylint: disable=R0913
     # provided.
     #
     if has_cfg_string:
-        cfg_from_string = pl.stableflow.util.serialization.deserialize(string_cfg)
+        cfg_from_string = pl.stableflow.util.serialization.deserialize(
+                                                                string_cfg)
         if cfg_from_string:
             cfg = merge_dicts(cfg, cfg_from_string)
+
+    # Merge in any additional configuration
+    # data passed in as a dict, if
+    # provided.
+    #
+    if has_cfg_map:
+        cfg = merge_dicts(cfg, map_cfg)
 
     # Apply any command line or env-var
     # overrides that may have been

@@ -5,66 +5,7 @@ Functional specification for fl.test.component
 """
 
 
-import pprint
-
-import click.testing
 import pytest
-
-
-# -----------------------------------------------------------------------------
-def run(cfg,  # pylint: disable=R0913
-        expected_exit_code = 0,
-        do_expect_stdout   = False,
-        do_expect_stderr   = False,
-        expected_stdout    = None,
-        expected_stderr    = None):
-    """
-    Run a test via the command line interface.
-
-    """
-    runner   = click.testing.CliRunner(mix_stderr = False)
-    response = runner.invoke(xact.cli.command.grp_main,
-                             ['system', 'start', '--local',
-                              '--cfg', xact.util.serialization.serialize(cfg)])
-
-    isok_exit_code = response.exit_code == expected_exit_code
-    isok_stdout    = _isok(response.stdout, do_expect_stdout, expected_stdout)
-    isok_stderr    = _isok(response.stderr, do_expect_stderr, expected_stderr)
-
-    isok = (isok_exit_code and isok_stdout and isok_stderr)
-
-    if isok:
-        return
-
-    msg = ''
-    if not isok_exit_code:
-        msg += 'exit_code:\n{exit_code}\n\n'.format(
-                                                exit_code = response.exit_code)
-
-    if not isok_stdout:
-        msg += 'stdout:\n{stdout}\n\n'.format(stdout = response.stdout)
-
-    if not isok_stderr:
-        msg += 'stderr:\n{stderr}\n\n'.format(stderr = response.stderr)
-
-    pytest.fail(msg = msg, pytrace = False)
-
-
-# -----------------------------------------------------------------------------
-def _isok(response_output, do_expect_output, expected_output):
-    """
-    Return true iff response is OK.
-
-    """
-    has_output = response_output != ''
-    if has_output != do_expect_output:
-        return False
-
-    if expected_output is not None:
-        if response_output != expected_output:
-            return False
-
-    return True
 
 
 # =============================================================================
@@ -115,23 +56,23 @@ class SpecifyFlTestComponent_baselineConfiguration:
 # =============================================================================
 class SpecifyFlTestComponent_pipelineConfiguration:
     """
-    Spec for the _pipeline_configuration function.
+    Spec for the _pipeline_test_cfg function.
 
     """
 
     #--------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_supports_generation_of_pipeline_configuration(self):
+    def it_supports_generation_of_pipeline_test_cfg(self):
         """
-        _pipeline_configuration generates the expected configuration data.
+        _pipeline_test_cfg generates the expected configuration data.
 
         """
         import fl.test.component
-        controller           = 'pl.stableflow.lib.control.system'
-        signal_generator     = 'pl.stableflow.lib.test.signal_generator'
-        signal_validator     = 'pl.stableflow.lib.test.signal_validator'
+        controller           = 'cl.core.ctrl.proc.ic00_edict'
+        signal_generator     = 'fl.test._meta.signal_generator'
+        signal_validator     = 'fl.test._meta.signal_validator'
         component_under_test = 'fl.test._meta.multiply_by_two'
-        cfg_output           = fl.test.component._pipeline_configuration(
+        cfg_output           = fl.test.component._pipeline_test_cfg(
                 list_pipeline_modules     = [component_under_test],
                 list_pipeline_node_config = [{}],
                 list_pipeline_edge_info   = [],
@@ -160,12 +101,6 @@ class SpecifyFlTestComponent_pipelineConfiguration:
                     'process':          'main_process',
                     'req_host_cfg':     'test_configuration',
                     'state_type':       'python_dict'},
-                'controller_tee': {
-                    'functionality': {
-                        'py_module':    'pl.stableflow.lib.util.tee'},
-                    'process':          'main_process',
-                    'req_host_cfg':     'test_configuration',
-                    'state_type':       'python_dict'},
                 'signal_generator': {
                     'config':           {'channels':    [{'path': ['data'],
                                          'signal':      [1, 2, 3, 4, 5]}]},
@@ -188,30 +123,26 @@ class SpecifyFlTestComponent_pipelineConfiguration:
                     'state_type':       'python_dict'}},
 
             'edge': [
-                {'data':    'python_dict',
+                {'owner':   'signal_generator',
+                 'src':     'signal_generator.outputs.data',
                  'dst':     'pipeline_node_000.inputs.data',
-                 'owner':   'signal_generator',
-                 'src':     'signal_generator.outputs.data'},
-                {'data':    'python_dict',
+                 'data':    'python_dict'},
+                {'owner':   'pipeline_node_000',
+                 'src':     'pipeline_node_000.outputs.data',
                  'dst':     'output_evaluator.inputs.data',
-                 'owner':   'pipeline_node_000',
-                 'src':     'pipeline_node_000.outputs.data'},
-                {'data':    'python_dict',
-                 'dst':     'controller_tee.inputs.control',
-                 'owner':   'controller',
-                 'src':     'controller.outputs.control'},
-                {'data':    'python_dict',
+                 'data':    'python_dict'},
+                {'owner':   'controller',
+                 'src':     'controller.outputs.control_000',
                  'dst':     'output_evaluator.inputs.control',
-                 'owner':   'controller_tee',
-                 'src':     'controller_tee.outputs.control_000'},
-                {'data':    'python_dict',
+                 'data':    'python_dict'},
+                {'owner':   'controller',
+                 'src':     'controller.outputs.control_001',
                  'dst':     'pipeline_node_000.inputs.control',
-                 'owner':   'controller_tee',
-                 'src':     'controller_tee.outputs.control_001'},
-                {'data':    'python_dict',
+                 'data':    'python_dict'},
+                {'owner':   'controller',
+                 'src':     'controller.outputs.control_002',
                  'dst':     'signal_generator.inputs.control',
-                 'owner':   'controller_tee',
-                 'src':     'controller_tee.outputs.control_002'}],
+                 'data':    'python_dict'}],
 
             'data': {
                 'python_dict': 'py_dict'},
@@ -221,7 +152,6 @@ class SpecifyFlTestComponent_pipelineConfiguration:
 
         assert cfg_output == cfg_expected
 
-
     #--------------------------------------------------------------------------
     @pytest.mark.e002_general_research
     def it_supports_generation_of_functional_configuration(self):
@@ -230,11 +160,11 @@ class SpecifyFlTestComponent_pipelineConfiguration:
 
         """
         import fl.test.component
-        controller           = 'pl.stableflow.lib.control.system'
-        signal_generator     = 'pl.stableflow.lib.test.signal_generator'
-        signal_validator     = 'pl.stableflow.lib.test.signal_validator'
+        controller           = 'cl.core.ctrl.proc.ic00_edict'
+        signal_generator     = 'fl.test._meta.signal_generator'
+        signal_validator     = 'fl.test._meta.signal_validator'
         component_under_test = 'fl.test._meta.multiply_by_two'
-        cfg_output           = fl.test.component.functionalConfiguration(
+        cfg_output           = fl.test.component.functional_test_cfg(
                                     module = component_under_test,
                                     config = dict(),
                                     script = [{'in':  { 'data':  1 },
@@ -267,12 +197,6 @@ class SpecifyFlTestComponent_pipelineConfiguration:
                     'process':          'main_process',
                     'req_host_cfg':     'test_configuration',
                     'state_type':       'python_dict'},
-                'controller_tee': {
-                    'functionality': {
-                        'py_module':    'pl.stableflow.lib.util.tee'},
-                    'process':          'main_process',
-                    'req_host_cfg':     'test_configuration',
-                    'state_type':       'python_dict'},
                 'signal_generator': {
                     'config':           {'channels':    [{'path': ['data'],
                                          'signal':      [1, 2, 3, 4, 5]}]},
@@ -294,36 +218,27 @@ class SpecifyFlTestComponent_pipelineConfiguration:
                     'req_host_cfg':     'test_configuration',
                     'state_type':       'python_dict'}},
 
-            'edge':  [
-                {'data':  'python_dict',
-                 'dst':   'pipeline_node_000.inputs.data',
-                 'owner': 'signal_generator',
-                 'src':   'signal_generator.outputs.data'},
-
-                {'data':  'python_dict',
-                 'dst':   'output_evaluator.inputs.data',
-                 'owner': 'pipeline_node_000',
-                 'src':   'pipeline_node_000.outputs.data'},
-
-                {'data':  'python_dict',
-                 'dst':   'controller_tee.inputs.control',
-                 'owner': 'controller',
-                 'src':   'controller.outputs.control'},
-
-                {'data':  'python_dict',
-                 'dst':   'output_evaluator.inputs.control',
-                 'owner': 'controller_tee',
-                 'src':   'controller_tee.outputs.control_000'},
-
-                {'data':  'python_dict',
-                 'dst':   'pipeline_node_000.inputs.control',
-                 'owner': 'controller_tee',
-                 'src':   'controller_tee.outputs.control_001'},
-
-                {'data':  'python_dict',
-                 'dst':   'signal_generator.inputs.control',
-                 'owner': 'controller_tee',
-                 'src':   'controller_tee.outputs.control_002'}],
+            'edge': [
+                {'owner':   'signal_generator',
+                 'src':     'signal_generator.outputs.data',
+                 'dst':     'pipeline_node_000.inputs.data',
+                 'data':    'python_dict'},
+                {'owner':   'pipeline_node_000',
+                 'src':     'pipeline_node_000.outputs.data',
+                 'dst':     'output_evaluator.inputs.data',
+                 'data':    'python_dict'},
+                {'owner':   'controller',
+                 'src':     'controller.outputs.control_000',
+                 'dst':     'output_evaluator.inputs.control',
+                 'data':    'python_dict'},
+                {'owner':   'controller',
+                 'src':     'controller.outputs.control_001',
+                 'dst':     'pipeline_node_000.inputs.control',
+                 'data':    'python_dict'},
+                {'owner':   'controller',
+                 'src':     'controller.outputs.control_002',
+                 'dst':     'signal_generator.inputs.control',
+                 'data':    'python_dict'}],
 
             'data': {
                 'python_dict': 'py_dict'},

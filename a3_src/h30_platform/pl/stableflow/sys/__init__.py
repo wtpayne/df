@@ -17,8 +17,19 @@ import uuid
 
 import zmq
 
+import fl.stableflow.cfg
 import pl.stableflow.host
 import pl.stableflow.util.serialization
+
+
+# -----------------------------------------------------------------------------
+def prep_and_start(map_cfg, is_local):
+    """
+    Prepare configuration and start the system.
+
+    """
+    return start(fl.stableflow.cfg.prepare(map_cfg  = map_cfg,
+                                           is_local = is_local))
 
 
 # -----------------------------------------------------------------------------

@@ -208,18 +208,17 @@ def start(path_cfg       = None,  # pylint: disable=R0913
     import fl.stableflow.cfg.exception  # pylint: disable=C0415,W0621
     import pl.stableflow.sys            # pylint: disable=C0415,W0621
 
-
     if debug:
         pudb.set_trace()
 
     with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
         try:
             cfg = fl.stableflow.cfg.prepare(path_cfg       = path_cfg,
-                                         string_cfg     = cfg,
-                                         do_make_ready  = makeready,
-                                         is_local       = local,
-                                         delim_cfg_addr = delim_cfg_addr,
-                                         tup_overrides  = cfg_override)
+                                            string_cfg     = cfg,
+                                            do_make_ready  = makeready,
+                                            is_local       = local,
+                                            delim_cfg_addr = delim_cfg_addr,
+                                            tup_overrides  = cfg_override)
         except fl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             sys.exit(1)
@@ -287,11 +286,11 @@ def stop(path_cfg       = None,
     with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
         try:
             cfg = fl.stableflow.cfg.prepare(path_cfg       = path_cfg,
-                                         string_cfg     = cfg,
-                                         do_make_ready  = False,
-                                         is_local       = False,
-                                         delim_cfg_addr = delim_cfg_addr,
-                                         tup_overrides  = cfg_override)
+                                            string_cfg     = cfg,
+                                            do_make_ready  = False,
+                                            is_local       = False,
+                                            delim_cfg_addr = delim_cfg_addr,
+                                            tup_overrides  = cfg_override)
         except fl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             sys.exit(1)
@@ -359,11 +358,11 @@ def pause(path_cfg       = None,
     with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
         try:
             cfg = fl.stableflow.cfg.prepare(path_cfg       = path_cfg,
-                                         string_cfg     = cfg,
-                                         do_make_ready  = False,
-                                         is_local       = False,
-                                         delim_cfg_addr = delim_cfg_addr,
-                                         tup_overrides  = cfg_override)
+                                            string_cfg     = cfg,
+                                            do_make_ready  = False,
+                                            is_local       = False,
+                                            delim_cfg_addr = delim_cfg_addr,
+                                            tup_overrides  = cfg_override)
         except fl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             sys.exit(1)
@@ -431,11 +430,11 @@ def step(path_cfg       = None,
     with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
         try:
             cfg = fl.stableflow.cfg.prepare(path_cfg       = path_cfg,
-                                         string_cfg     = cfg,
-                                         do_make_ready  = False,
-                                         is_local       = False,
-                                         delim_cfg_addr = delim_cfg_addr,
-                                         tup_overrides  = cfg_override)
+                                            string_cfg     = cfg,
+                                            do_make_ready  = False,
+                                            is_local       = False,
+                                            delim_cfg_addr = delim_cfg_addr,
+                                            tup_overrides  = cfg_override)
         except fl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             sys.exit(1)
@@ -503,11 +502,11 @@ def ps(path_cfg       = None,
     with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
         try:
             cfg = fl.stableflow.cfg.prepare(path_cfg       = path_cfg,
-                                         string_cfg     = cfg,
-                                         do_make_ready  = False,
-                                         is_local       = False,
-                                         delim_cfg_addr = delim_cfg_addr,
-                                         tup_overrides  = cfg_override)
+                                            string_cfg     = cfg,
+                                            do_make_ready  = False,
+                                            is_local       = False,
+                                            delim_cfg_addr = delim_cfg_addr,
+                                            tup_overrides  = cfg_override)
         except fl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             sys.exit(1)
