@@ -46,8 +46,10 @@ license:
 
 
 import os
+import os.path
 import sys
 
+import da.env
 import da.env.run
 
 
@@ -57,16 +59,31 @@ def start():
     Start dm001 system.
 
     """
-    dirpath_self       = os.path.dirname(os.path.realpath(__file__))
-    filename_quadrotor = 'quadrotor.urdf.template'
-    filepath_quadrotor = os.path.join(dirpath_self, filename_quadrotor)
+    dirpath_self      = os.path.dirname(os.path.realpath(__file__))
+    filename_template = 'quadrotor.urdf.template'
+    filepath_template = os.path.join(dirpath_self, filename_template)
 
+    dirpath_tmp       = da.env.path(
+                                process_area = 'a4_tmp',
+                                control_tier = 'h80_demonstration',
+                                relpath      = 'dm001_artificial_imagination')
+    filename_urdf     = 'quadrotor.urdf'
+    filepath_urdf     = os.path.join(dirpath_tmp, filename_urdf)
 
+    if not os.path.exists(dirpath_tmp):
+       os.makedirs(dirpath_tmp)
 
-    tup_overrides      = (
+    with open(filepath_template, 'rt') as file_template:
+        str_template = file_template.read()
+        str_urdf     = str_template.format(dirpath_root = da.env.rootpath())
+
+    with open(filepath_urdf, 'wt') as file_urdf:
+        file_urdf.write(str_urdf)
+
+    tup_overrides = (
         'host.localhost.dirpath_log',               _dirpath_log(),
-        'node.simulator.config.filepath_quadrotor', filepath_quadrotor)
-    import da.env.run
+        'node.simulator.config.filepath_quadrotor', filepath_urdf)
+
     sys.exit(da.env.run.stableflow_start(path_cfg      = _filepath_cfg(),
                                          tup_overrides = tup_overrides))
 
