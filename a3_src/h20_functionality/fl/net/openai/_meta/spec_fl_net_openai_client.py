@@ -31,6 +31,7 @@ def testvector_completions_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
+        'is_async':         True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -95,6 +96,7 @@ def testvector_chat_completions_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
+        'is_async':         True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -159,6 +161,7 @@ def testvector_edits_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
+        'is_async':         True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -223,6 +226,7 @@ def testvector_images_generations_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
+        'is_async':         True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -284,6 +288,7 @@ def testvector_images_edits_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
+        'is_async':         True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -345,6 +350,7 @@ def testvector_images_variations_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
+        'is_async':         True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -405,6 +411,7 @@ def testvector_embeddings_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
+        'is_async':         True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -469,6 +476,7 @@ def testvector_audio_transcriptions_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
+        'is_async':         True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -535,6 +543,7 @@ def testvector_audio_translations_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
+        'is_async':         True,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {

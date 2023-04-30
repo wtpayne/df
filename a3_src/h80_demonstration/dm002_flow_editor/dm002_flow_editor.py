@@ -3,14 +3,14 @@
 ---
 
 title:
-    "dm003_poetic demo commands."
+    "dm002_flow_editor demo commands."
 
 description:
     "This module defines commands for the
-    dm003_poetic demonstration."
+    dm002_flow_editor demonstration."
 
 id:
-    "b6506820-b3f9-42ea-8ff1-582139be96c8"
+    "41b86cc5-c4d1-43af-9c5d-686e6b4ec2da"
 
 type:
     dt003_python_module

@@ -3,11 +3,11 @@
 ---
 
 title:
-    "dm001_student demo commands."
+    "dm001_artificial_imagination demo commands."
 
 description:
     "This module defines commands for the
-    dm001_student demonstration."
+    dm001_artificial_imagination demonstration."
 
 id:
     "7b26801b-4f12-4102-9b4e-6bee29b73746"
@@ -58,10 +58,13 @@ def start():
 
     """
     dirpath_self       = os.path.dirname(os.path.realpath(__file__))
-    filename_quadrotor = 'quadrotor.urdf'
+    filename_quadrotor = 'quadrotor.urdf.template'
     filepath_quadrotor = os.path.join(dirpath_self, filename_quadrotor)
+
+
+
     tup_overrides      = (
-       'host.localhost.dirpath_log',                _dirpath_log(),
+        'host.localhost.dirpath_log',               _dirpath_log(),
         'node.simulator.config.filepath_quadrotor', filepath_quadrotor)
     import da.env.run
     sys.exit(da.env.run.stableflow_start(path_cfg      = _filepath_cfg(),
@@ -85,10 +88,13 @@ def _filepath_cfg():
 
     """
     import da.env
+    dirname_cfg  = 'dm001_artificial_imagination'
+    filename_cfg = 'dm001_artificial_imagination.stableflow.cfg.yaml'
+    relpath_cfg  = os.path.join(dirname_cfg, filename_cfg)
     return da.env.path(
             process_area = 'a3_src',
             control_tier = 'h80_demonstration',
-            relpath      = 'dm001_student/dm001_student.stableflow.cfg.yaml')
+            relpath      = relpath_cfg)
 
 
 # -----------------------------------------------------------------------------
@@ -100,4 +106,4 @@ def _dirpath_log():
     import da.env
     return da.env.path(process_area = 'a4_tmp',
                        control_tier = 'h80_demonstration',
-                       relpath      = 'dm001_student')
+                       relpath      = 'dm001_artificial_imagination')

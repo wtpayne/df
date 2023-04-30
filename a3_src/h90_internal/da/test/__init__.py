@@ -81,21 +81,40 @@ def all():
 
 
 # -----------------------------------------------------------------------------
-def run(control_tier, relpath, id_env):
+def run(iter_path     = None,
+        control_tier  = None,
+        relpath       = None,
+        id_env        = None,
+        verbose_level = None,
+        rootdir       = None):
     """
     Run test.
 
     """
     import da.env
+    if iter_path is None:
+        iter_path = list()
+    if isinstance(iter_path, tuple):
+        iter_path = list(iter_path)
+
+    if id_env is None:
+        id_env = 'e000_design_automation_core'
+
+    has_control_tier = (control_tier is not  None)
+    has_relpath      = (relpath      is not  None)
+    if has_control_tier and has_relpath:
+        iter_path.append(da.env.path(process_area = 'a3_src',
+                                     control_tier = control_tier,
+                                     relpath      = relpath))
+
     return run_pytest(
-            path          = da.env.path(process_area = 'a3_src',
-                                        control_tier = control_tier,
-                                        relpath      = relpath),
+            path          = iter_path,
             filepath_cfg  = da.env.path(process_area = 'a3_src',
                                         control_tier = 'h90_internal',
                                         relpath      = 'da/test/pytest.ini'),
             id_env        = id_env,
-            verbose_level = 4)
+            verbose_level = verbose_level,
+            rootdir       = rootdir)
 
 
 # -----------------------------------------------------------------------------
@@ -500,6 +519,12 @@ def run_pytest(
                                                     Can be passed multipe times.
 
     """
+
+    # Set custom defaults.
+    #
+    import da.env
+    if rootdir is None:
+        rootdir = da.env.rootpath()
 
     # Append all provided options and
     # option-arguments together into

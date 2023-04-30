@@ -3,11 +3,11 @@
 ---
 
 title:
-    "dm004_legend demo commands."
+    "dm004_forever_library demo commands."
 
 description:
     "This module defines commands for the 
-    dm004_legend demonstration."
+    dm004_forever_library demonstration."
 
 id:
     "b1e5f9e5-0626-4900-968f-c300006c074e"

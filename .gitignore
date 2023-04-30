@@ -124,6 +124,10 @@
 !.gitattributes
 !.gitignore
 
+# URDF (Unified Robotics Description Format) templates.
+#
+!*.urdf.template
+
 
 # -----------------------------------------------------------------------------
 # Explicitly ignore specific directories,

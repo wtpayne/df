@@ -60,6 +60,7 @@ license:
 #
 import os.path
 import subprocess
+import sys
 
 import da.env
 
@@ -70,8 +71,8 @@ def stableflow_start(path_cfg, tup_overrides = None):
     Run a python module in the specified environment.
 
     """
-    import pl.stableflow.cfg
-    import pl.stableflow.cfg.exception
+    import fl.stableflow.cfg
+    import fl.stableflow.cfg.exception
     import pl.stableflow.log
     import pl.stableflow.sys
 
@@ -79,13 +80,13 @@ def stableflow_start(path_cfg, tup_overrides = None):
 
         try:
 
-            cfg = pl.stableflow.cfg.prepare(
+            cfg = fl.stableflow.cfg.prepare(
                                     path_cfg      = path_cfg,
                                     tup_overrides = tup_overrides)
             _update_all_environments(cfg)
             _configure_all_launch_commands(cfg)
 
-        except pl.stableflow.cfg.exception.CfgError as err:
+        except fl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             return 1
 
@@ -110,8 +111,8 @@ def stableflow_stop(path_cfg):
     Run a python module in the specified environment.
 
     """
-    import pl.stableflow.cfg
-    import pl.stableflow.cfg.exception
+    import fl.stableflow.cfg
+    import fl.stableflow.cfg.exception
     import pl.stableflow.log
     import pl.stableflow.sys
 
@@ -119,10 +120,10 @@ def stableflow_stop(path_cfg):
 
         try:
 
-            cfg = pl.stableflow.cfg.prepare(path_cfg = path_cfg)
+            cfg = fl.stableflow.cfg.prepare(path_cfg = path_cfg)
             _configure_all_launch_commands(cfg)
 
-        except pl.stableflow.cfg.exception.CfgError as err:
+        except fl.stableflow.cfg.exception.CfgError as err:
             print(err, file = sys.stderr)  # Custom message (no stack trace)
             return 1
 

@@ -3,14 +3,14 @@
 ---
 
 title:
-    "dm002_algebra demo commands."
+    "dm003_requirements_linter demo commands."
 
 description:
     "This module defines commands for the
-    dm002_algebra demonstration."
+    dm003_requirements_linter demonstration."
 
 id:
-    "41b86cc5-c4d1-43af-9c5d-686e6b4ec2da"
+    "b6506820-b3f9-42ea-8ff1-582139be96c8"
 
 type:
     dt003_python_module
