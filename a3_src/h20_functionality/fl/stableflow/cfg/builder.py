@@ -236,9 +236,9 @@ def add_pipeline(cfg,  # pylint: disable=R0913
     Mutate the config structure to add a pipeline of new nodes.
 
     """
-    list_id_node   = sorted(list(iter_id_node))
+    list_id_node   = list(iter_id_node)
     num_nodes      = len(list_id_node)
-    list_edge_info = sorted(list(iter_edge_info))
+    list_edge_info = list(iter_edge_info)
     num_edges      = len(list_edge_info)
 
     assert num_edges == ( num_nodes - 1 )

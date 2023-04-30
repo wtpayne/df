@@ -10,9 +10,9 @@ import fl.stableflow.cfg.builder
 
 
 # -----------------------------------------------------------------------------
-def scripted(module, config, script):
+def functionalConfiguration(module, config, script):
     """
-    Return configuration for a functional test.
+    Return configuration for a scripted functional component test.
 
     """
 
@@ -141,8 +141,8 @@ def _pipeline_configuration(list_pipeline_modules,
             spec_config       = list_config,
             iter_edge_info    = list_edge_info)
 
-    list_id_node_controlled = list(   set(list_id_node)
-                                    - set(list_id_node_nocontrol))
+    list_id_node_controlled   = sorted(list(   set(list_id_node)
+                                             - set(list_id_node_nocontrol)))
 
     _add_controller(
             cfg,
@@ -221,6 +221,11 @@ def _add_controller(cfg, subordinate_nodes, idx_max):
                     data         = 'python_dict')
 
     for (idx, id_node) in enumerate(subordinate_nodes):
+
+        print('--')
+        print(idx)
+        print(id_node)
+
         fl.stableflow.cfg.builder.add_edge(
                     cfg          = cfg,
                     id_src       = 'controller_tee',
@@ -228,7 +233,6 @@ def _add_controller(cfg, subordinate_nodes, idx_max):
                     id_dst       = id_node,
                     dst_ref      = 'inputs.control',
                     data         = 'python_dict')
-
 
 # -----------------------------------------------------------------------------
 def _num_samples(test_vectors, key):
@@ -251,21 +255,3 @@ def _is_all_equal(itable):
     iter_items = iter(itable)
     item_first  = next(iter_items)
     return all(item == item_first for item in iter_items)
-
-
-# import pprint
-
-# import click.testing
-# import pytest
-
-# import fl.stableflow.cfg.builder
-# import pl.stableflow.cfg.validate
-# import pl.stableflow.cli.command
-# import pl.stableflow.util.serialization
-
-
-
-
-
-
-
