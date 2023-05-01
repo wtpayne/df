@@ -107,13 +107,92 @@ license:
 """
 
 
+import importlib
 import multiprocessing
 import queue
+import re
 import time
 
 import openai
 
 import fl.util
+
+import pprint
+
+
+# -----------------------------------------------------------------------------
+@fl.util.coroutine
+def coro_workflow_handler(cfg):
+    """
+    Yield results for workflow coroutines sent to the OpenAI web API.
+
+    """
+    template_handler = coro_template_handler(cfg)
+    map_workflow     = dict()  # id_workflow -> workflow data structure
+    list_workflow    = list()
+    list_param       = list()
+    list_result      = list()
+    list_error       = list()
+
+    while True:
+
+        list_workflow.clear()
+        list_param.clear()
+        (list_workflow, list_param) = yield (list_result, list_error)
+        list_result.clear()
+        list_error.clear()
+
+        # Update the workflow table.
+        #
+        for workflow in list_workflow:
+            uid_workflow               = workflow['uid_workflow']
+            map_workflow[uid_workflow] = _ensure_started(cfg, workflow)
+        list_workflow.clear()
+
+        # Run each workflow in turn and
+        # build up the result and error
+        # lists.
+        #
+        for workflow in map_workflow.values():
+
+            (list_template_wkflow,
+             list_param_wkflow) = workflow['coroutine'].send(list_param)
+
+            (list_result_wkflow,
+             list_error_wkflow) = template_handler.send((list_template_wkflow,
+                                                         list_param_wkflow))
+
+            list_result.extend(list_result_wkflow)
+            list_error.extend(list_error_wkflow)
+
+
+# -----------------------------------------------------------------------------
+def _ensure_started(cfg, workflow):
+    """
+    Ensure that the specified workflow is started.
+
+    """
+    if workflow['coroutine'] is not None:
+        return workflow
+
+    str_spec = workflow['spec']
+
+    # If the spec is an importable string
+    has_whitespace = re.search(r'\s', str_spec)
+    is_import_spec = not has_whitespace
+    if is_import_spec:
+        (name_module, name_fcn) = str_spec.rsplit(".", 1)
+        module                  = importlib.import_module(name = name_module)
+        coroutine_function      = getattr(object = module, name = name_fcn)
+    else:
+        namespace = dict()
+        exec(str_spec, namespace)
+        coroutine_function = namespace['coro']
+
+    workflow['coroutine'] = coroutine_function(cfg)
+    workflow['coroutine'].send(None)  # Prime the coroutine
+    return workflow
+
 
 # -----------------------------------------------------------------------------
 @fl.util.coroutine
@@ -143,6 +222,11 @@ def coro_template_handler(cfg):
 
         (list_template, list_param) = yield (list_result, list_error)
 
+        print('#' * 80)
+        import pprint
+        pprint.pprint((list_template, list_param))
+        print('#' * 80)
+
         # Update map_map_template with new
         # and updated templates. Any old
         # templates with the same id_prompt
@@ -162,6 +246,113 @@ def coro_template_handler(cfg):
                 pass  # TODO: Raise or log error?
 
         (list_result, list_error) = request_handler.send(list_request)
+
+
+# -----------------------------------------------------------------------------
+@fl.util.coroutine
+def coro_request_handler(cfg):
+    """
+    Yield results for requests sent to the OpenAI web API.
+
+    For each list of request items that are
+    sent to this coroutine, it will yield a
+    tuple containing a list of result items
+    followed by a list of errors encountered.
+
+    This coroutine is responsible
+    for inter process communication
+    with the OpenAI client daemon
+    process.
+
+    """
+    assert 'api_key'       in cfg
+    assert 'secs_interval' in cfg
+    assert 'is_bit'        in cfg
+    assert 'is_async'      in cfg
+
+    # Configure queues and start the
+    # client in a separate process.
+    #
+    cfg['queue_request'] = multiprocessing.Queue()  # coro   --> daemon
+    cfg['queue_result']  = multiprocessing.Queue()  # daemon --> coro
+    cfg['queue_error']   = multiprocessing.Queue()  # daemon --> coro
+
+    if cfg['is_async']:
+        daemon = multiprocessing.Process(target = _daemon_main,
+                                         args   = (cfg,),
+                                         name   = 'openai-client',
+                                         daemon = True)
+        daemon.start()
+
+    # Loop forever, sending data to
+    # and from the openai client via
+    # the multiprocessing queues.
+    #
+    list_request = list()
+    list_result  = list()
+    list_error   = list()
+
+    # Loop forever
+    #
+    while True:
+
+        # At each step, yield results
+        # and errors to the controlling
+        # context, and get any new
+        # requests to send to the client.
+        #
+        list_request.clear()
+        list_request = yield (list_result, list_error)
+
+        print('X' * 80)
+        import pprint
+        pprint.pprint((list_request))
+        print('X' * 80)
+
+        # Enqueue any newly submitted
+        # requests to send to the
+        # daemon process, then dequeue
+        # any newly returned results
+        # and errors.
+        #
+        if cfg['is_async']:
+
+            list_error.clear()
+            for request in list_request:
+                try:
+                    cfg['queue_request'].put(request, block = False)
+                except queue.Full as err:
+                    list_error.append(err)
+
+            list_result.clear()
+            while True:
+                try:
+                    list_result.append(cfg['queue_result'].get(block = False))
+                except queue.Empty:
+                    break
+
+            while True:
+                try:
+                    list_error.append(cfg['queue_error'].get(block = False))
+                except queue.Empty:
+                    break
+
+        # Synchronously process
+        # one request at a time,
+        # filling result and error
+        # lists as we go.
+        #
+        else:
+
+            list_error.clear()
+            list_result.clear()
+            for request in list_request:
+                result = _process_one_request(request_raw = request,
+                                              default     = cfg['default'],
+                                              is_bit      = cfg['is_bit'])
+                list_result.append(result)
+                if result['error'] is not None:
+                    list_error.append(result['error'])
 
 
 # -----------------------------------------------------------------------------
@@ -247,108 +438,6 @@ def _build_request(template, param):
                                                 **param['kwargs_tmpl'])
 
     return request
-
-
-# -----------------------------------------------------------------------------
-@fl.util.coroutine
-def coro_request_handler(cfg):
-    """
-    Yield results for requests sent to the OpenAI web API.
-
-    For each list of request items that are
-    sent to this coroutine, it will yield a
-    tuple containing a list of result items
-    followed by a list of errors encountered.
-
-    This coroutine is responsible
-    for inter process communication
-    with the OpenAI client daemon
-    process.
-
-    """
-    assert 'api_key'       in cfg
-    assert 'secs_interval' in cfg
-    assert 'is_bit'        in cfg
-    assert 'is_async'      in cfg
-
-    # Configure queues and start the
-    # client in a separate process.
-    #
-    cfg['queue_request'] = multiprocessing.Queue()  # coro   --> daemon
-    cfg['queue_result']  = multiprocessing.Queue()  # daemon --> coro
-    cfg['queue_error']   = multiprocessing.Queue()  # daemon --> coro
-
-    if cfg['is_async']:
-        daemon = multiprocessing.Process(target = _daemon_main,
-                                         args   = (cfg,),
-                                         name   = 'openai-client',
-                                         daemon = True)
-        daemon.start()
-
-    # Loop forever, sending data to
-    # and from the openai client via
-    # the multiprocessing queues.
-    #
-    list_request = list()
-    list_result  = list()
-    list_error   = list()
-
-    # Loop forever
-    #
-    while True:
-
-        # At each step, yield results
-        # and errors to the controlling
-        # context, and get any new
-        # requests to send to the client.
-        #
-        list_request.clear()
-        list_request = yield (list_result, list_error)
-
-        # Enqueue any newly submitted
-        # requests to send to the
-        # daemon process, then dequeue
-        # any newly returned results
-        # and errors.
-        #
-        if cfg['is_async']:
-
-            list_error.clear()
-            for request in list_request:
-                try:
-                    cfg['queue_request'].put(request, block = False)
-                except queue.Full as err:
-                    list_error.append(err)
-
-            list_result.clear()
-            while True:
-                try:
-                    list_result.append(cfg['queue_result'].get(block = False))
-                except queue.Empty:
-                    break
-
-            while True:
-                try:
-                    list_error.append(cfg['queue_error'].get(block = False))
-                except queue.Empty:
-                    break
-
-        # Synchronously process
-        # one request at a time,
-        # filling result and error
-        # lists as we go.
-        #
-        else:
-
-            list_error.clear()
-            list_result.clear()
-            for request in list_request:
-                result = _process_one_request(request_raw = request,
-                                              default     = cfg['default'],
-                                              is_bit      = cfg['is_bit'])
-                list_result.append(result)
-                if result['error'] is not None:
-                    list_error.append(result['error'])
 
 
 # -----------------------------------------------------------------------------

@@ -1,8 +1,129 @@
-import gradio as gr
+# -*- coding: utf-8 -*-
+"""
+---
 
-def greet(name):
-    return "Hello " + name + "!"
+title:
+    "Placeholder no-op stableflow-edict component."
 
-demo = gr.Interface(fn=greet, inputs="text", outputs="text")
+description:
+    "Placeholder no-op component. Does nothing"
 
-demo.launch()
+id:
+    "96559158-28ae-4636-9e78-0fb4c3b145ba"
+
+type:
+    dt004_python_stableflow_edict_component
+
+validation_level:
+    v00_minimum
+
+protection:
+    k00_general
+
+copyright:
+    "Copyright 2015-2022 William Payne"
+
+license:
+    "Licensed under the Apache License, Version
+    2.0 (the License); you may not use this file
+    except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed
+    to in writing, software distributed under
+    the License is distributed on an AS IS BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+    either express or implied. See the License
+    for the specific language governing
+    permissions and limitations under the
+    License."
+
+...
+"""
+
+
+# -----------------------------------------------------------------------------
+def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
+    """
+    Noop component coroutine.
+
+    """
+    signal = None
+
+    for id_out in outputs.keys():
+        outputs[id_out]['ena']  = False
+        outputs[id_out]['ts']   = dict()
+        outputs[id_out]['list'] = list()
+
+    while True:
+
+        inputs = yield (outputs, signal)
+
+        # Reset outputs.
+        #
+        for id_out in outputs.keys():
+            outputs[id_out]['ena'] = False
+            outputs[id_out]['ts'].clear()
+            outputs[id_out]['list'].clear()
+
+        print('STEP')
+
+        list_out = list()
+
+        # If any filepaths are ready for
+        # processing, then output them.
+        #
+        if list_out:
+            map_ts = inputs[id_in]['ts']
+            for id_out in outputs.keys():
+                outputs[id_out]['ena'] = True
+                outputs[id_out]['ts'].update(map_ts)
+                outputs[id_out]['list'][:] = list_out
+
+
+
+
+
+
+
+
+
+
+# import gradio as gr
+
+
+# # TODO: PUT IN MODEL
+
+# # -----------------------------------------------------------------------------
+# def process(input,
+#             proc_01,
+#             proc_02,
+#             proc_03,
+#             proc_04):
+
+#     return 'echo', 'foo', 'bar', 'baz', 'splat'
+
+
+
+# # -----------------------------------------------------------------------------
+# def _build_ui():
+#     """
+#     """
+#     list_inputs  = [gr.Textbox(lines = 3, placeholder = "Input")]
+#     list_outputs = [gr.Textbox(lines = 3, placeholder = "")]
+
+#     num_steps = 4;
+#     for idx in range(num_steps):
+#         list_inputs.append(gr.Textbox(lines = 3, placeholder = "Process step #"))
+#         list_outputs.append(gr.Textbox(lines = 3, placeholder = "Process step #"))
+
+#     demo = gr.Interface(
+#         fn      = process,
+#         inputs  = list_inputs,
+#         outputs = list_outputs,
+#     )
+#     demo.launch()
+
+
