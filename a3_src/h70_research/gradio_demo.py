@@ -44,14 +44,32 @@ license:
 """
 
 
+import multiprocessing
+import queue
+
+
 # -----------------------------------------------------------------------------
 def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     """
-    Noop component coroutine.
+    OpenAI agent coroutine.
 
     """
-    signal = None
 
+    cfg['queue_result']   = multiprocessing.Queue()  # coro   --> daemon
+    cfg['queue_error']    = multiprocessing.Queue()  # coro   --> daemon
+    cfg['queue_workflow'] = multiprocessing.Queue()  # daemon --> coro
+    cfg['queue_param']    = multiprocessing.Queue()  # daemon --> coro
+
+    daemon = multiprocessing.Process(target = _daemon_main,
+                                     args   = (cfg,),
+                                     name   = 'workflow-ui',
+                                     daemon = True)
+    daemon.start()
+
+
+    # Initialize outputs.
+    #
+    signal = None
     for id_out in outputs.keys():
         outputs[id_out]['ena']  = False
         outputs[id_out]['ts']   = dict()
@@ -68,62 +86,113 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
             outputs[id_out]['ts'].clear()
             outputs[id_out]['list'].clear()
 
-        # print('STEP')
-
-        list_out = list()
-
-        # If any filepaths are ready for
-        # processing, then output them.
+        # Grab any new result inputs.
         #
-        if list_out:
-            map_ts = inputs[id_in]['ts']
-            for id_out in outputs.keys():
-                outputs[id_out]['ena'] = True
-                outputs[id_out]['ts'].update(map_ts)
-                outputs[id_out]['list'][:] = list_out
+        map_ts      = dict()
+        list_result = list()
+        if inputs['result']['ena']:
+            map_ts        = inputs['result']['ts']
+            list_result = inputs['result']['list']
+
+        # Grab any new error inputs.
+        #
+        map_ts     = dict()
+        list_error = list()
+        if inputs['error']['ena']:
+            map_ts     = inputs['error']['ts']
+            list_error = inputs['error']['list']
+
+
+        list_workflow = []
+        list_param    = []
+
+        # Update workflow outputs.
+        #
+        if ('workflow' in outputs) and list_workflow:
+            outputs['workflow']['ena'] = True
+            outputs['workflow']['ts'].update(map_ts)
+            outputs['workflow']['list'][:] = list_workflow
+
+        # Update param outputs.
+        #
+        if ('param' in outputs) and list_param:
+            outputs['param']['ena'] = True
+            outputs['param']['ts'].update(map_ts)
+            outputs['param']['list'][:] = list_param
 
 
 
+# -----------------------------------------------------------------------------
+def _daemon_main(cfg):
+    """
+    Service the request queue, forwarding requests to the OpenAI API.
+
+    Each request in the queue is processed,
+    pausing for secs_interval if no request
+    is available at that time.
+
+    Results and errors are enqueued onto
+    their respective queues for further
+    processing by the controlling process.
+
+    This is intended to be a minimal daemon
+    that sits in a separate process and
+    handles communication with the OpenAI
+    API.
+
+    """
+
+    import gradio as gr
+
+    # while True:
+
+    #     try:
+    #         request = cfg['queue_request'].get(block = False)
+    #     except queue.Empty:
+    #         time.sleep(cfg['secs_interval'])
+    #         continue
+
+    #     # result = _process_one_request(request_raw = request,
+    #     #                               default     = cfg['default'],
+    #     #                               is_bit      = cfg['is_bit'])
+
+    #     if result['error'] is not None:
+    #         cfg['queue_error'].put(result['error'], block = False)
+
+    #     try:
+    #         cfg['queue_result'].put(result, block = False)
+    #     except queue.Full as error:
+    #         cfg['queue_error'].put(error, block = False)
 
 
+    # -------------------------------------------------------------------------
+    def process(input,
+                proc_01,
+                proc_02,
+                proc_03,
+                proc_04):
+
+        return 'echo', 'foo', 'bar', 'baz', 'splat'
 
 
+    list_inputs  = [gr.Textbox(lines = 3, placeholder = "Input")]
+    list_outputs = [gr.Textbox(lines = 3, placeholder = "")]
+
+    num_steps = 4;
+    for idx in range(num_steps):
+        list_inputs.append(gr.Textbox(lines = 3, placeholder = "Process step #"))
+        list_outputs.append(gr.Textbox(lines = 3, placeholder = "Process step #"))
+
+    demo = gr.Interface(
+        fn      = process,
+        inputs  = list_inputs,
+        outputs = list_outputs,
+    )
+    demo.launch()
 
 
+    while True:
 
-# import gradio as gr
+        time.sleep(1)
 
-
-# # TODO: PUT IN MODEL
-
-# # -----------------------------------------------------------------------------
-# def process(input,
-#             proc_01,
-#             proc_02,
-#             proc_03,
-#             proc_04):
-
-#     return 'echo', 'foo', 'bar', 'baz', 'splat'
-
-
-
-# # -----------------------------------------------------------------------------
-# def _build_ui():
-#     """
-#     """
-#     list_inputs  = [gr.Textbox(lines = 3, placeholder = "Input")]
-#     list_outputs = [gr.Textbox(lines = 3, placeholder = "")]
-
-#     num_steps = 4;
-#     for idx in range(num_steps):
-#         list_inputs.append(gr.Textbox(lines = 3, placeholder = "Process step #"))
-#         list_outputs.append(gr.Textbox(lines = 3, placeholder = "Process step #"))
-
-#     demo = gr.Interface(
-#         fn      = process,
-#         inputs  = list_inputs,
-#         outputs = list_outputs,
-#     )
-#     demo.launch()
-
-
+        # TODO: Pump queues and update stuff.

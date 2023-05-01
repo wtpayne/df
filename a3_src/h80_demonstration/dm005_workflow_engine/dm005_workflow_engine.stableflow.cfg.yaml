@@ -56,8 +56,28 @@ node:
     functionality:
       py_module:    gradio_demo
     state_type:     py_dict
+
+  # ---------------------------------------------------------------------------
+  # OpenAI client.
+  #
+  openai:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    cl.net.openai.client.ic00_edict
+    state_type:     py_dict
     config:
-      filepath_quadrotor: ''
+      filepath_env:  Null
+      envvar_key:    OPENAI_API_KEY
+      secs_interval: 0.1
+      default:
+        model:             'gpt-3.5-turbo'
+        temperature:       1
+        n:                 1
+        stream:            False
+        presence_penalty:  0
+        frequency_penalty: 0
+        user:              ''
 
 
 ###############################################################################
@@ -77,8 +97,28 @@ edge:
 
 - owner: main_process_controller
   data:  py_dict
-  src:   main_process_controller.outputs.control_filesystem_watcher
+  src:   main_process_controller.outputs.control_ui
   dst:   ui.inputs.control
+
+- owner: ui
+  data:  py_dict
+  src:   ui.outputs.workflow
+  dst:   openai.inputs.workflow
+
+- owner: ui
+  data:  py_dict
+  src:   ui.outputs.param
+  dst:   openai.inputs.param
+
+- owner: openai
+  data:  py_dict
+  src:   openai.outputs.result
+  dst:   ui.inputs.result
+
+- owner: openai
+  data:  py_dict
+  src:   openai.outputs.error
+  dst:   ui.inputs.error
 
 
 ###############################################################################

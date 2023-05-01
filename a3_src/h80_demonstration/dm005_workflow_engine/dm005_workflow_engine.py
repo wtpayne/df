@@ -86,9 +86,8 @@ def start():
     Start dm005 system.
 
     """
-    # tup_overrides = ('host.localhost.dirpath_log',      _dirpath_log_server(),
-    #                  'node.client.config.filepath_env', _filepath_dotenv())
-    tup_overrides = None
+    tup_overrides = ('host.localhost.dirpath_log',      _dirpath_log(),
+                     'node.openai.config.filepath_env', _filepath_dotenv())
 
     import da.env.run
     sys.exit(da.env.run.stableflow_start(path_cfg      = _filepath_cfg(),
@@ -106,7 +105,7 @@ def stop():
 
 
 # -----------------------------------------------------------------------------
-def _dirpath_log_server():
+def _dirpath_log():
     """
     Return the directory path to the logging directory for this system.
 
