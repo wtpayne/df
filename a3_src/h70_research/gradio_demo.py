@@ -68,7 +68,7 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
             outputs[id_out]['ts'].clear()
             outputs[id_out]['list'].clear()
 
-        print('STEP')
+        # print('STEP')
 
         list_out = list()
 

@@ -22,7 +22,6 @@ def step(inputs, state, outputs):
     Step the signal validator.
 
     """
-    print('STEP')
     for channel in state['channels']:
 
         offset = inputs['control']['ts']['idx'] % channel['num_samples']

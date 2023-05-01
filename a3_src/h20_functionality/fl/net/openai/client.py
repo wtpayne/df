@@ -193,9 +193,17 @@ def _step_workflow(workflow,
     #         list_error_wkflow.append(result)
 
     (list_template_workflow,
-     list_param_updated) = workflow['coroutine'].send(
+     list_param_updated,
+     list_error_updated) = workflow['coroutine'].send(
                                                     (list_param_workflow,
-                                                     list_result_workflow))
+                                                     list_result_workflow,
+                                                     list_error_workflow))
+
+    # TODO: DECIDE WHAT TO DO WITH ERRORS FROM WORKFLOW
+
+    # TODO: ADD LOGGING AND METRICS FROM WORKFLOW
+
+    # TODO: ADD ROUTING OF RESULTS FROM WORKFLOW
 
     (list_result_out,
      list_error_out) = template_handler.send((list_template_workflow,

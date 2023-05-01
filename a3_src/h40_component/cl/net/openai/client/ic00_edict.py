@@ -75,10 +75,14 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     cfg_client['default']        = cfg['default']
 
     request_handler  = fl.net.openai.client.coro_request_handler(
-                                            cfg             = cfg_client)
+                                        cfg             = cfg_client)
     template_handler = fl.net.openai.client.coro_template_handler(
-                                            cfg             = cfg_client,
-                                            request_handler = request_handler)
+                                        cfg             = cfg_client,
+                                        request_handler = request_handler)
+    workflow_handler = fl.net.openai.client.coro_workflow_handler(
+                                        cfg              = cfg,
+                                        request_handler  = request_handler,
+                                        template_handler = template_handler)
 
     # Initialize outputs.
     #
@@ -99,13 +103,13 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
             outputs[id_out]['ts'].clear()
             outputs[id_out]['list'].clear()
 
-        # Grab any new template inputs.
+        # Grab any new workflow inputs.
         #
         map_ts        = dict()
-        list_template = list()
-        if inputs['template']['ena']:
-            map_ts        = inputs['template']['ts']
-            list_template = inputs['template']['list']
+        list_workflow = list()
+        if inputs['workflow']['ena']:
+            map_ts        = inputs['workflow']['ts']
+            list_workflow = inputs['workflow']['list']
 
         # Grab any new param inputs.
         #
@@ -119,7 +123,7 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         # the OpenAI API client.
         #
         (list_result,
-         list_error) = template_handler.send((list_template,
+         list_error) = workflow_handler.send((list_workflow,
                                               list_param))
 
         # Update result outputs.

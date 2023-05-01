@@ -14,6 +14,24 @@ import fl.test.component
 import pl.stableflow.sys
 
 
+WORKFLOW_LOGIC = """
+
+def coro(cfg):
+
+    list_template_out = [{template}]
+    list_param_out    = [{param}]
+    list_error_out    = []
+
+    while True:
+        (list_param_in,
+         list_result_in,
+         list_error_in) = yield (list_template_out,
+                                 list_param_out,
+                                 list_error_out)
+
+"""
+
+
 # =============================================================================
 class SpecifyClNetOpenAiClientIc00_edict:
     """
@@ -54,6 +72,7 @@ class SpecifyClNetOpenAiClientIc00_edict:
 
         """
         id_endpoint    = 'chat_completions'
+        uid_workflow   = 'e6150ce3-8ebc-4553-9a9a-b1ebdc038f7e'
         uid_template   = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
         uid_variant    = '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3'
         uid_params     = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
@@ -75,8 +94,9 @@ class SpecifyClNetOpenAiClientIc00_edict:
                               ver           = '1.0')
         template_valid = dict(id_endpoint   = id_endpoint,
                               type          = type_template,
-                              uid_template  = uid_template, # Process step.
                               uid_variant   = uid_variant,  # Improvement.
+                              uid_template  = uid_template, # Process step.
+                              uid_workflow  = uid_workflow, # Process id.
                               kwargs_req    = {'model': id_model},
                               messages      = messages_test )
         type_param     = dict(id            = 'prompt_params',
@@ -84,9 +104,18 @@ class SpecifyClNetOpenAiClientIc00_edict:
         param_valid    = dict(type          = type_param,
                               uid_params    = uid_params,
                               uid_template  = uid_template,
+                              uid_workflow  = uid_workflow,
                               kwargs_tmpl   = dict(), # <-- Args for template.
                               kwargs_req    = dict(), # <-- Args for request.
                               state         = dict()) # <-- Process state.
+        type_workflow  = dict(id            = 'prompt_workflow',
+                              ver           = '1.0')
+        workflow_valid = dict(type          = type_workflow,
+                              uid_workflow  = uid_workflow,
+                              spec          = WORKFLOW_LOGIC.format(
+                                                    template = template_valid,
+                                                    param    = param_valid),
+                              coroutine     = None)
         message_valid  = dict(role          = 'assistant',
                               content       = '\n\nTest')
         choices_valid  = dict(finish_reason = 'stop',
@@ -106,10 +135,10 @@ class SpecifyClNetOpenAiClientIc00_edict:
                               response      =  response_valid,
                               state         = {})
 
-        edict_template_ena  = dict(ena  = True,
+        edict_workflow_ena  = dict(ena  = True,
                                    ts   = dict(),
-                                   list = [template_valid])
-        edict_template_none = dict(ena  = False,
+                                   list = [workflow_valid])
+        edict_workflow_none = dict(ena  = False,
                                    ts   = dict(),
                                    list = list())
 
@@ -137,13 +166,13 @@ class SpecifyClNetOpenAiClientIc00_edict:
         cfg_sys = fl.test.component.functional_test_cfg(
                   module = 'cl.net.openai.client.ic00_edict',
                   config = cfg_client,
-                  script = [{'in':  { 'template': edict_template_ena,
+                  script = [{'in':  { 'workflow': edict_workflow_ena,
                                       'param':    edict_param_ena       },
                              'out': { 'result':   edict_result_ena,
                                       'error':    edict_error_none      }},
-                            {'in':  { 'template': edict_template_none,
+                            {'in':  { 'workflow': edict_workflow_none,
                                       'param':    edict_param_none      },
-                             'out': { 'result':   edict_result_none,
+                             'out': { 'result':   edict_result_ena,
                                       'error':    edict_error_none      }}])
 
         exit_code = pl.stableflow.sys.prep_and_start(map_cfg  = cfg_sys,
