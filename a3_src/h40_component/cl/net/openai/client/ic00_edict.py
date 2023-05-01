@@ -73,7 +73,12 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     cfg_client['is_bit']         = cfg.get('is_bit',   True)  # Built-in-test
     cfg_client['is_async']       = cfg.get('is_async', False) # Asynchronous
     cfg_client['default']        = cfg['default']
-    client = fl.net.openai.client.coro_template_handler(cfg = cfg_client)
+
+    request_handler  = fl.net.openai.client.coro_request_handler(
+                                            cfg             = cfg_client)
+    template_handler = fl.net.openai.client.coro_template_handler(
+                                            cfg             = cfg_client,
+                                            request_handler = request_handler)
 
     # Initialize outputs.
     #
@@ -113,7 +118,9 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         # Send the templates and parameters to
         # the OpenAI API client.
         #
-        (list_result, list_error) = client.send((list_template, list_param))
+        (list_result,
+         list_error) = template_handler.send((list_template,
+                                              list_param))
 
         # Update result outputs.
         #

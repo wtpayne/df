@@ -117,17 +117,14 @@ import openai
 
 import fl.util
 
-import pprint
-
 
 # -----------------------------------------------------------------------------
 @fl.util.coroutine
-def coro_workflow_handler(cfg):
+def coro_workflow_handler(cfg, request_handler, template_handler):
     """
     Yield results for workflow coroutines sent to the OpenAI web API.
 
     """
-    template_handler = coro_template_handler(cfg)
     map_workflow     = dict()  # id_workflow -> workflow data structure
     list_workflow    = list()
     list_param       = list()
@@ -146,7 +143,7 @@ def coro_workflow_handler(cfg):
         #
         for workflow in list_workflow:
             uid_workflow               = workflow['uid_workflow']
-            map_workflow[uid_workflow] = _ensure_started(cfg, workflow)
+            map_workflow[uid_workflow] = _ensure_init_workflow(cfg, workflow)
         list_workflow.clear()
 
         # Run each workflow in turn and
@@ -167,36 +164,8 @@ def coro_workflow_handler(cfg):
 
 
 # -----------------------------------------------------------------------------
-def _ensure_started(cfg, workflow):
-    """
-    Ensure that the specified workflow is started.
-
-    """
-    if workflow['coroutine'] is not None:
-        return workflow
-
-    str_spec = workflow['spec']
-
-    # If the spec is an importable string
-    has_whitespace = re.search(r'\s', str_spec)
-    is_import_spec = not has_whitespace
-    if is_import_spec:
-        (name_module, name_fcn) = str_spec.rsplit(".", 1)
-        module                  = importlib.import_module(name = name_module)
-        coroutine_function      = getattr(object = module, name = name_fcn)
-    else:
-        namespace = dict()
-        exec(str_spec, namespace)
-        coroutine_function = namespace['coro']
-
-    workflow['coroutine'] = coroutine_function(cfg)
-    workflow['coroutine'].send(None)  # Prime the coroutine
-    return workflow
-
-
-# -----------------------------------------------------------------------------
 @fl.util.coroutine
-def coro_template_handler(cfg):
+def coro_template_handler(cfg, request_handler):
     """
     Yield results for templates/parameters sent to the OpenAI web API.
 
@@ -213,7 +182,6 @@ def coro_template_handler(cfg):
 
     """
     map_template    = dict()  # id_prompt -> dict with template.
-    request_handler = coro_request_handler(cfg)
     list_request    = list()
     list_result     = list()
     list_error      = list()
@@ -221,11 +189,6 @@ def coro_template_handler(cfg):
     while True:
 
         (list_template, list_param) = yield (list_result, list_error)
-
-        print('#' * 80)
-        import pprint
-        pprint.pprint((list_template, list_param))
-        print('#' * 80)
 
         # Update map_map_template with new
         # and updated templates. Any old
@@ -304,11 +267,6 @@ def coro_request_handler(cfg):
         list_request.clear()
         list_request = yield (list_result, list_error)
 
-        print('X' * 80)
-        import pprint
-        pprint.pprint((list_request))
-        print('X' * 80)
-
         # Enqueue any newly submitted
         # requests to send to the
         # daemon process, then dequeue
@@ -353,6 +311,34 @@ def coro_request_handler(cfg):
                 list_result.append(result)
                 if result['error'] is not None:
                     list_error.append(result['error'])
+
+
+# -----------------------------------------------------------------------------
+def _ensure_init_workflow(cfg, workflow):
+    """
+    Ensure that the specified workflow is imported and primed.
+
+    """
+    if workflow['coroutine'] is not None:
+        return workflow
+
+    str_spec = workflow['spec']
+
+    # If the spec is an importable string
+    has_whitespace = re.search(r'\s', str_spec)
+    is_import_spec = not has_whitespace
+    if is_import_spec:
+        (name_module, name_fcn) = str_spec.rsplit(".", 1)
+        module                  = importlib.import_module(name = name_module)
+        coroutine_function      = getattr(object = module, name = name_fcn)
+    else:
+        namespace = dict()
+        exec(str_spec, namespace)
+        coroutine_function = namespace['coro']
+
+    workflow['coroutine'] = coroutine_function(cfg)
+    workflow['coroutine'].send(None)  # Prime the coroutine
+    return workflow
 
 
 # -----------------------------------------------------------------------------

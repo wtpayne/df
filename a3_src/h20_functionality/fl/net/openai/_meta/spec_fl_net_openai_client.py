@@ -23,6 +23,9 @@ def coro(cfg):
 
 """
 
+IS_ASYNC              = True
+TESTRUNNER_MAXITER    = 100
+TESTRUNNER_DELAY_SECS = 0.03
 
 
 # -----------------------------------------------------------------------------
@@ -46,7 +49,7 @@ def testvector_completions_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
-        'is_async':         True,
+        'is_async':         IS_ASYNC,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -121,7 +124,7 @@ def testvector_chat_completions_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
-        'is_async':         True,
+        'is_async':         IS_ASYNC,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -196,7 +199,7 @@ def testvector_edits_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
-        'is_async':         True,
+        'is_async':         IS_ASYNC,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -271,7 +274,7 @@ def testvector_images_generations_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
-        'is_async':         True,
+        'is_async':         IS_ASYNC,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -343,7 +346,7 @@ def testvector_images_edits_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
-        'is_async':         True,
+        'is_async':         IS_ASYNC,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -415,7 +418,7 @@ def testvector_images_variations_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
-        'is_async':         True,
+        'is_async':         IS_ASYNC,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -486,7 +489,7 @@ def testvector_embeddings_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
-        'is_async':         True,
+        'is_async':         IS_ASYNC,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -561,7 +564,7 @@ def testvector_audio_transcriptions_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
-        'is_async':         True,
+        'is_async':         IS_ASYNC,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -638,7 +641,7 @@ def testvector_audio_translations_valid_bit():
 
     cfg_valid = {
         'is_bit':           True,
-        'is_async':         True,
+        'is_async':         IS_ASYNC,
         'api_key':          'test_api_key',
         'secs_interval':    0.01,
         'default':          {
@@ -703,8 +706,8 @@ def testrunner_coro_request_handler_singleshot():
     # -------------------------------------------------------------------------
     def _get_result_singleshot(cfg,
                                list_request,
-                               maxiter     = 100,
-                               delay_secs  = 0.01):
+                               maxiter     = TESTRUNNER_MAXITER,
+                               delay_secs  = TESTRUNNER_DELAY_SECS):
         """
         Run the openAI client and wait for the first set of responses.
 
@@ -743,8 +746,8 @@ def testrunner_coro_template_handler_singleshot():
     def _get_result_singleshot(cfg,
                                list_template,
                                list_param,
-                               maxiter     = 100,
-                               delay_secs  = 0.01):
+                               maxiter     = TESTRUNNER_MAXITER,
+                               delay_secs  = TESTRUNNER_DELAY_SECS):
         """
         Run the openAI client and wait for the first set of responses.
 
@@ -753,7 +756,12 @@ def testrunner_coro_template_handler_singleshot():
         list_tup_input_test = list()
         list_tup_input_test.append((list_template, list_param))
 
-        client = fl.net.openai.client.coro_template_handler(cfg = cfg)
+        request_handler  = fl.net.openai.client.coro_request_handler(
+                                            cfg              = cfg)
+        template_handler = fl.net.openai.client.coro_template_handler(
+                                            cfg              = cfg,
+                                            request_handler  = request_handler)
+
         for _ in range(maxiter):
 
             if list_tup_input_test:
@@ -761,7 +769,7 @@ def testrunner_coro_template_handler_singleshot():
             else:
                 tup_input_test = ([], [])
 
-            (list_result, list_error) = client.send(tup_input_test)
+            (list_result, list_error) = template_handler.send(tup_input_test)
             if (len(list_result) > 0) or (len(list_error) > 0):
                 return (list_result, list_error)
 
@@ -783,8 +791,8 @@ def testrunner_coro_workflow_handler_singleshot():
     def _get_result_singleshot(cfg,
                                list_workflow,
                                list_param,
-                               maxiter     = 100,
-                               delay_secs  = 0.01):
+                               maxiter     = TESTRUNNER_MAXITER,
+                               delay_secs  = TESTRUNNER_DELAY_SECS):
         """
         Run the openAI client and wait for the first set of responses.
 
@@ -793,7 +801,16 @@ def testrunner_coro_workflow_handler_singleshot():
         list_tup_input_test = list()
         list_tup_input_test.append((list_workflow, list_param))
 
-        client = fl.net.openai.client.coro_workflow_handler(cfg = cfg)
+        request_handler  = fl.net.openai.client.coro_request_handler(
+                                        cfg              = cfg)
+        template_handler = fl.net.openai.client.coro_template_handler(
+                                        cfg              = cfg,
+                                        request_handler  = request_handler)
+        workflow_handler = fl.net.openai.client.coro_workflow_handler(
+                                        cfg              = cfg,
+                                        request_handler  = request_handler,
+                                        template_handler = template_handler)
+
         for _ in range(maxiter):
 
             if list_tup_input_test:
@@ -801,7 +818,7 @@ def testrunner_coro_workflow_handler_singleshot():
             else:
                 tup_input_test = ([], [])
 
-            (list_result, list_error) = client.send(tup_input_test)
+            (list_result, list_error) = workflow_handler.send(tup_input_test)
 
             if (len(list_result) > 0) or (len(list_error) > 0):
                 return (list_result, list_error)
@@ -839,10 +856,11 @@ class SpecifyFlNetOpenAiClient:
 
         """
         import fl.net.openai.client
-        tup_valid = testvector_completions_valid_bit
-        cfg_valid = tup_valid[0]
-        client    = fl.net.openai.client.coro_request_handler(cfg = cfg_valid)
-        assert inspect.isgenerator(client)
+        tup_valid       = testvector_completions_valid_bit
+        cfg_valid       = tup_valid[0]
+        request_handler = fl.net.openai.client.coro_request_handler(
+                                                            cfg = cfg_valid)
+        assert inspect.isgenerator(request_handler)
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
@@ -854,10 +872,14 @@ class SpecifyFlNetOpenAiClient:
 
         """
         import fl.net.openai.client
-        tup_valid = testvector_completions_valid_bit
-        cfg_valid = tup_valid[0]
-        client    = fl.net.openai.client.coro_template_handler(cfg = cfg_valid)
-        assert inspect.isgenerator(client)
+        tup_valid        = testvector_completions_valid_bit
+        cfg_valid        = tup_valid[0]
+        request_handler  = fl.net.openai.client.coro_request_handler(
+                                            cfg             = cfg_valid)
+        template_handler = fl.net.openai.client.coro_template_handler(
+                                            cfg             = cfg_valid,
+                                            request_handler = request_handler)
+        assert inspect.isgenerator(template_handler)
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
@@ -869,27 +891,29 @@ class SpecifyFlNetOpenAiClient:
 
         """
         import fl.net.openai.client
-        tup_valid = testvector_completions_valid_bit
-        cfg_valid = tup_valid[0]
-        client    = fl.net.openai.client.coro_workflow_handler(cfg = cfg_valid)
-        assert inspect.isgenerator(client)
+        tup_valid        = testvector_completions_valid_bit
+        cfg_valid        = tup_valid[0]
+        request_handler  = fl.net.openai.client.coro_request_handler(
+                                        cfg              = cfg_valid)
+        template_handler = fl.net.openai.client.coro_template_handler(
+                                        cfg              = cfg_valid,
+                                        request_handler  = request_handler)
+        workflow_handler = fl.net.openai.client.coro_workflow_handler(
+                                        cfg              = cfg_valid,
+                                        request_handler  = request_handler,
+                                        template_handler = template_handler)
+        assert inspect.isgenerator(workflow_handler)
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
     def it_validates_provided_configuration(self):
         """
-        All fl.net.openai.client coroutines validate config.
+        All fl.net.openai.client.coro_request_handler validates config.
 
         """
         import fl.net.openai.client
         with pytest.raises(AssertionError):
             fl.net.openai.client.coro_request_handler(cfg = {})
-
-        with pytest.raises(AssertionError):
-            fl.net.openai.client.coro_template_handler(cfg = {})
-
-        with pytest.raises(AssertionError):
-            fl.net.openai.client.coro_workflow_handler(cfg = {})
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
