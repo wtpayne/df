@@ -13,22 +13,30 @@ import pytest
 
 WORKFLOW_LOGIC = """
 
+import itertools
+
 def coro(cfg):
 
     list_template_out = [{template}]
     list_param_out    = [{param}]
     list_error_out    = []
 
-    while True:
-        (list_param_in,
-         list_result_in,
-         list_error_in) = yield (list_template_out,
-                                 list_param_out,
-                                 list_error_out)
+    for idx in itertools.count():
+
+        if idx == 1:
+            (list_param_in,
+             list_result_in,
+             list_error_in) = yield (list_template_out,
+                                     list_param_out,
+                                     list_error_out)
+        else:
+            (list_param_in,
+             list_result_in,
+             list_error_in) = yield ([], [], [])
 
 """
 
-IS_ASYNC              = False
+IS_ASYNC              = True
 TESTRUNNER_MAXITER    = 100
 TESTRUNNER_DELAY_SECS = 0.03
 
