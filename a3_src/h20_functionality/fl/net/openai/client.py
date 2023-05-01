@@ -152,15 +152,56 @@ def coro_workflow_handler(cfg, request_handler, template_handler):
         #
         for workflow in map_workflow.values():
 
-            (list_template_wkflow,
-             list_param_wkflow) = workflow['coroutine'].send(list_param)
+            (list_result_new,
+             list_error_new) = _step_workflow(
+                                        workflow         = workflow,
+                                        template_handler = template_handler,
+                                        list_param_in    = list_param,
+                                        list_result_in   = list_result,
+                                        list_error_in    = list_error)
 
-            (list_result_wkflow,
-             list_error_wkflow) = template_handler.send((list_template_wkflow,
-                                                         list_param_wkflow))
+            list_result.extend(list_result_new)
+            list_error.extend(list_error_new)
 
-            list_result.extend(list_result_wkflow)
-            list_error.extend(list_error_wkflow)
+
+# -----------------------------------------------------------------------------
+def _step_workflow(workflow,
+                   template_handler,
+                   list_param_in,
+                   list_result_in,
+                   list_error_in):
+    """
+    Single-step the workflow.
+
+    """
+    uid_workflow = workflow['uid_workflow']
+
+    list_param_workflow = list()
+    for param in list_param_in:
+        if param['uid_workflow'] == uid_workflow:
+            list_param_workflow.append(param)
+
+    list_result_workflow = list()
+    for result in list_result_in:
+        if result['uid_workflow'] == uid_workflow:
+            list_result_workflow.append(result)
+
+    list_error_workflow = list()
+    # TODO: ADD UID_WORKFLOW TO ERROR
+    # for error in list_error_in:
+    #     if error['uid_workflow'] == uid_workflow:
+    #         list_error_wkflow.append(result)
+
+    (list_template_workflow,
+     list_param_updated) = workflow['coroutine'].send(
+                                                    (list_param_workflow,
+                                                     list_result_workflow))
+
+    (list_result_out,
+     list_error_out) = template_handler.send((list_template_workflow,
+                                              list_param_updated))
+
+    return (list_result_out, list_error_out)
 
 
 # -----------------------------------------------------------------------------
@@ -556,7 +597,7 @@ def _build_endpoint_specific_parameters(request_raw, default):
     #
     Y = True
     N = False
-    map_tup_tup_params = dict(  # RI, RO, name-api,           type
+    map_tup_tup_param = dict(  # RI, RO, name-api,           type
         completions           = (( N,  Y, 'model',             (str,)      ),
                                  ( Y,  N, 'prompt',            (str, list) ),
                                  ( N,  N, 'suffix',            (str,)      ),
@@ -627,11 +668,11 @@ def _build_endpoint_specific_parameters(request_raw, default):
     # data structure.
     #
     request_full    = dict()
-    tup_tup_params = map_tup_tup_params[id_endpoint]
+    tup_tup_param = map_tup_tup_param[id_endpoint]
     for (is_required_by_internal_api,  # Cannot be given a default value.
          is_required_by_openai_api,    # Must be given a value of some sort.
          id_param,
-         tup_type) in tup_tup_params:
+         tup_type) in tup_tup_param:
 
         # Try to get value from request_raw.
         #

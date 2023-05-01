@@ -19,11 +19,13 @@ def coro(cfg):
     list_param_out = [{param}]
 
     while True:
-        list_param_in = yield (list_template, list_param_out)
+        (list_param_in,
+         list_result_in) = yield (list_template,
+                                  list_param_out)
 
 """
 
-IS_ASYNC              = True
+IS_ASYNC              = False
 TESTRUNNER_MAXITER    = 100
 TESTRUNNER_DELAY_SECS = 0.03
 
@@ -59,15 +61,17 @@ def testvector_completions_valid_bit():
     template_valid = {
         'id_endpoint':      id_endpoint,
         'type':             {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template':     uid_template, # Process step.
         'uid_variant':      uid_variant,  # Improvement.
+        'uid_template':     uid_template, # Process step.
+        'uid_workflow':     uid_workflow, # Process id.
         'kwargs_req':       {'model': id_model},
         'prompt':           prompt_test}
 
-    params_valid = {
+    param_valid = {
         'type':             {'id': 'prompt_params', 'ver': '1.0'},
         'uid_params':       uid_params,
         'uid_template':     uid_template,
+        'uid_workflow':     uid_workflow,
         'kwargs_tmpl':      dict(), # <-- Args for template
         'kwargs_req':       dict(), # <-- Args for OpenAI request
         'state':            dict()} # <-- Process state
@@ -76,7 +80,7 @@ def testvector_completions_valid_bit():
         'uid_workflow':     uid_workflow,
         'type':             {'id': 'prompt_workflow', 'ver': '1.0'},
         'spec':             WORKFLOW_LOGIC.format(template = template_valid,
-                                                  param    = params_valid),
+                                                  param    = param_valid),
         'coroutine':        None
     }
 
@@ -96,7 +100,7 @@ def testvector_completions_valid_bit():
     return (cfg_valid,
             workflow_valid,
             template_valid,
-            params_valid,
+            param_valid,
             request_valid,
             result_valid,
             error_valid)
@@ -134,15 +138,17 @@ def testvector_chat_completions_valid_bit():
     template_valid = {
         'id_endpoint':      id_endpoint,
         'type':             {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template':     uid_template, # Process step.
         'uid_variant':      uid_variant,  # Improvement.
+        'uid_template':     uid_template, # Process step.
+        'uid_workflow':     uid_workflow, # Process id.
         'kwargs_req':       {'model': id_model},
         'messages':         messages_test }
 
-    params_valid = {
+    param_valid = {
         'type':             {'id': 'prompt_params', 'ver': '1.0'},
         'uid_params':       uid_params,
         'uid_template':     uid_template,
+        'uid_workflow':     uid_workflow,
         'kwargs_tmpl':      dict(), # <-- Args for template
         'kwargs_req':       dict(), # <-- Args for OpenAI request
         'state':            dict()} # <-- Process state
@@ -151,7 +157,7 @@ def testvector_chat_completions_valid_bit():
         'uid_workflow':     uid_workflow,
         'type':             {'id': 'prompt_workflow', 'ver': '1.0'},
         'spec':             WORKFLOW_LOGIC.format(template = template_valid,
-                                                  param    = params_valid),
+                                                  param    = param_valid),
         'coroutine':        None
     }
 
@@ -171,7 +177,7 @@ def testvector_chat_completions_valid_bit():
     return (cfg_valid,
             workflow_valid,
             template_valid,
-            params_valid,
+            param_valid,
             request_valid,
             result_valid,
             error_valid)
@@ -209,16 +215,18 @@ def testvector_edits_valid_bit():
     template_valid = {
         'id_endpoint':      id_endpoint,
         'type':             {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template':     uid_template, # Process step.
         'uid_variant':      uid_variant,  # Improvement.
+        'uid_template':     uid_template, # Process step.
+        'uid_workflow':     uid_workflow, # Process id.
         'kwargs_req':       {'model': id_model},
         'input':            input_test,
         'instruction':      instruction_test }
 
-    params_valid = {
+    param_valid = {
         'type':             {'id': 'prompt_params', 'ver': '1.0'},
         'uid_params':       uid_params,
         'uid_template':     uid_template,
+        'uid_workflow':     uid_workflow,
         'kwargs_tmpl':      dict(), # <-- Args for template
         'kwargs_req':       dict(), # <-- Args for OpenAI request
         'state':            dict()} # <-- Process state
@@ -227,7 +235,7 @@ def testvector_edits_valid_bit():
         'uid_workflow':     uid_workflow,
         'type':             {'id': 'prompt_workflow', 'ver': '1.0'},
         'spec':             WORKFLOW_LOGIC.format(template = template_valid,
-                                                  param    = params_valid),
+                                                  param    = param_valid),
         'coroutine':        None
     }
 
@@ -248,7 +256,7 @@ def testvector_edits_valid_bit():
     return (cfg_valid,
             workflow_valid,
             template_valid,
-            params_valid,
+            param_valid,
             request_valid,
             result_valid,
             error_valid)
@@ -283,15 +291,17 @@ def testvector_images_generations_valid_bit():
     template_valid = {
         'id_endpoint':      id_endpoint,
         'type':             {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template':     uid_template, # Process step.
         'uid_variant':      uid_variant,  # Improvement.
+        'uid_template':     uid_template, # Process step.
+        'uid_workflow':     uid_workflow, # Process id.
         'kwargs_req':       {},
         'prompt':           prompt_test }
 
-    params_valid = {
+    param_valid = {
         'type':             {'id': 'prompt_params', 'ver': '1.0'},
         'uid_params':       uid_params,
         'uid_template':     uid_template,
+        'uid_workflow':     uid_workflow,
         'kwargs_tmpl':      dict(), # <-- Args for template
         'kwargs_req':       dict(), # <-- Args for OpenAI request
         'state':            dict()} # <-- Process state
@@ -300,7 +310,7 @@ def testvector_images_generations_valid_bit():
         'uid_workflow':     uid_workflow,
         'type':             {'id': 'prompt_workflow', 'ver': '1.0'},
         'spec':             WORKFLOW_LOGIC.format(template = template_valid,
-                                                  param    = params_valid),
+                                                  param    = param_valid),
         'coroutine':        None
     }
 
@@ -319,7 +329,7 @@ def testvector_images_generations_valid_bit():
     return (cfg_valid,
             workflow_valid,
             template_valid,
-            params_valid,
+            param_valid,
             request_valid,
             result_valid,
             error_valid)
@@ -355,15 +365,17 @@ def testvector_images_edits_valid_bit():
     template_valid = {
         'id_endpoint':      id_endpoint,
         'type':             {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template':     uid_template, # Process step.
         'uid_variant':      uid_variant,  # Improvement.
+        'uid_template':     uid_template, # Process step.
+        'uid_workflow':     uid_workflow, # Process id.
         'kwargs_req':       {'image': image_test},
         'prompt':           prompt_test}
 
-    params_valid = {
+    param_valid = {
         'type':             {'id': 'prompt_params', 'ver': '1.0'},
         'uid_params':       uid_params,
         'uid_template':     uid_template,
+        'uid_workflow':     uid_workflow,
         'kwargs_tmpl':      dict(), # <-- Args for template
         'kwargs_req':       dict(), # <-- Args for OpenAI request
         'state':            dict()} # <-- Process state
@@ -372,7 +384,7 @@ def testvector_images_edits_valid_bit():
         'uid_workflow':     uid_workflow,
         'type':             {'id': 'prompt_workflow', 'ver': '1.0'},
         'spec':             WORKFLOW_LOGIC.format(template = template_valid,
-                                                  param    = params_valid),
+                                                  param    = param_valid),
         'coroutine':        None
     }
 
@@ -392,7 +404,7 @@ def testvector_images_edits_valid_bit():
     return (cfg_valid,
             workflow_valid,
             template_valid,
-            params_valid,
+            param_valid,
             request_valid,
             result_valid,
             error_valid)
@@ -427,14 +439,16 @@ def testvector_images_variations_valid_bit():
     template_valid = {
         'id_endpoint':      id_endpoint,
         'type':             {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template':     uid_template, # Process step.
         'uid_variant':      uid_variant,  # Improvement.
+        'uid_template':     uid_template, # Process step.
+        'uid_workflow':     uid_workflow, # Process id.
         'kwargs_req':       {'image':  image_test}}
 
-    params_valid = {
+    param_valid = {
         'type':             {'id': 'prompt_params', 'ver': '1.0'},
         'uid_params':       uid_params,
         'uid_template':     uid_template,
+        'uid_workflow':     uid_workflow,
         'kwargs_tmpl':      dict(), # <-- Args for template
         'kwargs_req':       dict(), # <-- Args for OpenAI request
         'state':            dict()} # <-- Process state
@@ -443,7 +457,7 @@ def testvector_images_variations_valid_bit():
         'uid_workflow':     uid_workflow,
         'type':             {'id': 'prompt_workflow', 'ver': '1.0'},
         'spec':             WORKFLOW_LOGIC.format(template = template_valid,
-                                                  param    = params_valid),
+                                                  param    = param_valid),
         'coroutine':        None
     }
 
@@ -462,7 +476,7 @@ def testvector_images_variations_valid_bit():
     return (cfg_valid,
             workflow_valid,
             template_valid,
-            params_valid,
+            param_valid,
             request_valid,
             result_valid,
             error_valid)
@@ -499,15 +513,17 @@ def testvector_embeddings_valid_bit():
     template_valid = {
         'id_endpoint':      id_endpoint,
         'type':             {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template':     uid_template, # Process step.
         'uid_variant':      uid_variant,  # Improvement.
+        'uid_template':     uid_template, # Process step.
+        'uid_workflow':     uid_workflow, # Process id.
         'kwargs_req':       {'model': id_model},
         'input':            input_test}
 
-    params_valid = {
+    param_valid = {
         'type':             {'id': 'prompt_params', 'ver': '1.0'},
         'uid_params':       uid_params,
         'uid_template':     uid_template,
+        'uid_workflow':     uid_workflow,
         'kwargs_tmpl':      dict(), # <-- Args for template
         'kwargs_req':       dict(), # <-- Args for OpenAI request
         'state':            dict()} # <-- Process state
@@ -516,7 +532,7 @@ def testvector_embeddings_valid_bit():
         'uid_workflow':     uid_workflow,
         'type':             {'id': 'prompt_workflow', 'ver': '1.0'},
         'spec':             WORKFLOW_LOGIC.format(template = template_valid,
-                                                  param    = params_valid),
+                                                  param    = param_valid),
         'coroutine':        None
     }
 
@@ -536,7 +552,7 @@ def testvector_embeddings_valid_bit():
     return (cfg_valid,
             workflow_valid,
             template_valid,
-            params_valid,
+            param_valid,
             request_valid,
             result_valid,
             error_valid)
@@ -574,16 +590,18 @@ def testvector_audio_transcriptions_valid_bit():
     template_valid = {
         'id_endpoint':      id_endpoint,
         'type':             {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template':     uid_template, # Process step.
         'uid_variant':      uid_variant,  # Improvement.
+        'uid_template':     uid_template, # Process step.
+        'uid_workflow':     uid_workflow, # Process id.
         'kwargs_req':       {'file':  audio_file_test,
                              'model': id_model},
         'prompt':           prompt_test}
 
-    params_valid = {
+    param_valid = {
         'type':             {'id': 'prompt_params', 'ver': '1.0'},
         'uid_params':       uid_params,
         'uid_template':     uid_template,
+        'uid_workflow':     uid_workflow,
         'kwargs_tmpl':      dict(), # <-- Args for template
         'kwargs_req':       dict(), # <-- Args for OpenAI request
         'state':            dict()} # <-- Process state
@@ -592,7 +610,7 @@ def testvector_audio_transcriptions_valid_bit():
         'uid_workflow':     uid_workflow,
         'type':             {'id': 'prompt_workflow', 'ver': '1.0'},
         'spec':             WORKFLOW_LOGIC.format(template = template_valid,
-                                                  param    = params_valid),
+                                                  param    = param_valid),
         'coroutine':        None
     }
 
@@ -613,7 +631,7 @@ def testvector_audio_transcriptions_valid_bit():
     return (cfg_valid,
             workflow_valid,
             template_valid,
-            params_valid,
+            param_valid,
             request_valid,
             result_valid,
             error_valid)
@@ -651,16 +669,18 @@ def testvector_audio_translations_valid_bit():
     template_valid = {
         'id_endpoint':      id_endpoint,
         'type':             {'id': 'prompt_template', 'ver': '1.0'},
-        'uid_template':     uid_template, # Process step.
         'uid_variant':      uid_variant,  # Improvement.
+        'uid_template':     uid_template, # Process step.
+        'uid_workflow':     uid_workflow, # Process id.
         'kwargs_req':       {'file':  audio_file_test,
                              'model': id_model},
         'prompt':           prompt_test}
 
-    params_valid = {
+    param_valid = {
         'type':             {'id': 'prompt_params', 'ver': '1.0'},
         'uid_params':       uid_params,
         'uid_template':     uid_template,
+        'uid_workflow':     uid_workflow,
         'kwargs_tmpl':      dict(), # <-- Args for template
         'kwargs_req':       dict(), # <-- Args for OpenAI request
         'state':            dict()} # <-- Process state
@@ -669,7 +689,7 @@ def testvector_audio_translations_valid_bit():
         'uid_workflow':     uid_workflow,
         'type':             {'id': 'prompt_workflow', 'ver': '1.0'},
         'spec':             WORKFLOW_LOGIC.format(template = template_valid,
-                                                  param    = params_valid),
+                                                  param    = param_valid),
         'coroutine':        None
     }
 
@@ -690,7 +710,7 @@ def testvector_audio_translations_valid_bit():
     return (cfg_valid,
             workflow_valid,
             template_valid,
-            params_valid,
+            param_valid,
             request_valid,
             result_valid,
             error_valid)
@@ -930,7 +950,7 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          workflow_valid,
          template_valid,
-         params_valid,
+         param_valid,
          request_valid,
          list_result_expected,
          list_error_expected) = testvector_completions_valid_bit
@@ -954,7 +974,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_2) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_2 == list_result_expected
         assert list_error_2  == list_error_expected
 
@@ -966,7 +986,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_3) = testrunner_coro_workflow_handler_singleshot(
                                                             cfg_valid,
                                                             [workflow_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_3 == list_result_expected
         assert list_error_3  == list_error_expected
 
@@ -985,7 +1005,7 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          workflow_valid,
          template_valid,
-         params_valid,
+         param_valid,
          request_valid,
          list_result_expected,
          list_error_expected) = testvector_chat_completions_valid_bit
@@ -1009,7 +1029,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_2) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_2 == list_result_expected
         assert list_error_2  == list_error_expected
 
@@ -1021,7 +1041,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_3) = testrunner_coro_workflow_handler_singleshot(
                                                             cfg_valid,
                                                             [workflow_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_3 == list_result_expected
         assert list_error_3  == list_error_expected
 
@@ -1040,7 +1060,7 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          workflow_valid,
          template_valid,
-         params_valid,
+         param_valid,
          request_valid,
          list_result_expected,
          list_error_expected) = testvector_edits_valid_bit
@@ -1064,7 +1084,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_2) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_2 == list_result_expected
         assert list_error_2  == list_error_expected
 
@@ -1076,7 +1096,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_3) = testrunner_coro_workflow_handler_singleshot(
                                                             cfg_valid,
                                                             [workflow_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_3 == list_result_expected
         assert list_error_3  == list_error_expected
 
@@ -1095,7 +1115,7 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          workflow_valid,
          template_valid,
-         params_valid,
+         param_valid,
          request_valid,
          list_result_expected,
          list_error_expected) = testvector_images_generations_valid_bit
@@ -1119,7 +1139,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_2) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_2 == list_result_expected
         assert list_error_2  == list_error_expected
 
@@ -1131,7 +1151,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_3) = testrunner_coro_workflow_handler_singleshot(
                                                             cfg_valid,
                                                             [workflow_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_3 == list_result_expected
         assert list_error_3  == list_error_expected
 
@@ -1150,7 +1170,7 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          workflow_valid,
          template_valid,
-         params_valid,
+         param_valid,
          request_valid,
          list_result_expected,
          list_error_expected) = testvector_images_edits_valid_bit
@@ -1174,7 +1194,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_2) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_2 == list_result_expected
         assert list_error_2  == list_error_expected
 
@@ -1186,7 +1206,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_3) = testrunner_coro_workflow_handler_singleshot(
                                                             cfg_valid,
                                                             [workflow_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_3 == list_result_expected
         assert list_error_3  == list_error_expected
 
@@ -1205,7 +1225,7 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          workflow_valid,
          template_valid,
-         params_valid,
+         param_valid,
          request_valid,
          list_result_expected,
          list_error_expected) = testvector_images_variations_valid_bit
@@ -1229,7 +1249,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_2) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_2 == list_result_expected
         assert list_error_2  == list_error_expected
 
@@ -1241,7 +1261,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_3) = testrunner_coro_workflow_handler_singleshot(
                                                             cfg_valid,
                                                             [workflow_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_3 == list_result_expected
         assert list_error_3  == list_error_expected
 
@@ -1260,7 +1280,7 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          workflow_valid,
          template_valid,
-         params_valid,
+         param_valid,
          request_valid,
          list_result_expected,
          list_error_expected) = testvector_embeddings_valid_bit
@@ -1284,7 +1304,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_2) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_2 == list_result_expected
         assert list_error_2  == list_error_expected
 
@@ -1296,7 +1316,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_3) = testrunner_coro_workflow_handler_singleshot(
                                                             cfg_valid,
                                                             [workflow_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_3 == list_result_expected
         assert list_error_3  == list_error_expected
 
@@ -1315,7 +1335,7 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          workflow_valid,
          template_valid,
-         params_valid,
+         param_valid,
          request_valid,
          list_result_expected,
          list_error_expected) = testvector_audio_transcriptions_valid_bit
@@ -1339,7 +1359,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_2) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_2 == list_result_expected
         assert list_error_2  == list_error_expected
 
@@ -1351,7 +1371,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_3) = testrunner_coro_workflow_handler_singleshot(
                                                             cfg_valid,
                                                             [workflow_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_3 == list_result_expected
         assert list_error_3  == list_error_expected
 
@@ -1370,7 +1390,7 @@ class SpecifyFlNetOpenAiClient:
         (cfg_valid,
          workflow_valid,
          template_valid,
-         params_valid,
+         param_valid,
          request_valid,
          list_result_expected,
          list_error_expected) = testvector_audio_translations_valid_bit
@@ -1394,7 +1414,7 @@ class SpecifyFlNetOpenAiClient:
          list_error_2) = testrunner_coro_template_handler_singleshot(
                                                             cfg_valid,
                                                             [template_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_2 == list_result_expected
         assert list_error_2  == list_error_expected
 
@@ -1406,6 +1426,6 @@ class SpecifyFlNetOpenAiClient:
          list_error_3) = testrunner_coro_workflow_handler_singleshot(
                                                             cfg_valid,
                                                             [workflow_valid],
-                                                            [params_valid])
+                                                            [param_valid])
         assert list_result_3 == list_result_expected
         assert list_error_3  == list_error_expected
