@@ -54,7 +54,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    gradio_demo
+      py_module:    cl.ui.gradio.text.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------

@@ -3,13 +3,15 @@
 ---
 
 title:
-    "Placeholder no-op stableflow-edict component."
+    "Gradio NLP demo support module."
 
 description:
-    "Placeholder no-op component. Does nothing"
+    "This Python module is designed to
+    interact with a Gradio UI that is
+    running in a separate process."
 
 id:
-    "96559158-28ae-4636-9e78-0fb4c3b145ba"
+    "f42feb22-a8dd-4c66-9968-475cb4c78e94"
 
 type:
     dt004_python_stableflow_edict_component
@@ -21,7 +23,7 @@ protection:
     k00_general
 
 copyright:
-    "Copyright 2015-2022 William Payne"
+    "Copyright 2015-2023 William Payne"
 
 license:
     "Licensed under the Apache License, Version
@@ -47,14 +49,16 @@ license:
 import multiprocessing
 import queue
 
+import gradio
+
+import fl.util
+
 
 # -----------------------------------------------------------------------------
-def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
+@fl.util.coroutine
+def coro_ui(cfg):
     """
-    OpenAI agent coroutine.
-
     """
-
     cfg['queue_result']   = multiprocessing.Queue()  # coro   --> daemon
     cfg['queue_error']    = multiprocessing.Queue()  # coro   --> daemon
     cfg['queue_workflow'] = multiprocessing.Queue()  # daemon --> coro
@@ -66,60 +70,44 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
                                      daemon = True)
     daemon.start()
 
+    list_workflow = list()
+    list_param    = list()
 
-    # Initialize outputs.
+    # Loop forever
     #
-    signal = None
-    for id_out in outputs.keys():
-        outputs[id_out]['ena']  = False
-        outputs[id_out]['ts']   = dict()
-        outputs[id_out]['list'] = list()
-
     while True:
 
-        inputs = yield (outputs, signal)
+        (list_result, list_error) = yield (list_workflow, list_param)
 
-        # Reset outputs.
-        #
-        for id_out in outputs.keys():
-            outputs[id_out]['ena'] = False
-            outputs[id_out]['ts'].clear()
-            outputs[id_out]['list'].clear()
+        while list_result:
+            try:
+                cfg['queue_result'].put(list_result.pop(), block = False)
+            except queue.Full as err:
+                # TODO: LOGGING
+                break
 
-        # Grab any new result inputs.
-        #
-        map_ts      = dict()
-        list_result = list()
-        if inputs['result']['ena']:
-            map_ts        = inputs['result']['ts']
-            list_result = inputs['result']['list']
+        while list_error:
+            try:
+                cfg['queue_error'].put(list_error.pop(), block = False)
+            except queue.Full as err:
+                # TODO: LOGGING
+                break
 
-        # Grab any new error inputs.
-        #
-        map_ts     = dict()
-        list_error = list()
-        if inputs['error']['ena']:
-            map_ts     = inputs['error']['ts']
-            list_error = inputs['error']['list']
+        list_workflow.clear()
+        while True:
+            try:
+                list_workflow.append(cfg['queue_workflow'].get(block = False))
+            except queue.Empty:
+                # TODO: LOGGING
+                break
 
-
-        list_workflow = []
-        list_param    = []
-
-        # Update workflow outputs.
-        #
-        if ('workflow' in outputs) and list_workflow:
-            outputs['workflow']['ena'] = True
-            outputs['workflow']['ts'].update(map_ts)
-            outputs['workflow']['list'][:] = list_workflow
-
-        # Update param outputs.
-        #
-        if ('param' in outputs) and list_param:
-            outputs['param']['ena'] = True
-            outputs['param']['ts'].update(map_ts)
-            outputs['param']['list'][:] = list_param
-
+        list_param.clear()
+        while True:
+            try:
+                list_param.append(cfg['queue_param'].get(block = False))
+            except queue.Empty:
+                # TODO: LOGGING
+                break
 
 
 # -----------------------------------------------------------------------------
@@ -142,7 +130,29 @@ def _daemon_main(cfg):
 
     """
 
-    import gradio as gr
+
+
+
+    while True:
+
+        try:
+            request = cfg['queue_request'].get(block = False)
+        except queue.Empty:
+            time.sleep(cfg['secs_interval'])
+            continue
+
+        result = _process_one_request(request_raw = request,
+                                      default     = cfg['default'],
+                                      is_bit      = cfg['is_bit'])
+
+        if result['error'] is not None:
+            cfg['queue_error'].put(result['error'], block = False)
+
+        try:
+            cfg['queue_result'].put(result, block = False)
+        except queue.Full as error:
+            cfg['queue_error'].put(error, block = False)
+
 
     # while True:
 
