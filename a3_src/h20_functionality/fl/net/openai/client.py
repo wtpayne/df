@@ -735,6 +735,34 @@ def built_in_test_response(id_endpoint, id_version = 'v1'):
     """
     Return the built-in-test response for the specified endpoint.
 
+    This function takes an id_endpoint and an
+    optional id_version (default 'v1') and returns
+    a built-in-test response for the specified
+    endpoint.
+
+    The built-in-test responses cover a variety
+    of API endpoints such as completions,
+    chat_completions, edits, images_generations,
+    images_edits, images_variations, embeddings,
+    audio_transcriptions, and audio_translations.
+
+    Args:
+
+    id_endpoint (str):          The identifier of the desired API endpoint,
+                                e.g. 'completions', 'chat_completions', etc.
+    id_version (str, optional): The version of the API endpoint.
+                                Defaults to 'v1'.
+
+    Returns:
+
+        dict:                   A dictionary containing the built-in-test
+                                response for the specified endpoint.
+
+    Examples:
+
+    >>> built_in_test_response('completions')
+    {'id': 'cmpl-uqkvlQyYK7bGYrRHQ0eXlWi7', 'object': 'text_completion', ...}
+
     """
     map_bit_endpoint = {
         ('v1', 'completions'): {

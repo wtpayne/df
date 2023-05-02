@@ -59,10 +59,8 @@ import fl.util
 def coro_ui(cfg):
     """
     """
-    cfg['queue_result']   = multiprocessing.Queue()  # coro   --> daemon
-    cfg['queue_error']    = multiprocessing.Queue()  # coro   --> daemon
-    cfg['queue_workflow'] = multiprocessing.Queue()  # daemon --> coro
-    cfg['queue_param']    = multiprocessing.Queue()  # daemon --> coro
+    cfg['queue_in']  = multiprocessing.Queue()  # coro   --> daemon
+    cfg['queue_out'] = multiprocessing.Queue()  # daemon --> coro
 
     daemon = multiprocessing.Process(target = _daemon_main,
                                      args   = (cfg,),
@@ -70,6 +68,8 @@ def coro_ui(cfg):
                                      daemon = True)
     daemon.start()
 
+    list_result   = list()
+    list_error    = list()
     list_workflow = list()
     list_param    = list()
 
@@ -78,33 +78,29 @@ def coro_ui(cfg):
     while True:
 
         (list_result, list_error) = yield (list_workflow, list_param)
+        try:
 
-        while list_result:
-            try:
-                cfg['queue_result'].put(list_result.pop(), block = False)
-            except queue.Full as err:
-                # TODO: LOGGING
-                break
+            cfg['queue_in'].put((list_result, list_error), block = False)
 
-        while list_error:
-            try:
-                cfg['queue_error'].put(list_error.pop(), block = False)
-            except queue.Full as err:
-                # TODO: LOGGING
-                break
+        except queue.Full as err:
+            # TODO: LOGGING
+            pass
+
+        list_result.clear()
+        list_error.clear()
 
         list_workflow.clear()
-        while True:
-            try:
-                list_workflow.append(cfg['queue_workflow'].get(block = False))
-            except queue.Empty:
-                # TODO: LOGGING
-                break
-
         list_param.clear()
+
         while True:
             try:
-                list_param.append(cfg['queue_param'].get(block = False))
+
+                (list_workflow_part,
+                 list_param_part) = cfg['queue_out'].get(block = False)
+
+                list_workflow.extend(list_workflow_part)queue_out
+                list_param.extend(list_param_part)
+
             except queue.Empty:
                 # TODO: LOGGING
                 break
@@ -113,77 +109,35 @@ def coro_ui(cfg):
 # -----------------------------------------------------------------------------
 def _daemon_main(cfg):
     """
-    Service the request queue, forwarding requests to the OpenAI API.
-
-    Each request in the queue is processed,
-    pausing for secs_interval if no request
-    is available at that time.
-
-    Results and errors are enqueued onto
-    their respective queues for further
-    processing by the controlling process.
-
-    This is intended to be a minimal daemon
-    that sits in a separate process and
-    handles communication with the OpenAI
-    API.
+    Service the request queue, forwarding requests to the UI.
 
     """
 
-
-
-
-    while True:
-
-        try:
-            request = cfg['queue_request'].get(block = False)
-        except queue.Empty:
-            time.sleep(cfg['secs_interval'])
-            continue
-
-        result = _process_one_request(request_raw = request,
-                                      default     = cfg['default'],
-                                      is_bit      = cfg['is_bit'])
-
-        if result['error'] is not None:
-            cfg['queue_error'].put(result['error'], block = False)
-
-        try:
-            cfg['queue_result'].put(result, block = False)
-        except queue.Full as error:
-            cfg['queue_error'].put(error, block = False)
-
-
-    # while True:
-
-    #     try:
-    #         request = cfg['queue_request'].get(block = False)
-    #     except queue.Empty:
-    #         time.sleep(cfg['secs_interval'])
-    #         continue
-
-    #     # result = _process_one_request(request_raw = request,
-    #     #                               default     = cfg['default'],
-    #     #                               is_bit      = cfg['is_bit'])
-
-    #     if result['error'] is not None:
-    #         cfg['queue_error'].put(result['error'], block = False)
-
-    #     try:
-    #         cfg['queue_result'].put(result, block = False)
-    #     except queue.Full as error:
-    #         cfg['queue_error'].put(error, block = False)
-
+    list_fields = ['Field 1',
+                   'Field 2',
+                   'Field 3',
+                   'Field 4',
+                   'Field 5']
 
     # -------------------------------------------------------------------------
-    def process(input,
-                proc_01,
-                proc_02,
-                proc_03,
-                proc_04):
+    def _ui_callback(input,
+                     proc_01,
+                     proc_02,
+                     proc_03,
+                     proc_04):
 
-        return 'echo', 'foo', 'bar', 'baz', 'splat'
+        return tuple(list_fields)
 
+    # -------------------------------------------------------------------------
+    def _system_callback(result):
+        """
+        """
+        # Update list_fields from result.
+
+        return ([], [])
+
+    # MAIN
+    # ====
 
     list_inputs  = [gr.Textbox(lines = 3, placeholder = "Input")]
     list_outputs = [gr.Textbox(lines = 3, placeholder = "")]
@@ -194,15 +148,29 @@ def _daemon_main(cfg):
         list_outputs.append(gr.Textbox(lines = 3, placeholder = "Process step #"))
 
     demo = gr.Interface(
-        fn      = process,
+        fn      = _ui_callback,
         inputs  = list_inputs,
         outputs = list_outputs,
     )
     demo.launch()
 
-
     while True:
 
-        time.sleep(1)
+        try:
+            (list_result, list_error) = cfg['queue_in'].get(block = False)
+        except queue.Empty:
+            time.sleep(cfg['secs_interval'])
+            continue
 
-        # TODO: Pump queues and update stuff.
+        for result in list_result:
+            (list_workflow, list_param) = _system_callback(result)
+
+        # for error in list_error:
+        #     _process_one_error(error)
+
+        try:
+            cfg['queue_out'].put((list_workflow, list_param),
+                                 block = False)
+        except queue.Full as exc:
+            pass
+
