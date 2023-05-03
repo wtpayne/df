@@ -6,7 +6,7 @@ title:
     "Gradio text input stableflow-edict component."
 
 description:
-    "Placeholder no-op component. Does nothing"
+    "Ultra simple UI for text processing tasks."
 
 id:
     "c917c7be-064d-43b0-adfd-2a057834d51e"
@@ -75,38 +75,23 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
             outputs[id_out]['ts'].clear()
             outputs[id_out]['list'].clear()
 
-        # Grab any new result inputs.
-        #
-        map_ts      = dict()
-        list_result = list()
-        if inputs['result']['ena']:
-            map_ts      = inputs['result']['ts']
-            list_result = inputs['result']['list']
+        map_ts = dict()
+        if inputs['control']['ena']:
+            map_ts = inputs['control']['ts']
 
-        # Grab any new error inputs.
+        # Grab incoming automatically generated data.
         #
-        map_ts     = dict()
-        list_error = list()
-        if inputs['error']['ena']:
-            map_ts     = inputs['error']['ts']
-            list_error = inputs['error']['list']
+        list_str_auto = list()
+        if inputs['auto']['ena']:
+            list_str_auto = inputs['auto']['list']
 
         # Communicate with the UI.
         #
-        (list_workflow,
-         list_param) = ui.send((list_result,
-                                list_error))
+        (list_str_user) = ui.send(list_str_auto)
 
-        # Update workflow outputs.
+        # Update outputs with outgoing user provided data.
         #
-        if ('workflow' in outputs) and list_workflow:
-            outputs['workflow']['ena'] = True
-            outputs['workflow']['ts'].update(map_ts)
-            outputs['workflow']['list'][:] = list_workflow
-
-        # Update param outputs.
-        #
-        if ('param' in outputs) and list_param:
-            outputs['param']['ena'] = True
-            outputs['param']['ts'].update(map_ts)
-            outputs['param']['list'][:] = list_param
+        if list_str_user:
+            outputs['user']['ena'] = True
+            outputs['user']['ts'].update(map_ts)
+            outputs['user']['list'][:] = list_str_user

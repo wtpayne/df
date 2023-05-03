@@ -58,6 +58,16 @@ node:
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
+  # applogic.
+  #
+  applogic:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    applogic
+    state_type:     py_dict
+
+  # ---------------------------------------------------------------------------
   # OpenAI client.
   #
   openai:
@@ -102,23 +112,36 @@ edge:
 
 - owner: ui
   data:  py_dict
-  src:   ui.outputs.workflow
+  src:   ui.outputs.user
+  dst:   applogic.inputs.user
+
+- owner: applogic
+  data:  py_dict
+  src:   applogic.outputs.workflow
   dst:   openai.inputs.workflow
 
-- owner: ui
+- owner: applogic
   data:  py_dict
-  src:   ui.outputs.param
+  src:   applogic.outputs.param
   dst:   openai.inputs.param
 
 - owner: openai
   data:  py_dict
   src:   openai.outputs.result
-  dst:   ui.inputs.result
+  dst:   applogic.inputs.result
+  dirn:  feedback
 
 - owner: openai
   data:  py_dict
   src:   openai.outputs.error
-  dst:   ui.inputs.error
+  dst:   applogic.inputs.error
+  dirn:  feedback
+
+- owner: applogic
+  data:  py_dict
+  src:   applogic.outputs.auto
+  dst:   ui.inputs.auto
+  dirn:  feedback
 
 
 ###############################################################################

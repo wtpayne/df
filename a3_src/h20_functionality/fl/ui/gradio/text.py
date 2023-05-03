@@ -46,6 +46,7 @@ license:
 """
 
 
+import itertools
 import multiprocessing
 import queue
 
@@ -60,60 +61,71 @@ def coro_ui(cfg):
     """
     """
 
-    cfg['queue_in']  = multiprocessing.Queue()  # coro   --> daemon
-    cfg['queue_out'] = multiprocessing.Queue()  # daemon --> coro
+    cfg['queue_to_ui']   = multiprocessing.Queue()  # coro --> ui
+    cfg['queue_from_ui'] = multiprocessing.Queue()  # ui --> coro
 
-    daemon = multiprocessing.Process(target = _gradio_main,
-                                     args   = (cfg,),
-                                     name   = 'workflow-ui',
-                                     daemon = True)
-    daemon.start()
+    proc_ui = multiprocessing.Process(target = _proc_ui_main,
+                                      args   = (cfg,),
+                                      name   = 'workflow-ui',
+                                      daemon = True)
+    proc_ui.start()
 
-    list_workflow = list()
-    list_param    = list()
-    list_result   = list()
-    list_error    = list()
+    list_str_user = list()
+    list_str_auto = list()
 
-    while True:
+    for idx in itertools.count():
 
-        list_result.clear()
-        list_error.clear()
-        (list_result, list_error) = yield (list_workflow, list_param)
-        list_workflow.clear()
-        list_param.clear()
+        list_str_auto.clear()
+        (list_str_auto) = yield (list_str_user)
+        list_str_user.clear()
 
-        print('STEP')
-        str_test = 'TEST TEXT'
-        try:
-            cfg['queue_in'].put(str_test, block = False)
-        except queue.Full as err:
-            pass
+        if list_str_auto:
+            for str_auto in list_str_auto:
+                try:
+                    cfg['queue_to_ui'].put(str_auto, block = False)
+                except queue.Full as err:
+                    pass
+
+        while True:
+            try:
+                list_str_user.append(cfg['queue_from_ui'].get(block = False))
+            except queue.Empty:
+                break
 
 
 # -----------------------------------------------------------------------------
-def _gradio_main(cfg):
+def _proc_ui_main(cfg):
     """
     Service the request queue, forwarding requests to the UI.
 
     """
 
+    polling_interval_secs = 0.5
+
     # -------------------------------------------------------------------------
-    def _btn_submit_callback(txt_input, txt_prompt):
+    def _on_click_btn_submit(txt_user_input):
         """
+        Callback function for the submit button.
+
+        Put inputs onto the queue.
+
         """
         try:
-            cfg['queue_out'].put((txt_input, txt_prompt), block = False)
+            str_user_input = txt_user_input
+            cfg['queue_from_ui'].put(str_user_input, block = False)
         except queue.Full as err:
-            print('QUEUE FULL')
+            pass
         return
 
     # -------------------------------------------------------------------------
-    def _timer_callback():
+    def _poll():
         """
+        Callback function for the periodic timer.
+
         """
         try:
-            result = cfg['queue_in'].get(block = False)
-            return result
+            str_generated_output = cfg['queue_to_ui'].get(block = False)
+            return str_generated_output
         except queue.Empty:
             return
 
@@ -122,29 +134,24 @@ def _gradio_main(cfg):
         with gradio.Row():
             with gradio.Column():
 
-                txt_input  = gradio.TextArea(
-                                        interactive = True,
-                                        label       = 'Input',
-                                        lines       = 10)
-                txt_prompt = gradio.TextArea(
-                                        interactive = True,
-                                        label       = 'Template',
-                                        lines       = 10)
-                txt_output = gradio.TextArea(
-                                        interactive = False,
-                                        label       = 'Output',
-                                        lines       = 10)
-                btn_submit = gradio.Button(
-                                        value       = 'Submit')
+                txt_user_input = gradio.TextArea(
+                                            interactive = True,
+                                            label       = 'User input',
+                                            lines       = 15)
 
-                btn_submit.click(
-                            fn     = _btn_submit_callback,
-                            inputs = [txt_input, txt_prompt])
+                txt_generated_output = gradio.TextArea(
+                                            interactive = False,
+                                            label       = 'Generated output',
+                                            lines       = 25)
+
+                btn_submit = gradio.Button(value = 'Submit')
+                btn_submit.click(fn     = _on_click_btn_submit,
+                                 inputs = [txt_user_input])
 
         ui.load(
-            fn      = _timer_callback,
-            outputs = [txt_output],
-            every   = 1)
+            fn      = _poll,
+            outputs = [txt_generated_output],
+            every   = polling_interval_secs)
 
     ui.queue(
         concurrency_count = 2,
@@ -153,4 +160,4 @@ def _gradio_main(cfg):
     ui.launch(
         inbrowser           = True,
         share               = False,
-        prevent_thread_lock = False)
+        prevent_thread_lock = False)  # Blocks
