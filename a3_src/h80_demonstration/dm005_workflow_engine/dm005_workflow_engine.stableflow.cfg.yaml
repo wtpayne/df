@@ -34,8 +34,8 @@ node:
       py_module:    cl.core.ctrl.sys.ic00_edict
     state_type:     py_dict
     config:
-      frequency_hz: 50
-      idx_max:      100
+      frequency_hz: 2
+      idx_max:      120
 
   # ---------------------------------------------------------------------------
   # State management for the main process.

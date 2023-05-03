@@ -59,118 +59,98 @@ import fl.util
 def coro_ui(cfg):
     """
     """
+
     cfg['queue_in']  = multiprocessing.Queue()  # coro   --> daemon
     cfg['queue_out'] = multiprocessing.Queue()  # daemon --> coro
 
-    daemon = multiprocessing.Process(target = _daemon_main,
+    daemon = multiprocessing.Process(target = _gradio_main,
                                      args   = (cfg,),
                                      name   = 'workflow-ui',
                                      daemon = True)
     daemon.start()
 
-    list_result   = list()
-    list_error    = list()
     list_workflow = list()
     list_param    = list()
+    list_result   = list()
+    list_error    = list()
 
-    # Loop forever
-    #
     while True:
-
-        (list_result, list_error) = yield (list_workflow, list_param)
-        try:
-
-            cfg['queue_in'].put((list_result, list_error), block = False)
-
-        except queue.Full as err:
-            # TODO: LOGGING
-            pass
 
         list_result.clear()
         list_error.clear()
-
+        (list_result, list_error) = yield (list_workflow, list_param)
         list_workflow.clear()
         list_param.clear()
 
-        while True:
-            try:
-
-                (list_workflow_part,
-                 list_param_part) = cfg['queue_out'].get(block = False)
-
-                list_workflow.extend(list_workflow_part)queue_out
-                list_param.extend(list_param_part)
-
-            except queue.Empty:
-                # TODO: LOGGING
-                break
+        print('STEP')
+        str_test = 'TEST TEXT'
+        try:
+            cfg['queue_in'].put(str_test, block = False)
+        except queue.Full as err:
+            pass
 
 
 # -----------------------------------------------------------------------------
-def _daemon_main(cfg):
+def _gradio_main(cfg):
     """
     Service the request queue, forwarding requests to the UI.
 
     """
 
-    list_fields = ['Field 1',
-                   'Field 2',
-                   'Field 3',
-                   'Field 4',
-                   'Field 5']
-
     # -------------------------------------------------------------------------
-    def _ui_callback(input,
-                     proc_01,
-                     proc_02,
-                     proc_03,
-                     proc_04):
-
-        return tuple(list_fields)
-
-    # -------------------------------------------------------------------------
-    def _system_callback(result):
+    def _btn_submit_callback(txt_input, txt_prompt):
         """
         """
-        # Update list_fields from result.
-
-        return ([], [])
-
-    # MAIN
-    # ====
-
-    list_inputs  = [gr.Textbox(lines = 3, placeholder = "Input")]
-    list_outputs = [gr.Textbox(lines = 3, placeholder = "")]
-
-    num_steps = 4;
-    for idx in range(num_steps):
-        list_inputs.append(gr.Textbox(lines = 3, placeholder = "Process step #"))
-        list_outputs.append(gr.Textbox(lines = 3, placeholder = "Process step #"))
-
-    demo = gr.Interface(
-        fn      = _ui_callback,
-        inputs  = list_inputs,
-        outputs = list_outputs,
-    )
-    demo.launch()
-
-    while True:
-
         try:
-            (list_result, list_error) = cfg['queue_in'].get(block = False)
+            cfg['queue_out'].put((txt_input, txt_prompt), block = False)
+        except queue.Full as err:
+            print('QUEUE FULL')
+        return
+
+    # -------------------------------------------------------------------------
+    def _timer_callback():
+        """
+        """
+        try:
+            result = cfg['queue_in'].get(block = False)
+            return result
         except queue.Empty:
-            time.sleep(cfg['secs_interval'])
-            continue
+            return
 
-        for result in list_result:
-            (list_workflow, list_param) = _system_callback(result)
+    # -------------------------------------------------------------------------
+    with gradio.Blocks() as ui:
+        with gradio.Row():
+            with gradio.Column():
 
-        # for error in list_error:
-        #     _process_one_error(error)
+                txt_input  = gradio.TextArea(
+                                        interactive = True,
+                                        label       = 'Input',
+                                        lines       = 10)
+                txt_prompt = gradio.TextArea(
+                                        interactive = True,
+                                        label       = 'Template',
+                                        lines       = 10)
+                txt_output = gradio.TextArea(
+                                        interactive = False,
+                                        label       = 'Output',
+                                        lines       = 10)
+                btn_submit = gradio.Button(
+                                        value       = 'Submit')
 
-        try:
-            cfg['queue_out'].put((list_workflow, list_param),
-                                 block = False)
-        except queue.Full as exc:
-            pass
+                btn_submit.click(
+                            fn     = _btn_submit_callback,
+                            inputs = [txt_input, txt_prompt])
 
+        ui.load(
+            fn      = _timer_callback,
+            outputs = [txt_output],
+            every   = 1)
+
+    ui.queue(
+        concurrency_count = 2,
+        max_size          = 3)
+
+    ui.launch(
+        inbrowser           = True,
+        share               = False,
+        prevent_thread_lock = False)

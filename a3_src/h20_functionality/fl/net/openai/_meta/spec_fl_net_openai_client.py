@@ -36,7 +36,7 @@ def coro(cfg):
 
 """
 
-IS_ASYNC              = True
+IS_ASYNC              = False
 TESTRUNNER_MAXITER    = 100
 TESTRUNNER_DELAY_SECS = 0.03
 
