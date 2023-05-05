@@ -68,8 +68,8 @@ class SpecifyFlTestComponent_pipelineConfiguration:
 
         """
         import fl.test.component
-        ctrl_sys             = 'cl.core.ctrl.sys.ic00_edict'
-        ctrl_proc            = 'cl.core.ctrl.proc.ic00_edict'
+        ctrl_sys             = 'cl.ctrl.sys.ic00_edict'
+        ctrl_proc            = 'cl.ctrl.proc.ic00_edict'
         signal_generator     = 'fl.test._meta.signal_generator'
         signal_validator     = 'fl.test._meta.signal_validator'
         component_under_test = 'fl.test._meta.multiply_by_two'
@@ -182,8 +182,8 @@ class SpecifyFlTestComponent_pipelineConfiguration:
 
         """
         import fl.test.component
-        ctrl_sys             = 'cl.core.ctrl.sys.ic00_edict'
-        ctrl_proc            = 'cl.core.ctrl.proc.ic00_edict'
+        ctrl_sys             = 'cl.ctrl.sys.ic00_edict'
+        ctrl_proc            = 'cl.ctrl.proc.ic00_edict'
         signal_generator     = 'fl.test._meta.signal_generator'
         signal_validator     = 'fl.test._meta.signal_validator'
         component_under_test = 'fl.test._meta.multiply_by_two'

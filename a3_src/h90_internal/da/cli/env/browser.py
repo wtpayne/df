@@ -63,7 +63,7 @@ import textual.containers
 import textual.reactive
 import textual.widgets
 
-import cl.core.design.index.db.trace as trace
+import cl.design.index.db.trace as trace
 
 
 # =============================================================================

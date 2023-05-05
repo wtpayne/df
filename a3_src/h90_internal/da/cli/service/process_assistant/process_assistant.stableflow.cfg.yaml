@@ -30,7 +30,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.ctrl.sys.ic00_edict
+      py_module:    cl.ctrl.sys.ic00_edict
     state_type:     py_dict
     config:
       frequency_hz: 5
@@ -43,7 +43,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.ctrl.proc.ic00_edict
+      py_module:    cl.ctrl.proc.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -56,7 +56,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.watcher.ic00_edict
+      py_module:    cl.design.watcher.ic00_edict
     state_type:     py_dict
     config:
       iter_dirpath_root: []
@@ -123,7 +123,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.distributor.ic00_edict
+      py_module:    cl.design.distributor.ic00_edict
     state_type:     py_dict
     config:
       output:
@@ -143,7 +143,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.py.parse.ic00_edict
+      py_module:    cl.design.py.parse.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -157,7 +157,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.py.check.codestyle.ic00_edict
+      py_module:    cl.design.py.check.codestyle.ic00_edict
     state_type:     py_dict
     config:
       list_ignore:
@@ -177,7 +177,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.py.check.docstyle.ic00_edict
+      py_module:    cl.design.py.check.docstyle.ic00_edict
     state_type:     py_dict
     config:
       list_ignore:
@@ -207,7 +207,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.py.check.complexity.ic00_edict
+      py_module:    cl.design.py.check.complexity.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -215,7 +215,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.py.check.lint.ic00_edict
+      py_module:    cl.design.py.check.lint.ic00_edict
     state_type:     py_dict
     config:
         design:
@@ -235,7 +235,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.py.check.security.ic00_edict
+      py_module:    cl.design.py.check.security.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -243,7 +243,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.py.check.type.ic00_edict
+      py_module:    cl.design.py.check.type.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -251,7 +251,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.aggregator.ic00_edict
+      py_module:    cl.design.aggregator.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -259,7 +259,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.index.etl.ic00_edict
+      py_module:    cl.design.index.etl.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -267,7 +267,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.index.db.ic00_edict
+      py_module:    cl.design.index.db.ic00_edict
     state_type:     py_dict
     config:
       filepath_db:  Null
@@ -277,7 +277,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.ui.system_tray.ic00_edict
+      py_module:    cl.design.ui.system_tray.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -285,7 +285,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.ui.web.ic00_edict
+      py_module:    cl.design.ui.web.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -293,7 +293,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.ui.text_file.ic00_edict
+      py_module:    cl.design.ui.text_file.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -301,7 +301,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.design.ui.discord.formatter.ic00_edict
+      py_module:    cl.design.ui.discord.formatter.ic00_edict
     state_type:     py_dict
     config:
       id_chan_gen:  1050172081259692085

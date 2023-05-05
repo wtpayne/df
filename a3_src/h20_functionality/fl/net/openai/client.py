@@ -472,6 +472,13 @@ def _build_request(template, param):
         request['prompt'] = template['prompt'].format(
                                                 **param['kwargs_tmpl'])
 
+
+
+    import pprint
+    pprint.pprint(template)
+    pprint.pprint(param)
+    pprint.pprint(request)
+
     return request
 
 
@@ -725,7 +732,7 @@ def _check_type(id_param, param, tup_type):
     if isinstance(param, tup_type):
         return
     raise RuntimeError(
-        'Type error for request["{id}"]: ({typename} != {reqired})'.format(
+        'Type error for request["{id}"]: ({typename} != {required})'.format(
                                                     id       = id_param,
                                                     typename = type(param),
                                                     required = repr(tup_type)))

@@ -44,6 +44,8 @@ license:
 """
 
 
+import textwrap
+
 import fl.util
 
 
@@ -146,9 +148,17 @@ def _applogic(cfg):
     list_error    = list()  # LLM --> applogic
     list_auto     = list()  # applogic --> UI
 
-    while True:
+    uid_workflow = 'e6150ce3-8ebc-4553-9a9a-b1ebdc038f7e'
+    coro         = _coro_workflow()
+    coro.send(None)
+    list_workflow.append({
+        'uid_workflow':     uid_workflow,
+        'type':             {'id': 'prompt_workflow', 'ver': '1.0'},
+        'coroutine':        coro,
+        'spec':             None
+    })
 
-        list_auto = ['TEST STRING']
+    while True:
 
         (list_user,
          list_result,
@@ -156,5 +166,80 @@ def _applogic(cfg):
                               list_param,
                               list_auto)
 
+        if list_result:
+            response         = list_result[0]['response']
+            response_content = response['choices'][0]['message']['content']
+            list_auto.append(response_content)
 
+            print('<' * 80)
+            import pprint
+            pprint.pprint(list_result)
+            print('>' * 80)
+
+
+        if list_user:
+
+            uid_params        = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
+            uid_template      = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
+
+            list_param.append({
+                'type':             {'id': 'prompt_params', 'ver': '1.0'},
+                'uid_params':       uid_params,
+                'uid_template':     uid_template,
+                'uid_workflow':     uid_workflow,
+                'kwargs_tmpl':      dict(), # <-- Args for template
+                'kwargs_req':       dict(), # <-- Args for OpenAI request
+                'state':            dict()}) # <-- Process state
+
+
+
+
+# -----------------------------------------------------------------------------
+def _coro_workflow():
+    """
+    """
+    list_param_in     = list()
+    list_result_in    = list()
+    list_error_in     = list()
+    list_template_out = list()
+    list_param_out    = list()
+    list_error_out    = list()
+
+    id_endpoint       = 'chat_completions'
+    uid_workflow      = 'e6150ce3-8ebc-4553-9a9a-b1ebdc038f7e'
+    uid_template      = 'e2cb431c-a709-4e7e-a9d1-dfb51d8dc4e2'
+    uid_variant       = '5b8c0cfb-b4fb-4d9a-a839-4eef8bdd36d3'
+    uid_params        = 'de678e1f-bc1b-402a-bfe8-d2705cb9a5ce'
+    id_model          = 'gpt-3.5-turbo-0301'
+    messages_test     = [{'role':    'user',
+                          'content': 'Please say hello to {name}'}]
+
+    template = {
+        'id_endpoint':      id_endpoint,
+        'type':             {'id': 'prompt_template', 'ver': '1.0'},
+        'uid_variant':      uid_variant,  # Improvement.
+        'uid_template':     uid_template, # Process step.
+        'uid_workflow':     uid_workflow, # Process id.
+        'kwargs_req':       {'model': id_model},
+        'messages':         messages_test }
+
+    list_template_out.append(template)
+
+    while True:
+
+        list_param_in.clear()
+        list_result_in.clear()
+        list_error_in.clear()
+
+        (list_param_in,
+         list_result_in,
+         list_error_in) = yield (list_template_out,
+                                 list_param_out,
+                                 list_error_out)
+
+        list_template_out.clear()
+        list_param_out.clear()
+        list_error_out.clear()
+
+        list_param_out[:] = list_param_in
 

@@ -200,7 +200,7 @@ def _add_controller(cfg, subordinate_nodes, idx_max):
                     id_node      = 'ctrl_sys',
                     id_process   = 'main_process',
                     req_host_cfg = 'test_configuration',
-                    py_module    = 'cl.core.ctrl.sys.ic00_edict',
+                    py_module    = 'cl.ctrl.sys.ic00_edict',
                     config       = { 'idx_max':  2 },
                     state_type   = 'python_dict')
 
@@ -209,7 +209,7 @@ def _add_controller(cfg, subordinate_nodes, idx_max):
                     id_node      = 'ctrl_proc',
                     id_process   = 'main_process',
                     req_host_cfg = 'test_configuration',
-                    py_module    = 'cl.core.ctrl.proc.ic00_edict',
+                    py_module    = 'cl.ctrl.proc.ic00_edict',
                     config       = {},
                     state_type   = 'python_dict')
 

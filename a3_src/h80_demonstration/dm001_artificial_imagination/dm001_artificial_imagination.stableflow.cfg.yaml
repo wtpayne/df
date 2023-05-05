@@ -31,7 +31,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.ctrl.sys.ic00_edict
+      py_module:    cl.ctrl.sys.ic00_edict
     state_type:     py_dict
     config:
       frequency_hz: 50
@@ -44,7 +44,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.ctrl.proc.ic00_edict
+      py_module:    cl.ctrl.proc.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -66,7 +66,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.util.noop.ic00_edict
+      py_module:    cl.util.noop.ic00_edict
     state_type:     py_dict
 
 

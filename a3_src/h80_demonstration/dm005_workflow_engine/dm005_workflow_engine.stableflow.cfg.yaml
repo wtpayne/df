@@ -31,11 +31,11 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.ctrl.sys.ic00_edict
+      py_module:    cl.ctrl.sys.ic00_edict
     state_type:     py_dict
     config:
-      frequency_hz: 2
-      idx_max:      120
+      frequency_hz: 10
+      idx_max:      1200
 
   # ---------------------------------------------------------------------------
   # State management for the main process.
@@ -44,7 +44,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.core.ctrl.proc.ic00_edict
+      py_module:    cl.ctrl.proc.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -54,7 +54,7 @@ node:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.ui.gradio.text.ic00_edict
+      py_module:    cl.ui.gradio.nlp.simple.ic00_edict
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
@@ -77,17 +77,20 @@ node:
       py_module:    cl.net.openai.client.ic00_edict
     state_type:     py_dict
     config:
-      filepath_env:  Null
-      envvar_key:    OPENAI_API_KEY
-      secs_interval: 0.1
+      filepath_env:         Null
+      envvar_key:           OPENAI_API_KEY
+      secs_interval:        0.1
+      is_bit:               True
+      is_async:             True
       default:
-        model:             'gpt-3.5-turbo'
-        temperature:       1
-        n:                 1
-        stream:            False
-        presence_penalty:  0
-        frequency_penalty: 0
-        user:              ''
+        id_endpoint:        'chat_completions'
+        model:              'gpt-3.5-turbo'
+        temperature:        1.0
+        n:                  1
+        stream:             False
+        presence_penalty:   0.0
+        frequency_penalty:  0.0
+        user:               ''
 
 
 ###############################################################################
