@@ -70,21 +70,20 @@ def functional_test_cfg(module, config, script):
             'path':   [name_output],
             'signal': list_output});
 
-    return _pipeline_test_cfg(
-                        list_pipeline_modules     = [module],
-                        list_pipeline_node_config = [config],
-                        list_pipeline_edge_info   = [],
-                        list_test_vectors         = list_test_vectors,
-                        list_expected_outputs     = list_expected_outputs)
+    return pipeline_test_cfg(list_pipeline_modules     = [module],
+                             list_pipeline_node_config = [config],
+                             list_pipeline_edge_info   = [],
+                             list_test_vectors         = list_test_vectors,
+                             list_expected_outputs     = list_expected_outputs)
 
 
 # -----------------------------------------------------------------------------
-def _pipeline_test_cfg(list_pipeline_modules,
-                       list_pipeline_node_config,
-                       list_test_vectors,
-                       list_expected_outputs,
-                       list_pipeline_edge_info = [],
-                       list_id_node_nocontrol  = []):
+def pipeline_test_cfg(list_pipeline_modules,
+                      list_pipeline_node_config,
+                      list_test_vectors,
+                      list_expected_outputs,
+                      list_pipeline_edge_info = [],
+                      list_id_node_nocontrol  = []):
     """
     Return configuration for a pipeline test.
 

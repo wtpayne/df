@@ -174,10 +174,9 @@ class SpecifyBroker:
 
                 }])
 
-        xact.cli.util.run_test(cfg,
-                               expected_exit_code = 0,
-                               do_expect_stdout   = False,
-                               do_expect_stderr   = False)
+        exit_code = pl.stableflow.sys.prep_and_start(map_cfg  = cfg,
+                                                     is_local = True)
+        assert exit_code == 0
 
 
     #--------------------------------------------------------------------------
@@ -308,10 +307,9 @@ class SpecifyBroker:
 
                 }])
 
-        xact.cli.util.run_test(cfg,
-                               expected_exit_code = 0,
-                               do_expect_stdout   = False,
-                               do_expect_stderr   = False)
+        exit_code = pl.stableflow.sys.prep_and_start(map_cfg  = cfg,
+                                                     is_local = True)
+        assert exit_code == 0
 
 
     #--------------------------------------------------------------------------
@@ -434,9 +432,6 @@ class SpecifyBroker:
 
                 }])
 
-        xact.cli.util.run_test(cfg,
-                               expected_exit_code = 0,
-                               do_expect_stdout   = False,
-                               do_expect_stderr   = False)
-
-
+        exit_code = pl.stableflow.sys.prep_and_start(map_cfg  = cfg,
+                                                     is_local = True)
+        assert exit_code == 0

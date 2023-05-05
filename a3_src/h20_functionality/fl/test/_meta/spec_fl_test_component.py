@@ -56,7 +56,7 @@ class SpecifyFlTestComponent_baselineConfiguration:
 # =============================================================================
 class SpecifyFlTestComponent_pipelineConfiguration:
     """
-    Spec for the _pipeline_test_cfg function.
+    Spec for the pipeline_test_cfg function.
 
     """
 
@@ -64,7 +64,7 @@ class SpecifyFlTestComponent_pipelineConfiguration:
     @pytest.mark.e002_general_research
     def it_supports_generation_of_pipeline_test_cfg(self):
         """
-        _pipeline_test_cfg generates the expected configuration data.
+        pipeline_test_cfg generates the expected configuration data.
 
         """
         import fl.test.component
@@ -73,7 +73,7 @@ class SpecifyFlTestComponent_pipelineConfiguration:
         signal_generator     = 'fl.test._meta.signal_generator'
         signal_validator     = 'fl.test._meta.signal_validator'
         component_under_test = 'fl.test._meta.multiply_by_two'
-        cfg_output           = fl.test.component._pipeline_test_cfg(
+        cfg_output           = fl.test.component.pipeline_test_cfg(
                 list_pipeline_modules     = [component_under_test],
                 list_pipeline_node_config = [{}],
                 list_pipeline_edge_info   = [],

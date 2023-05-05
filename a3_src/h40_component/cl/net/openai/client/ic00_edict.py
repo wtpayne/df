@@ -58,31 +58,18 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     OpenAI agent coroutine.
 
     """
+    default_args = dict(id_endpoint = 'chat_completions',
+                        model       = 'gpt-3.5-turbo')
 
-    # Initialize the OpenAI client coroutine
-    # using an API key loaded from a .env
-    # file in configured location.
-    #
-    dotenv.load_dotenv(dotenv_path = cfg['filepath_env'],
-                       verbose     = True,
-                       override    = False)
-
-    cfg_client                   = dict()
-    cfg_client['api_key']        = os.environ[cfg['envvar_key']]
-    cfg_client['secs_interval']  = cfg.get('secs_interval', 5)
-    cfg_client['is_bit']         = cfg.get('is_bit',   True)  # Built-in-test
-    cfg_client['is_async']       = cfg.get('is_async', False) # Asynchronous
-    cfg_client['default']        = cfg['default']
-
-    request_handler  = fl.net.openai.client.coro_request_handler(
-                                        cfg             = cfg_client)
-    template_handler = fl.net.openai.client.coro_template_handler(
-                                        cfg             = cfg_client,
-                                        request_handler = request_handler)
-    workflow_handler = fl.net.openai.client.coro_workflow_handler(
-                                        cfg              = cfg,
-                                        request_handler  = request_handler,
-                                        template_handler = template_handler)
+    (request_handler,
+     template_handler,
+     workflow_handler) = init_handlers(
+                filepath_env  = cfg['filepath_env'],
+                envvar_key    = cfg.get('envvar_key',    'OPENAI_API_KEY'),
+                is_bit        = cfg.get('is_bit',        True),  # Builtin test
+                is_async      = cfg.get('is_async',      False), # Asynchronous
+                secs_interval = cfg.get('secs_interval', 2),
+                default       = cfg.get('default',       default_args))
 
     # Initialize outputs.
     #
@@ -139,3 +126,43 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
             outputs['error']['ena'] = True
             outputs['error']['ts'].update(map_ts)
             outputs['error']['list'][:] = list_error
+
+
+# -----------------------------------------------------------------------------
+def init_handlers(filepath_env,
+                  envvar_key    = 'OPENAI_API_KEY',
+                  is_bit        = True,  # Built-in-test
+                  is_async      = False, # Asynchronous API access.
+                  secs_interval = 2,
+                  default       = None):
+    """
+    Return initialized handler coroutines for the OpenAI client.
+
+    """
+
+    # Use an API key loaded from a .env
+    # file in the configured location.
+    #
+    dotenv.load_dotenv(dotenv_path = filepath_env,
+                       verbose     = True,
+                       override    = False)
+
+    cfg_handler = dict(api_key       = os.environ[envvar_key],
+                       secs_interval = secs_interval,
+                       is_bit        = is_bit,
+                       is_async      = is_async,
+                       default       = default)
+
+    request_handler  = fl.net.openai.client.coro_request_handler(
+                                        cfg             = cfg_handler)
+
+    template_handler = fl.net.openai.client.coro_template_handler(
+                                        cfg             = cfg_handler,
+                                        request_handler = request_handler)
+
+    workflow_handler = fl.net.openai.client.coro_workflow_handler(
+                                        cfg              = cfg_handler,
+                                        request_handler  = request_handler,
+                                        template_handler = template_handler)
+
+    return (request_handler, template_handler, workflow_handler)

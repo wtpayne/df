@@ -48,11 +48,16 @@ license:
 # -----------------------------------------------------------------------------
 def uuid():
     """
-    Generate a UUID.
+    Generate a UUID and copy it to the clipboard.
 
     """
     import uuid
+    import pyclip
+
     obj_uuid = uuid.uuid4()
     str_uuid = str(obj_uuid)
-    print(str_uuid)
+
+    pyclip.copy(str_uuid)
+    print('Copied to clipboard: ' + str_uuid)
+
     return 0

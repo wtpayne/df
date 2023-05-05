@@ -58,29 +58,19 @@ node:
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
-  # applogic.
+  # ACE simplification.
   #
-  applogic:
+  ace:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    applogic
-    state_type:     py_dict
-
-  # ---------------------------------------------------------------------------
-  # OpenAI client.
-  #
-  openai:
-    process:        proc_main
-    req_host_cfg:   default_configuration
-    functionality:
-      py_module:    cl.net.openai.client.ic00_edict
+      py_module:    cl.rpa.cnl.ace.simplify.ic00_edict
     state_type:     py_dict
     config:
       filepath_env:         Null
       envvar_key:           OPENAI_API_KEY
       secs_interval:        0.1
-      is_bit:               True
+      is_bit:               False
       is_async:             True
       default:
         id_endpoint:        'chat_completions'
@@ -115,35 +105,13 @@ edge:
 
 - owner: ui
   data:  py_dict
-  src:   ui.outputs.user
-  dst:   applogic.inputs.user
+  src:   ui.outputs.text
+  dst:   ace.inputs.text
 
-- owner: applogic
+- owner: ace
   data:  py_dict
-  src:   applogic.outputs.workflow
-  dst:   openai.inputs.workflow
-
-- owner: applogic
-  data:  py_dict
-  src:   applogic.outputs.param
-  dst:   openai.inputs.param
-
-- owner: openai
-  data:  py_dict
-  src:   openai.outputs.result
-  dst:   applogic.inputs.result
-  dirn:  feedback
-
-- owner: openai
-  data:  py_dict
-  src:   openai.outputs.error
-  dst:   applogic.inputs.error
-  dirn:  feedback
-
-- owner: applogic
-  data:  py_dict
-  src:   applogic.outputs.auto
-  dst:   ui.inputs.auto
+  src:   ace.outputs.text
+  dst:   ui.inputs.text
   dirn:  feedback
 
 

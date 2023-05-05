@@ -139,10 +139,32 @@ def _execution_rate_control(inputs, state):
     """
     Return the step time and the relative load.
 
-    Wait for the next step time if we are rate
-    limited and running early.
+    This function controls the execution rate of
+    the dataflow model by managing the wait time
+    between steps and adjusting the mode based
+    on load.
 
-    """
+    The relative load and time of the next step
+    in the dataflow model is computerd. If the
+    system is rate-limited and running early,
+    it waits for the next step time. The function
+    also handles entering and exiting degraded
+    mode based on high/low water marks.
+
+    Args:
+        inputs (dict): A dictionary containing feedback information,
+                       with keys being unique identifiers and values
+                       being dictionaries containing 'ena' (boolean),
+                       and 'map_load' (dict) keys.
+        state (dict):  A dictionary containing state information,
+                       such as period_us, time_prev_us,
+                       degraded_enter_maxq, and degraded_exit_maxq.
+
+    Returns:
+        tuple:  A tuple containing the current time in microseconds
+                (int) and the relative load (float) of the system.
+
+     """
 
     load_rel = 1.0
     is_rate_limited = state['period_us'] is not None

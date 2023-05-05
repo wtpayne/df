@@ -70,25 +70,26 @@ def coro_ui(cfg):
                                       daemon = True)
     proc_ui.start()
 
-    list_str_user = list()
-    list_str_auto = list()
+    list_str_user_input = list()
+    list_str_generated  = list()
 
     for idx in itertools.count():
 
-        list_str_auto.clear()
-        (list_str_auto) = yield (list_str_user)
-        list_str_user.clear()
+        list_str_generated.clear()
+        (list_str_generated) = yield (list_str_user_input)
+        list_str_user_input.clear()
 
-        if list_str_auto:
-            for str_auto in list_str_auto:
+        if list_str_generated:
+            for str_generated in list_str_generated:
                 try:
-                    cfg['queue_to_ui'].put(str_auto, block = False)
+                    cfg['queue_to_ui'].put(str_generated, block = False)
                 except queue.Full as err:
                     pass
 
         while True:
             try:
-                list_str_user.append(cfg['queue_from_ui'].get(block = False))
+                list_str_user_input.append(
+                                    cfg['queue_from_ui'].get(block = False))
             except queue.Empty:
                 break
 
@@ -101,6 +102,7 @@ def _proc_ui_main(cfg):
     """
 
     polling_interval_secs = 0.5
+    str_generated_output  = '(None)'
 
     # -------------------------------------------------------------------------
     def _on_click_btn_submit(txt_user_input):
@@ -123,11 +125,12 @@ def _proc_ui_main(cfg):
         Callback function for the periodic timer.
 
         """
+        nonlocal str_generated_output
         try:
             str_generated_output = cfg['queue_to_ui'].get(block = False)
-            return str_generated_output
         except queue.Empty:
-            return
+            pass
+        return str_generated_output
 
     # -------------------------------------------------------------------------
     with gradio.Blocks() as ui:

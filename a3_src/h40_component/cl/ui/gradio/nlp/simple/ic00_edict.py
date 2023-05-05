@@ -81,17 +81,17 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
         # Grab incoming automatically generated data.
         #
-        list_str_auto = list()
-        if inputs['auto']['ena']:
-            list_str_auto = inputs['auto']['list']
+        list_str_generated = list()
+        if inputs['text']['ena']:
+            list_str_generated = inputs['text']['list']
 
         # Communicate with the UI.
         #
-        (list_str_user) = ui.send(list_str_auto)
+        (list_str_user_input) = ui.send(list_str_generated)
 
         # Update outputs with outgoing user provided data.
         #
-        if list_str_user:
-            outputs['user']['ena'] = True
-            outputs['user']['ts'].update(map_ts)
-            outputs['user']['list'][:] = list_str_user
+        if list_str_user_input:
+            outputs['text']['ena'] = True
+            outputs['text']['ts'].update(map_ts)
+            outputs['text']['list'][:] = list_str_user_input

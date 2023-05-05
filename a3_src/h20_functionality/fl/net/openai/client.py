@@ -472,13 +472,6 @@ def _build_request(template, param):
         request['prompt'] = template['prompt'].format(
                                                 **param['kwargs_tmpl'])
 
-
-
-    import pprint
-    pprint.pprint(template)
-    pprint.pprint(param)
-    pprint.pprint(request)
-
     return request
 
 
