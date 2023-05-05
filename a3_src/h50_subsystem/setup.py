@@ -4,10 +4,10 @@
 ---
 
 title:
-    "h50_product setup script."
+    "h50_subsystem setup script."
 
 description:
-    "The h50_product setup script is intended
+    "The h50_subsystem setup script is intended
     to allow products to be made available
     with the command 'pip install --editable'."
 
@@ -47,5 +47,5 @@ license:
 """
 
 import setuptools
-setuptools.setup(name       = 'h50_product',
+setuptools.setup(name       = 'h50_subsystem',
                  py_modules = [])

@@ -96,61 +96,64 @@ of the hierarchy as well as frameworks managed
 at the h30_platform level.
 
 
-h50_product
+h50_subsystem
+-------------
+
+The h50_subsystem tier is intended for the
+management of networks of components arranged
+in functional chains or similar agglomerations
+which provide some manageable subset of system
+functionality. The primary purpose of this level
+is to allow customisation of systems at a high
+level of abstraction.
+
+It is expected that design elements at the
+subsystem level will consist of configurations
+of components with associated scripts to enable
+them to be customised and integrated into
+larger systems.
+
+
+h60_system
+----------
+
+The h60_system tier is intended for the
+management of systems of components and
+subsystems which are functionally complete
+but not tailored to the requirements of
+a specific customer.
+
+It is expected that design elements at the
+system level will consist of configurations
+of subsystems, components, and associated
+scripts which assemble all the pieces
+together into a functional whole.
+
+
+h70_bespoke
 -----------
 
-The h50_product tier is intended for the
-management of the design of each of our
-'off-the-shelf' product lines.
-
-It is expected that designs at the h50_product
-tier will consist primarily of configuration
-data that assembles components defined at the
-h40_component tier into the functional chains
-that support the feature mix of each specific
-product line.
-
-Some small quantity of detailed design work is
-also acceptable here, but the majority of the
-design effort should be concentrated in the
-lower levels of the hierarchy where the costs
-may be more readily amortized across multiple
-product lines.
-
-
-h60_bespoke
------------
-
-The h60_bespoke tier is intended for the
+The h70_bespoke tier is intended for the
 management of designs of bespoke products.
 
-The designs in the h60_bespoke tier are
+The designs in the h70_bespoke tier are
 normally composed of tailorings applied
 on top of off the shelf product designs
-drawn from the h50_product tier.
+drawn from the h60_system tier.
 
 
-h70_research
+h80_research
 ------------
 
-The h70_research tier is intended for the
+The h80_research tier is intended for the
 management of design elements that arise
 from research activities.
 
-The design elements managed in the h70_research
+The design elements managed in the h80_research
 tier are normally composed of tailorings and
 improvements that modify or replace design
 elements drawn from tiers at lower levels of
 the hierarchy.
-
-
-h80_demonstration
------------------
-
-The h80_demonstration tier is intended for
-the management of design elements that arise
-from the preparation of technical
-demonstrations or early feasibility studies.
 
 
 h90_internal
@@ -160,4 +163,6 @@ The h90_internal tier is intended for the
 management of design elements, programs,
 scripts, tools and utilities that are
 used to automate the design process itself,
-along with internal documentation and processes.
+along with internal documentation, processes,
+and launchers for demonstrations of work in
+progress.

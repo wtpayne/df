@@ -48,7 +48,6 @@ license:
 import os
 import sys
 
-
 # -----------------------------------------------------------------------------
 def test():
     """
@@ -81,7 +80,13 @@ def test():
                              _path(control_tier = 'h40_component',
                                    relpath      = 'cl/ui/gradio',
                                    id_env       = ID_ENV),
-                             _path(control_tier = 'h50_product',
+                             _path(control_tier = 'h50_subsystem',
+                                   relpath      = '.',
+                                   id_env       = ID_ENV),
+                             _path(control_tier = 'h60_system',
+                                   relpath      = '.',
+                                   id_env       = ID_ENV),
+                             _path(control_tier = 'h70_bespoke',
                                    relpath      = '.',
                                    id_env       = ID_ENV)))
 
@@ -118,7 +123,7 @@ def _dirpath_log():
     """
     import da.env
     return da.env.path(process_area = 'a4_tmp',
-                       control_tier = 'h70_research',
+                       control_tier = 'h80_research',
                        relpath      = 'workflow_engine')
 
 
@@ -143,11 +148,11 @@ def _filepath_cfg():
     """
     import da.env
 
-    reldir_cfg   = 'dm005_workflow_engine'
+    reldir_cfg   = 'da/demo/dm005_workflow_engine'
     filename_cfg = 'dm005_workflow_engine.stableflow.cfg.yaml'
     relpath_cfg  = os.path.join(reldir_cfg, filename_cfg)
 
     return da.env.path(process_area = 'a3_src',
-                       control_tier = 'h80_demonstration',
+                       control_tier = 'h90_internal',
                        relpath      = relpath_cfg)
 

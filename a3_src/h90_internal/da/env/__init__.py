@@ -77,10 +77,10 @@ def tup_control_tier():
             'h20_functionality',
             'h30_platform',
             'h40_component',
-            'h50_product',
-            'h60_bespoke',
-            'h70_research',
-            'h80_demonstration',
+            'h50_subsystem',
+            'h60_system',
+            'h70_bespoke',
+            'h80_research',
             'h90_internal')
 
 # -----------------------------------------------------------------------------

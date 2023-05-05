@@ -97,7 +97,7 @@ def build_android():
 
     """
     import da.build
-    sys.exit(da.build.kivy(control_tier   = 'h70_research',
+    sys.exit(da.build.kivy(control_tier   = 'h80_research',
                            relpath        = 'forever/library',
                            target         = 'android',
                            build          = 'debug',
@@ -112,7 +112,7 @@ def test():
 
     """
     import da.test
-    sys.exit(da.test.run(control_tier = 'h70_research',
+    sys.exit(da.test.run(control_tier = 'h80_research',
                          relpath      = 'forever/library',
                          id_env       = ID_ENV))
 
@@ -125,7 +125,7 @@ def _dirpath_log_server():
     """
     import da.env
     return da.env.path(process_area = 'a4_tmp',
-                       control_tier = 'h70_research',
+                       control_tier = 'h80_research',
                        relpath      = 'forever/library')
 
 
@@ -151,5 +151,5 @@ def _filepath_cfg_server():
     import da.env
     return da.env.path(
                 process_area = 'a3_src',
-                control_tier = 'h70_research',
+                control_tier = 'h80_research',
                 relpath      = 'forever/library/forever.stableflow.cfg.yaml')

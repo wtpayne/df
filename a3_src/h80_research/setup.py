@@ -4,15 +4,16 @@
 ---
 
 title:
-    "h60_bespoke setup script."
+    "h80_research setup script."
 
 description:
-    "The h60_bespoke setup script is intended
-    to allow projects to be made available
-    with the command 'pip install --editable'."
+    "The h80_research setup script is
+    intended to allow research projects
+    to be made available with the
+    command 'pip install --editable'."
 
 id:
-    "8b1e1ff4-8a8a-44fb-92e4-767ceb1a9af2"
+    "87afaed2-898d-46e3-b773-8ac7e49ad830"
 
 type:
     dt001_python_script
@@ -47,5 +48,5 @@ license:
 """
 
 import setuptools
-setuptools.setup(name       = 'h60_bespoke',
+setuptools.setup(name       = 'h80_research',
                  py_modules = [])

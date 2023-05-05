@@ -117,10 +117,10 @@
     { "type": "local",  "relpath": "a3_src/h20_functionality"                 },
     { "type": "local",  "relpath": "a3_src/h30_platform"                      },
     { "type": "local",  "relpath": "a3_src/h40_component"                     },
-    { "type": "local",  "relpath": "a3_src/h50_product"                       },
-    { "type": "local",  "relpath": "a3_src/h60_bespoke"                       },
-    { "type": "local",  "relpath": "a3_src/h70_research"                      },
-    { "type": "local",  "relpath": "a3_src/h80_demonstration"                 },
+    { "type": "local",  "relpath": "a3_src/h50_subsystem"                     },
+    { "type": "local",  "relpath": "a3_src/h60_system"                        },
+    { "type": "local",  "relpath": "a3_src/h70_bespoke"                       },
+    { "type": "local",  "relpath": "a3_src/h80_research"                      },
     { "type": "local",  "relpath": "a3_src/h90_internal"                      }
   ]
 }

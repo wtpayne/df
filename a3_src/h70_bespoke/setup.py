@@ -4,15 +4,15 @@
 ---
 
 title:
-    "h80_demonstration setup script."
+    "h70_bespoke setup script."
 
 description:
-    "The h80_demonstration setup script is
-    intended to allow demos to be made available
+    "The h70_bespoke setup script is intended
+    to allow projects to be made available
     with the command 'pip install --editable'."
 
 id:
-    "b8c5b02f-ad60-4677-82e4-1cb4e957c218"
+    "8b1e1ff4-8a8a-44fb-92e4-767ceb1a9af2"
 
 type:
     dt001_python_script
@@ -47,5 +47,5 @@ license:
 """
 
 import setuptools
-setuptools.setup(name       = 'h80_demonstration',
+setuptools.setup(name       = 'h70_bespoke',
                  py_modules = [])

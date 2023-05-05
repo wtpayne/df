@@ -65,7 +65,7 @@ def start():
 
     dirpath_tmp       = da.env.path(
                                 process_area = 'a4_tmp',
-                                control_tier = 'h80_demonstration',
+                                control_tier = 'h90_internal',
                                 relpath      = 'dm001_artificial_imagination')
     filename_urdf     = 'quadrotor.urdf'
     filepath_urdf     = os.path.join(dirpath_tmp, filename_urdf)
@@ -105,12 +105,12 @@ def _filepath_cfg():
 
     """
     import da.env
-    dirname_cfg  = 'dm001_artificial_imagination'
+    relpath_dir  = 'da/demo/dm001_artificial_imagination'
     filename_cfg = 'dm001_artificial_imagination.stableflow.cfg.yaml'
-    relpath_cfg  = os.path.join(dirname_cfg, filename_cfg)
+    relpath_cfg  = os.path.join(relpath_dir, filename_cfg)
     return da.env.path(
             process_area = 'a3_src',
-            control_tier = 'h80_demonstration',
+            control_tier = 'h90_internal',
             relpath      = relpath_cfg)
 
 
@@ -122,5 +122,5 @@ def _dirpath_log():
     """
     import da.env
     return da.env.path(process_area = 'a4_tmp',
-                       control_tier = 'h80_demonstration',
+                       control_tier = 'h90_internal',
                        relpath      = 'dm001_artificial_imagination')

@@ -64,30 +64,31 @@ def add_demos(grp_parent):
     Add a command group for each demo.
 
     """
-    dirpath_root  = _dirpath_root()
-    rootpath_demo = os.path.join(dirpath_root, 'a3_src', 'h80_demonstration')
+    dirpath_root      = _dirpath_root()
+    dirpath_internal  = os.path.join(dirpath_root,     'a3_src/h90_internal')
+    dirpath_demo_root = os.path.join(dirpath_internal, 'da/demo')
 
-    for id_demo in sorted(os.listdir(rootpath_demo)):
+    for id_demo in sorted(os.listdir(dirpath_demo_root)):
 
-        dirpath = os.path.join(rootpath_demo, id_demo)
-
-        if _is_demo_dir(dirpath):
+        dirpath_demo = os.path.join(dirpath_demo_root, id_demo)
+        if not _is_demo_dir(dirpath_demo):
+            continue
  
-            grp_demo     = _create_group_for_demo(grp_parent, id_demo)
-            filepath_py  = _filepath_python_module(dirpath, id_demo)
-            filepath_cfg = _filepath_stableflow_config(dirpath, id_demo)
+        grp_demo     = _create_group_for_demo(      grp_parent,   id_demo)
+        filepath_py  = _filepath_python_module(     dirpath_demo, id_demo)
+        filepath_cfg = _filepath_stableflow_config( dirpath_demo, id_demo)
 
-            if os.path.exists(filepath_py):
-                _add_functions_from_python_module_to_group(
-                                                    group    = grp_demo, 
-                                                    filepath = filepath_py, 
-                                                    rootpath = rootpath_demo)
- 
-            elif os.path.exists(filepath_cfg):
-                _add_start_stop_commands_for_stableflow_config(
-                                                    group    = grp_demo,
-                                                    filepath = filepath_cfg, 
-                                                    id_demo  = id_demo)
+        if os.path.exists(filepath_py):
+            _add_functions_from_python_module_to_group(
+                                                group    = grp_demo,
+                                                filepath = filepath_py,
+                                                rootpath = dirpath_internal)
+
+        elif os.path.exists(filepath_cfg):
+            _add_start_stop_commands_for_stableflow_config(
+                                                group    = grp_demo,
+                                                filepath = filepath_cfg,
+                                                id_demo  = id_demo)
 
 
 # -----------------------------------------------------------------------------

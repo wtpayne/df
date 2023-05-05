@@ -54,7 +54,7 @@ def all():
     list_retval        = list()
     tup_id_tier_ignore = ('h00_thirdparty',
                           'h10_resource',
-                          'h70_research')
+                          'h80_research')
     tup_id_env_ignore  = ('e000_design_automation_core',
                           'e001_process_assistant')
     for id_tier in da.env.tup_control_tier():
