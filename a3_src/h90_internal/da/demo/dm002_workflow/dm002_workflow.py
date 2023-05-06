@@ -3,11 +3,11 @@
 ---
 
 title:
-    "dm005_workflow_engine demo commands."
+    "dm002_workflow demo commands."
 
 description:
     "This module defines commands for the 
-    dm005_workflow_engine demonstration."
+    dm002_workflow demonstration."
 
 id:
     "87df2f55-214e-40be-9330-53cf354817ef"
@@ -22,7 +22,7 @@ protection:
     k00_general
 
 copyright:
-    "Copyright 2015-2023 William Payne"
+    "Copyright 2023 William Payne"
 
 license:
     "Licensed under the Apache License, Version
@@ -51,7 +51,7 @@ import sys
 # -----------------------------------------------------------------------------
 def test():
     """
-    Run all dm005 tests.
+    Run all dm002 tests.
 
     """
     import da.env
@@ -131,9 +131,19 @@ def test():
 
 
 # -----------------------------------------------------------------------------
+def sfedit():
+    """
+    Run dm002 stableflow editor.
+
+    """
+    import da.env.run
+    sys.exit(da.env.run.python_function(spec   = 'sfedit.cli.main',
+                                        id_env = 'e002_general_research'))
+
+# -----------------------------------------------------------------------------
 def start():
     """
-    Start dm005 system.
+    Start dm002 system.
 
     """
     tup_overrides = ('host.localhost.dirpath_log',   _dirpath_log(),
@@ -147,7 +157,7 @@ def start():
 # -----------------------------------------------------------------------------
 def stop():
     """
-    Stop dm005 system.
+    Stop dm002 system.
 
     """
     import da.env.run
@@ -187,8 +197,8 @@ def _filepath_cfg():
     """
     import da.env
 
-    reldir_cfg   = 'da/demo/dm005_workflow_engine'
-    filename_cfg = 'dm005_workflow_engine.stableflow.cfg.yaml'
+    reldir_cfg   = 'da/demo/dm002_workflow'
+    filename_cfg = 'dm002_workflow.stableflow.cfg.yaml'
     relpath_cfg  = os.path.join(reldir_cfg, filename_cfg)
 
     return da.env.path(process_area = 'a3_src',

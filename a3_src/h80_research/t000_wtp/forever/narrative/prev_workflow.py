@@ -23,7 +23,7 @@ protection:
     k00_general
 
 copyright:
-    "Copyright 2022-2023 William Payne"
+    "Copyright 2023 William Payne"
 
 license:
     "Licensed under the Apache License, Version

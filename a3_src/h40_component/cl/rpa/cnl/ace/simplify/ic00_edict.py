@@ -23,7 +23,7 @@ protection:
     k00_general
 
 copyright:
-    "Copyright 2015-2023 William Payne"
+    "Copyright 2023 William Payne"
 
 license:
     "Licensed under the Apache License, Version
@@ -47,6 +47,7 @@ license:
 
 
 import os
+import textwrap
 
 import dotenv
 
@@ -73,7 +74,18 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
                 secs_interval = cfg.get('secs_interval', 2),
                 default       = cfg.get('default',       default_args))
 
-    str_template = 'Please simplify the following into attempto controlled english: {text}'
+    str_template = textwrap.dedent("""
+        Please simplify the following engineering process document excerpt from
+        unconstrained English to Attempto Controlled English (ACE). Make sure
+        the simplified text is clear, concise, and retains the original meaning.
+
+        Excerpt:
+
+        "{text}"
+
+        Simplified Text (ACE):
+
+        """)
 
     map_template = {
         'id_endpoint':      'chat_completions',

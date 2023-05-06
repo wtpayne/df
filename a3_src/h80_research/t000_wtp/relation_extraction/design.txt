@@ -1,0 +1,51 @@
+Designing prompts for relation extraction from engineering standards
+documents can be a challenging task, as these documents are typically
+dense, highly structured, and use technical language. Here are some
+approaches you can use to create effective prompts for relation
+extraction:
+
+Understand the structure and content of engineering standards
+documents: Familiarize yourself with the typical structure, format,
+and language used in these documents. This will help you identify
+important elements and relationships that need to be extracted.
+
+Break down complex sentences: Engineering standards often contain
+long, complex sentences with multiple relationships. Break these
+sentences down into simpler, smaller sentences or phrases to make it
+easier for the model to identify and extract relations.
+
+Use templates for common relations: Identify common relationships
+found in engineering standards (e.g., component properties,
+performance criteria, or material specifications) and create
+templates or fill-in-the-blank questions to guide the model in
+extracting these relations.
+
+Leverage domain-specific terminology: Use domain-specific terminology
+and phrases commonly found in engineering standards to create more
+precise prompts that help the model better understand the context.
+
+Contextualize the prompt: Provide the model with some context about
+the document, such as the standard number or the field of
+engineering, to help it better understand the specific domain and
+improve relation extraction.
+
+Specify the desired output format: Clearly specify the desired output
+format for the extracted relations, such as a tuple, table, or graph
+representation. This will help the model provide consistent and
+structured outputs.
+
+Combine multiple prompts: Use a combination of prompts targeting
+different types of relations, which can help cover a wider range of
+information and increase the chances of accurate extraction.
+
+Iteratively refine prompts: Test and evaluate the performance of your
+prompts on a sample of engineering standards documents, and
+iteratively refine the prompts based on the results to improve their
+effectiveness.
+
+Incorporate examples: Provide the model with examples of correct
+relation extraction to help guide its understanding of the task.
+
+Fine-tune the model: Consider fine-tuning the model on a dataset of
+engineering standards documents to improve its domain-specific
+understanding and performance in relation extraction tasks.

@@ -23,7 +23,7 @@ protection:
     k00_general
 
 copyright:
-    "Copyright 2015-2022 William Payne"
+    "Copyright 2023 William Payne"
 
 license:
     "Licensed under the Apache License, Version
@@ -203,6 +203,27 @@ def python_source(source,
     """
     _python(option      = '-c',
             parameter   = "'{source}'".format(source = source),
+            id_env      = id_env,
+            id_env_boot = id_env_boot,
+            acct        = acct,
+            host        = host)
+
+
+# -----------------------------------------------------------------------------
+def python_function(spec,
+                    id_env,
+                    id_env_boot = None,
+                    acct        = None,
+                    host        = None):
+    """
+    Run a python module in the specified environment.
+
+    """
+    (name_module, name_function) = spec.rsplit('.', 1)
+    _python(option      = '-c',
+            parameter   = "'import {mod}; {mod}.{fcn}()'".format(
+                                                        mod = name_module,
+                                                        fcn = name_function),
             id_env      = id_env,
             id_env_boot = id_env_boot,
             acct        = acct,

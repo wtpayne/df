@@ -136,15 +136,6 @@ def _ensure_resolved(value):
     return value
 
 # -----------------------------------------------------------------------------
-def _resolve_callback_from_spec(str_spec):
-    """
-    Return a callable from a string specification.
-
-    """
-    return fcn
-
-
-# -----------------------------------------------------------------------------
 def _iter_widget_cfg(cfg):
     """
     Yield widget configuration from cfg.
@@ -354,12 +345,3 @@ def coroutine(fun):
     return primed
 
 
-# =============================================================================
-class DotDict(dict):
-    """
-    Custom dictionary with dot notation attribute access.
-
-    """
-    __getattr__ = dict.get
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__

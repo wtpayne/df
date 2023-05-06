@@ -13,7 +13,7 @@ protection:
     k00_public
 
 copyright:
-    "Copyright 2019 High Integrity Artificial Intelligence Systems"
+    "Copyright 2023 William Payne"
 
 license:
     "Licensed under the Apache License, Version 2.0 (the License);
@@ -66,7 +66,7 @@ def valid_file_metadata():
         'validation_level':     'v00_minimum',
         'protection':           'k00_public',
         'copyright':
-            "Copyright 2019 High Integrity Artificial Intelligence Systems",
+            "Copyright 2023 William Payne",
         'license': (
             'Licensed under the Apache License, Version 2.0 '
             '(the License); you may not use this file except in compliance '
