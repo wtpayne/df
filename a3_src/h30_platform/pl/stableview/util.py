@@ -3,11 +3,11 @@
 ---
 
 title:
-    "Stableflow editor utility function module."
+    "Stableview platform utility function module."
 
 description:
     "This python module contains assorted utility
-    functions used by the stableflow editor."
+    functions used by the stableview platform."
 
 id:
     "dc479ba2-6702-4fb1-91d8-5eb3f17a9cea"
@@ -44,11 +44,15 @@ license:
 ...
 """
 
+
 import collections
 import collections.abc
 import copy
 import functools
+import importlib
 import sys
+
+import fl.util
 
 
 # =============================================================================
@@ -364,3 +368,20 @@ class LiveMap(collections.abc.MutableMapping):
             pass
         for callback in self._lm_list_global_callback:
             callback(self)
+
+
+# -----------------------------------------------------------------------------
+def resolve(value):
+    """
+    Ensure that the provided value is fully resolved.
+
+    If the provided value is a string starting
+    with the prefix '_spec::' then resolve it
+    to the actual value.
+
+    """
+    if fl.util.is_string(value) and value.startswith('_spec::'):
+        (module, func) = value.split('::')[1].split(':')
+        return getattr(importlib.import_module(module), func)
+
+    return value

@@ -4,11 +4,11 @@
 ---
 
 title:
-    "Stableflow editor command line interface."
+    "Stableview GUI platform command line interface."
 
 description:
-    "This script is used to launch the
-    stableflow editor GUI."
+    "This script is used to launch a stableview
+    user interface."
 
 id:
     "fac2efd1-a12f-4726-8a19-3410c306dfd1"
@@ -48,18 +48,24 @@ license:
 
 import click
 
-import sfedit
+import pl.stableview
 
 
 # -----------------------------------------------------------------------------
 @click.command()
-@click.version_option(version = sfedit.__version__)
-def main():
+@click.version_option(version = pl.stableview.__version__)
+@click.argument(
+    'path_cfg',
+    required = False,
+    default  = None,
+    type     = click.STRING,
+    nargs    = -1)
+def main(path_cfg):
     """
-    Run the main view of the stableflow editor GUI.
+    Run the main view of the configured GUI.
 
     """
-    sfedit.main(cfg = sfedit.get_view_cfg('main'))
+    pl.stableview.main(path_cfg, 'main')
 
 
 # -----------------------------------------------------------------------------

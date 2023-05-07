@@ -3,11 +3,11 @@
 ---
 
 title:
-    "dm001_artificial_imagination demo commands."
+    "dm002_artificial_imagination demo commands."
 
 description:
     "This module defines commands for the
-    dm001_artificial_imagination demonstration."
+    dm002_artificial_imagination demonstration."
 
 id:
     "7b26801b-4f12-4102-9b4e-6bee29b73746"
@@ -66,7 +66,7 @@ def start():
     dirpath_tmp       = da.env.path(
                                 process_area = 'a4_tmp',
                                 control_tier = 'h90_internal',
-                                relpath      = 'dm001_artificial_imagination')
+                                relpath      = 'dm002_artificial_imagination')
     filename_urdf     = 'quadrotor.urdf'
     filepath_urdf     = os.path.join(dirpath_tmp, filename_urdf)
 
@@ -105,8 +105,8 @@ def _filepath_cfg():
 
     """
     import da.env
-    relpath_dir  = 'da/demo/dm001_artificial_imagination'
-    filename_cfg = 'dm001_artificial_imagination.stableflow.cfg.yaml'
+    relpath_dir  = 'da/demo/dm002_artificial_imagination'
+    filename_cfg = 'dm002_artificial_imagination.stableflow.cfg.yaml'
     relpath_cfg  = os.path.join(relpath_dir, filename_cfg)
     return da.env.path(
             process_area = 'a3_src',
@@ -123,4 +123,4 @@ def _dirpath_log():
     import da.env
     return da.env.path(process_area = 'a4_tmp',
                        control_tier = 'h90_internal',
-                       relpath      = 'dm001_artificial_imagination')
+                       relpath      = 'dm002_artificial_imagination')

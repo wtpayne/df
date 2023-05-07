@@ -3,17 +3,18 @@
 ---
 
 title:
-    "Workflow editor package."
+    "Stableview GUI building module."
 
 description:
-    "This package provides functions for
-    running the workflow editor"
+    "This module provides functions for
+    building the user interface widgets
+    from supplied configuration data."
 
 id:
-    "9fa93a78-fd12-44c4-9122-05b35e272340"
+    "0298490d-41be-4d04-a404-2ec1637190f7"
 
 type:
-    dt002_python_package
+    dt003_python_module
 
 validation_level:
     v00_minimum
@@ -44,100 +45,20 @@ license:
 ...
 """
 
-import collections
-import contextlib
 import copy
-import importlib
-import importlib.metadata
-import os.path
-
-import dearpygui.dearpygui
-import ruamel.yaml
 
 import fl.util
-import sfedit.util
-
-
-try:
-    __version__ = importlib.metadata.version('sfedit')
-except importlib.metadata.PackageNotFoundError:
-    __version__ = '0.0.1'
+import pl.stableview.util
 
 
 # -----------------------------------------------------------------------------
-def get_view_cfg(name_view):
-    """
-    Load configuration for the UI from the specified view.
-
-    """
-    filename_cfg = '{name_view}.uicfg.yaml'.format(name_view = name_view)
-    dirpath_self = os.path.dirname(os.path.realpath(__file__))
-    filepath_cfg = os.path.join(dirpath_self, 'view', filename_cfg)
-
-    with open(filepath_cfg, 'rt') as file:
-        return ruamel.yaml.YAML(typ = 'safe').load(file)
-
-
-# -----------------------------------------------------------------------------
-def main(cfg):
-    """
-    Main update/event loop for the ui.
-
-    The cfg data structure defines the basic
-    layout and structure of the GUI.
-
-    """
-    ctx               = fl.util.DotDict
-    ctx.ui            = dearpygui.dearpygui
-    ctx.cfg           = cfg
-    ctx.app_coroutine = _ensure_resolved(ctx.cfg['app_coroutine'])(ctx)
-
-    next(ctx.app_coroutine)                       # app early setup.
-
-    ctx.ui.create_context()
-    try:
-
-        _build_ui(ctx)
-        ctx.ui.setup_dearpygui()
-
-        next(ctx.app_coroutine)                   # app late setup.
-
-        ctx.ui.show_viewport()
-        while ctx.ui.is_dearpygui_running():
-
-            next(ctx.app_coroutine)               # app runtime step.
-
-            ctx.ui.render_dearpygui_frame()
-
-    finally:
-        ctx.ui.destroy_context()
-
-
-# -----------------------------------------------------------------------------
-def _ensure_resolved(value):
-    """
-    Ensure that the provided value is fully resolved.
-
-    If the provided value is a string starting
-    with the prefix '_spec::' then resolve it
-    to the actual value.
-
-    """
-    if fl.util.is_string(value) and value.startswith('_spec::'):
-        (module, func) = value.split('::')[1].split(':')
-        return getattr(importlib.import_module(module), func)
-
-    return value
-
-
-# -----------------------------------------------------------------------------
-def _build_ui(ctx):
+def ui(ctx):
     """
     Add widgets to the current context.
 
     """
 
-    # model = sfedit.util.ViewModel()
+    # model = pl.stableview.util.ViewModel()
 
     for (tup_path, cfg_widget) in _iter_widget_cfg(ctx.cfg):
 
@@ -155,7 +76,7 @@ def _build_ui(ctx):
         tup_key = tuple(kwargs.keys())
         for key in tup_key:
 
-            kwargs[key] = _ensure_resolved(value = kwargs[key])
+            kwargs[key] = pl.stableview.util.resolve(value = kwargs[key])
 
             if key.endswith('callback'):
                 kwargs['user_data'] = ctx

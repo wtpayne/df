@@ -3,11 +3,11 @@
 ---
 
 title:
-    "dm002_workflow demo commands."
+    "dm001_workflow demo commands."
 
 description:
     "This module defines commands for the 
-    dm002_workflow demonstration."
+    dm001_workflow demonstration."
 
 id:
     "87df2f55-214e-40be-9330-53cf354817ef"
@@ -51,7 +51,7 @@ import sys
 # -----------------------------------------------------------------------------
 def test():
     """
-    Run all dm002 tests.
+    Run all dm001 tests.
 
     """
     import da.env
@@ -131,19 +131,27 @@ def test():
 
 
 # -----------------------------------------------------------------------------
-def sfedit():
+def editor():
     """
-    Run dm002 stableflow editor.
+    Run dm001 stableflow editor.
 
     """
     import da.env.run
-    sys.exit(da.env.run.python_function(spec   = 'sfedit.cli.main',
-                                        id_env = 'e002_general_research'))
+
+    dirpath_editor = da.env.path(
+                            process_area = 'a3_src',
+                            control_tier = 'h80_research',
+                            relpath      = 'flowforge')
+    sys.exit(da.env.run.python_function(
+                            spec         = 'pl.stableview.main',
+                            iter_args    = (dirpath_editor, 'main'),
+                            id_env       = 'e002_general_research'))
+
 
 # -----------------------------------------------------------------------------
 def start():
     """
-    Start dm002 system.
+    Start dm001 system.
 
     """
     tup_overrides = ('host.localhost.dirpath_log',   _dirpath_log(),
@@ -157,7 +165,7 @@ def start():
 # -----------------------------------------------------------------------------
 def stop():
     """
-    Stop dm002 system.
+    Stop dm001 system.
 
     """
     import da.env.run
@@ -197,8 +205,8 @@ def _filepath_cfg():
     """
     import da.env
 
-    reldir_cfg   = 'da/demo/dm002_workflow'
-    filename_cfg = 'dm002_workflow.stableflow.cfg.yaml'
+    reldir_cfg   = 'da/demo/dm001_workflow'
+    filename_cfg = 'dm001_workflow.stableflow.cfg.yaml'
     relpath_cfg  = os.path.join(reldir_cfg, filename_cfg)
 
     return da.env.path(process_area = 'a3_src',

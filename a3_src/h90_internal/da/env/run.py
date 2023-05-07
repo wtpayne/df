@@ -212,6 +212,8 @@ def python_source(source,
 # -----------------------------------------------------------------------------
 def python_function(spec,
                     id_env,
+                    iter_args   = None,
+                    map_kwargs  = None,
                     id_env_boot = None,
                     acct        = None,
                     host        = None):
@@ -220,10 +222,28 @@ def python_function(spec,
 
     """
     (name_module, name_function) = spec.rsplit('.', 1)
-    _python(option      = '-c',
-            parameter   = "'import {mod}; {mod}.{fcn}()'".format(
+
+    str_args = ''
+
+    if iter_args:
+        list_args = list()
+        for arg in iter_args:
+            list_args.append('\"{arg}\"'.format(arg = arg))
+        str_args += ','.join(list_args)
+
+    if map_kwargs:
+        list_kwargs = list()
+        for (kw, value) in map_kwargs.items():
+            list_kwargs.append('{kw} = {value}'.format(kw = kw, value = value))
+        str_args += ','.join(list_kwargs)
+
+    str_python_source = "'import {mod}; {mod}.{fcn}({arg})'".format(
                                                         mod = name_module,
-                                                        fcn = name_function),
+                                                        fcn = name_function,
+                                                        arg = str_args)
+
+    _python(option      = '-c',
+            parameter   = str_python_source,
             id_env      = id_env,
             id_env_boot = id_env_boot,
             acct        = acct,

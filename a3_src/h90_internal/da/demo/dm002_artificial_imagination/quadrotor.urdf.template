@@ -14,7 +14,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="{dirpath_root}/a3_src/h90_internal/da/demo/dm001_artificial_imagination/quadrotor_base.obj" scale=".1 .1 .1"/>
+        <mesh filename="{dirpath_root}/a3_src/h90_internal/da/demo/dm002_artificial_imagination/quadrotor_base.obj" scale=".1 .1 .1"/>
       </geometry>
     </visual>
     <!-- note: the original hector quadrotor urdf had a (simplified, but still complex) collision mesh, too -->

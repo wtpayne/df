@@ -1,5 +1,5 @@
 system:
-  id_system: dm002_workflow
+  id_system: dm002_artificial_imagination
 
 
 ###############################################################################
@@ -34,8 +34,8 @@ node:
       py_module:    cl.ctrl.sys.ic00_edict
     state_type:     py_dict
     config:
-      frequency_hz: 10
-      idx_max:      1200
+      frequency_hz: 50
+      idx_max:      100
 
   # ---------------------------------------------------------------------------
   # State management for the main process.
@@ -48,39 +48,26 @@ node:
     state_type:     py_dict
 
   # ---------------------------------------------------------------------------
-  # UI.
+  # Simulator.
   #
-  ui:
+  simulator:
     process:        proc_main
     req_host_cfg:   default_configuration
     functionality:
-      py_module:    cl.ui.gradio.nlp.simple.ic00_edict
-    state_type:     py_dict
-
-  # ---------------------------------------------------------------------------
-  # ACE simplification.
-  #
-  ace:
-    process:        proc_main
-    req_host_cfg:   default_configuration
-    functionality:
-      py_module:    cl.rpa.cnl.ace.simplify.ic00_edict
+      py_module:    cl.sim.pybullet.ic00_edict
     state_type:     py_dict
     config:
-      filepath_env:         Null
-      envvar_key:           OPENAI_API_KEY
-      secs_interval:        0.1
-      is_bit:               False
-      is_async:             True
-      default:
-        id_endpoint:        'chat_completions'
-        model:              'gpt-3.5-turbo'
-        temperature:        1.0
-        n:                  1
-        stream:             False
-        presence_penalty:   0.0
-        frequency_penalty:  0.0
-        user:               ''
+      filepath_quadrotor: ''
+
+  # ---------------------------------------------------------------------------
+  # Debug display.
+  #
+  debug_display:
+    process:        proc_main
+    req_host_cfg:   default_configuration
+    functionality:
+      py_module:    cl.util.noop.ic00_edict
+    state_type:     py_dict
 
 
 ###############################################################################
@@ -100,19 +87,17 @@ edge:
 
 - owner: main_process_controller
   data:  py_dict
-  src:   main_process_controller.outputs.control_ui
-  dst:   ui.inputs.control
+  src:   main_process_controller.outputs.control_filesystem_watcher
+  dst:   simulator.inputs.control
 
-- owner: ui
-  data:  py_dict
-  src:   ui.outputs.text
-  dst:   ace.inputs.text
+# -----------------------------------------------------------------------------
+# Simulation pipeline.
+#
 
-- owner: ace
+- owner: simulator
   data:  py_dict
-  src:   ace.outputs.text
-  dst:   ui.inputs.text
-  dirn:  feedback
+  src:   simulator.outputs.sensor_data
+  dst:   debug_display.inputs.sensor_data
 
 
 ###############################################################################

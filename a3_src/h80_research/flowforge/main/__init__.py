@@ -3,7 +3,7 @@
 ---
 
 title:
-    "Workflow editor app module."
+    "Workflow editor main view."
 
 description:
     "This python module contains functions
@@ -45,12 +45,11 @@ license:
 """
 
 
-import sfedit.view.main_model
+from . import model
 
-
-SIDEBAR_WIDTH        = sfedit.view.main_model.SIDEBAR_WIDTH
-SIDEBAR_WIDGET_WIDTH = sfedit.view.main_model.SIDEBAR_WIDGET_WIDTH
-INDENT               = sfedit.view.main_model.INDENT
+SIDEBAR_WIDTH        = model.SIDEBAR_WIDTH
+SIDEBAR_WIDGET_WIDTH = model.SIDEBAR_WIDGET_WIDTH
+INDENT               = model.INDENT
 
 
 # -----------------------------------------------------------------------------
@@ -66,7 +65,7 @@ def coro(ctx):
     # that are bound to the widgets during their
     # creation.
     #
-    ctx.pm = sfedit.view.main_model.Model(ctx)
+    ctx.pm = model.Model(ctx)
 
     yield  # Context is created and widgets are added in gui.main().
 
