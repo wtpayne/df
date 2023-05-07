@@ -140,7 +140,7 @@ def editor():
 
     dirpath_editor = da.env.path(
                             process_area = 'a3_src',
-                            control_tier = 'h80_research',
+                            control_tier = 'h60_system',
                             relpath      = 'flowforge')
     sys.exit(da.env.run.python_function(
                             spec         = 'pl.stableview.main',

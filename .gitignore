@@ -45,11 +45,19 @@
 
 # Stableflow system configuration design documents.
 #
-!*.cfg.ini
-!*.cfg.json
-!*.cfg.toml
-!*.cfg.xml
-!*.cfg.yaml
+!*.stableflow.cfg.ini
+!*.stableflow.cfg.json
+!*.stableflow.cfg.toml
+!*.stableflow.cfg.xml
+!*.stableflow.cfg.yaml
+
+# Stableview system configuration design documents.
+#
+!*.stableview.cfg.ini
+!*.stableview.cfg.json
+!*.stableview.cfg.toml
+!*.stableview.cfg.xml
+!*.stableview.cfg.yaml
 
 # Python/Cython/Codon design documents.
 #

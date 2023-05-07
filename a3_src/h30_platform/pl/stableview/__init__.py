@@ -68,7 +68,7 @@ def _load_cfg(dirpath_cfg, name_view):
     Load configuration for the UI from the specified view.
 
     """
-    filename_cfg = '{name}.uicfg.yaml'.format(name = name_view)
+    filename_cfg = '{name}.stableview.cfg.yaml'.format(name = name_view)
     filepath_cfg = os.path.join(dirpath_cfg, name_view, filename_cfg)
 
     with open(filepath_cfg, 'rt') as file:

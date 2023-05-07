@@ -1,0 +1,338 @@
+# ------------------------------------------------------------------------------
+# Vieww logic as a coroutine.
+#
+coro_view:                        _spec::flowforge.main:coro
+
+# ------------------------------------------------------------------------------
+# Global event handlers.
+#
+globhandler:
+  _fcn:                           add_handler_registry
+
+  mouseright:
+    _fcn:                         add_mouse_click_handler
+    _kwargs:
+      button:                     _spec::dearpygui.dearpygui:mvMouseButton_Right
+      callback:                   _spec::flowforge.main:mouseright
+
+# ------------------------------------------------------------------------------
+# Viewport and top level window.
+#
+vp:
+  _fcn:                           create_viewport
+  _kwargs:
+    title:                        "Stableflow Editor"
+    width:                        1024
+    height:                       768
+
+  win:
+    _fcn:                         add_window
+    _misc:
+      set_primary_window:         True
+
+    # --------------------------------------------------------------------------
+    # Right-click context menu.
+    #
+    ctx:
+      _fcn:                       add_window
+      _kwargs:
+        label:                    "Actions"
+        modal:                    True
+        show:                     False
+        no_title_bar:             True
+
+      edit:
+        _fcn:                     add_text
+        _args:
+          - "Edit"
+
+      addnode:
+        _fcn:                     add_button
+        _kwargs:
+          label:                  "Add Node"
+          width:                  75
+          callback:               _spec::flowforge.main:ctx_addnode
+
+    # --------------------------------------------------------------------------
+    # Application menubar
+    #
+    menu:
+      _fcn:                       add_menu_bar
+
+      file:
+        _fcn:                     add_menu
+        _kwargs:
+          label:                  "File"
+
+        open:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Open"
+            callback:             _spec::flowforge.main:menu_file_open
+
+        save:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Save"
+            callback:             _spec::flowforge.main:menu_file_save
+
+        save_as:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Save As"
+            callback:             _spec::flowforge.main:menu_file_save
+
+      edit:
+        _fcn:                     add_menu
+        _kwargs:
+          label:                  "Edit"
+
+        addnode:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Add Node"
+            callback:             _spec::flowforge.main:menu_edit_addnode
+
+      tools:
+        _fcn:                     add_menu
+        _kwargs:
+          label:                  "Tools"
+
+        about:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show About"
+            callback:             _spec::flowforge.main:menu_tools_about
+
+        metrics:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show Metrics"
+            callback:             _spec::flowforge.main:menu_tools_metrics
+
+        doc:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show Documentation"
+            callback:             _spec::flowforge.main:menu_tools_doc
+
+        debug:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show Debug"
+            callback:             _spec::flowforge.main:menu_tools_debug
+
+        style:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show Style Editor"
+            callback:             _spec::flowforge.main:menu_tools_style
+
+        font:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show Font Editor"
+            callback:             _spec::flowforge.main:menu_tools_font
+
+        itemreg:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show Item Registry"
+            callback:             _spec::flowforge.main:menu_tools_itemreg
+
+        demo:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Demo"
+            callback:             _spec::flowforge.main:menu_tools_demo
+
+      help:
+        _fcn:                     add_menu
+        _kwargs:
+          label:                  "Help"
+
+        about:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "About"
+            callback:             _spec::flowforge.main:menu_help_about
+
+    # --------------------------------------------------------------------------
+    # Main workspace
+    #
+    main:
+      _fcn:                       add_group
+      _kwargs:
+        horizontal:               True
+
+      # ------------------------------------------------------------------------
+      # Sidebar
+      #
+      side:
+        _fcn:                     add_child_window
+        _kwargs:
+          width:                  _spec::flowforge.main:SIDEBAR_WIDTH
+          border:                 True
+          autosize_y:             True
+
+        tab:
+          _fcn:                   add_tab_bar
+
+          cfg:
+            _fcn:                 add_tab
+            _kwargs:
+              label:              "Cfg"
+
+            sys:
+              _fcn:               add_collapsing_header
+              _kwargs:
+                label:            "System"
+
+              id:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "System ID"
+                  indent:         _spec::flowforge.main:INDENT
+                  width:          _spec::flowforge.main:SIDEBAR_WIDGET_WIDTH
+                  callback:       _spec::flowforge.main:side_cfg_sys_id
+                _bindings:
+                  value:          default
+
+              separator:
+                _fcn:             add_separator
+
+            host:
+              _fcn:               add_collapsing_header
+              _kwargs:
+                label:            "Host"
+
+              count:
+                _fcn:             add_input_int
+                _kwargs:
+                  label:          "Host count"
+                  indent:         _spec::flowforge.main:INDENT
+                  width:          _spec::flowforge.main:SIDEBAR_WIDGET_WIDTH
+                  default_value:  1
+                  min_value:      1  # We rely on there being at least one host.
+                  min_clamped:    True
+                  callback:       _spec::flowforge.main:side_cfg_host_count
+
+              separator:
+                _fcn:             add_separator
+
+            proc:
+              _fcn:               add_collapsing_header
+              _kwargs:
+                label:            "Process"
+
+              count:
+                _fcn:             add_input_int
+                _kwargs:
+                  label:          "Process count"
+                  indent:         _spec::flowforge.main:INDENT
+                  width:          _spec::flowforge.main:SIDEBAR_WIDGET_WIDTH
+                  default_value:  1
+                  min_value:      1
+                  min_clamped:    True
+                  callback:       _spec::flowforge.main:side_cfg_proc_count
+
+              separator:
+                _fcn:             add_separator
+
+            node:
+              _fcn:               add_collapsing_header
+              _kwargs:
+                label:            "Node"
+
+              id:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "Node ID"
+                  indent:         _spec::flowforge.main:INDENT
+                  width:          _spec::flowforge.main:SIDEBAR_WIDGET_WIDTH
+                  callback:       _spec::flowforge.main:side_cfg_node_id
+
+              proc:
+                _fcn:             add_combo
+                _kwargs:
+                  label:          "Process ID"
+                  items:          [""]
+                  indent:         _spec::flowforge.main:INDENT
+                  width:          _spec::flowforge.main:SIDEBAR_WIDGET_WIDTH
+                  callback:       _spec::flowforge.main:side_cfg_node_proc
+
+              func:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "Implementation"
+                  indent:         _spec::flowforge.main:INDENT
+                  width:          _spec::flowforge.main:SIDEBAR_WIDGET_WIDTH
+
+              state:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "State data type"
+                  indent:         _spec::flowforge.main:INDENT
+                  width:          _spec::flowforge.main:SIDEBAR_WIDGET_WIDTH
+
+              cfg:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "Configuration"
+                  indent:         _spec::flowforge.main:INDENT
+                  width:          _spec::flowforge.main:SIDEBAR_WIDGET_WIDTH
+
+              countin:
+                _fcn:             add_input_int
+                _kwargs:
+                  label:          "Input count"
+                  indent:         _spec::flowforge.main:INDENT
+                  width:          _spec::flowforge.main:SIDEBAR_WIDGET_WIDTH
+                  min_value:      0
+                  min_clamped:    True
+                  callback:       _spec::flowforge.main:side_cfg_node_input_count
+
+              countout:
+                _fcn:             add_input_int
+                _kwargs:
+                  label:          "Output count"
+                  indent:         _spec::flowforge.main:INDENT
+                  width:          _spec::flowforge.main:SIDEBAR_WIDGET_WIDTH
+                  min_value:      0
+                  min_clamped:    True
+                  callback:       _spec::flowforge.main:side_cfg_node_output_count
+
+              separator:
+                _fcn:             add_separator
+
+            # Edges
+            edge:
+              _fcn:               add_collapsing_header
+              _kwargs:
+                label:            "Edge"
+
+              owner:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "Owner"
+                  indent:         _spec::flowforge.main:INDENT
+                  width:          _spec::flowforge.main:SIDEBAR_WIDGET_WIDTH
+
+              datatype:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "Data type"
+                  indent:         _spec::flowforge.main:INDENT
+                  width:          _spec::flowforge.main:SIDEBAR_WIDGET_WIDTH
+
+              separator:
+                _fcn:             add_separator
+
+      # ------------------------------------------------------------------------
+      # Node editor
+      #
+      nodeeditor:
+        _fcn:                     add_node_editor
+        _kwargs:
+          callback:               _spec::flowforge.main:node_link
+          delink_callback:        _spec::flowforge.main:node_delink
