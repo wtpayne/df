@@ -345,6 +345,24 @@ class SpecifyFlUtilBureau:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
+    def it_can_be_updated_from_a_key_value_tuple(self):
+        """
+        fl.util.Bureau containers can be updated using key-value tuples.
+
+        """
+        import fl.util
+        soi = fl.util.Bureau()
+        soi.from_key_value_tuple(((('a', 'c'), 100),
+                                  (('a', 'd'), 200),
+                                  (('b', 'e'), 300),
+                                  (('b', 'f'), 400)))
+        assert soi.a.c == 100
+        assert soi.a.d == 200
+        assert soi.b.e == 300
+        assert soi.b.f == 400
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_can_be_represented_as_a_nested_dict(self):
         """
         fl.util.Bureau containers can be represented as a nested dict.
@@ -359,6 +377,22 @@ class SpecifyFlUtilBureau:
 
         assert soi.as_nested_dict() == {'a': {'c': 100, 'd': 200},
                                         'b': {'e': 300, 'f': 400}}
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_be_updated_from_a_nested_dict(self):
+        """
+        fl.util.Bureau containers can be updated from a nested dict.
+
+        """
+        import fl.util
+        soi = fl.util.Bureau()
+        soi.from_nested_dict({'a': {'c': 100, 'd': 200},
+                              'b': {'e': 300, 'f': 400}})
+        assert soi.a.c == 100
+        assert soi.a.d == 200
+        assert soi.b.e == 300
+        assert soi.b.f == 400
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research

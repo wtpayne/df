@@ -150,6 +150,16 @@ class Bureau(collections.abc.MutableMapping):
                              gen_obj  = True))
 
     # -------------------------------------------------------------------------
+    def from_key_value_tuple(self, tup_kv):
+        """
+        Update Bureau from a key-value tuple.
+
+        """
+        for (tup_path, value) in tup_kv:
+            self._bureau_engine.set_item(path      = tup_path,
+                                         value_new = value)
+
+    # -------------------------------------------------------------------------
     def as_nested_dict(self):
         """
         Return a representation of self as a nested dict.
@@ -205,20 +215,15 @@ class Bureau(collections.abc.MutableMapping):
         return output
 
     # -------------------------------------------------------------------------
-    def from_key_value_tuple(self, tup_kv):
+    def from_nested_dict(self, map_item):
         """
         Load Bureau from a nested dict.
 
         """
-        pass
-
-    # -------------------------------------------------------------------------
-    def from_nested_dict(self, item):
-        """
-        Load Bureau from a nested dict.
-
-        """
-        pass
+        return self.from_key_value_tuple(walkobj(obj      = map_item,
+                                                 gen_leaf = True,
+                                                 gen_path = True,
+                                                 gen_obj  = True))
 
     # -------------------------------------------------------------------------
     def load(self, str_spec):
@@ -960,6 +965,127 @@ def walkobj(obj:         typing.Any,              # pylint: disable=R0912,R0913
     memo.remove(_id)
 
     return
+
+
+# -----------------------------------------------------------------------------
+def deserialize_xml_string(str_xml):
+    """
+    Return the data encoded in the the specified XML string.
+
+    """
+
+    import xmltodict          # pylint: disable=C0415
+    import xml.parsers.expat  # pylint: disable=C0415
+
+    map_data  = {}
+    map_error = {}
+
+    try:
+        map_data = xmltodict.parse(str_xml)
+    except xml.parsers.expat.ExpatError as err:
+        map_error['exception']      = err
+        map_error['message']        = str(err)
+        map_error['idx_char_start'] = None
+        map_error['idx_char_end']   = None
+        map_error['idx_line']       = err.lineno - 1
+        map_error['idx_col']        = err.offset
+
+    else:
+        if tuple(map_data.keys()) == ('root',):
+            map_data = map_data['root']
+
+    return (map_data, map_error)
+
+
+# -----------------------------------------------------------------------------
+def deserialize_json_string(str_json):
+    """
+    Return the data encoded in the the specified JSON string.
+
+    """
+
+    import json  # pylint: disable=C0415
+
+    map_data  = {}
+    map_error = {}
+
+    # Remove comment lines.
+    #
+    list_str_line = []
+    for str_line in str_json.splitlines():
+        str_line_naked = str_line.strip()
+        if str_line_naked.startswith('//') or str_line_naked.startswith('#'):
+            continue
+        list_str_line.append(str_line)
+
+    try:
+        map_data = json.loads(''.join(list_str_line))
+    except json.JSONDecodeError as err:
+        map_error['exception']      = err
+        map_error['message']        = err.msg
+        map_error['idx_char_start'] = err.pos
+        map_error['idx_char_end']   = err.end
+        map_error['idx_line']       = None
+        map_error['idx_col']        = None
+
+    return (map_data, map_error)
+
+
+# -----------------------------------------------------------------------------
+def deserialize_yaml_string(str_yaml):
+    """
+    Return the data encoded in the specified YAML string.
+
+    """
+
+    import yaml  # pylint: disable=C0415
+
+    map_data  = {}
+    map_error = {}
+
+    loader = yaml.SafeLoader
+    yaml.add_constructor('!regex',
+                         lambda l, n: str(n.value),
+                         Loader = loader)
+
+    try:
+        map_data = yaml.load(str_yaml, Loader = loader)
+    except yaml.YAMLError as err:
+        map_error['exception'] = err
+        map_error['message']   = str(err)
+        if hasattr(err, 'problem_mark'):
+            mark = err.problem_mark
+            map_error['idx_char_start'] = None
+            map_error['idx_char_end']   = None
+            map_error['idx_line']       = mark.line
+            map_error['idx_col']        = mark.column
+
+    return (map_data, map_error)
+
+
+# -----------------------------------------------------------------------------
+def deserialize_toml_string(str_yaml):
+    """
+    Return the data encoded in the specified TOML string.
+
+    """
+
+    import toml  # pylint: disable=C0415
+
+    map_data  = {}
+    map_error = {}
+
+    try:
+        map_data = toml.loads(file_cfg.read())
+    except toml.TomlDecodeError as err:
+        map_error['exception']      = err
+        map_error['message']        = err.msg
+        map_error['idx_char_start'] = err.pos
+        map_error['idx_char_end']   = None
+        map_error['idx_line']       = err.lineno - 1
+        map_error['idx_col']        = err.colno
+
+    return (map_data, map_error)
 
 
 # -----------------------------------------------------------------------------
