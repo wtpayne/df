@@ -7,10 +7,64 @@ Module of utility functions and classes used across the stableflow system.
 
 import collections
 import collections.abc
+import functools
 import itertools
 import string
 
 import dill
+
+
+# =============================================================================
+class PathDict(collections.UserDict):  # pylint: disable=R0901
+    """
+    Custom dictionary class supporting path-tuple based access.
+
+    """
+
+    # -------------------------------------------------------------------------
+    def __init__(self, *args, **kwargs):
+        """
+        Return a PathDict instance.
+
+        """
+        self.delim = '.'
+        super().__init__(*args, **kwargs)
+
+    # -------------------------------------------------------------------------
+    def __getitem__(self, key):
+        """
+        Return a reference to the specified item in data.
+
+        """
+        reference = self.data
+        for name in _ensure_list(key, delim = self.delim):
+            reference = reference[name]
+        return reference
+
+    # -------------------------------------------------------------------------
+    def __setitem__(self, key, value):
+        """
+        Return a reference to the specified item in data.
+
+        """
+        reference = self.data
+
+        # If we want to disable string
+        # to list conversion, we can
+        # set delim to None.
+        #
+        if self.delim is not None:
+            key = _ensure_list(key, delim = self.delim)
+
+        reference = self.data
+        for name in key[:-1]:
+            if name not in reference:
+                reference[name] = dict()
+            reference = reference[name]
+        if key:
+            reference[key[-1]] = value
+        else:
+            reference = value
 
 
 # -----------------------------------------------------------------------------
@@ -529,59 +583,6 @@ def function_from_dill(pickled_function):
 
     """
     return dill.loads(pickled_function)
-
-
-# =============================================================================
-class PathDict(collections.UserDict):  # pylint: disable=R0901
-    """
-    Custom dictionary class supporting path-tuple based access.
-
-    """
-
-    # -------------------------------------------------------------------------
-    def __init__(self, *args, **kwargs):
-        """
-        Return a PathDict instance.
-
-        """
-        self.delim = '.'
-        super().__init__(*args, **kwargs)
-
-    # -------------------------------------------------------------------------
-    def __getitem__(self, key):
-        """
-        Return a reference to the specified item in data.
-
-        """
-        reference = self.data
-        for name in _ensure_list(key, delim = self.delim):
-            reference = reference[name]
-        return reference
-
-    # -------------------------------------------------------------------------
-    def __setitem__(self, key, value):
-        """
-        Return a reference to the specified item in data.
-
-        """
-        reference = self.data
-
-        # If we want to disable string
-        # to list conversion, we can
-        # set delim to None.
-        #
-        if self.delim is not None:
-            key = _ensure_list(key, delim = self.delim)
-
-        reference = self.data
-        for name in key[:-1]:
-            if name not in reference:
-                reference[name] = dict()
-            reference = reference[name]
-        if key:
-            reference[key[-1]] = value
-        else:
-            reference = value
 
 
 # =============================================================================

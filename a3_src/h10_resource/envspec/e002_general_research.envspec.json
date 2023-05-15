@@ -98,10 +98,11 @@
     "",
     "",
     "# -----------------------------------------------------------------------",
-    "# Packages required by workflow.editor.",
+    "# Packages required by stableview.",
     "#",
     { "type": "pep508", "spec":    "dearpygui==1.9.0"                         },
     { "type": "pep508", "spec":    "imgui==2.0.0"                             },
+    { "type": "pep508", "spec":    "reactivex==4.0.4"                         },
 
     "",
     "",

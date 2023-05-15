@@ -57,9 +57,6 @@ def ui(ctx):
     Add widgets to the current context.
 
     """
-
-    # model = pl.stableview.util.ViewModel()
-
     for (tup_path, cfg_widget) in _iter_widget_cfg(ctx.cfg):
 
         name_fcn = cfg_widget['fcn']
@@ -69,9 +66,9 @@ def ui(ctx):
         misc     = cfg_widget['misc']
         fcn      = getattr(ctx.ui, name_fcn)
 
-        # Resolve constants and
-        # functions to their
-        # actual values.
+        # Resolve functions (and sometimes also
+        # constants) from specification strings
+        # to their actual (e.g. callable) values.
         #
         tup_key = tuple(kwargs.keys())
         for key in tup_key:
@@ -81,8 +78,10 @@ def ui(ctx):
             if key.endswith('callback'):
                 kwargs['user_data'] = ctx
 
-        # Handle functions with
-        # no tag parameter.
+        # Handle nodes where the associated
+        # DearPyGui function does not expect
+        # either a tag parameter or a parent
+        # parameter.
         #
         tup_no_tag = ('create_viewport',
                       'bind_item_handler_registry')
@@ -105,10 +104,6 @@ def ui(ctx):
                 ctx.ui.set_primary_window(str_tag, True)
             continue
 
-        # Bind widgets to the view model.
-        #
-        # model.bind(str_tag)
-
         # Handle all other functions.
         #
         str_parent       = '.'.join(tup_path[:-1])
@@ -118,12 +113,59 @@ def ui(ctx):
         else:
             fcn(**kwargs)
 
+        # Bind widgets to the view model.
+        #
+        # if name_fcn == 'add_menu_item':
+        print('')
+        print('')
+        print('-' * 60)
+        print(str_tag)
+        print('=' * len(str_tag))
+        print('')
+        import pprint
+        pprint.pprint(ctx.ui.get_item_configuration(str_tag))
+        print('')
+
+        # model.bind(
+        #         tag         = str_tag,
+        #         ui_property = 'value',
+        #         ui_callback = 'callback')
 
 
 # -----------------------------------------------------------------------------
 def _iter_widget_cfg(cfg):
     """
-    Yield widget configuration from cfg.
+    Yield widget configuration items from the given configuration object.
+
+    This function iterates through the given
+    configuration object, extracting widget
+    configurations based on specific keys
+    starting with an underscore.
+
+    It also ensures that the widget configuration
+    contains 'bindings', 'kwargs', 'args', and
+    'misc' keys with default values if they are
+    not present.
+
+    Parameters:
+
+        cfg (dict): The configuration object containing
+                    widget configurations.
+
+    Yields:
+
+        tuple:  A tuple containing the path to the widget
+                configuration and the widget configuration
+                itself as a dictionary.
+
+    Example:
+
+        Given a configuration object `cfg` containing
+        widget configurations, the function can be
+        used as follows:
+
+            >>> for path, widget_config in _iter_widget_cfg(cfg):
+            ...     print(path, widget_config)
 
     """
     for (tup_path, item) in fl.util.walkobj(cfg,
