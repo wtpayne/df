@@ -99,13 +99,12 @@ class Bureau(collections.abc.MutableMapping):
         tables and supports callback registration
         for change listeners.
 
-        TODO: Consider removing callbacks from _set_item_impl.
+        TODO: Consider removing callbacks from _do_update. OR MOVE JOURNAL IN THERE?
         TODO: Design mechanism for binding to other Bureau trees.
         TODO: Support for remote sync (Load/update from journal)
         TODO: Handle clearing down the journal.
 
         TODO: Save/Load to/from JSON/YAML/XML/SQLITE
-        TODO: Handle deletions of fields __del__
         TODO: Reactive programming with RxPy ???
         TODO: Regex-based listening on paths. (jquery-like?) ???
 
@@ -146,6 +145,7 @@ class Bureau(collections.abc.MutableMapping):
         Gets the value for the specified key.
 
         """
+
         return self._bureau_engine.get_item(path = self._tup_full_path(key))
 
     # -------------------------------------------------------------------------
@@ -154,8 +154,10 @@ class Bureau(collections.abc.MutableMapping):
         Sets a key-value pair.
 
         """
+
         self._bureau_engine.set_item(path      = self._tup_full_path(key),
                                      value_new = value)
+
         return None
 
     # -------------------------------------------------------------------------
@@ -164,7 +166,10 @@ class Bureau(collections.abc.MutableMapping):
         Delete the specified key.
 
         """
-        return self._bureau_engine.del_item(path = self._tup_full_path(key))
+
+        self._bureau_engine.del_item(path = self._tup_full_path(key))
+
+        return None
 
     # -------------------------------------------------------------------------
     def __iter__(self):
@@ -172,6 +177,7 @@ class Bureau(collections.abc.MutableMapping):
         Return an iterator over elements in the Bureau.
 
         """
+
         return self._bureau_data.__iter__()
 
     # -------------------------------------------------------------------------
@@ -180,6 +186,7 @@ class Bureau(collections.abc.MutableMapping):
         Return the number of elements in the Bureau.
 
         """
+
         return self._bureau_data.__len__()
 
     # -------------------------------------------------------------------------
@@ -188,10 +195,12 @@ class Bureau(collections.abc.MutableMapping):
         Sets a key-value pair.
 
         """
+
         if key in Bureau._bureau_attributes:
             super().__setattr__(key, value)
         else:
             self.__setitem__(key, value)
+
         return None
 
     # -------------------------------------------------------------------------
@@ -200,6 +209,7 @@ class Bureau(collections.abc.MutableMapping):
         Gets the value for the specified key.
 
         """
+
         return self.__getitem__(key)
 
     # -------------------------------------------------------------------------
@@ -208,6 +218,7 @@ class Bureau(collections.abc.MutableMapping):
         Return a string representation of the Bureau.
 
         """
+
         list_kv = list()
         for (key, value) in self._bureau_data.items():
 
@@ -231,6 +242,7 @@ class Bureau(collections.abc.MutableMapping):
         Undo the last edit in the bureau engine edit history.
 
         """
+
         return self._bureau_engine.undo()
 
     # -------------------------------------------------------------------------
@@ -239,6 +251,7 @@ class Bureau(collections.abc.MutableMapping):
         Redo the last undo in the bureau engine undo history.
 
         """
+
         return self._bureau_engine.redo()
 
     # -------------------------------------------------------------------------
@@ -247,6 +260,7 @@ class Bureau(collections.abc.MutableMapping):
         Add a callback function for the specified key.
 
         """
+
         return self._bureau_engine.add_callback(
                                         tup_path = self._tup_full_path(key),
                                         callback = callback)
@@ -257,6 +271,7 @@ class Bureau(collections.abc.MutableMapping):
         Return a representation of self as a key-value tuple.
 
         """
+
         return tuple(walkobj(obj      = self,
                              gen_leaf = True,
                              gen_path = True,
@@ -301,9 +316,12 @@ class Bureau(collections.abc.MutableMapping):
                     to the values in the object.
 
         """
+
         output = dict()
+
         for (tup_path, value) in sorted(self.as_key_value_tuple(),
                                         key = lambda item: len(item[0])):
+
             cursor = output
             for name in tup_path[:-1]:
                 if name not in cursor:
@@ -320,6 +338,7 @@ class Bureau(collections.abc.MutableMapping):
         Return the journal.
 
         """
+
         return self._bureau_engine._journal
 
 
@@ -329,7 +348,9 @@ class Bureau(collections.abc.MutableMapping):
         Return the full path to the specified key as a tuple.
 
         """
+
         iter_branch = _iter_path(key, self._bureau_path_delimiter)
+
         return self._bureau_path + tuple(iter_branch)
 
 
@@ -346,12 +367,26 @@ class BureauEngine():
         Returns a new BureauEngine instance.
 
         """
+
         self._bureau         = bureau
         self._journal        = list()
         self._hist_edit      = list()
         self._hist_undo      = list()
         self._list_callback  = list()  # Global callbacks.
         self._map_callback   = dict()  # Callbacks specific to a key.
+
+    # -------------------------------------------------------------------------
+    def add_callback(self, tup_path, callback):
+        """
+        Add a callback function for the specified key.
+
+        """
+
+        if tup_path not in self._map_callback:
+            self._map_callback[tup_path] = list()
+        self._map_callback[tup_path].append(callback)
+
+        return None
 
     # -------------------------------------------------------------------------
     def get_item(self, path):
@@ -376,83 +411,94 @@ class BureauEngine():
         return cursor
 
     # -------------------------------------------------------------------------
+    def del_item(self, path):
+        """
+        Deleter implementation.
+
+        """
+
+        self.set_item(path = path, value_new = None, operation = 'del')
+        return None
+
+    # -------------------------------------------------------------------------
     def set_item(self, path, value_new, operation = 'edit'):
         """
         Setter implementation.
 
         """
 
-        value_old = self._set_item_impl(path, value_new)
-        command   = (operation, path, value_old, value_new)
-        self._hist_edit.append(command)
-        self._journal.append(command)
-        return None
-
-    # -------------------------------------------------------------------------
-    def del_item(self, path):
-        """
-        TODO: MAKE SURE WE IMPLEMENT THIS PROPERLY, INCLUDING CALLBACKS
-
-        """
-        self.set_item(path, None, operation = 'del')
-        self._bureau_data.__delitem__(key)
+        self._hist_edit.append(
+                    self._do_update_and_bookkeeping(
+                            BureauEngineCommand(operation = operation,
+                                                path      = path,
+                                                value_new = value_new,
+                                                value_old = None)))
         return None
 
     # -------------------------------------------------------------------------
     def undo(self):
         """
-        Get the last edit, run it in reverse and store in the undo history.
+        Get the last edit, reverse it, and store in the undo history.
 
         """
-        if self._hist_edit:
-            command = self._hist_edit.pop()
-            self._step_reverse(command)
-            self._hist_undo.append(command)
-            self._journal.append(('undo',) + command[1:])
+
+        if not self._hist_edit:
+            return None
+
+        cmd_edit = self._hist_edit.pop()
+        self._hist_undo.append(
+                    self._do_update_and_bookkeeping(
+                                    BureauEngineCommand(
+                                            operation = 'undo',
+                                            path      = cmd_edit.path,
+                                            value_new = cmd_edit.value_old,
+                                            value_old = cmd_edit.value_new)))
+        return None
 
     # -------------------------------------------------------------------------
     def redo(self):
         """
-        Get the last undo, run it forwards, and store in the edit history.
+        Get the last undo, reverse it, and store in the edit history.
 
         """
-        if self._hist_undo:
-            command = self._hist_undo.pop()
-            self._step_forward(command)
-            self._hist_edit.append(command)
-            self._journal.append(('redo',) + command[1:])
+
+        if not self._hist_undo:
+            return None
+
+        cmd_undo = self._hist_undo.pop()
+        self._hist_edit.append(
+                    self._do_update_and_bookkeeping(
+                                    BureauEngineCommand(
+                                            operation = 'redo',
+                                            path      = cmd_undo.path,
+                                            value_new = cmd_undo.value_old,
+                                            value_old = cmd_undo.value_new)))
+        return None
 
     # -------------------------------------------------------------------------
-    def add_callback(self, tup_path, callback):
+    def _do_update_and_bookkeeping(self, cmd):
         """
-        Add a callback function for the specified key.
+        Sets a new value in the specified bureau and returns the old value.
+
+        Also performs book-keeping tasks such as
+        invoking related callbacks, updating
+        the journal etc...
 
         """
-        print('ADD CALLBACK FOR: ' + repr(tup_path))
-        if tup_path not in self._map_callback:
-            self._map_callback[tup_path] = list()
-        self._map_callback[tup_path].append(callback)
+        value_old = self._do_update(cmd.path, cmd.value_new)
+        if cmd.operation == 'del':
+            self._bureau_data.__delitem__(key)
+        cmd = BureauEngineCommand(operation = cmd.operation,
+                                  path      = cmd.path,
+                                  value_new = cmd.value_new,
+                                  value_old = value_old)
+        self._invoke_callbacks(cmd)
+        self._journal.append(cmd)
 
-    # -------------------------------------------------------------------------
-    def _step_forward(self, command):
-        """
-        Step a mutation command in the forward direction.
-
-        """
-        (_, path, _, value_new) = command
-        self._set_item_impl(path, value_new)
-
-    # -------------------------------------------------------------------------
-    def _step_reverse(self, command):
-        """
-        Step a mutation command in the reverse direction.
-
-        """
-        (_, path, value_old, _) = command
-        self._set_item_impl(path, value_old)
+        return cmd
 
     # -------------------------------------------------------------------------
-    def _set_item_impl(self, tup_path, value_new):
+    def _do_update(self, tup_path, value_new):
         """
         Sets a new value in the specified bureau and returns the old value.
 
@@ -496,11 +542,6 @@ class BureauEngine():
 
         """
 
-        # Keep track of which paths
-        # are being modified.
-        #
-        list_path_modified = list()
-
         # Resolve path-like keys.
         #
         cursor      = self._bureau._bureau_data
@@ -508,7 +549,6 @@ class BureauEngine():
         for name in tup_path[:-1]:
             path_cursor += (name,)
             cursor      = self._ensure_exists(path_cursor, cursor, name)
-            list_path_modified.append(path_cursor)
 
         # Invalid keys raise KeyError.
         #
@@ -521,12 +561,10 @@ class BureauEngine():
         # key (or the whole key if it is atomic).
         #
         path_cursor += (name,)
-        list_path_modified.append(path_cursor)
 
         # Avoid recursion and get the old value.
         #
         (get_item, set_item) = _accessor_functions(cursor)
-
         if name in tuple(cursor.keys()):  # NUST BE tuple(cursor.keys())
             value_old    = get_item(name)
             is_recursive = (value_old is value_new)
@@ -535,12 +573,9 @@ class BureauEngine():
         else:
             value_old = None
 
-        # Apply the change and invoke callbacks.
+        # Apply the change.
         #
         set_item(name, value_new)
-        self._invoke_callbacks(
-                        list_path_modified, tup_path, value_old, value_new)
-
         return value_old
 
     # -------------------------------------------------------------------------
@@ -561,6 +596,7 @@ class BureauEngine():
         cursor.
 
         """
+
         (get_item, set_item) = _accessor_functions(cursor)
         try:
             cursor = get_item(name)
@@ -569,11 +605,11 @@ class BureauEngine():
                                 path   = tup_path_cursor)
             set_item(name, bureau_new)
             cursor = bureau_new
+
         return cursor
 
     # -------------------------------------------------------------------------
-    def _invoke_callbacks(
-                self, list_path_modified, tup_path, value_old, value_new):
+    def _invoke_callbacks(self, cmd):
         """
         Invoke callbacks.
 
@@ -584,12 +620,16 @@ class BureauEngine():
         # Extend the calback list with
         # key-specific callbacks.
         #
-        for tup_path in list_path_modified:
-            if tup_path in self._map_callback:
-                list_callback.extend(self._map_callback[tup_path])
+        tup_path_part = tuple()
+        for item in cmd.path:
+            tup_path_part += (item,)
+            if tup_path_part in self._map_callback:
+                list_callback.extend(self._map_callback[tup_path_part])
 
         for callback in list_callback:
-            callback(tup_path, value_old, value_new)
+            callback(cmd)
+
+        return None
 
 
 # -----------------------------------------------------------------------------
@@ -629,16 +669,15 @@ def _iter_path(path, delim):
 
     This function returns a generator that yields
     each item in a given path. The path can be a
-    string, an iterable, or an atomic(non-string,
+    string, an iterable, or an atomic (non-string,
     non-iterable) value.
 
     If the path is a string, it is split by a
     specified delimiter, and each item is yielded.
 
     If the item can be converted to an integer,
-    it is yielded as an integer;
-
-    otherwise, it is yielded as a string.
+    it is yielded as an integer; otherwise, it
+    is yielded as a string.
 
     If the path is an iterable (but not a string),
     each item in the iterable is yielded.
@@ -652,11 +691,11 @@ def _iter_path(path, delim):
     # delimiter and yield each item in turn.
     #
     try:
-        for name in path.split(delim):
+        for item in path.split(delim):
             try:
-                yield int(name)
+                yield int(item)  # Support for indices into lists.
             except ValueError:
-                yield name
+                yield item
 
     # If the path is not a string (it doesn't
     # have the split method), it treats it as
@@ -664,8 +703,8 @@ def _iter_path(path, delim):
     #
     except AttributeError:
         try:
-            for name in path:
-                yield name
+            for item in path:
+                yield item
 
         # If the path is not an iterable either,
         # it treats it as an atomic value and
@@ -676,11 +715,19 @@ def _iter_path(path, delim):
 
 
 # =============================================================================
+BureauEngineCommand = collections.namedtuple(
+        typename    = 'BureauEngineCommand',
+        field_names = ('operation', 'path', 'value_new', 'value_old'),
+        defaults    = ('edit',      '',     None,        None))
+
+
+# =============================================================================
 class DotDict(dict):
     """
     Custom dictionary with dot notation attribute access.
 
     """
+
     __getattr__ = dict.get
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
@@ -696,6 +743,7 @@ def coroutine(fun):
     ...
 
     """
+
     def primed(*args, **kwargs):
         """
         Wrapper for coroutines that 'primes' it by sending the first message.
@@ -708,6 +756,7 @@ def coroutine(fun):
         coro = fun(*args, **kwargs)
         coro.send(None)
         return coro
+
     return primed
 
 
@@ -868,6 +917,7 @@ def walkobj(obj:         typing.Any,              # pylint: disable=R0912,R0913
     # with them and about to pop the stack.
     #
     memo.remove(_id)
+
     return
 
 
@@ -877,6 +927,7 @@ def is_string(obj):
     Return true if obj is a string. Works in Python 2 and Python 3.
 
     """
+
     return isinstance(obj, string_types())
 
 
@@ -886,8 +937,12 @@ def string_types():
     Return the string types for the current Python version.
 
     """
+
     is_python_2 = str is bytes
     if is_python_2:  # pylint: disable=R1705
+
         return (str, unicode)  # pylint: disable=E0602
+
     else:
+
         return (str, bytes)

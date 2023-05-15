@@ -244,15 +244,15 @@ class SpecifyFlUtilBureau:
         path_written  = None
 
         # ---------------------------------------------------------------------
-        def _test_callback(tup_path, value_old, value_new):
+        def _test_callback(cmd):
             """
             Test callback.
 
             """
             nonlocal value_written
             nonlocal path_written
-            value_written = value_new
-            path_written  = tup_path
+            value_written = cmd.value_new
+            path_written  = cmd.path
 
         import fl.util
         soi   = fl.util.Bureau()
@@ -275,15 +275,15 @@ class SpecifyFlUtilBureau:
         path_written  = None
 
         # ---------------------------------------------------------------------
-        def _test_callback(tup_path, value_old, value_new):
+        def _test_callback(cmd):
             """
             Test callback.
 
             """
             nonlocal value_written
             nonlocal path_written
-            value_written = value_new
-            path_written  = tup_path
+            value_written = cmd.value_new
+            path_written  = cmd.path
 
         import fl.util
         soi    = fl.util.Bureau()
@@ -306,15 +306,16 @@ class SpecifyFlUtilBureau:
         value_written = None
         path_written  = None
 
-        def _test_callback(tup_path, value_old, value_new):
+        # ---------------------------------------------------------------------
+        def _test_callback(cmd):
             """
             Test callback.
 
             """
             nonlocal value_written
             nonlocal path_written
-            value_written = value_new
-            path_written  = tup_path
+            value_written = cmd.value_new
+            path_written  = cmd.path
 
         import fl.util
         soi = fl.util.Bureau()
@@ -376,10 +377,16 @@ class SpecifyFlUtilBureau:
         soi.undo()
         soi.redo()
 
-        assert soi.journal() == [('edit', ('a', 'c'), None, 100),
-                                 ('edit', ('a', 'd'), None, 200),
-                                 ('edit', ('b', 'e'), None, 300),
-                                 ('edit', ('b', 'f'), None, 400),
-                                 ('edit', ('b', 'f'), 400,  500),
-                                 ('undo', ('b', 'f'), 400,  500),
-                                 ('redo', ('b', 'f'), 400,  500)]
+        iter_journal    = soi.journal()
+        tup_tup_journal = tuple(tuple(item) for item in iter_journal)
+
+        import pprint
+        pprint.pprint(tup_tup_journal)
+
+        assert tup_tup_journal == (('edit', ('a', 'c'), 100, None ),
+                                   ('edit', ('a', 'd'), 200, None ),
+                                   ('edit', ('b', 'e'), 300, None ),
+                                   ('edit', ('b', 'f'), 400, None ),
+                                   ('edit', ('b', 'f'), 500, 400  ),
+                                   ('undo', ('b', 'f'), 400, 500  ),
+                                   ('redo', ('b', 'f'), 500, 400  ))
