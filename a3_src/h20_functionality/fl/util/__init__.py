@@ -99,10 +99,8 @@ class Bureau(collections.abc.MutableMapping):
         tables and supports callback registration
         for change listeners.
 
-        TODO: Consider removing callbacks from _do_update. OR MOVE JOURNAL IN THERE?
         TODO: Design mechanism for binding to other Bureau trees.
         TODO: Support for remote sync (Load/update from journal)
-        TODO: Handle clearing down the journal.
 
         TODO: Save/Load to/from JSON/YAML/XML/SQLITE
         TODO: Reactive programming with RxPy ???
@@ -333,13 +331,26 @@ class Bureau(collections.abc.MutableMapping):
         return output
 
     # -------------------------------------------------------------------------
-    def journal(self):
+    def journal_peek(self):
         """
-        Return the journal.
+        Return the journal without clearing it.
 
         """
 
         return self._bureau_engine._journal
+
+
+    # -------------------------------------------------------------------------
+    def journal_pop(self):
+        """
+        Return the journal and clear it.
+
+        """
+
+        journal    = list()
+        journal[:] = self._bureau_engine._journal
+        self._bureau_engine._journal.clear()
+        return journal
 
 
     # -------------------------------------------------------------------------

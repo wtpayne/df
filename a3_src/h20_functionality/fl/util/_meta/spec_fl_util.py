@@ -377,7 +377,7 @@ class SpecifyFlUtilBureau:
         soi.undo()
         soi.redo()
 
-        iter_journal    = soi.journal()
+        iter_journal    = soi.journal_pop()
         tup_tup_journal = tuple(tuple(item) for item in iter_journal)
 
         import pprint
