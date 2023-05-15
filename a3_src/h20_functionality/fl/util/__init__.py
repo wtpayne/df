@@ -138,6 +138,105 @@ class Bureau(collections.abc.MutableMapping):
         self._bureau_path_delimiter = path_delimiter
 
     # -------------------------------------------------------------------------
+    def as_key_value_tuple(self):
+        """
+        Return a representation of self as a key-value tuple.
+
+        """
+
+        return tuple(walkobj(obj      = self,
+                             gen_leaf = True,
+                             gen_path = True,
+                             gen_obj  = True))
+
+    # -------------------------------------------------------------------------
+    def as_nested_dict(self):
+        """
+        Return a representation of self as a nested dict.
+
+        This function converts the current Bureau
+        instance into a nested dictionary
+        representation.
+
+        This method traverses the object using
+        the `walkobj` utility function (via the
+        as_key_value_tuple method), which
+        generates length-2 tuples where the
+        first element is a path indicating a
+        location in the Bureau and the second
+        element is the value at that path.
+
+        The paths are sorted by their length as
+        a (probably unnecessary) sanity check
+        to ensure that parent dictionaries are
+        created before their children.
+
+        For each path-value pair, this method
+        creates nested dictionaries within the
+        output dictionary according to the path,
+        and sets the innermost dictionary's value
+        according to the value.
+
+        The resulting dictionary has the same
+        nested structure as the original object,
+        and can be used for purposes like
+        serialization.
+
+        :returns:   A nested dictionary representation of the object. The
+                    keys in the dictionary correspond to the paths in the
+                    object, and the values in the dictionary correspond
+                    to the values in the object.
+
+        """
+
+        output = dict()
+
+        for (tup_path, value) in sorted(self.as_key_value_tuple(),
+                                        key = lambda item: len(item[0])):
+
+            cursor = output
+            for name in tup_path[:-1]:
+                if name not in cursor:
+                    cursor[name] = dict()
+                cursor = cursor[name]
+            name = tup_path[-1]
+            cursor[name] = value
+
+        return output
+
+    # -------------------------------------------------------------------------
+    def from_key_value_tuple(self, tup_kv):
+        """
+        Load Bureau from a nested dict.
+
+        """
+        pass
+
+    # -------------------------------------------------------------------------
+    def from_nested_dict(self, item):
+        """
+        Load Bureau from a nested dict.
+
+        """
+        pass
+
+    # -------------------------------------------------------------------------
+    def load(self, str_spec):
+        """
+        Load Bureau from file or database.
+
+        """
+        pass
+
+    # -------------------------------------------------------------------------
+    def save(self, str_spec):
+        """
+        Save Bureau to file or database.
+
+        """
+        pass
+
+    # -------------------------------------------------------------------------
     def __getitem__(self, key):
         """
         Gets the value for the specified key.
@@ -264,73 +363,6 @@ class Bureau(collections.abc.MutableMapping):
                                         callback = callback)
 
     # -------------------------------------------------------------------------
-    def as_key_value_tuple(self):
-        """
-        Return a representation of self as a key-value tuple.
-
-        """
-
-        return tuple(walkobj(obj      = self,
-                             gen_leaf = True,
-                             gen_path = True,
-                             gen_obj  = True))
-
-    # -------------------------------------------------------------------------
-    def as_nested_dict(self):
-        """
-        Return a representation of self as a nested dict.
-
-        This function converts the current Bureau
-        instance into a nested dictionary
-        representation.
-
-        This method traverses the object using
-        the `walkobj` utility function (via the
-        as_key_value_tuple method), which
-        generates length-2 tuples where the
-        first element is a path indicating a
-        location in the Bureau and the second
-        element is the value at that path.
-
-        The paths are sorted by their length as
-        a (probably unnecessary) sanity check
-        to ensure that parent dictionaries are
-        created before their children.
-
-        For each path-value pair, this method
-        creates nested dictionaries within the
-        output dictionary according to the path,
-        and sets the innermost dictionary's value
-        according to the value.
-
-        The resulting dictionary has the same
-        nested structure as the original object,
-        and can be used for purposes like
-        serialization.
-
-        :returns:   A nested dictionary representation of the object. The
-                    keys in the dictionary correspond to the paths in the
-                    object, and the values in the dictionary correspond
-                    to the values in the object.
-
-        """
-
-        output = dict()
-
-        for (tup_path, value) in sorted(self.as_key_value_tuple(),
-                                        key = lambda item: len(item[0])):
-
-            cursor = output
-            for name in tup_path[:-1]:
-                if name not in cursor:
-                    cursor[name] = dict()
-                cursor = cursor[name]
-            name = tup_path[-1]
-            cursor[name] = value
-
-        return output
-
-    # -------------------------------------------------------------------------
     def journal_peek(self):
         """
         Return the journal without clearing it.
@@ -338,7 +370,6 @@ class Bureau(collections.abc.MutableMapping):
         """
 
         return self._bureau_engine._journal
-
 
     # -------------------------------------------------------------------------
     def journal_pop(self):
@@ -351,7 +382,6 @@ class Bureau(collections.abc.MutableMapping):
         journal[:] = self._bureau_engine._journal
         self._bureau_engine._journal.clear()
         return journal
-
 
     # -------------------------------------------------------------------------
     def _tup_full_path(self, key):
