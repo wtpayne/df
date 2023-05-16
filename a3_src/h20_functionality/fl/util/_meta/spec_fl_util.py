@@ -4,6 +4,9 @@ Functional specification for fl.util
 
 """
 
+
+import textwrap
+
 import pytest
 
 
@@ -424,3 +427,214 @@ class SpecifyFlUtilBureau:
                                    ('edit', ('b', 'f'), 500, 400  ),
                                    ('undo', ('b', 'f'), 400, 500  ),
                                    ('redo', ('b', 'f'), 500, 400  ))
+
+
+# =============================================================================
+class SpecifyFlUtilSerializeToString:
+    """
+    Spec for the fl.util.serialize_to_string function.
+
+    """
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_serialize_to_xml(self):
+        """
+        fl.util.serialize_to_string can serialize a dict to xml
+
+        """
+        import fl.util
+        map_input  = dict(a = dict(b = 1, c = 2, d = 3))
+        (str_output, map_error) = fl.util.serialize_to_string(
+                                                        map_input, 'xml')
+
+        assert map_error is None
+        assert str_output == textwrap.dedent(
+                                        """
+                                        <?xml version="1.0" encoding="utf-8"?>
+                                        <a>
+                                          <b>1</b>
+                                          <c>2</c>
+                                          <d>3</d>
+                                        </a>
+                                        """).strip()
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_serialize_to_json(self):
+        """
+        fl.util.serialize_to_string can serialize a dict to json
+
+        """
+        import fl.util
+        map_input  = dict(a = dict(b = 1, c = 2, d = 3))
+        (str_output, map_error) = fl.util.serialize_to_string(
+                                                        map_input, 'json')
+
+        assert str_output == textwrap.dedent(
+                                        """
+                                        {
+                                          "a": {
+                                            "b": 1,
+                                            "c": 2,
+                                            "d": 3
+                                          }
+                                        }
+                                        """).strip()
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_serialize_to_toml(self):
+        """
+        fl.util.serialize_to_string can serialize a dict to toml
+
+        """
+        import fl.util
+        map_input  = dict(a = dict(b = 1, c = 2, d = 3))
+        (str_output, map_error) = fl.util.serialize_to_string(
+                                                        map_input, 'toml')
+
+        assert str_output == textwrap.dedent(
+                                        """
+                                        [a]
+                                        b = 1
+                                        c = 2
+                                        d = 3
+                                        """).strip()
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_serialize_to_yaml(self):
+        """
+        fl.util.serialize_to_string can serialize a dict to yaml
+
+        """
+        import fl.util
+        map_input  = dict(a = dict(b = 1, c = 2, d = 3))
+        (str_output, map_error) = fl.util.serialize_to_string(
+                                                        map_input, 'yaml')
+
+        assert str_output == textwrap.dedent(
+                                        """
+                                        a:
+                                          b: 1
+                                          c: 2
+                                          d: 3
+                                        """).strip()
+
+
+# =============================================================================
+class SpecifyFlUtilDeserializeFromString:
+    """
+    Spec for the fl.util.serialize_to_string function.
+
+    """
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_deserialize_from_xml(self):
+        """
+        fl.util.deserialize_from_string can deserialize a dict from xml
+
+        Please note that XML does not inherently
+        distinguish between different datatypes,
+        and treats everything as text. This means
+        that unless an application-specific type
+        annotation mechanism is used, then all
+        type information will be lost when using
+        xml.
+
+        """
+        import fl.util
+        str_input = textwrap.dedent(
+                                """
+                                <?xml version="1.0" encoding="utf-8"?>
+                                <root>
+                                  <a>1</a>
+                                  <b>2.0</b>
+                                  <c>Some string</c>
+                                  <d>
+                                    <e>345</e>
+                                  </d>
+                                </root>
+                                """).strip()
+        (map_output, map_error) = fl.util.deserialize_from_string(
+                                                        str_input, 'xml')
+        assert map_error is None
+        assert map_output == dict(a = 1,
+                                  b = 2.0,
+                                  c = 'Some string',
+                                  d = dict(e = 345))
+
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_deserialize_from_json(self):
+        """
+        fl.util.deserialize_from_string can deserialize a dict from json
+
+        """
+        import fl.util
+        str_input = textwrap.dedent(
+                                """
+                                {
+                                  "a": 1,
+                                  "b": 2.0,
+                                  "c": "Some string",
+                                  "d": {
+                                    "e": 345
+                                  }
+                                }
+                                """).strip()
+        (map_output, map_error) = fl.util.deserialize_from_string(
+                                                        str_input, 'json')
+        assert map_error is None
+        assert map_output == dict(a = 1,
+                                  b = 2.0,
+                                  c = 'Some string',
+                                  d = dict(e = 345))
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_deserialize_from_toml(self):
+        """
+        fl.util.deserialize_from_string can deserialize a dict from toml
+
+        """
+        import fl.util
+        str_input = textwrap.dedent(
+                                """
+                                [a]
+                                b = 1
+                                c = 2
+                                d = 3
+                                """).strip()
+        (map_output, map_error) = fl.util.deserialize_from_string(
+                                                        str_input, 'toml')
+        assert map_error is None
+        assert map_output == dict(a = dict(b = 1, c = 2, d = 3))
+
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_deserialize_from_yaml(self):
+        """
+        fl.util.deserialize_from_string can deserialize a dict from yaml
+
+        """
+        import fl.util
+        str_input = textwrap.dedent(
+                                """
+                                a: 1
+                                b: 2.0
+                                c: "Some string"
+                                d:
+                                  e: 345
+                                """).strip()
+        (map_output, map_error) = fl.util.deserialize_from_string(
+                                                        str_input, 'yaml')
+        assert map_error is None
+        assert map_output == dict(a = 1,
+                                  b = 2.0,
+                                  c = 'Some string',
+                                  d = dict(e = 345))

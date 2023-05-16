@@ -968,21 +968,108 @@ def walkobj(obj:         typing.Any,              # pylint: disable=R0912,R0913
 
 
 # -----------------------------------------------------------------------------
-def deserialize_xml_string(str_xml):
+def serialize_to_string(map_data, str_format):
     """
-    Return the data encoded in the the specified XML string.
+    Return the specified data as a serialised string in the specified format.
+
+    """
+
+    for (suffix, fcn) in (( 'xml',  serialize_to_xml_string  ),
+                          ( 'json', serialize_to_json_string ),
+                          ( 'toml', serialize_to_toml_string ),
+                          ( 'yaml', serialize_to_yaml_string ),
+                          ( 'yml',  serialize_to_yaml_string )):
+        if str_format.endswith(suffix):
+            return fcn(map_data)
+
+
+# -----------------------------------------------------------------------------
+def deserialize_from_string(str_data, str_format):
+    """
+    Return the data encoded in the the specified string as a dict.
+
+    """
+
+    for (suffix, fcn) in (( 'xml',  deserialize_from_xml_string  ),
+                          ( 'json', deserialize_from_json_string ),
+                          ( 'toml', deserialize_from_toml_string ),
+                          ( 'yaml', deserialize_from_yaml_string ),
+                          ( 'yml',  deserialize_from_yaml_string )):
+        if str_format.endswith(suffix):
+            return fcn(str_data)
+
+
+# -----------------------------------------------------------------------------
+def serialize_to_xml_string(map_data):
+    """
+    Return the specified data as an XML string.
+
+    """
+
+    import xmltodict # pylint: disable=C0415
+
+    str_xml   = None
+    map_error = None
+
+    if len(map_data) > 1:
+        map_data = dict(root = map_data)
+
+    try:
+
+        str_xml = xmltodict.unparse(input_dict = map_data,
+                                    encoding = 'utf-8',
+                                    pretty     = True,
+                                    newl       = '\n'.format(),
+                                    indent     = '  ')
+
+    except TypeError as err:
+        map_error = dict()
+        map_error['exception'] = err
+        map_error['message']   = str(err)
+    else:
+        str_xml = str_xml.strip()
+
+    return (str_xml, map_error)
+
+
+# -----------------------------------------------------------------------------
+def deserialize_from_xml_string(str_xml):
+    """
+    Return the data encoded in the the specified XML string as a dict.
 
     """
 
     import xmltodict          # pylint: disable=C0415
     import xml.parsers.expat  # pylint: disable=C0415
 
-    map_data  = {}
-    map_error = {}
+    map_data  = None
+    map_error = None
+
+    str_xml = str_xml.strip()
+
+    # -------------------------------------------------------------------------
+    def _postproc(path, key, value):
+        """
+        """
+        tup_ctor_type = (int, float)
+        for ctor_type in tup_ctor_type:
+            try:
+                value = ctor_type(value)
+            except (ValueError, TypeError):
+                continue
+            else:
+                break
+        return (key, value)
 
     try:
-        map_data = xmltodict.parse(str_xml)
+
+        map_data = xmltodict.parse(str_xml,
+                                   encoding      = 'utf-8',
+                                   xml_attribs   = False,
+                                   postprocessor = _postproc)
+
     except xml.parsers.expat.ExpatError as err:
+        map_error = dict()
         map_error['exception']      = err
         map_error['message']        = str(err)
         map_error['idx_char_start'] = None
@@ -998,7 +1085,33 @@ def deserialize_xml_string(str_xml):
 
 
 # -----------------------------------------------------------------------------
-def deserialize_json_string(str_json):
+def serialize_to_json_string(map_data):
+    """
+    Return the specified data as a JSON string.
+
+    """
+
+    import json  # pylint: disable=C0415
+
+    str_json  = None
+    map_error = None
+
+    try:
+
+        str_json = json.dumps(map_data, indent = 2)
+
+    except TypeError as err:
+        map_error = dict()
+        map_error['exception'] = err
+        map_error['message']   = str(err)
+    else:
+        str_json = str_json.strip()
+
+    return (str_json, map_error)
+
+
+# -----------------------------------------------------------------------------
+def deserialize_from_json_string(str_json):
     """
     Return the data encoded in the the specified JSON string.
 
@@ -1006,25 +1119,29 @@ def deserialize_json_string(str_json):
 
     import json  # pylint: disable=C0415
 
-    map_data  = {}
-    map_error = {}
+    map_data  = None
+    map_error = None
 
     # Remove comment lines.
     #
     list_str_line = []
-    for str_line in str_json.splitlines():
+    for str_line in str_json.strip().splitlines():
         str_line_naked = str_line.strip()
         if str_line_naked.startswith('//') or str_line_naked.startswith('#'):
             continue
         list_str_line.append(str_line)
+    str_json = ''.join(list_str_line)
 
     try:
-        map_data = json.loads(''.join(list_str_line))
+
+        map_data = json.loads(str_json)
+
     except json.JSONDecodeError as err:
+        map_error = dict()
         map_error['exception']      = err
         map_error['message']        = err.msg
         map_error['idx_char_start'] = err.pos
-        map_error['idx_char_end']   = err.end
+        map_error['idx_char_end']   = None
         map_error['idx_line']       = None
         map_error['idx_col']        = None
 
@@ -1032,39 +1149,33 @@ def deserialize_json_string(str_json):
 
 
 # -----------------------------------------------------------------------------
-def deserialize_yaml_string(str_yaml):
+def serialize_to_toml_string(map_data):
     """
-    Return the data encoded in the specified YAML string.
+    Return the specified data as a TOML string.
 
     """
 
-    import yaml  # pylint: disable=C0415
+    import toml  # pylint: disable=C0415
 
-    map_data  = {}
-    map_error = {}
-
-    loader = yaml.SafeLoader
-    yaml.add_constructor('!regex',
-                         lambda l, n: str(n.value),
-                         Loader = loader)
+    str_toml  = None
+    map_error = None
 
     try:
-        map_data = yaml.load(str_yaml, Loader = loader)
-    except yaml.YAMLError as err:
+
+        str_toml = toml.dumps(map_data)
+
+    except TypeError as err:
+        map_error = dict()
         map_error['exception'] = err
         map_error['message']   = str(err)
-        if hasattr(err, 'problem_mark'):
-            mark = err.problem_mark
-            map_error['idx_char_start'] = None
-            map_error['idx_char_end']   = None
-            map_error['idx_line']       = mark.line
-            map_error['idx_col']        = mark.column
+    else:
+        str_toml = str_toml.strip()
 
-    return (map_data, map_error)
+    return (str_toml, map_error)
 
 
 # -----------------------------------------------------------------------------
-def deserialize_toml_string(str_yaml):
+def deserialize_from_toml_string(str_toml):
     """
     Return the data encoded in the specified TOML string.
 
@@ -1072,18 +1183,89 @@ def deserialize_toml_string(str_yaml):
 
     import toml  # pylint: disable=C0415
 
-    map_data  = {}
-    map_error = {}
+    map_data  = None
+    map_error = None
+
+    str_toml  = str_toml.strip()
 
     try:
-        map_data = toml.loads(file_cfg.read())
+
+        map_data = toml.loads(str_toml)
+
     except toml.TomlDecodeError as err:
+        map_error = dict()
         map_error['exception']      = err
         map_error['message']        = err.msg
         map_error['idx_char_start'] = err.pos
         map_error['idx_char_end']   = None
         map_error['idx_line']       = err.lineno - 1
         map_error['idx_col']        = err.colno
+
+    return (map_data, map_error)
+
+
+# -----------------------------------------------------------------------------
+def serialize_to_yaml_string(map_data):
+    """
+    Return the specified data as a YAML string.
+
+    """
+
+    import yaml  # pylint: disable=C0415
+
+    str_yaml  = None
+    map_error = None
+
+    try:
+
+        str_yaml = yaml.dump(map_data, default_flow_style = False)
+
+    except yaml.YAMLError as err:
+        map_error = dict()
+        map_error['exception'] = err
+        map_error['message']   = str(err)
+    else:
+        str_yaml = str_yaml.strip()
+
+    return (str_yaml, map_error)
+
+
+# -----------------------------------------------------------------------------
+def deserialize_from_yaml_string(str_yaml):
+    """
+    Return the data encoded in the specified YAML string.
+
+    """
+
+    import yaml  # pylint: disable=C0415
+
+    map_data  = None
+    map_error = None
+
+    loader = yaml.SafeLoader
+    yaml.add_constructor('!regex',
+                         lambda l, n: str(n.value),
+                         Loader = loader)
+
+    str_yaml = str_yaml.strip()
+
+    try:
+
+        map_data = yaml.load(str_yaml, Loader = loader)
+
+    except yaml.YAMLError as err:
+        map_error = dict()
+        map_error['exception']      = err
+        map_error['message']        = str(err)
+        map_error['idx_char_start'] = None
+        map_error['idx_char_end']   = None
+        map_error['idx_line']       = None
+        map_error['idx_col']        = None
+
+        if hasattr(err, 'problem_mark'):
+            mark = err.problem_mark
+            map_error['idx_line'] = mark.line
+            map_error['idx_col']  = mark.column
 
     return (map_data, map_error)
 
