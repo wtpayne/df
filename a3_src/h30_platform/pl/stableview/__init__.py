@@ -45,6 +45,8 @@ license:
 ...
 """
 
+
+import copy
 import importlib.metadata
 import os.path
 
@@ -52,27 +54,12 @@ import dearpygui.dearpygui
 import ruamel.yaml
 
 import fl.util
-import pl.stableview.build
-import pl.stableview.util
 
 
 try:
     __version__ = importlib.metadata.version('sfedit')
 except importlib.metadata.PackageNotFoundError:
     __version__ = '0.0.1'
-
-
-# -----------------------------------------------------------------------------
-def _load_cfg(dirpath_cfg, name_view):
-    """
-    Load configuration for the UI from the specified view.
-
-    """
-    filename_cfg = '{name}.stableview.cfg.yaml'.format(name = name_view)
-    filepath_cfg = os.path.join(dirpath_cfg, name_view, filename_cfg)
-
-    with open(filepath_cfg, 'rt') as file:
-        return ruamel.yaml.YAML(typ = 'safe').load(file)
 
 
 # -----------------------------------------------------------------------------
@@ -85,17 +72,19 @@ def main(dirpath_cfg, name_view):
 
     """
 
-    ctx           = fl.util.DotDict
-    ctx.ui        = dearpygui.dearpygui
-    ctx.cfg       = _load_cfg(dirpath_cfg, name_view)
-    ctx.coro_view = pl.stableview.util.resolve(ctx.cfg['coro_view'])(ctx)
+    ctx    = fl.util.Bureau()
+    ctx.ui = dearpygui.dearpygui
+    ctx.cfg.from_file(filepath = _filepath_cfg(dirpath_cfg, name_view))
+
+    ctx.coro_view = fl.util.resolve(ctx.cfg.coro_view)(ctx)
 
     next(ctx.coro_view)                           # app early setup.
 
     ctx.ui.create_context()
     try:
 
-        pl.stableview.build.ui(ctx)
+        _build(ctx)
+
         ctx.ui.setup_dearpygui()
 
         next(ctx.coro_view)                       # app late setup.
@@ -109,3 +98,192 @@ def main(dirpath_cfg, name_view):
 
     finally:
         ctx.ui.destroy_context()
+
+
+# -----------------------------------------------------------------------------
+def _filepath_cfg(dirpath_cfg, name_view):
+    """
+    Load configuration for the UI from the specified view.
+
+    """
+    filename_cfg = '{name}.stableview.cfg.yaml'.format(name = name_view)
+    filepath_cfg = os.path.join(dirpath_cfg, name_view, filename_cfg)
+    return filepath_cfg
+
+
+# -----------------------------------------------------------------------------
+def _build(ctx):
+    """
+    """
+    for (tup_path, cfg_item) in _select_internal_data_structures(
+                                        fl.util.walkobj(ctx.cfg,
+                                                        gen_leaf    = False,
+                                                        gen_nonleaf = True,
+                                                        gen_path    = True,
+                                                        gen_obj     = True)):
+
+        (name_fcn, args, kwargs, bindings, misc) = _get_widget_params(cfg_item)
+
+        _add_widget(ctx        = ctx,
+                    name_fcn   = name_fcn,
+                    args       = args,
+                    kwargs     = kwargs,
+                    bindings   = bindings,
+                    misc       = misc,
+                    tag_item   = '.'.join(tup_path),
+                    tag_parent = '.'.join(tup_path[:-1]))
+
+
+        # print('')
+        # print('')
+        # print('-' * 60)
+        # print(str_tag)
+        # print('=' * len(str_tag))
+        # print('')
+        # import pprint
+        # pprint.pprint(kwargs)
+
+
+# -----------------------------------------------------------------------------
+def _add_widget(
+        ctx, name_fcn, args, kwargs, bindings, misc, tag_item, tag_parent):
+    """
+
+    """
+
+    fcn = getattr(ctx.ui, name_fcn)
+
+    # Resolve functions (and sometimes also
+    # constants) from specification strings
+    # to their actual (e.g. callable) values.
+    #
+    tup_key = tuple(kwargs.keys())
+    for key in tup_key:
+
+        kwargs[key] = fl.util.resolve(value = kwargs[key])
+
+        if key.endswith('callback'):
+            kwargs['user_data'] = ctx
+
+    # Handle nodes where the associated
+    # DearPyGui function does not expect
+    # either a tag parameter or a parent
+    # parameter.
+    #
+    tup_no_tag = ('create_viewport',
+                  'bind_item_handler_registry')
+    if name_fcn in tup_no_tag:
+        fcn(**kwargs)
+        return
+
+    kwargs['tag'] = tag_item
+
+    # Handle functions with
+    # no parent parameter.
+    #
+    tup_no_parent = ('add_window',
+                     'add_handler_registry',
+                     'add_item_handler_registry')
+    if name_fcn in tup_no_parent:
+        fcn(**kwargs)
+        if 'set_primary_window' in misc and misc['set_primary_window']:
+            ctx.ui.set_primary_window(tag_item, True)
+        return
+
+    # Handle all other functions.
+    #
+    kwargs['parent'] = tag_parent
+    if args:
+        fcn(*args, **kwargs)
+    else:
+        fcn(**kwargs)
+
+
+# -----------------------------------------------------------------------------
+def _get_widget_params(cfg_item):
+    """
+    Return widget parameters from the specified config.
+
+    """
+
+    name_fcn = ''
+    args     = tuple()
+    kwargs   = dict()
+    bindings = dict()
+    misc     = dict()
+
+    tup_keys = tuple(cfg_item.keys())
+
+    if '_fcn' in tup_keys:
+        name_fcn = cfg_item._fcn
+
+    if '_args' in tup_keys:
+        args = cfg_item._args
+
+    if '_kwargs' in tup_keys:
+        kwargs = cfg_item._kwargs.as_dict()
+
+    if '_bindings' in tup_keys:
+        bindings = cfg_item._bindings.as_dict()
+
+    if '_misc' in tup_keys:
+        misc = cfg_item._misc.as_dict()
+
+    return (name_fcn, args, kwargs, bindings, misc)
+
+
+# -----------------------------------------------------------------------------
+def _select_internal_data_structures(iter_items):
+    """
+    Yield all items inthe specified iterator that posess internal fields.
+
+    """
+    for (tup_path, item) in iter_items:
+        if _has_internal_fields(tup_path, item):
+            yield (tup_path, item)
+
+
+# -----------------------------------------------------------------------------
+def _has_internal_fields(tup_path, item):
+    """
+    Return true if tup_path has no leading underscores but item.keys does.
+
+    This indicates that it is a data item at a
+    public location that contains internal
+    implementation-specific fields. (I.e. those
+    that begin with an underscore.)
+
+    """
+    is_container = isinstance(item, fl.util.Bureau)
+    if not is_container:
+        return False
+
+    is_internal = _has_internal_element(tup_path)
+    if is_internal:
+        return False
+
+    tup_fields          = tuple(item.keys())
+    has_internal_fields = _has_internal_element(tup_fields)
+
+    return has_internal_fields
+
+
+# -----------------------------------------------------------------------------
+def _has_internal_element(tup_str):
+    """
+    Return true if any element in tup_str starts with an underscore.
+
+    """
+    return any(_select_internal_elemnets(tup_str))
+
+
+# -----------------------------------------------------------------------------
+def _select_internal_elemnets(tup_str):
+    """
+    Yield each element in tup_str that starts with an underscore.
+
+    """
+    for str_element in tup_str:
+        if str_element.startswith('_'):
+            yield str_element
+

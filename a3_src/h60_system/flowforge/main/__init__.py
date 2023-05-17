@@ -58,26 +58,25 @@ def coro(ctx):
     Main coroutine for the app.
 
     """
-
     # We set up the presentation model here
     # because it does not require the dearpygui
     # context and is required by the callbacks
     # that are bound to the widgets during their
     # creation.
     #
-    ctx.pm = model.Model(ctx)
+    #ctx.pm = model.Model(ctx)
 
     yield  # Context is created and widgets are added in gui.main().
 
-    ctx.pm.host.set_count(1)
-    ctx.pm.proc.set_count(1)
+    #ctx.pm.host.set_count(1)
+    #ctx.pm.proc.set_count(1)
 
     yield  # Viewport is shown, main loop starts in gui.main().
 
     while True:
 
-        ctx.pm.node.update_selected_nodes()
-        ctx.pm.edge.update_selected_edges()
+        #ctx.pm.node.update_selected_nodes()
+        #ctx.pm.edge.update_selected_edges()
 
         yield  # Frame is rendered, is_dearpygui_running check in gui.main().
 

@@ -367,6 +367,44 @@ class SpecifyFlUtilBureau:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
+    def it_can_be_updated_from_a_tuple_rooted_key_value_tuple(self):
+        """
+        fl.util.Bureau containers can be partly updated using key-value tuples.
+
+        """
+        import fl.util
+        soi = fl.util.Bureau()
+        soi.from_key_value_tuple(tup_kv    = ((('a', 'c'), 100),
+                                              (('a', 'd'), 200),
+                                              (('b', 'e'), 300),
+                                              (('b', 'f'), 400)),
+                                 path_root = ('root', 'path'))
+        assert soi.root.path.a.c == 100
+        assert soi.root.path.a.d == 200
+        assert soi.root.path.b.e == 300
+        assert soi.root.path.b.f == 400
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_be_updated_from_a_string_rooted_key_value_tuple(self):
+        """
+        fl.util.Bureau containers can be partly updated using key-value tuples.
+
+        """
+        import fl.util
+        soi = fl.util.Bureau()
+        soi.from_key_value_tuple(tup_kv    = ((('a', 'c'), 100),
+                                              (('a', 'd'), 200),
+                                              (('b', 'e'), 300),
+                                              (('b', 'f'), 400)),
+                                 path_root = 'root.path')
+        assert soi.root.path.a.c == 100
+        assert soi.root.path.a.d == 200
+        assert soi.root.path.b.e == 300
+        assert soi.root.path.b.f == 400
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_can_be_represented_as_a_nested_dict(self):
         """
         fl.util.Bureau containers can be represented as a nested dict.
@@ -379,8 +417,10 @@ class SpecifyFlUtilBureau:
         soi.b.e = 300
         soi.b.f = 400
 
-        assert soi.as_nested_dict() == {'a': {'c': 100, 'd': 200},
-                                        'b': {'e': 300, 'f': 400}}
+        assert soi.as_nested_dict()   == {'a': {'c': 100, 'd': 200},
+                                          'b': {'e': 300, 'f': 400}}
+        assert soi.a.as_nested_dict() == {'c': 100, 'd': 200}
+        assert soi.b.as_nested_dict() == {'e': 300, 'f': 400}
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
@@ -397,6 +437,40 @@ class SpecifyFlUtilBureau:
         assert soi.a.d == 200
         assert soi.b.e == 300
         assert soi.b.f == 400
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_be_updated_from_a_tuple_rooted_nested_dict(self):
+        """
+        fl.util.Bureau containers can be updated from a nested dict.
+
+        """
+        import fl.util
+        soi = fl.util.Bureau()
+        soi.from_nested_dict(map_item  = {'a': {'c': 100, 'd': 200},
+                                          'b': {'e': 300, 'f': 400}},
+                             path_root = ('root', 'path'))
+        assert soi.root.path.a.c == 100
+        assert soi.root.path.a.d == 200
+        assert soi.root.path.b.e == 300
+        assert soi.root.path.b.f == 400
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_be_updated_from_a_string_rooted_nested_dict(self):
+        """
+        fl.util.Bureau containers can be updated from a nested dict.
+
+        """
+        import fl.util
+        soi = fl.util.Bureau()
+        soi.from_nested_dict(map_item  = {'a': {'c': 100, 'd': 200},
+                                          'b': {'e': 300, 'f': 400}},
+                             path_root = 'rootpath')
+        assert soi.rootpath.a.c == 100
+        assert soi.rootpath.a.d == 200
+        assert soi.rootpath.b.e == 300
+        assert soi.rootpath.b.f == 400
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research

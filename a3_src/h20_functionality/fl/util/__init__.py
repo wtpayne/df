@@ -48,10 +48,29 @@ license:
 import collections
 import collections.abc
 import functools
+import importlib
 import itertools
+import os.path
+import pprint
 import string
 import time
 import typing
+
+
+# Command used by Bureau and BureauEngine to mutate state.
+#
+Command = collections.namedtuple(
+    typename    = 'Command',
+    field_names = ('operation', 'time_utc', 'path', 'value_new', 'value_old'),
+    defaults    = ('edit',      0.0,        '',     None,        None))
+
+
+# Rule used by Bureau and BureauEngine to filter and modify commands.
+#
+Rule = collections.namedtuple(
+    typename    = 'Rule',
+    field_names = ('test',               'act'),
+    defaults    = ((lambda item: False), (lambda item: item)))
 
 
 # =============================================================================
@@ -150,17 +169,28 @@ class Bureau(collections.abc.MutableMapping):
                              gen_obj  = True))
 
     # -------------------------------------------------------------------------
-    def from_key_value_tuple(self, tup_kv):
+    def from_key_value_tuple(self, tup_kv, path_root = tuple()):
         """
         Update Bureau from a key-value tuple.
 
         """
+        if path_root:
+            tup_path_root = tuple(_iter_path(
+                                        path  = path_root,
+                                        delim = self._bureau_path_delimiter))
+        else:
+            tup_path_root = self._bureau_path
+
         for (tup_path, value) in tup_kv:
-            self._bureau_engine.set_item(path      = tup_path,
+            self._bureau_engine.set_item(path      = tup_path_root + tup_path,
                                          value_new = value)
 
     # -------------------------------------------------------------------------
     def as_nested_dict(self):
+        return self.as_dict()
+
+    # -------------------------------------------------------------------------
+    def as_dict(self):
         """
         Return a representation of self as a nested dict.
 
@@ -215,28 +245,34 @@ class Bureau(collections.abc.MutableMapping):
         return output
 
     # -------------------------------------------------------------------------
-    def from_nested_dict(self, map_item):
+    def from_nested_dict(self, map_item, path_root = tuple()):
         """
         Load Bureau from a nested dict.
 
         """
-        return self.from_key_value_tuple(walkobj(obj      = map_item,
-                                                 gen_leaf = True,
-                                                 gen_path = True,
-                                                 gen_obj  = True))
+        return self.from_key_value_tuple(
+                                    tup_kv    = walkobj(obj      = map_item,
+                                                        gen_leaf = True,
+                                                        gen_path = True,
+                                                        gen_obj  = True),
+                                    path_root = path_root)
 
     # -------------------------------------------------------------------------
-    def load_baseline_from_file(self, filepath, str_format = None):
+    def from_file(self, filepath, str_format = None, path_root = tuple()):
         """
         Load the Bureau in its entirety from the specified file.
 
         """
 
         # TODO: FROM DB?
-        self.from_nested_dict(load_from_filepath(filepath, str_format))
+        (map_data, map_error) = load_from_filepath(filepath, str_format)
+        if map_error is None:
+            self.from_nested_dict(
+                            map_item  = map_data,
+                            path_root = path_root)
 
     # -------------------------------------------------------------------------
-    def save_baseline_as_file(self, filepath, str_format = None):
+    def as_file(self, filepath, str_format = None):
         """
         Save the Bureau in its entirety to the specified file.
 
@@ -244,6 +280,14 @@ class Bureau(collections.abc.MutableMapping):
 
         # TODO: TO DB?
         save_to_filepath(self.as_nested_dict, filepath, str_format)
+
+    # -------------------------------------------------------------------------
+    def pprint(self):
+        """
+        Pretty print the bureau.
+
+        """
+        pprint.pprint(self.as_nested_dict())
 
     # -------------------------------------------------------------------------
     def __getitem__(self, key):
@@ -324,7 +368,6 @@ class Bureau(collections.abc.MutableMapping):
         Return a string representation of the Bureau.
 
         """
-
         list_kv = list()
         for (key, value) in self._bureau_data.items():
 
@@ -399,7 +442,7 @@ class Bureau(collections.abc.MutableMapping):
 
         """
         for tup_entry in journal:
-            cmd = BureauEngineCommand._make(tup_entry)
+            cmd = Command._make(tup_entry)
             self._bureau_engine.set_item(path      = cmd.path,
                                          value_new = cmd.value_new,
                                          operation = cmd.operation)
@@ -491,10 +534,10 @@ class BureauEngine():
 
         self._hist_edit.append(
                     self._do_update_and_bookkeeping(
-                            BureauEngineCommand(operation = operation,
-                                                path      = path,
-                                                value_new = value_new,
-                                                value_old = None)))
+                                    Command(operation = operation,
+                                            path      = path,
+                                            value_new = value_new,
+                                            value_old = None)))
         return None
 
     # -------------------------------------------------------------------------
@@ -510,8 +553,7 @@ class BureauEngine():
         cmd_edit = self._hist_edit.pop()
         self._hist_undo.append(
                     self._do_update_and_bookkeeping(
-                                    BureauEngineCommand(
-                                            operation = 'undo',
+                                    Command(operation = 'undo',
                                             path      = cmd_edit.path,
                                             value_new = cmd_edit.value_old,
                                             value_old = cmd_edit.value_new)))
@@ -530,8 +572,7 @@ class BureauEngine():
         cmd_undo = self._hist_undo.pop()
         self._hist_edit.append(
                     self._do_update_and_bookkeeping(
-                                    BureauEngineCommand(
-                                            operation = 'redo',
+                                    Command(operation = 'redo',
                                             path      = cmd_undo.path,
                                             value_new = cmd_undo.value_old,
                                             value_old = cmd_undo.value_new)))
@@ -551,11 +592,11 @@ class BureauEngine():
         value_old = self._do_update(cmd.path, cmd.value_new)
         if cmd.operation == 'del':
             self._bureau_data.__delitem__(key)
-        cmd = BureauEngineCommand(operation = cmd.operation,
-                                  time_utc  = time_utc,
-                                  path      = cmd.path,
-                                  value_new = cmd.value_new,
-                                  value_old = value_old)
+        cmd = Command(operation = cmd.operation,
+                      time_utc  = time_utc,
+                      path      = cmd.path,
+                      value_new = cmd.value_new,
+                      value_old = value_old)
         self._invoke_callbacks(cmd)
         self._journal.append(cmd)
 
@@ -779,13 +820,6 @@ def _iter_path(path, delim):
 
 
 # =============================================================================
-BureauEngineCommand = collections.namedtuple(
-    typename    = 'BureauEngineCommand',
-    field_names = ('operation', 'time_utc', 'path', 'value_new', 'value_old'),
-    defaults    = ('edit',      0.0,        '',     None,        None))
-
-
-# =============================================================================
 class DotDict(dict):
     """
     Custom dictionary with dot notation attribute access.
@@ -983,13 +1017,6 @@ def walkobj(obj:         typing.Any,              # pylint: disable=R0912,R0913
     memo.remove(_id)
 
     return
-
-
-# =============================================================================
-Rule = collections.namedtuple(
-    typename    = 'Rule',
-    field_names = ('test',               'act'),
-    defaults    = ((lambda item: False), (lambda item: item)))
 
 
 # -----------------------------------------------------------------------------
@@ -1409,6 +1436,27 @@ def deserialize_from_yaml_string(str_yaml):
             map_error['idx_col']  = mark.column
 
     return (map_data, map_error)
+
+
+# -----------------------------------------------------------------------------
+def resolve(value):
+    """
+    Ensure that the provided value is fully resolved.
+
+    If the provided value is a string starting
+    with the prefix '_spec::' then resolve it
+    to the actual value.
+
+    """
+    if not is_string(value):
+        return value
+
+    prefix = '_spec::'
+    if not value.startswith(prefix):
+        return value
+
+    (name_module, name_attrib) = value[len(prefix):].rsplit('.', 1)
+    return getattr(importlib.import_module(name_module), name_attrib)
 
 
 # -----------------------------------------------------------------------------
