@@ -50,6 +50,7 @@ import collections.abc
 import functools
 import itertools
 import string
+import time
 import typing
 
 
@@ -99,10 +100,9 @@ class Bureau(collections.abc.MutableMapping):
         tables and supports callback registration
         for change listeners.
 
-        TODO: Design mechanism for binding to other Bureau trees.
+        TODO: Save/Load (journal?/state?) to/from SQLITE
         TODO: Support for remote sync (Load/update from journal)
-
-        TODO: Save/Load to/from JSON/YAML/XML/SQLITE
+        TODO: Design mechanism for binding to other Bureau trees.
         TODO: Reactive programming with RxPy ???
         TODO: Regex-based listening on paths. (jquery-like?) ???
 
@@ -226,20 +226,24 @@ class Bureau(collections.abc.MutableMapping):
                                                  gen_obj  = True))
 
     # -------------------------------------------------------------------------
-    def load(self, str_spec):
+    def load_baseline_from_file(self, filepath, str_format = None):
         """
-        Load Bureau from file or database.
+        Load the Bureau in its entirety from the specified file.
 
         """
-        pass
+
+        # TODO: FROM DB?
+        self.from_nested_dict(load_from_filepath(filepath, str_format))
 
     # -------------------------------------------------------------------------
-    def save(self, str_spec):
+    def save_baseline_as_file(self, filepath, str_format = None):
         """
-        Save Bureau to file or database.
+        Save the Bureau in its entirety to the specified file.
 
         """
-        pass
+
+        # TODO: TO DB?
+        save_to_filepath(self.as_nested_dict, filepath, str_format)
 
     # -------------------------------------------------------------------------
     def __getitem__(self, key):
@@ -389,6 +393,18 @@ class Bureau(collections.abc.MutableMapping):
         return journal
 
     # -------------------------------------------------------------------------
+    def update_from_journal(self, journal):
+        """
+        Update the Bureau using journal entries from the specified file.
+
+        """
+        for tup_entry in journal:
+            cmd = BureauEngineCommand._make(tup_entry)
+            self._bureau_engine.set_item(path      = cmd.path,
+                                         value_new = cmd.value_new,
+                                         operation = cmd.operation)
+
+    # -------------------------------------------------------------------------
     def _tup_full_path(self, key):
         """
         Return the full path to the specified key as a tuple.
@@ -531,10 +547,12 @@ class BureauEngine():
         the journal etc...
 
         """
+        time_utc  = time.time()
         value_old = self._do_update(cmd.path, cmd.value_new)
         if cmd.operation == 'del':
             self._bureau_data.__delitem__(key)
         cmd = BureauEngineCommand(operation = cmd.operation,
+                                  time_utc  = time_utc,
                                   path      = cmd.path,
                                   value_new = cmd.value_new,
                                   value_old = value_old)
@@ -762,9 +780,9 @@ def _iter_path(path, delim):
 
 # =============================================================================
 BureauEngineCommand = collections.namedtuple(
-        typename    = 'BureauEngineCommand',
-        field_names = ('operation', 'path', 'value_new', 'value_old'),
-        defaults    = ('edit',      '',     None,        None))
+    typename    = 'BureauEngineCommand',
+    field_names = ('operation', 'time_utc', 'path', 'value_new', 'value_old'),
+    defaults    = ('edit',      0.0,        '',     None,        None))
 
 
 # =============================================================================
@@ -967,36 +985,159 @@ def walkobj(obj:         typing.Any,              # pylint: disable=R0912,R0913
     return
 
 
+# =============================================================================
+Rule = collections.namedtuple(
+    typename    = 'Rule',
+    field_names = ('test',               'act'),
+    defaults    = ((lambda item: False), (lambda item: item)))
+
+
 # -----------------------------------------------------------------------------
-def serialize_to_string(map_data, str_format):
+def apply_rules(tup_rule, item):
+    """
+    Apply the specified rules to the specified items.
+
+    """
+    for rule in tup_rule:
+        if rule.test(item):
+            item = rule.act(item)
+    return item
+
+
+# -----------------------------------------------------------------------------
+def save_to_filepath(map_data, filepath, str_format = None):
+    """
+    Write the specified dict to the specified file in the specified format.
+
+    """
+
+    if str_format is None:
+        (_, str_ext) = os.path.splitext(filepath)
+        str_format   = str_ext[1:]
+
+    if str_format == 'pickle':
+        filemode = 'wb'
+    else:
+        filemode = 'wt'
+
+    (serial_data, map_error) = serialize(map_data, str_format)
+
+    if serial_data is not None:
+        with open(filepath, filemode) as file:
+            file.write(serial_data)
+
+    return map_error
+
+
+# -----------------------------------------------------------------------------
+def load_from_filepath(filepath, str_format = None):
+    """
+    Return data loaded from the specified file as a dict.
+
+    """
+
+    if str_format is None:
+        (_, str_ext) = os.path.splitext(filepath)
+        str_format   = str_ext[1:]
+
+    if str_format == 'pickle':
+        filemode = 'rb'
+    else:
+        filemode = 'rt'
+
+    with open(filepath, filemode) as file:
+        serial_data = file.read()
+
+    (map_data, map_error) = deserialize(serial_data, str_format)
+
+    return (map_data, map_error)
+
+
+# -----------------------------------------------------------------------------
+def serialize(map_data, str_format):
     """
     Return the specified data as a serialised string in the specified format.
 
     """
 
-    for (suffix, fcn) in (( 'xml',  serialize_to_xml_string  ),
-                          ( 'json', serialize_to_json_string ),
-                          ( 'toml', serialize_to_toml_string ),
-                          ( 'yaml', serialize_to_yaml_string ),
-                          ( 'yml',  serialize_to_yaml_string )):
-        if str_format.endswith(suffix):
-            return fcn(map_data)
+    lut = dict(pickle = serialize_to_pickle_bytes,
+               pkl    = serialize_to_pickle_bytes,
+               xml    = serialize_to_xml_string,
+               json   = serialize_to_json_string,
+               toml   = serialize_to_toml_string,
+               yaml   = serialize_to_yaml_string,
+               yml    = serialize_to_yaml_string)
+    return lut[str_format](map_data)
 
 
 # -----------------------------------------------------------------------------
-def deserialize_from_string(str_data, str_format):
+def deserialize(str_data, str_format):
     """
     Return the data encoded in the the specified string as a dict.
 
     """
 
-    for (suffix, fcn) in (( 'xml',  deserialize_from_xml_string  ),
-                          ( 'json', deserialize_from_json_string ),
-                          ( 'toml', deserialize_from_toml_string ),
-                          ( 'yaml', deserialize_from_yaml_string ),
-                          ( 'yml',  deserialize_from_yaml_string )):
-        if str_format.endswith(suffix):
-            return fcn(str_data)
+    lut = dict(pickle = deserialize_from_pickle_bytes,
+               pkl    = deserialize_from_pickle_bytes,
+               xml    = deserialize_from_xml_string,
+               json   = deserialize_from_json_string,
+               toml   = deserialize_from_toml_string,
+               yaml   = deserialize_from_yaml_string,
+               yml    = deserialize_from_yaml_string)
+    return lut[str_format](str_data)
+
+
+# -----------------------------------------------------------------------------
+def serialize_to_pickle_bytes(map_data):
+    """
+    Return the specified data as pickled bytes.
+
+    """
+
+    import pickle # pylint: disable=C0415
+
+    bytes_pickle = None
+    map_error    = None
+
+    try:
+
+        bytes_pickle = pickle.dumps(obj             = map_data,
+                                    protocol        = pickle.DEFAULT_PROTOCOL,
+                                    fix_imports     = False,
+                                    buffer_callback = None)
+
+    except pickle.PicklingError as err:
+
+        map_error = dict(exception = err,
+                         message   = str(err))
+
+    return (bytes_pickle, map_error)
+
+
+# -----------------------------------------------------------------------------
+def deserialize_from_pickle_bytes(bytes_pickle):
+    """
+    Return the data encoded in the the specified pickled bytes as a dict.
+
+    """
+
+    import pickle # pylint: disable=C0415
+
+    map_data  = None
+    map_error = None
+
+    try:
+
+        map_data = pickle.loads(bytes_pickle,
+                                fix_imports = False)
+
+    except pickle.UnpicklingError as err:
+
+        map_error = dict(exception = err,
+                         message   = str(err))
+
+    return (map_data, map_error)
+
 
 
 # -----------------------------------------------------------------------------
@@ -1023,10 +1164,12 @@ def serialize_to_xml_string(map_data):
                                     indent     = '  ')
 
     except TypeError as err:
-        map_error = dict()
-        map_error['exception'] = err
-        map_error['message']   = str(err)
+
+        map_error = dict(exception = err,
+                         message   = str(err))
+
     else:
+
         str_xml = str_xml.strip()
 
     return (str_xml, map_error)
@@ -1069,15 +1212,14 @@ def deserialize_from_xml_string(str_xml):
                                    postprocessor = _postproc)
 
     except xml.parsers.expat.ExpatError as err:
-        map_error = dict()
-        map_error['exception']      = err
-        map_error['message']        = str(err)
-        map_error['idx_char_start'] = None
-        map_error['idx_char_end']   = None
-        map_error['idx_line']       = err.lineno - 1
-        map_error['idx_col']        = err.offset
+
+        map_error = dict(exception = err,
+                         message   = str(err),
+                         idx_line  = err.lineno - 1,
+                         idx_col   = err.offset)
 
     else:
+
         if tuple(map_data.keys()) == ('root',):
             map_data = map_data['root']
 
@@ -1101,10 +1243,12 @@ def serialize_to_json_string(map_data):
         str_json = json.dumps(map_data, indent = 2)
 
     except TypeError as err:
-        map_error = dict()
-        map_error['exception'] = err
-        map_error['message']   = str(err)
+
+        map_error = dict(exception = err,
+                         message   = str(err))
+
     else:
+
         str_json = str_json.strip()
 
     return (str_json, map_error)
@@ -1137,13 +1281,10 @@ def deserialize_from_json_string(str_json):
         map_data = json.loads(str_json)
 
     except json.JSONDecodeError as err:
-        map_error = dict()
-        map_error['exception']      = err
-        map_error['message']        = err.msg
-        map_error['idx_char_start'] = err.pos
-        map_error['idx_char_end']   = None
-        map_error['idx_line']       = None
-        map_error['idx_col']        = None
+
+        map_error = dict(exception      = err,
+                         message        = str(err),
+                         idx_char_start = err.pos)
 
     return (map_data, map_error)
 
@@ -1165,10 +1306,12 @@ def serialize_to_toml_string(map_data):
         str_toml = toml.dumps(map_data)
 
     except TypeError as err:
-        map_error = dict()
-        map_error['exception'] = err
-        map_error['message']   = str(err)
+
+        map_error = dict(exception = err,
+                         message   = str(err))
+
     else:
+
         str_toml = str_toml.strip()
 
     return (str_toml, map_error)
@@ -1193,13 +1336,12 @@ def deserialize_from_toml_string(str_toml):
         map_data = toml.loads(str_toml)
 
     except toml.TomlDecodeError as err:
-        map_error = dict()
-        map_error['exception']      = err
-        map_error['message']        = err.msg
-        map_error['idx_char_start'] = err.pos
-        map_error['idx_char_end']   = None
-        map_error['idx_line']       = err.lineno - 1
-        map_error['idx_col']        = err.colno
+
+        map_error = dict(exception      = err,
+                         message        = err.msg,
+                         idx_char_start = err.pos,
+                         idx_line       = err.lineno - 1,
+                         idx_col        = err.colno)
 
     return (map_data, map_error)
 
@@ -1221,11 +1363,14 @@ def serialize_to_yaml_string(map_data):
         str_yaml = yaml.dump(map_data, default_flow_style = False)
 
     except yaml.YAMLError as err:
-        map_error = dict()
-        map_error['exception'] = err
-        map_error['message']   = str(err)
+
+        map_error = dict(exception = err,
+                         message   = str(err))
+
     else:
+
         str_yaml = str_yaml.strip()
+        #str_yaml = _reindent_yaml(str_yaml)
 
     return (str_yaml, map_error)
 
@@ -1254,13 +1399,9 @@ def deserialize_from_yaml_string(str_yaml):
         map_data = yaml.load(str_yaml, Loader = loader)
 
     except yaml.YAMLError as err:
-        map_error = dict()
-        map_error['exception']      = err
-        map_error['message']        = str(err)
-        map_error['idx_char_start'] = None
-        map_error['idx_char_end']   = None
-        map_error['idx_line']       = None
-        map_error['idx_col']        = None
+
+        map_error = dict(exception = err,
+                         message   = str(err))
 
         if hasattr(err, 'problem_mark'):
             mark = err.problem_mark

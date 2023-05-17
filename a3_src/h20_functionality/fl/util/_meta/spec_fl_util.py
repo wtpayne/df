@@ -6,6 +6,7 @@ Functional specification for fl.util
 
 
 import textwrap
+import time
 
 import pytest
 
@@ -399,54 +400,136 @@ class SpecifyFlUtilBureau:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_keeps_a_journal(self):
+    def it_keeps_a_journal(self, monkeypatch):
         """
         fl.util.Bureau containers keep a journal of operations.
 
         """
+
         import fl.util
-        soi     = fl.util.Bureau()
-        soi.a.c = 100
-        soi.a.d = 200
-        soi.b.e = 300
-        soi.b.f = 400
-        soi.b.f = 500
-        soi.undo()
-        soi.redo()
+
+        soi = fl.util.Bureau()
+
+        # ---------------------------------------------------------------------
+        ts = '1234.5678'
+        def _mock_time():
+            """
+            Mock for time.time()
+
+            """
+            return ts
+
+        with monkeypatch.context() as patch:
+
+            patch.setattr(time, 'time', _mock_time)
+
+            soi.a.c = 100
+            soi.a.d = 200
+            soi.b.e = 300
+            soi.b.f = 400
+            soi.b.f = 500
+            soi.undo()
+            soi.redo()
 
         iter_journal    = soi.journal_pop()
         tup_tup_journal = tuple(tuple(item) for item in iter_journal)
 
-        import pprint
-        pprint.pprint(tup_tup_journal)
+        assert tup_tup_journal == (('edit', ts, ('a', 'c'), 100, None ),
+                                   ('edit', ts, ('a', 'd'), 200, None ),
+                                   ('edit', ts, ('b', 'e'), 300, None ),
+                                   ('edit', ts, ('b', 'f'), 400, None ),
+                                   ('edit', ts, ('b', 'f'), 500, 400  ),
+                                   ('undo', ts, ('b', 'f'), 400, 500  ),
+                                   ('redo', ts, ('b', 'f'), 500, 400  ))
 
-        assert tup_tup_journal == (('edit', ('a', 'c'), 100, None ),
-                                   ('edit', ('a', 'd'), 200, None ),
-                                   ('edit', ('b', 'e'), 300, None ),
-                                   ('edit', ('b', 'f'), 400, None ),
-                                   ('edit', ('b', 'f'), 500, 400  ),
-                                   ('undo', ('b', 'f'), 400, 500  ),
-                                   ('redo', ('b', 'f'), 500, 400  ))
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_be_updated_from_journal(self, monkeypatch):
+        """
+        fl.util.Bureau containers can be updated using journelled commands.
+
+        """
+
+        import fl.util
+
+        journal = (('edit', 0.0, ('a', 'c'), 100, None ),
+                   ('edit', 0.0, ('a', 'd'), 200, None ),
+                   ('edit', 0.0, ('b', 'e'), 300, None ),
+                   ('edit', 0.0, ('b', 'f'), 400, None ),
+                   ('edit', 0.0, ('b', 'f'), 500, 400  ),
+                   ('undo', 0.0, ('b', 'f'), 400, 500  ),
+                   ('redo', 0.0, ('b', 'f'), 500, 400  ))
+
+        soi = fl.util.Bureau()
+        soi.update_from_journal(journal)
+
+        assert soi.a.c == 100
+        assert soi.a.d == 200
+        assert soi.b.e == 300
+        assert soi.b.f == 500
 
 
 # =============================================================================
-class SpecifyFlUtilSerializeToString:
+class SpecifyFlUtilApplyRules:
     """
-    Spec for the fl.util.serialize_to_string function.
+    Spec for the fl.util.apply_rules function.
 
     """
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
+    def it_can_modify_keys(self):
+        """
+        fl.util.apply_rules can modify keys.
+
+        """
+
+        import fl.util
+
+        item     = ('a', 'b')
+        tup_rule = (fl.util.Rule(test = lambda it: True,
+                                 act  = lambda it: (it[0] + '_foo', it[1])),
+                    fl.util.Rule(test = lambda it: True,
+                                 act  = lambda it: (it[0], it[1] + '_bar')))
+
+        result = fl.util.apply_rules(tup_rule = tup_rule,
+                                     item     = item)
+
+        assert result == ('a_foo', 'b_bar')
+
+
+# =============================================================================
+class SpecifyFlUtilSerialize:
+    """
+    Spec for the fl.util.serialize function.
+
+    """
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_serialize_to_pickle(self):
+        """
+        fl.util.serialize can serialize a dict to pickle
+
+        """
+        import fl.util
+        map_input = dict(a = 1, b = 2)
+        (bytes_output, map_error) = fl.util.serialize(map_input, 'pickle')
+
+        assert map_error is None
+        assert bytes_output == b'\x80\x04\x95\x11\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01a\x94K\x01\x8c\x01b\x94K\x02u.'
+
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_can_serialize_to_xml(self):
         """
-        fl.util.serialize_to_string can serialize a dict to xml
+        fl.util.serialize can serialize a dict to xml
 
         """
         import fl.util
         map_input  = dict(a = dict(b = 1, c = 2, d = 3))
-        (str_output, map_error) = fl.util.serialize_to_string(
-                                                        map_input, 'xml')
+        (str_output, map_error) = fl.util.serialize(map_input, 'xml')
 
         assert map_error is None
         assert str_output == textwrap.dedent(
@@ -463,13 +546,12 @@ class SpecifyFlUtilSerializeToString:
     @pytest.mark.e002_general_research
     def it_can_serialize_to_json(self):
         """
-        fl.util.serialize_to_string can serialize a dict to json
+        fl.util.serialize can serialize a dict to json
 
         """
         import fl.util
         map_input  = dict(a = dict(b = 1, c = 2, d = 3))
-        (str_output, map_error) = fl.util.serialize_to_string(
-                                                        map_input, 'json')
+        (str_output, map_error) = fl.util.serialize(map_input, 'json')
 
         assert str_output == textwrap.dedent(
                                         """
@@ -486,13 +568,12 @@ class SpecifyFlUtilSerializeToString:
     @pytest.mark.e002_general_research
     def it_can_serialize_to_toml(self):
         """
-        fl.util.serialize_to_string can serialize a dict to toml
+        fl.util.serialize can serialize a dict to toml
 
         """
         import fl.util
         map_input  = dict(a = dict(b = 1, c = 2, d = 3))
-        (str_output, map_error) = fl.util.serialize_to_string(
-                                                        map_input, 'toml')
+        (str_output, map_error) = fl.util.serialize(map_input, 'toml')
 
         assert str_output == textwrap.dedent(
                                         """
@@ -506,35 +587,55 @@ class SpecifyFlUtilSerializeToString:
     @pytest.mark.e002_general_research
     def it_can_serialize_to_yaml(self):
         """
-        fl.util.serialize_to_string can serialize a dict to yaml
+        fl.util.serialize can serialize a dict to yaml
 
         """
         import fl.util
-        map_input  = dict(a = dict(b = 1, c = 2, d = 3))
-        (str_output, map_error) = fl.util.serialize_to_string(
-                                                        map_input, 'yaml')
+        map_input  = dict(a_key = dict(a_long_key = 1, short = 2, tiny = 3))
+        (str_output, map_error) = fl.util.serialize(map_input, 'yaml')
 
         assert str_output == textwrap.dedent(
                                         """
-                                        a:
-                                          b: 1
-                                          c: 2
-                                          d: 3
+                                        a_key:
+                                          a_long_key: 1
+                                          short: 2
+                                          tiny: 3
                                         """).strip()
 
 
 # =============================================================================
-class SpecifyFlUtilDeserializeFromString:
+class SpecifyFlUtilDeserialize:
     """
-    Spec for the fl.util.serialize_to_string function.
+    Spec for the fl.util.deserialize function.
 
     """
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
+    def it_can_deserialize_from_pickle(self):
+        """
+        fl.util.deserialize can deserialize a dict from pickle bytes.
+
+        Please note that XML does not inherently
+        distinguish between different datatypes,
+        and treats everything as text. This means
+        that unless an application-specific type
+        annotation mechanism is used, then all
+        type information will be lost when using
+        xml.
+
+        """
+        import fl.util
+        bytes_input = b'\x80\x04\x95\x11\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01a\x94K\x01\x8c\x01b\x94K\x02u.'
+        (map_output, map_error) = fl.util.deserialize(bytes_input, 'pickle')
+        assert map_error is None
+        assert map_output == dict(a = 1, b = 2)
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_can_deserialize_from_xml(self):
         """
-        fl.util.deserialize_from_string can deserialize a dict from xml
+        fl.util.deserialize can deserialize a dict from xml
 
         Please note that XML does not inherently
         distinguish between different datatypes,
@@ -558,8 +659,7 @@ class SpecifyFlUtilDeserializeFromString:
                                   </d>
                                 </root>
                                 """).strip()
-        (map_output, map_error) = fl.util.deserialize_from_string(
-                                                        str_input, 'xml')
+        (map_output, map_error) = fl.util.deserialize(str_input, 'xml')
         assert map_error is None
         assert map_output == dict(a = 1,
                                   b = 2.0,
@@ -571,7 +671,7 @@ class SpecifyFlUtilDeserializeFromString:
     @pytest.mark.e002_general_research
     def it_can_deserialize_from_json(self):
         """
-        fl.util.deserialize_from_string can deserialize a dict from json
+        fl.util.deserialize can deserialize a dict from json
 
         """
         import fl.util
@@ -586,8 +686,7 @@ class SpecifyFlUtilDeserializeFromString:
                                   }
                                 }
                                 """).strip()
-        (map_output, map_error) = fl.util.deserialize_from_string(
-                                                        str_input, 'json')
+        (map_output, map_error) = fl.util.deserialize(str_input, 'json')
         assert map_error is None
         assert map_output == dict(a = 1,
                                   b = 2.0,
@@ -598,7 +697,7 @@ class SpecifyFlUtilDeserializeFromString:
     @pytest.mark.e002_general_research
     def it_can_deserialize_from_toml(self):
         """
-        fl.util.deserialize_from_string can deserialize a dict from toml
+        fl.util.deserialize can deserialize a dict from toml
 
         """
         import fl.util
@@ -609,8 +708,7 @@ class SpecifyFlUtilDeserializeFromString:
                                 c = 2
                                 d = 3
                                 """).strip()
-        (map_output, map_error) = fl.util.deserialize_from_string(
-                                                        str_input, 'toml')
+        (map_output, map_error) = fl.util.deserialize(str_input, 'toml')
         assert map_error is None
         assert map_output == dict(a = dict(b = 1, c = 2, d = 3))
 
@@ -619,7 +717,7 @@ class SpecifyFlUtilDeserializeFromString:
     @pytest.mark.e002_general_research
     def it_can_deserialize_from_yaml(self):
         """
-        fl.util.deserialize_from_string can deserialize a dict from yaml
+        fl.util.deserialize can deserialize a dict from yaml
 
         """
         import fl.util
@@ -631,8 +729,7 @@ class SpecifyFlUtilDeserializeFromString:
                                 d:
                                   e: 345
                                 """).strip()
-        (map_output, map_error) = fl.util.deserialize_from_string(
-                                                        str_input, 'yaml')
+        (map_output, map_error) = fl.util.deserialize(str_input, 'yaml')
         assert map_error is None
         assert map_output == dict(a = 1,
                                   b = 2.0,
