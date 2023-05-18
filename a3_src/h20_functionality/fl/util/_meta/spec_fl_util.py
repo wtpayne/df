@@ -259,11 +259,12 @@ class SpecifyFlUtilBureau:
             path_written  = tup_cmd[0].path
 
         import fl.util
+        import fl.util.condition
         soi   = fl.util.Bureau()
         key   = 'field_1'
         value = 100
-        soi.add_rule(fl.util.Rule(condition = (lambda cmd: True,),
-                                  action    = _test_action))
+        soi.add_rule(condition = fl.util.condition.always(),
+                     action    = _test_action)
 
         with soi.batch_context():
             soi[key] = value
@@ -294,12 +295,13 @@ class SpecifyFlUtilBureau:
             path_written  = tup_cmd[0].path
 
         import fl.util
+        import fl.util.condition
         soi    = fl.util.Bureau()
         value1 = 100
         value2 = 200
-        soi.add_rule(rule     = fl.util.Rule(condition = (lambda cmd: True,),
-                                             action    = _test_action),
-                     tup_path = ('field_1','field_2'))
+        soi.add_rule(
+                condition = fl.util.condition.root_in(('field_1','field_2')),
+                action    = _test_action)
 
         with soi.batch_context():
             soi.field_1.field_2 = value1
@@ -332,9 +334,8 @@ class SpecifyFlUtilBureau:
 
         import fl.util
         soi = fl.util.Bureau()
-        soi.add_rule(rule     = fl.util.Rule(condition = (lambda cmd: True,),
-                                             action    = _test_action),
-                     tup_path = ('field_1',))
+        soi.add_rule(condition = fl.util.condition.root_in(('field_1',)),
+                     action    = _test_action)
 
         with soi.batch_context():
             soi.field_1.field_2 = 100

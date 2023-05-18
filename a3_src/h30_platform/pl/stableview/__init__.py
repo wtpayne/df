@@ -73,6 +73,9 @@ def main(dirpath_cfg, name_view):
     """
 
     ctx    = fl.util.Bureau()
+    ctx.add_rule(fl.util.Rule(condition = fl.util.condition.always,
+                              action    = _build_widget))
+
     ctx.ui = dearpygui.dearpygui
 
     _load_configuration(ctx, dirpath_cfg, name_view)

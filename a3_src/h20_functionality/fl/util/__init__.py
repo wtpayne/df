@@ -421,7 +421,11 @@ class Bureau(collections.abc.MutableMapping):
         return self._bureau_engine.redo()
 
     # -------------------------------------------------------------------------
-    def add_rule(self, rule, tup_path = None):
+    def add_rule(self,
+                 rule      = None,
+                 condition = None,
+                 action    = None,
+                 tup_path  = None):
         """
         Add a rule to the bureau engine.
 
@@ -430,7 +434,10 @@ class Bureau(collections.abc.MutableMapping):
         if tup_path is None:
             tup_path = self._bureau_path
 
-        return self._bureau_engine.add_rule(rule = rule, tup_path = tup_path)
+        return self._bureau_engine.add_rule(rule      = rule,
+                                            condition = condition,
+                                            action    = action,
+                                            tup_path  = tup_path)
 
     # -------------------------------------------------------------------------
     def _tup_full_path(self, key):
@@ -731,17 +738,49 @@ class BureauEngine():
         return cursor
 
     # -------------------------------------------------------------------------
-    def add_rule(self, rule, tup_path = None):
+    def add_rule(self,
+                 rule      = None,
+                 condition = None,
+                 action    = None,
+                 tup_path  = None):
         """
         Add a rule.
 
         """
+        has_rule      = rule      is not None
+        has_condition = condition is not None
+        has_action    = action    is not None
+        has_tup_path  = tup_path  is not None
+
+        if has_rule:
+
+            if (has_condition) or (has_action):
+                raise ValueError((
+                    'If a rule is specified, then'
+                    'no additional condition or'
+                    'action may be specified.'))
+
+        else:
+
+            if (not has_condition) or (not has_action):
+                raise ValueError((
+                    'If no rule is specified, then'
+                    'a condition and an action must'
+                    'be specified instead.'))
+
+            # Ensure condition wrapped in tuple
+            if callable(condition):
+                condition = (condition,)
+
+            rule = Rule(condition = condition,
+                        action    = action)
 
         # Add an indicator function to the rule's
         # conditions to select only commands that
         # affect the specified path.
         #
-        if tup_path is not None:
+        if has_tup_path:
+
             indicator = functools.partial(_is_match_path,
                                           tup_path = tup_path)
             rule = Rule(condition = (indicator,) + rule.condition,
