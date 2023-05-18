@@ -70,8 +70,7 @@ Command = collections.namedtuple(
 #
 Rule = collections.namedtuple(
     typename    = 'Rule',
-    field_names = ('test',               'act'),
-    defaults    = ((lambda item: False), (lambda item: item)))
+    field_names = ('condition', 'action'))
 
 
 # =============================================================================
@@ -422,24 +421,14 @@ class Bureau(collections.abc.MutableMapping):
         return self._bureau_engine.redo()
 
     # -------------------------------------------------------------------------
-    def add_global_callback(self, callback):
+    def add_rule(self, rule):
         """
-        Add a global callback function for the whole data structure.
-
-        """
-
-        return self._bureau_engine.add_global_callback(callback = callback)
-
-    # -------------------------------------------------------------------------
-    def add_callback(self, key, callback):
-        """
-        Add a callback function for the specified key.
+        Add a rule to the bureau engine.
 
         """
 
-        return self._bureau_engine.add_callback(
-                                        tup_path = self._tup_full_path(key),
-                                        callback = callback)
+        return self._bureau_engine.add_rule(rule     = rule,
+                                            tup_path = self._bureau_path)
 
     # -------------------------------------------------------------------------
     def _tup_full_path(self, key):
@@ -476,7 +465,7 @@ class Bureau(collections.abc.MutableMapping):
             self._bureau_engine._do_keep_journal = False
             batch[:] = self._bureau_engine._journal
 
-            self._bureau_engine._invoke_callbacks(batch)
+            self._bureau_engine._invoke_rules(batch)
 
             self._bureau_engine._journal.clear()
 
@@ -512,8 +501,7 @@ class BureauEngine():
         self._cmd_counter     = 0
         self._hist_edit       = list()
         self._hist_undo       = list()
-        self._list_callback   = list()  # Global callbacks.
-        self._map_callback    = dict()  # Callbacks specific to a key.
+        self._list_rule       = list()
 
     # -------------------------------------------------------------------------
     def get_item(self, path):
@@ -741,57 +729,60 @@ class BureauEngine():
         return cursor
 
     # -------------------------------------------------------------------------
-    def add_global_callback(self, callback):
+    def add_rule(self, rule, tup_path = None):
         """
-        Add a callback function for the whole data structure.
-
-        """
-        self._list_callback.append(callback)
-
-        return None
-
-    # -------------------------------------------------------------------------
-    def add_callback(self, tup_path, callback):
-        """
-        Add a callback function for the specified key.
+        Add a rule.
 
         """
 
-        if tup_path not in self._map_callback:
-            self._map_callback[tup_path] = list()
-        self._map_callback[tup_path].append(callback)
-
-        return None
-
-    # -------------------------------------------------------------------------
-    def _invoke_callbacks(self, batch):
-        """
-        Invoke callbacks for the specified batch of command.
-
-        """
-        for callback in self._list_callback:
-            callback(batch)
-
-        # for (key, list_callback) in self._map_callback.items():
-
-        #     filtered_batch = (cmd for cmd in batch if _matches(cmd, key))
-
-        #     # filter batch using key
-        #     for callback in list_callback:
-        #         callback(filtered_batch)
-
-        # Extend the calback list with
-        # key-specific callbacks.
+        # Add an indicator function to the rule's
+        # conditions to select only commands that
+        # affect the specified path.
         #
-        # tup_path_part = tuple()
-        # for item in cmd.path:
-        #     tup_path_part += (item,)
-        #     if tup_path_part in self._map_callback:
-        #         list_callback.extend(self._map_callback[tup_path_part])
+        if tup_path is not None:
+            indicator = functools.partial(_is_match_path,
+                                          tup_path = tup_path)
+            rule = Rule(condition = (indicator,) + rule.condition,
+                        action    = rule.action)
 
+        self._list_rule.append(rule)
 
         return None
 
+    # -------------------------------------------------------------------------
+    def _invoke_rules(self, batch):
+        """
+        Invoke rules for the specified batch of commands.
+
+        """
+        list_cmd = list()
+        for rule in self._list_rule:
+
+            # If one or more commands in the
+            # batch meet all of the current
+            # rule's conditions, then the rule's
+            # action is invoked.
+            #
+            list_cmd.clear()
+            list_cmd[:] = batch
+
+            for indicator in rule.condition:
+                if not list_cmd:
+                    break
+                list_cmd[:] = (cmd for cmd in list_cmd if indicator(cmd = cmd))
+
+            if not list_cmd:
+                continue
+
+            rule.action(self._bureau, list_cmd)
+
+        return None
+
+# -----------------------------------------------------------------------------
+def _is_match_path(tup_path, cmd):
+    """
+    """
+    return cmd.path[:len(tup_path)] == tup_path
 
 # -----------------------------------------------------------------------------
 def _accessor_functions(item):

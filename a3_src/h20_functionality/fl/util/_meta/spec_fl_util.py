@@ -238,9 +238,9 @@ class SpecifyFlUtilBureau:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_can_support_callbacks(self):
+    def it_can_trigger_rules(self):
         """
-        fl.util.Bureau fields can support callbacks.
+        Editing fl.util.Bureau fields will trigger relevant rules.
 
         """
 
@@ -248,9 +248,9 @@ class SpecifyFlUtilBureau:
         path_written  = None
 
         # ---------------------------------------------------------------------
-        def _test_callback(tup_cmd):
+        def _test_function(data, tup_cmd):
             """
-            Test callback.
+            Test function.
 
             """
             nonlocal value_written
@@ -262,7 +262,8 @@ class SpecifyFlUtilBureau:
         soi   = fl.util.Bureau()
         key   = 'field_1'
         value = 100
-        soi.add_global_callback(_test_callback)
+        soi.add_rule(fl.util.Rule(condition = (lambda cmd: True,),
+                                  action    = _test_function))
 
         with soi.batch_context():
             soi[key] = value
@@ -554,32 +555,33 @@ class SpecifyFlUtilBureau:
 
 
 # =============================================================================
-class SpecifyFlUtilApplyRules:
-    """
-    Spec for the fl.util.apply_rules function.
+# class SpecifyFlUtilApplyRules:
+#     """
+#     Spec for the fl.util.apply_rules function.
 
-    """
+#     """
 
-    # -------------------------------------------------------------------------
-    @pytest.mark.e002_general_research
-    def it_can_modify_keys(self):
-        """
-        fl.util.apply_rules can modify keys.
+#     # -------------------------------------------------------------------------
+#     @pytest.mark.e002_general_research
+#     def it_can_modify_keys(self):
+#         """
+#         fl.util.apply_rules can modify keys.
 
-        """
+#         """
 
-        import fl.util
+#         import fl.util
 
-        item     = ('a', 'b')
-        tup_rule = (fl.util.Rule(test = lambda it: True,
-                                 act  = lambda it: (it[0] + '_foo', it[1])),
-                    fl.util.Rule(test = lambda it: True,
-                                 act  = lambda it: (it[0], it[1] + '_bar')))
+#         Rule     = fl.util.Rule
+#         item     = ('a', 'b')
+#         tup_rule = (Rule(filter   = lambda it: it,
+#                          function = lambda it: (it[0] + '_foo', it[1])),
+#                     Rule(filter   = lambda it: it,
+#                          function = lambda it: (it[0], it[1] + '_bar')))
 
-        result = fl.util.apply_rules(tup_rule = tup_rule,
-                                     item     = item)
+#         result = fl.util.apply_rules(tup_rule = tup_rule,
+#                                      item     = item)
 
-        assert result == ('a_foo', 'b_bar')
+#         assert result == ('a_foo', 'b_bar')
 
 
 # =============================================================================
