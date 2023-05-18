@@ -57,6 +57,8 @@ import string
 import time
 import typing
 
+import fl.util.condition
+
 
 # Command used by Bureau and BureauEngine to mutate state.
 #
@@ -780,10 +782,8 @@ class BureauEngine():
         # affect the specified path.
         #
         if has_tup_path:
-
-            indicator = functools.partial(_is_match_path,
-                                          tup_path = tup_path)
-            rule = Rule(condition = (indicator,) + rule.condition,
+            root_in_condition = fl.util.condition.root_in(tup_path)
+            rule = Rule(condition = (root_in_condition,) + rule.condition,
                         action    = rule.action)
 
         self._list_rule.append(rule)
@@ -818,12 +818,6 @@ class BureauEngine():
             rule.action(self._bureau, list_cmd)
 
         return None
-
-# -----------------------------------------------------------------------------
-def _is_match_path(tup_path, cmd):
-    """
-    """
-    return cmd.path[:len(tup_path)] == tup_path
 
 # -----------------------------------------------------------------------------
 def _accessor_functions(item):
