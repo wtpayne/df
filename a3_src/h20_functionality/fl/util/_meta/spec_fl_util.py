@@ -240,7 +240,7 @@ class SpecifyFlUtilBureau:
     @pytest.mark.e002_general_research
     def it_can_trigger_rules(self):
         """
-        Editing fl.util.Bureau fields will trigger relevant rules.
+        Editing fl.util.Bureau fields can trigger rules.
 
         """
 
@@ -248,9 +248,9 @@ class SpecifyFlUtilBureau:
         path_written  = None
 
         # ---------------------------------------------------------------------
-        def _test_function(data, tup_cmd):
+        def _test_action(data, tup_cmd):
             """
-            Test function.
+            Test action.
 
             """
             nonlocal value_written
@@ -263,7 +263,7 @@ class SpecifyFlUtilBureau:
         key   = 'field_1'
         value = 100
         soi.add_rule(fl.util.Rule(condition = (lambda cmd: True,),
-                                  action    = _test_function))
+                                  action    = _test_action))
 
         with soi.batch_context():
             soi[key] = value
@@ -271,91 +271,95 @@ class SpecifyFlUtilBureau:
         assert value_written == value
         assert path_written  == (key,)
 
-    # # -------------------------------------------------------------------------
-    # @pytest.mark.e002_general_research
-    # def it_can_support_callbacks_on_nested_fields(self):
-    #     """
-    #     fl.util.Bureau fields can support callbacks.
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_trigger_rules_on_nested_fields(self):
+        """
+        Editing fl.util.Bureau fields will trigger relevant rules.
 
-    #     """
+        """
 
-    #     value_written = None
-    #     path_written  = None
+        value_written = None
+        path_written  = None
 
-    #     # ---------------------------------------------------------------------
-    #     def _test_callback(tup_cmd):
-    #         """
-    #         Test callback.
+        # ---------------------------------------------------------------------
+        def _test_action(data, tup_cmd):
+            """
+            Test action.
 
-    #         """
-    #         nonlocal value_written
-    #         nonlocal path_written
-    #         value_written = tup_cmd[0].value_new
-    #         path_written  = tup_cmd[0].path
+            """
+            nonlocal value_written
+            nonlocal path_written
+            value_written = tup_cmd[0].value_new
+            path_written  = tup_cmd[0].path
 
-    #     import fl.util
-    #     soi    = fl.util.Bureau()
-    #     value1 = 100
-    #     value2 = 200
-    #     soi.add_callback('field_1.field_2', _test_callback)
+        import fl.util
+        soi    = fl.util.Bureau()
+        value1 = 100
+        value2 = 200
+        soi.add_rule(rule     = fl.util.Rule(condition = (lambda cmd: True,),
+                                             action    = _test_action),
+                     tup_path = ('field_1','field_2'))
 
-    #     with soi.batch_context():
-    #         soi.field_1.field_2 = value1
-    #         soi.field3          = value2
+        with soi.batch_context():
+            soi.field_1.field_2 = value1
+            soi.field3          = value2
 
-    #     assert value_written == value1
-    #     assert path_written  == ('field_1', 'field_2')
+        assert value_written == value1
+        assert path_written  == ('field_1', 'field_2')
 
-    # # -------------------------------------------------------------------------
-    # @pytest.mark.e002_general_research
-    # def it_triggers_callback_if_nested_field_is_changed(self):
-    #     """
-    #     fl.util.Bureau callbacks are called if a nested field is changed.
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_trigger_rules_if_nested_field_is_changed(self):
+        """
+        fl.util.Bureau rules are triggered if a nested field is changed.
 
-    #     """
+        """
 
-    #     value_written = None
-    #     path_written  = None
+        value_written = None
+        path_written  = None
 
-    #     # ---------------------------------------------------------------------
-    #     def _test_callback(tup_cmd):
-    #         """
-    #         Test callback.
+        # ---------------------------------------------------------------------
+        def _test_action(data, tup_cmd):
+            """
+            Test action.
 
-    #         """
-    #         nonlocal value_written
-    #         nonlocal path_written
-    #         value_written = tup_cmd[0].value_new
-    #         path_written  = tup_cmd[0].path
+            """
+            nonlocal value_written
+            nonlocal path_written
+            value_written = tup_cmd[0].value_new
+            path_written  = tup_cmd[0].path
 
-    #     import fl.util
-    #     soi = fl.util.Bureau()
-    #     soi.add_callback('field_1', _test_callback)
+        import fl.util
+        soi = fl.util.Bureau()
+        soi.add_rule(rule     = fl.util.Rule(condition = (lambda cmd: True,),
+                                             action    = _test_action),
+                     tup_path = ('field_1',))
 
-    #     with soi.batch_context():
-    #         soi.field_1.field_2 = 100
+        with soi.batch_context():
+            soi.field_1.field_2 = 100
 
-    #     assert value_written == 100
-    #     assert path_written  == ('field_1', 'field_2')
+        assert value_written == 100
+        assert path_written  == ('field_1', 'field_2')
 
-    # # -------------------------------------------------------------------------
-    # @pytest.mark.e002_general_research
-    # def it_can_be_represented_as_a_key_value_tuple(self):
-    #     """
-    #     fl.util.Bureau containers can be represented as key-value tuples.
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_be_represented_as_a_key_value_tuple(self):
+        """
+        fl.util.Bureau containers can be represented as key-value tuples.
 
-    #     """
-    #     import fl.util
-    #     soi     = fl.util.Bureau()
-    #     soi.a.c = 100
-    #     soi.a.d = 200
-    #     soi.b.e = 300
-    #     soi.b.f = 400
+        """
+        import fl.util
+        soi     = fl.util.Bureau()
+        soi.a.c = 100
+        soi.a.d = 200
+        soi.b.e = 300
+        soi.b.f = 400
 
-    #     assert soi.to_tuple() == ((('a', 'c'), 100),
-    #                               (('a', 'd'), 200),
-    #                               (('b', 'e'), 300),
-    #                               (('b', 'f'), 400))
+        assert soi.to_tuple() == ((('a', 'c'), 100),
+                                  (('a', 'd'), 200),
+                                  (('b', 'e'), 300),
+                                  (('b', 'f'), 400))
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
@@ -367,9 +371,9 @@ class SpecifyFlUtilBureau:
         import fl.util
         soi = fl.util.Bureau()
         soi.from_tuple(((('a', 'c'), 100),
-                       (('a', 'd'), 200),
-                       (('b', 'e'), 300),
-                       (('b', 'f'), 400)))
+                        (('a', 'd'), 200),
+                        (('b', 'e'), 300),
+                        (('b', 'f'), 400)))
         assert soi.a.c == 100
         assert soi.a.d == 200
         assert soi.b.e == 300
@@ -552,36 +556,6 @@ class SpecifyFlUtilBureau:
         assert soi.a.d == 200
         assert soi.b.e == 300
         assert soi.b.f == 500
-
-
-# =============================================================================
-# class SpecifyFlUtilApplyRules:
-#     """
-#     Spec for the fl.util.apply_rules function.
-
-#     """
-
-#     # -------------------------------------------------------------------------
-#     @pytest.mark.e002_general_research
-#     def it_can_modify_keys(self):
-#         """
-#         fl.util.apply_rules can modify keys.
-
-#         """
-
-#         import fl.util
-
-#         Rule     = fl.util.Rule
-#         item     = ('a', 'b')
-#         tup_rule = (Rule(filter   = lambda it: it,
-#                          function = lambda it: (it[0] + '_foo', it[1])),
-#                     Rule(filter   = lambda it: it,
-#                          function = lambda it: (it[0], it[1] + '_bar')))
-
-#         result = fl.util.apply_rules(tup_rule = tup_rule,
-#                                      item     = item)
-
-#         assert result == ('a_foo', 'b_bar')
 
 
 # =============================================================================

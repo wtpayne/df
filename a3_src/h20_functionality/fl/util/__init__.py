@@ -421,14 +421,16 @@ class Bureau(collections.abc.MutableMapping):
         return self._bureau_engine.redo()
 
     # -------------------------------------------------------------------------
-    def add_rule(self, rule):
+    def add_rule(self, rule, tup_path = None):
         """
         Add a rule to the bureau engine.
 
         """
 
-        return self._bureau_engine.add_rule(rule     = rule,
-                                            tup_path = self._bureau_path)
+        if tup_path is None:
+            tup_path = self._bureau_path
+
+        return self._bureau_engine.add_rule(rule = rule, tup_path = tup_path)
 
     # -------------------------------------------------------------------------
     def _tup_full_path(self, key):
@@ -1064,18 +1066,6 @@ def walkobj(obj:         typing.Any,              # pylint: disable=R0912,R0913
     memo.remove(_id)
 
     return
-
-
-# -----------------------------------------------------------------------------
-def apply_rules(tup_rule, item):
-    """
-    Apply the specified rules to the specified items.
-
-    """
-    for rule in tup_rule:
-        if rule.test(item):
-            item = rule.act(item)
-    return item
 
 
 # -----------------------------------------------------------------------------
