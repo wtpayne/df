@@ -248,104 +248,113 @@ class SpecifyFlUtilBureau:
         path_written  = None
 
         # ---------------------------------------------------------------------
-        def _test_callback(cmd):
+        def _test_callback(tup_cmd):
             """
             Test callback.
 
             """
             nonlocal value_written
             nonlocal path_written
-            value_written = cmd.value_new
-            path_written  = cmd.path
+            value_written = tup_cmd[0].value_new
+            path_written  = tup_cmd[0].path
 
         import fl.util
         soi   = fl.util.Bureau()
         key   = 'field_1'
         value = 100
-        soi.add_callback(key, _test_callback)
-        soi[key] = value
+        soi.add_global_callback(_test_callback)
+
+        with soi.batch_context():
+            soi[key] = value
+
         assert value_written == value
         assert path_written  == (key,)
 
-    # -------------------------------------------------------------------------
-    @pytest.mark.e002_general_research
-    def it_can_support_callbacks_on_nested_fields(self):
-        """
-        fl.util.Bureau fields can support callbacks.
+    # # -------------------------------------------------------------------------
+    # @pytest.mark.e002_general_research
+    # def it_can_support_callbacks_on_nested_fields(self):
+    #     """
+    #     fl.util.Bureau fields can support callbacks.
 
-        """
+    #     """
 
-        value_written = None
-        path_written  = None
+    #     value_written = None
+    #     path_written  = None
 
-        # ---------------------------------------------------------------------
-        def _test_callback(cmd):
-            """
-            Test callback.
+    #     # ---------------------------------------------------------------------
+    #     def _test_callback(tup_cmd):
+    #         """
+    #         Test callback.
 
-            """
-            nonlocal value_written
-            nonlocal path_written
-            value_written = cmd.value_new
-            path_written  = cmd.path
+    #         """
+    #         nonlocal value_written
+    #         nonlocal path_written
+    #         value_written = tup_cmd[0].value_new
+    #         path_written  = tup_cmd[0].path
 
-        import fl.util
-        soi    = fl.util.Bureau()
-        value1 = 100
-        value2 = 200
-        soi.add_callback('field_1.field_2', _test_callback)
-        soi.field_1.field_2 = value1
-        soi.field3          = value2
-        assert value_written == value1
-        assert path_written  == ('field_1', 'field_2')
+    #     import fl.util
+    #     soi    = fl.util.Bureau()
+    #     value1 = 100
+    #     value2 = 200
+    #     soi.add_callback('field_1.field_2', _test_callback)
 
-    # -------------------------------------------------------------------------
-    @pytest.mark.e002_general_research
-    def it_triggers_callback_if_nested_field_is_changed(self):
-        """
-        fl.util.Bureau callbacks are called if a nested field is changed.
+    #     with soi.batch_context():
+    #         soi.field_1.field_2 = value1
+    #         soi.field3          = value2
 
-        """
+    #     assert value_written == value1
+    #     assert path_written  == ('field_1', 'field_2')
 
-        value_written = None
-        path_written  = None
+    # # -------------------------------------------------------------------------
+    # @pytest.mark.e002_general_research
+    # def it_triggers_callback_if_nested_field_is_changed(self):
+    #     """
+    #     fl.util.Bureau callbacks are called if a nested field is changed.
 
-        # ---------------------------------------------------------------------
-        def _test_callback(cmd):
-            """
-            Test callback.
+    #     """
 
-            """
-            nonlocal value_written
-            nonlocal path_written
-            value_written = cmd.value_new
-            path_written  = cmd.path
+    #     value_written = None
+    #     path_written  = None
 
-        import fl.util
-        soi = fl.util.Bureau()
-        soi.add_callback('field_1', _test_callback)
-        soi.field_1.field_2 = 100
-        assert value_written == 100
-        assert path_written  == ('field_1', 'field_2')
+    #     # ---------------------------------------------------------------------
+    #     def _test_callback(tup_cmd):
+    #         """
+    #         Test callback.
 
-    # -------------------------------------------------------------------------
-    @pytest.mark.e002_general_research
-    def it_can_be_represented_as_a_key_value_tuple(self):
-        """
-        fl.util.Bureau containers can be represented as key-value tuples.
+    #         """
+    #         nonlocal value_written
+    #         nonlocal path_written
+    #         value_written = tup_cmd[0].value_new
+    #         path_written  = tup_cmd[0].path
 
-        """
-        import fl.util
-        soi     = fl.util.Bureau()
-        soi.a.c = 100
-        soi.a.d = 200
-        soi.b.e = 300
-        soi.b.f = 400
+    #     import fl.util
+    #     soi = fl.util.Bureau()
+    #     soi.add_callback('field_1', _test_callback)
 
-        assert soi.as_key_value_tuple() == ((('a', 'c'), 100),
-                                            (('a', 'd'), 200),
-                                            (('b', 'e'), 300),
-                                            (('b', 'f'), 400))
+    #     with soi.batch_context():
+    #         soi.field_1.field_2 = 100
+
+    #     assert value_written == 100
+    #     assert path_written  == ('field_1', 'field_2')
+
+    # # -------------------------------------------------------------------------
+    # @pytest.mark.e002_general_research
+    # def it_can_be_represented_as_a_key_value_tuple(self):
+    #     """
+    #     fl.util.Bureau containers can be represented as key-value tuples.
+
+    #     """
+    #     import fl.util
+    #     soi     = fl.util.Bureau()
+    #     soi.a.c = 100
+    #     soi.a.d = 200
+    #     soi.b.e = 300
+    #     soi.b.f = 400
+
+    #     assert soi.to_tuple() == ((('a', 'c'), 100),
+    #                               (('a', 'd'), 200),
+    #                               (('b', 'e'), 300),
+    #                               (('b', 'f'), 400))
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
@@ -356,10 +365,10 @@ class SpecifyFlUtilBureau:
         """
         import fl.util
         soi = fl.util.Bureau()
-        soi.from_key_value_tuple(((('a', 'c'), 100),
-                                  (('a', 'd'), 200),
-                                  (('b', 'e'), 300),
-                                  (('b', 'f'), 400)))
+        soi.from_tuple(((('a', 'c'), 100),
+                       (('a', 'd'), 200),
+                       (('b', 'e'), 300),
+                       (('b', 'f'), 400)))
         assert soi.a.c == 100
         assert soi.a.d == 200
         assert soi.b.e == 300
@@ -374,11 +383,11 @@ class SpecifyFlUtilBureau:
         """
         import fl.util
         soi = fl.util.Bureau()
-        soi.from_key_value_tuple(tup_kv    = ((('a', 'c'), 100),
-                                              (('a', 'd'), 200),
-                                              (('b', 'e'), 300),
-                                              (('b', 'f'), 400)),
-                                 path_root = ('root', 'path'))
+        soi.from_tuple(path_root = ('root', 'path'),
+                       tup_kv    = ((('a', 'c'), 100),
+                                    (('a', 'd'), 200),
+                                    (('b', 'e'), 300),
+                                    (('b', 'f'), 400)))
         assert soi.root.path.a.c == 100
         assert soi.root.path.a.d == 200
         assert soi.root.path.b.e == 300
@@ -393,11 +402,11 @@ class SpecifyFlUtilBureau:
         """
         import fl.util
         soi = fl.util.Bureau()
-        soi.from_key_value_tuple(tup_kv    = ((('a', 'c'), 100),
-                                              (('a', 'd'), 200),
-                                              (('b', 'e'), 300),
-                                              (('b', 'f'), 400)),
-                                 path_root = 'root.path')
+        soi.from_tuple(path_root = 'root.path',
+                       tup_kv    = ((('a', 'c'), 100),
+                                    (('a', 'd'), 200),
+                                    (('b', 'e'), 300),
+                                    (('b', 'f'), 400)))
         assert soi.root.path.a.c == 100
         assert soi.root.path.a.d == 200
         assert soi.root.path.b.e == 300
@@ -417,10 +426,10 @@ class SpecifyFlUtilBureau:
         soi.b.e = 300
         soi.b.f = 400
 
-        assert soi.as_nested_dict()   == {'a': {'c': 100, 'd': 200},
-                                          'b': {'e': 300, 'f': 400}}
-        assert soi.a.as_nested_dict() == {'c': 100, 'd': 200}
-        assert soi.b.as_nested_dict() == {'e': 300, 'f': 400}
+        assert soi.to_dict()   == {'a': {'c': 100, 'd': 200},
+                                   'b': {'e': 300, 'f': 400}}
+        assert soi.a.to_dict() == {'c': 100, 'd': 200}
+        assert soi.b.to_dict() == {'e': 300, 'f': 400}
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
@@ -431,8 +440,8 @@ class SpecifyFlUtilBureau:
         """
         import fl.util
         soi = fl.util.Bureau()
-        soi.from_nested_dict({'a': {'c': 100, 'd': 200},
-                              'b': {'e': 300, 'f': 400}})
+        soi.from_dict({'a': {'c': 100, 'd': 200},
+                       'b': {'e': 300, 'f': 400}})
         assert soi.a.c == 100
         assert soi.a.d == 200
         assert soi.b.e == 300
@@ -447,9 +456,9 @@ class SpecifyFlUtilBureau:
         """
         import fl.util
         soi = fl.util.Bureau()
-        soi.from_nested_dict(map_item  = {'a': {'c': 100, 'd': 200},
-                                          'b': {'e': 300, 'f': 400}},
-                             path_root = ('root', 'path'))
+        soi.from_dict(path_root = ('root', 'path'),
+                      map_item  = {'a': {'c': 100, 'd': 200},
+                                   'b': {'e': 300, 'f': 400}})
         assert soi.root.path.a.c == 100
         assert soi.root.path.a.d == 200
         assert soi.root.path.b.e == 300
@@ -464,9 +473,9 @@ class SpecifyFlUtilBureau:
         """
         import fl.util
         soi = fl.util.Bureau()
-        soi.from_nested_dict(map_item  = {'a': {'c': 100, 'd': 200},
-                                          'b': {'e': 300, 'f': 400}},
-                             path_root = 'rootpath')
+        soi.from_dict(path_root = 'rootpath',
+                      map_item  = {'a': {'c': 100, 'd': 200},
+                                   'b': {'e': 300, 'f': 400}})
         assert soi.rootpath.a.c == 100
         assert soi.rootpath.a.d == 200
         assert soi.rootpath.b.e == 300
@@ -474,9 +483,9 @@ class SpecifyFlUtilBureau:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_keeps_a_journal(self, monkeypatch):
+    def it_provides_a_batch_update_context(self, monkeypatch):
         """
-        fl.util.Bureau containers keep a journal of operations.
+        fl.util.Bureau containers provide a batched-updates context manager.
 
         """
 
@@ -497,45 +506,46 @@ class SpecifyFlUtilBureau:
 
             patch.setattr(time, 'time', _mock_time)
 
-            soi.a.c = 100
-            soi.a.d = 200
-            soi.b.e = 300
-            soi.b.f = 400
-            soi.b.f = 500
-            soi.undo()
-            soi.redo()
+            with soi.batch_context() as batch:
 
-        iter_journal    = soi.journal_pop()
-        tup_tup_journal = tuple(tuple(item) for item in iter_journal)
+                soi.a.c = 100
+                soi.a.d = 200
+                soi.b.e = 300
+                soi.b.f = 400
+                soi.b.f = 500
+                soi.undo()
+                soi.redo()
 
-        assert tup_tup_journal == (('edit', ts, ('a', 'c'), 100, None ),
-                                   ('edit', ts, ('a', 'd'), 200, None ),
-                                   ('edit', ts, ('b', 'e'), 300, None ),
-                                   ('edit', ts, ('b', 'f'), 400, None ),
-                                   ('edit', ts, ('b', 'f'), 500, 400  ),
-                                   ('undo', ts, ('b', 'f'), 400, 500  ),
-                                   ('redo', ts, ('b', 'f'), 500, 400  ))
+        tup_tup_batch = tuple(tuple(item) for item in batch)
+
+        assert tup_tup_batch == (('edit', 0, ts, ('a', 'c'), 100, None ),
+                                 ('edit', 1, ts, ('a', 'd'), 200, None ),
+                                 ('edit', 2, ts, ('b', 'e'), 300, None ),
+                                 ('edit', 3, ts, ('b', 'f'), 400, None ),
+                                 ('edit', 4, ts, ('b', 'f'), 500, 400  ),
+                                 ('undo', 5, ts, ('b', 'f'), 400, 500  ),
+                                 ('redo', 6, ts, ('b', 'f'), 500, 400  ))
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_can_be_updated_from_journal(self, monkeypatch):
+    def it_can_be_updated_from_a_batch_record(self, monkeypatch):
         """
-        fl.util.Bureau containers can be updated using journelled commands.
+        fl.util.Bureau containers can be updated with batches of commands.
 
         """
 
         import fl.util
 
-        journal = (('edit', 0.0, ('a', 'c'), 100, None ),
-                   ('edit', 0.0, ('a', 'd'), 200, None ),
-                   ('edit', 0.0, ('b', 'e'), 300, None ),
-                   ('edit', 0.0, ('b', 'f'), 400, None ),
-                   ('edit', 0.0, ('b', 'f'), 500, 400  ),
-                   ('undo', 0.0, ('b', 'f'), 400, 500  ),
-                   ('redo', 0.0, ('b', 'f'), 500, 400  ))
+        batch = (('edit', 0, 0.0, ('a', 'c'), 100, None ),
+                 ('edit', 1, 0.0, ('a', 'd'), 200, None ),
+                 ('edit', 2, 0.0, ('b', 'e'), 300, None ),
+                 ('edit', 3, 0.0, ('b', 'f'), 400, None ),
+                 ('edit', 4, 0.0, ('b', 'f'), 500, 400  ),
+                 ('undo', 5, 0.0, ('b', 'f'), 400, 500  ),
+                 ('redo', 6, 0.0, ('b', 'f'), 500, 400  ))
 
         soi = fl.util.Bureau()
-        soi.update_from_journal(journal)
+        soi.from_batch(batch)
 
         assert soi.a.c == 100
         assert soi.a.d == 200

@@ -47,6 +47,7 @@ license:
 
 import collections
 import collections.abc
+import contextlib
 import functools
 import importlib
 import itertools
@@ -61,8 +62,8 @@ import typing
 #
 Command = collections.namedtuple(
     typename    = 'Command',
-    field_names = ('operation', 'time_utc', 'path', 'value_new', 'value_old'),
-    defaults    = ('edit',      0.0,        '',     None,        None))
+    field_names = ('operation', 'idx', 'time_utc', 'path', 'value_new', 'value_old'),
+    defaults    = ('edit',      0,     0.0,        '',     None,        None))
 
 
 # Rule used by Bureau and BureauEngine to filter and modify commands.
@@ -119,9 +120,13 @@ class Bureau(collections.abc.MutableMapping):
         tables and supports callback registration
         for change listeners.
 
+        TODO: Add path/filter/rules parameter for data savers/exporters.
         TODO: Save/Load (journal?/state?) to/from SQLITE
+
         TODO: Support for remote sync (Load/update from journal)
         TODO: Design mechanism for binding to other Bureau trees.
+        TODO: Filters and rulesets.
+
         TODO: Reactive programming with RxPy ???
         TODO: Regex-based listening on paths. (jquery-like?) ???
 
@@ -157,7 +162,7 @@ class Bureau(collections.abc.MutableMapping):
         self._bureau_path_delimiter = path_delimiter
 
     # -------------------------------------------------------------------------
-    def as_key_value_tuple(self):
+    def to_tuple(self):
         """
         Return a representation of self as a key-value tuple.
 
@@ -169,7 +174,7 @@ class Bureau(collections.abc.MutableMapping):
                              gen_obj  = True))
 
     # -------------------------------------------------------------------------
-    def from_key_value_tuple(self, tup_kv, path_root = tuple()):
+    def from_tuple(self, tup_kv, path_root = tuple()):
         """
         Update Bureau from a key-value tuple.
 
@@ -186,11 +191,7 @@ class Bureau(collections.abc.MutableMapping):
                                          value_new = value)
 
     # -------------------------------------------------------------------------
-    def as_nested_dict(self):
-        return self.as_dict()
-
-    # -------------------------------------------------------------------------
-    def as_dict(self):
+    def to_dict(self):
         """
         Return a representation of self as a nested dict.
 
@@ -200,11 +201,11 @@ class Bureau(collections.abc.MutableMapping):
 
         This method traverses the object using
         the `walkobj` utility function (via the
-        as_key_value_tuple method), which
-        generates length-2 tuples where the
-        first element is a path indicating a
-        location in the Bureau and the second
-        element is the value at that path.
+        to_tuple method), which generates length
+        two tuples where the first element is a
+        path indicating a location in the Bureau
+        and the second element is the value at
+        that path location.
 
         The paths are sorted by their length as
         a (probably unnecessary) sanity check
@@ -231,7 +232,7 @@ class Bureau(collections.abc.MutableMapping):
 
         output = dict()
 
-        for (tup_path, value) in sorted(self.as_key_value_tuple(),
+        for (tup_path, value) in sorted(self.to_tuple(),
                                         key = lambda item: len(item[0])):
 
             cursor = output
@@ -245,41 +246,58 @@ class Bureau(collections.abc.MutableMapping):
         return output
 
     # -------------------------------------------------------------------------
-    def from_nested_dict(self, map_item, path_root = tuple()):
+    def from_dict(self, map_item, path_root = tuple()):
         """
         Load Bureau from a nested dict.
 
         """
-        return self.from_key_value_tuple(
-                                    tup_kv    = walkobj(obj      = map_item,
-                                                        gen_leaf = True,
-                                                        gen_path = True,
-                                                        gen_obj  = True),
-                                    path_root = path_root)
+        return self.from_tuple(path_root = path_root,
+                               tup_kv    = walkobj(obj      = map_item,
+                                                   gen_leaf = True,
+                                                   gen_path = True,
+                                                   gen_obj  = True))
+
+    # -------------------------------------------------------------------------
+    def from_db(self, connection, path_root = tuple()):
+        """
+        Load data into the Bureau from the specified database.
+
+        """
+
+        (map_data, map_error) = load_from_db(filepath, str_format)
+        if map_error is None:
+            self.from_dict(path_root = path_root,
+                           map_item  = map_data)
+
+    # -------------------------------------------------------------------------
+    def to_db(self, connection):
+        """
+        Save data from the Bureau to the specified database.
+
+        """
+
+        save_to_db(self.to_dict(), connection)
 
     # -------------------------------------------------------------------------
     def from_file(self, filepath, str_format = None, path_root = tuple()):
         """
-        Load the Bureau in its entirety from the specified file.
+        Load data into the Bureau from the specified file.
 
         """
 
-        # TODO: FROM DB?
         (map_data, map_error) = load_from_filepath(filepath, str_format)
         if map_error is None:
-            self.from_nested_dict(
-                            map_item  = map_data,
-                            path_root = path_root)
+            self.from_dict(path_root = path_root,
+                           map_item  = map_data)
 
     # -------------------------------------------------------------------------
-    def as_file(self, filepath, str_format = None):
+    def to_file(self, filepath, str_format = None):
         """
-        Save the Bureau in its entirety to the specified file.
+        Save data from the Bureau to the specified file.
 
         """
 
-        # TODO: TO DB?
-        save_to_filepath(self.as_nested_dict, filepath, str_format)
+        save_to_filepath(self.to_dict(), filepath, str_format)
 
     # -------------------------------------------------------------------------
     def pprint(self):
@@ -287,7 +305,7 @@ class Bureau(collections.abc.MutableMapping):
         Pretty print the bureau.
 
         """
-        pprint.pprint(self.as_nested_dict())
+        pprint.pprint(self.to_dict())
 
     # -------------------------------------------------------------------------
     def __getitem__(self, key):
@@ -404,6 +422,15 @@ class Bureau(collections.abc.MutableMapping):
         return self._bureau_engine.redo()
 
     # -------------------------------------------------------------------------
+    def add_global_callback(self, callback):
+        """
+        Add a global callback function for the whole data structure.
+
+        """
+
+        return self._bureau_engine.add_global_callback(callback = callback)
+
+    # -------------------------------------------------------------------------
     def add_callback(self, key, callback):
         """
         Add a callback function for the specified key.
@@ -413,39 +440,6 @@ class Bureau(collections.abc.MutableMapping):
         return self._bureau_engine.add_callback(
                                         tup_path = self._tup_full_path(key),
                                         callback = callback)
-
-    # -------------------------------------------------------------------------
-    def journal_peek(self):
-        """
-        Return the journal without clearing it.
-
-        """
-
-        return self._bureau_engine._journal
-
-    # -------------------------------------------------------------------------
-    def journal_pop(self):
-        """
-        Return the journal and clear it.
-
-        """
-
-        journal    = list()
-        journal[:] = self._bureau_engine._journal
-        self._bureau_engine._journal.clear()
-        return journal
-
-    # -------------------------------------------------------------------------
-    def update_from_journal(self, journal):
-        """
-        Update the Bureau using journal entries from the specified file.
-
-        """
-        for tup_entry in journal:
-            cmd = Command._make(tup_entry)
-            self._bureau_engine.set_item(path      = cmd.path,
-                                         value_new = cmd.value_new,
-                                         operation = cmd.operation)
 
     # -------------------------------------------------------------------------
     def _tup_full_path(self, key):
@@ -458,6 +452,45 @@ class Bureau(collections.abc.MutableMapping):
 
         return self._bureau_path + tuple(iter_branch)
 
+    # -------------------------------------------------------------------------
+    @contextlib.contextmanager
+    def batch_context(self):
+        """
+        Context manager for processing updates as a batch.
+
+        """
+        self._bureau_engine._journal.clear()
+        self._bureau_engine._do_keep_journal = True
+        batch = list()
+
+        try:
+
+            yield batch
+
+        except Exception as err:
+
+            pass # We might want to rollback changes here if there is a need.
+
+        finally:
+
+            self._bureau_engine._do_keep_journal = False
+            batch[:] = self._bureau_engine._journal
+
+            self._bureau_engine._invoke_callbacks(batch)
+
+            self._bureau_engine._journal.clear()
+
+    # -------------------------------------------------------------------------
+    def from_batch(self, batch):
+        """
+        Update the Bureau using the specified journal segment.
+
+        """
+        for tup_cmd in batch:
+            cmd = Command._make(tup_cmd)
+            self._bureau_engine.set_item(path      = cmd.path,
+                                         value_new = cmd.value_new,
+                                         operation = cmd.operation)
 
 # =============================================================================
 class BureauEngine():
@@ -473,25 +506,14 @@ class BureauEngine():
 
         """
 
-        self._bureau         = bureau
-        self._journal        = list()
-        self._hist_edit      = list()
-        self._hist_undo      = list()
-        self._list_callback  = list()  # Global callbacks.
-        self._map_callback   = dict()  # Callbacks specific to a key.
-
-    # -------------------------------------------------------------------------
-    def add_callback(self, tup_path, callback):
-        """
-        Add a callback function for the specified key.
-
-        """
-
-        if tup_path not in self._map_callback:
-            self._map_callback[tup_path] = list()
-        self._map_callback[tup_path].append(callback)
-
-        return None
+        self._bureau          = bureau
+        self._do_keep_journal = False
+        self._journal         = list()
+        self._cmd_counter     = 0
+        self._hist_edit       = list()
+        self._hist_undo       = list()
+        self._list_callback   = list()  # Global callbacks.
+        self._map_callback    = dict()  # Callbacks specific to a key.
 
     # -------------------------------------------------------------------------
     def get_item(self, path):
@@ -584,21 +606,26 @@ class BureauEngine():
         Sets a new value in the specified bureau and returns the old value.
 
         Also performs book-keeping tasks such as
-        invoking related callbacks, updating
-        the journal etc...
+        updating the and journal command counter.
 
         """
         time_utc  = time.time()
         value_old = self._do_update(cmd.path, cmd.value_new)
         if cmd.operation == 'del':
             self._bureau_data.__delitem__(key)
+
+        self._cmd_counter += 1
+        idx_cmd = self._cmd_counter - 1
+
         cmd = Command(operation = cmd.operation,
+                      idx       = idx_cmd,
                       time_utc  = time_utc,
                       path      = cmd.path,
                       value_new = cmd.value_new,
                       value_old = value_old)
-        self._invoke_callbacks(cmd)
-        self._journal.append(cmd)
+
+        if self._do_keep_journal:
+           self._journal.append(cmd)
 
         return cmd
 
@@ -714,25 +741,54 @@ class BureauEngine():
         return cursor
 
     # -------------------------------------------------------------------------
-    def _invoke_callbacks(self, cmd):
+    def add_global_callback(self, callback):
         """
-        Invoke callbacks.
+        Add a callback function for the whole data structure.
 
         """
-        list_callback = list()
-        list_callback.extend(self._list_callback)
+        self._list_callback.append(callback)
+
+        return None
+
+    # -------------------------------------------------------------------------
+    def add_callback(self, tup_path, callback):
+        """
+        Add a callback function for the specified key.
+
+        """
+
+        if tup_path not in self._map_callback:
+            self._map_callback[tup_path] = list()
+        self._map_callback[tup_path].append(callback)
+
+        return None
+
+    # -------------------------------------------------------------------------
+    def _invoke_callbacks(self, batch):
+        """
+        Invoke callbacks for the specified batch of command.
+
+        """
+        for callback in self._list_callback:
+            callback(batch)
+
+        # for (key, list_callback) in self._map_callback.items():
+
+        #     filtered_batch = (cmd for cmd in batch if _matches(cmd, key))
+
+        #     # filter batch using key
+        #     for callback in list_callback:
+        #         callback(filtered_batch)
 
         # Extend the calback list with
         # key-specific callbacks.
         #
-        tup_path_part = tuple()
-        for item in cmd.path:
-            tup_path_part += (item,)
-            if tup_path_part in self._map_callback:
-                list_callback.extend(self._map_callback[tup_path_part])
+        # tup_path_part = tuple()
+        # for item in cmd.path:
+        #     tup_path_part += (item,)
+        #     if tup_path_part in self._map_callback:
+        #         list_callback.extend(self._map_callback[tup_path_part])
 
-        for callback in list_callback:
-            callback(cmd)
 
         return None
 

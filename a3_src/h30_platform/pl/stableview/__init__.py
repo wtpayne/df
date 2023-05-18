@@ -74,7 +74,8 @@ def main(dirpath_cfg, name_view):
 
     ctx    = fl.util.Bureau()
     ctx.ui = dearpygui.dearpygui
-    ctx.cfg.from_file(filepath = _filepath_cfg(dirpath_cfg, name_view))
+
+    _load_configuration(ctx, dirpath_cfg, name_view)
 
     ctx.coro_view = fl.util.resolve(ctx.cfg.coro_view)(ctx)
 
@@ -83,7 +84,7 @@ def main(dirpath_cfg, name_view):
     ctx.ui.create_context()
     try:
 
-        _build(ctx)
+        _add_all_widgets_from_configuration(ctx)
 
         ctx.ui.setup_dearpygui()
 
@@ -101,6 +102,12 @@ def main(dirpath_cfg, name_view):
 
 
 # -----------------------------------------------------------------------------
+def _load_configuration(ctx, dirpath_cfg, name_view):
+    """
+    """
+    ctx.cfg.from_file(filepath = _filepath_cfg(dirpath_cfg, name_view))
+
+# -----------------------------------------------------------------------------
 def _filepath_cfg(dirpath_cfg, name_view):
     """
     Load configuration for the UI from the specified view.
@@ -112,8 +119,10 @@ def _filepath_cfg(dirpath_cfg, name_view):
 
 
 # -----------------------------------------------------------------------------
-def _build(ctx):
+def _add_all_widgets_from_configuration(ctx):
     """
+    Add all widgets from the specified configuration data.
+
     """
     for (tup_path, cfg_item) in _select_internal_data_structures(
                                         fl.util.walkobj(ctx.cfg,
@@ -122,34 +131,18 @@ def _build(ctx):
                                                         gen_path    = True,
                                                         gen_obj     = True)):
 
-        (name_fcn, args, kwargs, bindings, misc) = _get_widget_params(cfg_item)
-
-        _add_widget(ctx        = ctx,
-                    name_fcn   = name_fcn,
-                    args       = args,
-                    kwargs     = kwargs,
-                    bindings   = bindings,
-                    misc       = misc,
-                    tag_item   = '.'.join(tup_path),
-                    tag_parent = '.'.join(tup_path[:-1]))
-
-
-        # print('')
-        # print('')
-        # print('-' * 60)
-        # print(str_tag)
-        # print('=' * len(str_tag))
-        # print('')
-        # import pprint
-        # pprint.pprint(kwargs)
+        add_widget(ctx      = ctx,
+                   tup_path = tup_path,
+                   cfg_item = cfg_item)
 
 
 # -----------------------------------------------------------------------------
-def _add_widget(
-        ctx, name_fcn, args, kwargs, bindings, misc, tag_item, tag_parent):
+def add_widget(ctx, tup_path, cfg_item)
     """
 
     """
+
+    (name_fcn, args, kwargs, bindings, misc) = _get_widget_params(cfg_item)
 
     fcn = getattr(ctx.ui, name_fcn)
 
@@ -175,7 +168,7 @@ def _add_widget(
     if name_fcn in tup_no_tag:
         fcn(**kwargs)
         return
-
+    tag_item      = '.'.join(tup_path),
     kwargs['tag'] = tag_item
 
     # Handle functions with
@@ -189,10 +182,11 @@ def _add_widget(
         if 'set_primary_window' in misc and misc['set_primary_window']:
             ctx.ui.set_primary_window(tag_item, True)
         return
+    tag_parent       = '.'.join(tup_path[:-1]
+    kwargs['parent'] = tag_parent
 
     # Handle all other functions.
     #
-    kwargs['parent'] = tag_parent
     if args:
         fcn(*args, **kwargs)
     else:
@@ -221,13 +215,13 @@ def _get_widget_params(cfg_item):
         args = cfg_item._args
 
     if '_kwargs' in tup_keys:
-        kwargs = cfg_item._kwargs.as_dict()
+        kwargs = cfg_item._kwargs.to_dict()
 
     if '_bindings' in tup_keys:
-        bindings = cfg_item._bindings.as_dict()
+        bindings = cfg_item._bindings.to_dict()
 
     if '_misc' in tup_keys:
-        misc = cfg_item._misc.as_dict()
+        misc = cfg_item._misc.to_dict()
 
     return (name_fcn, args, kwargs, bindings, misc)
 
