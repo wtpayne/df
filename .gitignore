@@ -143,6 +143,10 @@
 # excluded.
 #
 
+# Jetbrains metadata
+#
+.idea
+
 # Secrets files for python-dotenv.
 #
 *.env

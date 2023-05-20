@@ -259,12 +259,11 @@ class SpecifyFlUtilBureau:
             path_written  = tup_cmd[0].path
 
         import fl.util
-        import fl.util.condition
         soi   = fl.util.Bureau()
         key   = 'field_1'
         value = 100
-        soi.add_rule(condition = fl.util.condition.always(),
-                     action    = _test_action)
+        soi.rule(cond = fl.util.always(),
+                 act  = _test_action)
 
         with soi.batch_context():
             soi[key] = value
@@ -295,13 +294,11 @@ class SpecifyFlUtilBureau:
             path_written  = tup_cmd[0].path
 
         import fl.util
-        import fl.util.condition
         soi    = fl.util.Bureau()
         value1 = 100
         value2 = 200
-        soi.add_rule(
-                condition = fl.util.condition.root_in(('field_1','field_2')),
-                action    = _test_action)
+        soi.rule(cond = fl.util.is_root_in(('field_1','field_2')),
+                 act  = _test_action)
 
         with soi.batch_context():
             soi.field_1.field_2 = value1
@@ -334,8 +331,8 @@ class SpecifyFlUtilBureau:
 
         import fl.util
         soi = fl.util.Bureau()
-        soi.add_rule(condition = fl.util.condition.root_in(('field_1',)),
-                     action    = _test_action)
+        soi.rule(cond = fl.util.is_root_in(('field_1',)),
+                 act  = _test_action)
 
         with soi.batch_context():
             soi.field_1.field_2 = 100
@@ -517,6 +514,7 @@ class SpecifyFlUtilBureau:
                 soi.a.c = 100
                 soi.a.d = 200
                 soi.b.e = 300
+                del soi.a
                 soi.b.f = 400
                 soi.b.f = 500
                 soi.undo()
@@ -524,13 +522,18 @@ class SpecifyFlUtilBureau:
 
         tup_tup_batch = tuple(tuple(item) for item in batch)
 
-        assert tup_tup_batch == (('edit', 0, ts, ('a', 'c'), 100, None ),
-                                 ('edit', 1, ts, ('a', 'd'), 200, None ),
-                                 ('edit', 2, ts, ('b', 'e'), 300, None ),
-                                 ('edit', 3, ts, ('b', 'f'), 400, None ),
-                                 ('edit', 4, ts, ('b', 'f'), 500, 400  ),
-                                 ('undo', 5, ts, ('b', 'f'), 400, 500  ),
-                                 ('redo', 6, ts, ('b', 'f'), 500, 400  ))
+        import pprint
+        pprint.pprint(tup_tup_batch)
+
+        assert tup_tup_batch == (('add',  0, ts, ('a', 'c'), 100,  None ),
+                                 ('add',  1, ts, ('a', 'd'), 200,  None ),
+                                 ('add',  2, ts, ('b', 'e'), 300,  None ),
+                                 ('del',  3, ts, ('a', 'c'), None, 100  ),
+                                 ('del',  4, ts, ('a', 'd'), None, 200  ),
+                                 ('add',  5, ts, ('b', 'f'), 400,  None ),
+                                 ('edit', 6, ts, ('b', 'f'), 500,  400  ),
+                                 ('undo', 7, ts, ('b', 'f'), 400,  500  ),
+                                 ('redo', 8, ts, ('b', 'f'), 500,  400  ))
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research

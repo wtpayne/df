@@ -70,45 +70,47 @@ def main(dirpath_cfg, name_view):
     The cfg data structure defines the basic
     layout and structure of the GUI.
 
+    TODO: Glue in callbacks from widgets to the VM.
+
     """
 
-    ctx    = fl.util.Bureau()
-    ctx.add_rule(fl.util.Rule(condition = fl.util.condition.always,
-                              action    = _build_widget))
+    ctx = fl.util.Bureau()
+    ctx.rule(cond = (fl.util.is_leaf_at(('_fcn',)),
+                     fl.util.is_operation('add')),
+             act  = _add_dearpygui_widget)
+
+    ctx.rule(cond = (fl.util.is_leaf_at(('_fcn',)),
+                     fl.util.is_operation('del')),
+             act  = _del_dearpygui_widget)
 
     ctx.ui = dearpygui.dearpygui
 
-    _load_configuration(ctx, dirpath_cfg, name_view)
+    batch = ctx.batch_init()
+    ctx.cfg.from_file(filepath = _filepath_cfg(dirpath_cfg, name_view))
 
-    ctx.coro_view = fl.util.resolve(ctx.cfg.coro_view)(ctx)
+    # ctx.coro_view = fl.util.resolve(ctx.cfg.coro_view)(ctx)
 
-    next(ctx.coro_view)                           # app early setup.
+    # next(ctx.coro_view)                           # app early setup.
 
     ctx.ui.create_context()
     try:
 
-        _add_all_widgets_from_configuration(ctx)
+        ctx.batch_finalize(batch)  # Create widgets.
 
         ctx.ui.setup_dearpygui()
 
-        next(ctx.coro_view)                       # app late setup.
+    #     next(ctx.coro_view)                       # app late setup.
 
         ctx.ui.show_viewport()
         while ctx.ui.is_dearpygui_running():
 
-            next(ctx.coro_view)                   # app runtime step.
+    #         next(ctx.coro_view)                   # app runtime step.
 
             ctx.ui.render_dearpygui_frame()
 
     finally:
         ctx.ui.destroy_context()
 
-
-# -----------------------------------------------------------------------------
-def _load_configuration(ctx, dirpath_cfg, name_view):
-    """
-    """
-    ctx.cfg.from_file(filepath = _filepath_cfg(dirpath_cfg, name_view))
 
 # -----------------------------------------------------------------------------
 def _filepath_cfg(dirpath_cfg, name_view):
@@ -121,29 +123,23 @@ def _filepath_cfg(dirpath_cfg, name_view):
     return filepath_cfg
 
 
+
 # -----------------------------------------------------------------------------
-def _add_all_widgets_from_configuration(ctx):
+def _add_dearpygui_widget(ctx, tup_cmd):
     """
-    Add all widgets from the specified configuration data.
-
     """
-    for (tup_path, cfg_item) in _select_internal_data_structures(
-                                        fl.util.walkobj(ctx.cfg,
-                                                        gen_leaf    = False,
-                                                        gen_nonleaf = True,
-                                                        gen_path    = True,
-                                                        gen_obj     = True)):
-
-        add_widget(ctx      = ctx,
-                   tup_path = tup_path,
-                   cfg_item = cfg_item)
+    for cmd in tup_cmd:
+        add_one_widget(ctx, cmd)
 
 
 # -----------------------------------------------------------------------------
-def add_widget(ctx, tup_path, cfg_item)
+def add_one_widget(ctx, cmd):
     """
 
     """
+
+    tup_path = cmd.path[:-1]
+    cfg_item = ctx[tup_path]
 
     (name_fcn, args, kwargs, bindings, misc) = _get_widget_params(cfg_item)
 
@@ -161,6 +157,20 @@ def add_widget(ctx, tup_path, cfg_item)
         if key.endswith('callback'):
             kwargs['user_data'] = ctx
 
+        def _callback(sender, app_data, ctx):
+            """
+            """
+            key_value = '_value' # Widget callback specific
+            ctx[tup_path + (key_value,)] = app_data
+        kwargs[key] = _callback
+
+        ######################################################
+        ######################################################
+        # TODO: MAKE CALLBACK NUTATE CTX WITH LAMBDA ..      #
+        #       AND ALSO ADD RULE FOR THOSE CHANGES TOO?     #
+        ######################################################
+        ######################################################
+
     # Handle nodes where the associated
     # DearPyGui function does not expect
     # either a tag parameter or a parent
@@ -171,7 +181,7 @@ def add_widget(ctx, tup_path, cfg_item)
     if name_fcn in tup_no_tag:
         fcn(**kwargs)
         return
-    tag_item      = '.'.join(tup_path),
+    tag_item      = '.'.join(tup_path)
     kwargs['tag'] = tag_item
 
     # Handle functions with
@@ -185,7 +195,7 @@ def add_widget(ctx, tup_path, cfg_item)
         if 'set_primary_window' in misc and misc['set_primary_window']:
             ctx.ui.set_primary_window(tag_item, True)
         return
-    tag_parent       = '.'.join(tup_path[:-1]
+    tag_parent       = '.'.join(tup_path[:-1])
     kwargs['parent'] = tag_parent
 
     # Handle all other functions.

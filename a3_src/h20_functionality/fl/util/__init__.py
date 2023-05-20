@@ -57,8 +57,6 @@ import string
 import time
 import typing
 
-import fl.util.condition
-
 
 # Command used by Bureau and BureauEngine to mutate state.
 #
@@ -72,7 +70,7 @@ Command = collections.namedtuple(
 #
 Rule = collections.namedtuple(
     typename    = 'Rule',
-    field_names = ('condition', 'action'))
+    field_names = ('cond', 'act'))
 
 
 # =============================================================================
@@ -121,12 +119,14 @@ class Bureau(collections.abc.MutableMapping):
         tables and supports callback registration
         for change listeners.
 
+        TODO: Support for trigger-rule-on-removal.
+        ==========================================
+
         TODO: Add path/filter/rules parameter for data savers/exporters.
         TODO: Save/Load (journal?/state?) to/from SQLITE
 
         TODO: Support for remote sync (Load/update from journal)
         TODO: Design mechanism for binding to other Bureau trees.
-        TODO: Filters and rulesets.
 
         TODO: Reactive programming with RxPy ???
         TODO: Regex-based listening on paths. (jquery-like?) ???
@@ -161,6 +161,26 @@ class Bureau(collections.abc.MutableMapping):
         # used to delimit string paths.
         #
         self._bureau_path_delimiter = path_delimiter
+
+    # -------------------------------------------------------------------------
+    def reset_engine(self, path = None, engine = None):
+        """
+        Disconnect this Bureau from it's engine and replace with a new one.
+
+        We need to do this, for example, when
+        separating a subtree from the main
+        tree.
+
+        """
+        if engine is None:
+            self._bureau_engine = BureauEngine(bureau = self)
+        else:
+            self._bureau_engine = Engine
+
+        if path is None:
+            self._bureau_path = tuple()
+        else:
+            self._bureau_path = path
 
     # -------------------------------------------------------------------------
     def to_tuple(self):
@@ -330,12 +350,21 @@ class Bureau(collections.abc.MutableMapping):
         return None
 
     # -------------------------------------------------------------------------
+    def __delattr__(self, key):
+        """
+        Delete the specified key.
+
+        """
+        self._bureau_engine.del_item(path = self._tup_full_path(key))
+
+        return None
+
+    # -------------------------------------------------------------------------
     def __delitem__(self, key):
         """
         Delete the specified key.
 
         """
-
         self._bureau_engine.del_item(path = self._tup_full_path(key))
 
         return None
@@ -423,11 +452,11 @@ class Bureau(collections.abc.MutableMapping):
         return self._bureau_engine.redo()
 
     # -------------------------------------------------------------------------
-    def add_rule(self,
-                 rule      = None,
-                 condition = None,
-                 action    = None,
-                 tup_path  = None):
+    def rule(self,
+             rule     = None,
+             cond     = None,
+             act      = None,
+             tup_path = None):
         """
         Add a rule to the bureau engine.
 
@@ -436,10 +465,10 @@ class Bureau(collections.abc.MutableMapping):
         if tup_path is None:
             tup_path = self._bureau_path
 
-        return self._bureau_engine.add_rule(rule      = rule,
-                                            condition = condition,
-                                            action    = action,
-                                            tup_path  = tup_path)
+        return self._bureau_engine.rule(rule     = rule,
+                                        cond     = cond,
+                                        act      = act,
+                                        tup_path = tup_path)
 
     # -------------------------------------------------------------------------
     def _tup_full_path(self, key):
@@ -459,9 +488,7 @@ class Bureau(collections.abc.MutableMapping):
         Context manager for processing updates as a batch.
 
         """
-        self._bureau_engine._journal.clear()
-        self._bureau_engine._do_keep_journal = True
-        batch = list()
+        batch = self.batch_init()
 
         try:
 
@@ -469,16 +496,31 @@ class Bureau(collections.abc.MutableMapping):
 
         except Exception as err:
 
-            pass # We might want to rollback changes here if there is a need.
+            raise # We might want to rollback changes here if there is a need.
 
         finally:
 
-            self._bureau_engine._do_keep_journal = False
-            batch[:] = self._bureau_engine._journal
+            self.batch_finalize(batch)
 
-            self._bureau_engine._invoke_rules(batch)
+    # -------------------------------------------------------------------------
+    def batch_init(self):
+        """
+        """
+        self._bureau_engine._journal.clear()
+        self._bureau_engine._do_keep_journal = True
+        batch = list()
+        return batch
 
-            self._bureau_engine._journal.clear()
+    # -------------------------------------------------------------------------
+    def batch_finalize(self, batch):
+        """
+        """
+        self._bureau_engine._do_keep_journal = False
+        batch[:] = self._bureau_engine._journal
+
+        self._bureau_engine._invoke_rules(batch)
+
+        self._bureau_engine._journal.clear()
 
     # -------------------------------------------------------------------------
     def from_batch(self, batch):
@@ -544,10 +586,11 @@ class BureauEngine():
         """
 
         self.set_item(path = path, value_new = None, operation = 'del')
+
         return None
 
     # -------------------------------------------------------------------------
-    def set_item(self, path, value_new, operation = 'edit'):
+    def set_item(self, path, value_new, operation = None):
         """
         Setter implementation.
 
@@ -602,31 +645,202 @@ class BureauEngine():
     # -------------------------------------------------------------------------
     def _do_update_and_bookkeeping(self, cmd):
         """
-        Sets a new value in the specified bureau and returns the old value.
+        Update the bureau state and return the completed command.
 
-        Also performs book-keeping tasks such as
-        updating the and journal command counter.
+        The Command named tuple that is returned
+        has mostly the same values as the command
+        specified by the caller, but with any
+        missing values filled in. This will
+        include the old value where it isn't
+        known beforehand, and the operation name
+        when we don't know if we are making an
+        'edit' to an existing field or an 'add'
+        of a new field.
+
+        This procedure also performs book-keeping
+        tasks such as updating the journal and the
+        command counter.
+
+        If the command specified by the caller
+        affects more than one leaf of the bureau
+        tree, then the journal is updated with
+        one command for each leaf that is changed.
+
+        This is done so that leaf-specific rules
+        will be triggered as expected.
+
+        We call these leaf-specific commands
+        'auxiliary' commands, and we call the
+        command from which they are derived
+        the 'principal' command.
 
         """
-        time_utc  = time.time()
-        value_old = self._do_update(cmd.path, cmd.value_new)
-        if cmd.operation == 'del':
-            self._bureau_data.__delitem__(key)
 
-        self._cmd_counter += 1
-        idx_cmd = self._cmd_counter - 1
+        value_new = cmd.value_new
+        value_old = self._do_update(cmd.path, value_new)
 
-        cmd = Command(operation = cmd.operation,
-                      idx       = idx_cmd,
-                      time_utc  = time_utc,
-                      path      = cmd.path,
-                      value_new = cmd.value_new,
-                      value_old = value_old)
+        # Connect any newly added Bureau subtrees
+        # to the engine, and disconnect any newly
+        # removed subtrees from the engine.
+        #
+        # This is to prevent removed subtrees
+        # from affecting the original and vice
+        # versa.
+        #
+        if isinstance(value_new, Bureau):
+            value_new.reset_engine(path   = cmd.path,
+                                   engine = self)
 
-        if self._do_keep_journal:
-           self._journal.append(cmd)
+        if isinstance(value_old, Bureau):
+            value_old.reset_engine(path   = None,
+                                   engine = None)
 
-        return cmd
+        # Work out if we are adding a new
+        # value or modifying an existing
+        # value.
+        #
+        operation = cmd.operation
+        if operation is None:
+            if value_old is None:
+                operation = 'add'
+            else:
+                operation = 'edit'
+
+        # If we're not keeping a journal, then
+        # we don't need to worry about non-atomic
+        # additions and removals. We also
+        # don't need to keep track of the command
+        # counter or timestamp.
+        #
+        if not self._do_keep_journal:
+            return Command(operation = operation,
+                           idx       = None,
+                           time_utc  = None,
+                           path      = cmd.path,
+                           value_new = value_new,
+                           value_old = value_old)
+
+        # If both the old and the new values are
+        # leaf nodes, then it is an atomic change
+        # and we can just journal the principal
+        # command as-is.
+        #
+        time_utc    = time.time()
+        is_leaf_new = is_leaf(value_new)
+        is_leaf_old = is_leaf(value_old)
+
+        is_leaf_replaces_leaf     =      is_leaf_new  and      is_leaf_old
+        is_leaf_replaces_branch   =      is_leaf_new  and (not is_leaf_old)
+        is_branch_replaces_leaf   = (not is_leaf_new) and      is_leaf_old
+        is_branch_replaces_branch = (not is_leaf_new) and (not is_leaf_old)
+
+        if is_leaf_replaces_leaf:
+
+            self._cmd_counter += 1
+            idx_cmd            = self._cmd_counter - 1
+            cmd_principal      = Command(operation = operation,
+                                         idx       = idx_cmd,
+                                         time_utc  = time_utc,
+                                         path      = cmd.path,
+                                         value_new = value_new,
+                                         value_old = value_old)
+            self._journal.append(cmd_principal)
+
+        elif is_leaf_replaces_branch:
+
+            for (relpath, leaf_old) in walkobj(obj         = value_old,
+                                               gen_leaf    = True,
+                                               gen_nonleaf = False,
+                                               gen_path    = True,
+                                               gen_obj     = True):
+                self._cmd_counter += 1
+                idx_cmd = self._cmd_counter - 1
+                self._journal.append(Command(operation = operation,
+                                             idx       = idx_cmd,
+                                             time_utc  = time_utc,
+                                             path      = cmd.path + relpath,
+                                             value_new = value_new,
+                                             value_old = leaf_old))
+
+        elif is_branch_replaces_leaf:
+
+            for (relpath, leaf_new) in walkobj(obj         = value_new,
+                                               gen_leaf    = True,
+                                               gen_nonleaf = False,
+                                               gen_path    = True,
+                                               gen_obj     = True):
+                self._cmd_counter += 1
+                idx_cmd = self._cmd_counter - 1
+                self._journal.append(Command(operation = operation,
+                                             idx       = idx_cmd,
+                                             time_utc  = time_utc,
+                                             path      = cmd.path + relpath,
+                                             value_new = leaf_new,
+                                             value_old = value_old))
+
+        elif is_branch_replaces_branch:
+
+            for (relpath, leaf_old) in walkobj(obj         = value_old,
+                                               gen_leaf    = True,
+                                               gen_nonleaf = False,
+                                               gen_path    = True,
+                                               gen_obj     = True):
+                self._cmd_counter += 1
+                idx_cmd = self._cmd_counter - 1
+                self._journal.append(Command(operation = operation,
+                                             idx       = idx_cmd,
+                                             time_utc  = time_utc,
+                                             path      = cmd.path + relpath,
+                                             value_new = None,
+                                             value_old = leaf_old))
+
+            for (relpath, leaf_new) in walkobj(obj         = value_new,
+                                               gen_leaf    = True,
+                                               gen_nonleaf = False,
+                                               gen_path    = True,
+                                               gen_obj     = True):
+                self._cmd_counter += 1
+                idx_cmd = self._cmd_counter - 1
+                self._journal.append(Command(operation = operation,
+                                             idx       = idx_cmd,
+                                             time_utc  = time_utc,
+                                             path      = cmd.path + relpath,
+                                             value_new = leaf_new,
+                                             value_old = None))
+
+        return Command(operation = operation,
+                       idx       = None,
+                       time_utc  = None,
+                       path      = cmd.path,
+                       value_new = value_new,
+                       value_old = value_old)
+
+    # -------------------------------------------------------------------------
+    def _iter_subtree_leaves(self, path):
+        """
+        Yield of the existing leaf items under the specified path.
+
+        """
+        for (relpath, value) in walkobj(obj         = self._item_at(path),
+                                        gen_leaf    = True,
+                                        gen_nonleaf = False,
+                                        gen_path    = True,
+                                        gen_obj     = True):
+            yield (path_cursor + relpath, value)
+
+    # -------------------------------------------------------------------------
+    def _item_at(self, path, do_create_missing = False):
+        """
+        Return a reference to the item at the specified path.
+
+        """
+        cursor      = self._bureau._bureau_data
+        path_cursor = tuple()
+        for name in _iter_path(path, self._bureau._bureau_path_delimiter):
+            path_cursor = path_cursor + (name,)
+            (get_item, set_item) = _accessor_functions(cursor)
+            cursor = get_item(name)
+        return cursor
 
     # -------------------------------------------------------------------------
     def _do_update(self, tup_path, value_new):
@@ -645,10 +859,6 @@ class BureauEngine():
         returned. If there is no old value (the
         path was not previously in the data
         structure), then None is returned.
-
-        If there are any callbacks associated
-        with the specified path, they are invoked
-        with the old and new values as arguments.
 
         :param tup_path:    A tuple representing the path in the bureau's
                             data structure where the new value is to be set.
@@ -727,7 +937,6 @@ class BureauEngine():
         cursor.
 
         """
-
         (get_item, set_item) = _accessor_functions(cursor)
         try:
             cursor = get_item(name)
@@ -740,18 +949,18 @@ class BureauEngine():
         return cursor
 
     # -------------------------------------------------------------------------
-    def add_rule(self,
-                 rule      = None,
-                 condition = None,
-                 action    = None,
-                 tup_path  = None):
+    def rule(self,
+             rule     = None,
+             cond     = None,
+             act      = None,
+             tup_path = None):
         """
         Add a rule.
 
         """
         has_rule      = rule      is not None
-        has_condition = condition is not None
-        has_action    = action    is not None
+        has_condition = cond      is not None
+        has_action    = act       is not None
         has_tup_path  = tup_path  is not None
 
         if has_rule:
@@ -771,20 +980,19 @@ class BureauEngine():
                     'be specified instead.'))
 
             # Ensure condition wrapped in tuple
-            if callable(condition):
-                condition = (condition,)
+            if callable(cond):
+                cond = (cond,)
 
-            rule = Rule(condition = condition,
-                        action    = action)
+            rule = Rule(cond = cond,
+                        act  = act)
 
         # Add an indicator function to the rule's
         # conditions to select only commands that
         # affect the specified path.
         #
         if has_tup_path:
-            root_in_condition = fl.util.condition.root_in(tup_path)
-            rule = Rule(condition = (root_in_condition,) + rule.condition,
-                        action    = rule.action)
+            rule = Rule(cond = (is_root_in(tup_path),) + rule.cond,
+                        act  = rule.act)
 
         self._list_rule.append(rule)
 
@@ -807,7 +1015,7 @@ class BureauEngine():
             list_cmd.clear()
             list_cmd[:] = batch
 
-            for indicator in rule.condition:
+            for indicator in rule.cond:
                 if not list_cmd:
                     break
                 list_cmd[:] = (cmd for cmd in list_cmd if indicator(cmd = cmd))
@@ -815,7 +1023,7 @@ class BureauEngine():
             if not list_cmd:
                 continue
 
-            rule.action(self._bureau, list_cmd)
+            rule.act(self._bureau, list_cmd)
 
         return None
 
@@ -899,6 +1107,96 @@ def _iter_path(path, delim):
         #
         except TypeError:
             yield path
+
+
+# -----------------------------------------------------------------------------
+def always():
+    """
+    Return an always-true indicator function.
+
+    """
+    def _indicator(cmd):
+        """
+        Return True.
+
+        """
+        return True
+    return _indicator
+
+
+# -----------------------------------------------------------------------------
+def never():
+    """
+    Return a never-true indicator function.
+
+    """
+    def _indicator(cmd):
+        """
+        Return False.
+
+        """
+        return False
+    return _indicator
+
+
+# -----------------------------------------------------------------------------
+def is_not(fcn):
+    """
+    Return indicator that negates the specified indicator.
+
+    """
+    def _indicator(cmd):
+        """
+        Return the negation of the specified indicator.
+
+        """
+        return not fcn(cmd)
+    return _indicator
+
+
+# -----------------------------------------------------------------------------
+def is_root_in(tup_path_root):
+    """
+    Return indicator that checks cmd.path is rooted in the specified location.
+
+    """
+    def _indicator(cmd):
+        """
+        Return True iff cmd.path is rooted in the specified location.
+
+        """
+        return cmd.path[:len(tup_path_root)] == tup_path_root
+    return _indicator
+
+
+# -----------------------------------------------------------------------------
+def is_leaf_at(tup_path_leaf):
+    """
+    Return indicator that checks cmd.path leafed at the specified location.
+
+    """
+    def _indicator(cmd):
+        """
+        Return True iff cmd.path is leafed at the specified location.
+
+        """
+        return cmd.path[-len(tup_path_leaf):] == tup_path_leaf
+    return _indicator
+
+
+# -----------------------------------------------------------------------------
+def is_operation(operation):
+    """
+    Return indicator that checks cmd.operation.
+
+    """
+    def _indicator(cmd):
+        """
+        Return True iff cmd.path is leafed at the specified location.
+
+        """
+        return cmd.operation == operation
+    return _indicator
 
 
 # =============================================================================
@@ -1527,6 +1825,17 @@ def resolve(value):
 
     (name_module, name_attrib) = value[len(prefix):].rsplit('.', 1)
     return getattr(importlib.import_module(name_module), name_attrib)
+
+
+# -----------------------------------------------------------------------------
+def is_leaf(obj):
+    """
+    Return True if obj is a leaf data type, False otherwise.
+
+    """
+
+    is_itable = isinstance(obj, collections.abc.Iterable)
+    return (not is_itable) or is_string(obj)
 
 
 # -----------------------------------------------------------------------------
