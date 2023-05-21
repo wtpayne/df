@@ -1823,7 +1823,16 @@ def resolve(value):
     if not value.startswith(prefix):
         return value
 
-    (name_module, name_attrib) = value[len(prefix):].rsplit('.', 1)
+    return from_spec(str_spec = value[len(prefix):])
+
+
+# -----------------------------------------------------------------------------
+def from_spec(str_spec):
+    """
+    Import the module and return the attribute in the specified spec.
+
+    """
+    (name_module, name_attrib) = str_spec.rsplit('.', 1)
     return getattr(importlib.import_module(name_module), name_attrib)
 
 

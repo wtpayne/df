@@ -52,6 +52,11 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
     """
 
+    # Data & logic.
+    #
+    data  = fl.util.Bureau()
+    logic = fl.util.from_spec(cfg['spec_coro'])()
+
     # We distinguish between 'administrative'
     # inputs and 'operational' inputs.
     #
@@ -68,10 +73,6 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
     set_input_operational = set_input_all - set_input_administrative
     tup_input_operational = tuple(sorted(set_input_operational))
-
-    # Data.
-    #
-    data = fl.util.Bureau()
 
     # Initialize outputs.
     #
@@ -102,15 +103,25 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
             for rule in inputs['rule']['list']:
                 data.rule(rule)
 
-        # Update data from operational inputs.
+        # Update the data structure from the
+        # operational inputs.
         #
-        with data.batch_context() as batch:
+        with data.batch_context() as batch_in:
             for key in tup_input_operational:
                 data.from_batch(inputs[key]['list'])
 
-        # Update outputs with outgoing user provided data.
+        # Update the data structure using the
+        # configured logic coroutine.
         #
-        if batch:
+        with data.batch_context() as batch_proc:
+            logic.send(data)
+
+        # Fill output data structures with batch
+        # output commands.
+        #
+        # batch_out = batch_in + batch_proc
+        batch_out = batch_proc
+        if batch_out:
             for key in outputs.keys():
                 outputs[key]['ena'] = True
                 outputs[key]['ts'].update(map_ts)
