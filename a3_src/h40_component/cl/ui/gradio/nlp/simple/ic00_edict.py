@@ -50,7 +50,7 @@ import fl.ui.gradio.nlp.simple
 # -----------------------------------------------------------------------------
 def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     """
-    OpenAI agent coroutine.
+    Gradio simple NLP task control UI coroutine.
 
     """
 

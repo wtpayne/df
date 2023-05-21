@@ -21,7 +21,7 @@ globhandler:
 vp:
   _fcn:                           create_viewport
   _kwargs:
-    title:                        "Stableflow Editor"
+    title:                        "FlowForge"
     width:                        1024
     height:                       768
 

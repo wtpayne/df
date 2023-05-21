@@ -57,7 +57,7 @@ import fl.util
 
 
 try:
-    __version__ = importlib.metadata.version('sfedit')
+    __version__ = importlib.metadata.version('stableview')
 except importlib.metadata.PackageNotFoundError:
     __version__ = '0.0.1'
 
@@ -70,18 +70,11 @@ def main(dirpath_cfg, name_view):
     The cfg data structure defines the basic
     layout and structure of the GUI.
 
-    TODO: Glue in callbacks from widgets to the VM.
-
     """
 
     ctx = fl.util.Bureau()
-    ctx.rule(cond = (fl.util.is_leaf_at(('_fcn',)),
-                     fl.util.is_operation('add')),
-             act  = _add_dearpygui_widget)
-
-    ctx.rule(cond = (fl.util.is_leaf_at(('_fcn',)),
-                     fl.util.is_operation('del')),
-             act  = _del_dearpygui_widget)
+    ctx.rule(cond = fl.util.is_leaf_at(('_fcn',)),
+             act  = _update_widget)
 
     ctx.ui = dearpygui.dearpygui
 
@@ -106,7 +99,8 @@ def main(dirpath_cfg, name_view):
 
     #         next(ctx.coro_view)                   # app runtime step.
 
-            ctx.ui.render_dearpygui_frame()
+            with ctx.batch_context():
+                ctx.ui.render_dearpygui_frame()
 
     finally:
         ctx.ui.destroy_context()
@@ -118,23 +112,47 @@ def _filepath_cfg(dirpath_cfg, name_view):
     Load configuration for the UI from the specified view.
 
     """
+
     filename_cfg = '{name}.stableview.cfg.yaml'.format(name = name_view)
     filepath_cfg = os.path.join(dirpath_cfg, name_view, filename_cfg)
     return filepath_cfg
 
 
-
 # -----------------------------------------------------------------------------
-def _add_dearpygui_widget(ctx, tup_cmd):
+def _update_widget(ctx, tup_cmd):
     """
+    Delete corresponding to the specified commands.
+
     """
+
     for cmd in tup_cmd:
-        add_one_widget(ctx, cmd)
+
+        if cmd.operation == 'del':
+            _del_widget(ctx, cmd)
+
+        if cmd.operation == 'add':
+            _add_widget(ctx, cmd)
+
+        if cmd.operation == 'edit':
+            print('EDIT')
 
 
 # -----------------------------------------------------------------------------
-def add_one_widget(ctx, cmd):
+def _del_widget(ctx, cmd):
     """
+    Delete the widget being referenced by the specified command.
+
+    """
+
+    tup_path = cmd.path[:-1]
+    tag      = '.'.join(tup_path)
+    ctx.ui.delete_item(tag)
+
+
+# -----------------------------------------------------------------------------
+def _add_widget(ctx, cmd):
+    """
+    Add the widget being referenced by the specified command.
 
     """
 
@@ -157,12 +175,22 @@ def add_one_widget(ctx, cmd):
         if key.endswith('callback'):
             kwargs['user_data'] = ctx
 
-        def _callback(sender, app_data, ctx):
-            """
-            """
-            key_value = '_value' # Widget callback specific
-            ctx[tup_path + (key_value,)] = app_data
-        kwargs[key] = _callback
+            def _callback(sender, app_data, ctx):
+                """
+                """
+                print('IN CALLBACK')
+                ctx.vp.browse._fcn    = 'add_file_dialog'
+                ctx.vp.browse._kwargs.directory_selector = True
+                ctx.vp.browse._kwargs.show               = True
+
+                # print('CALLBACK: ' + repr(tup_key))
+                # print(sender)
+                # print(app_data)
+
+                # key_value = '_value' # Widget callback specific
+                # ctx[tup_path + (key_value,)] = app_data
+
+            kwargs[key] = _callback
 
         ######################################################
         ######################################################
@@ -189,7 +217,8 @@ def add_one_widget(ctx, cmd):
     #
     tup_no_parent = ('add_window',
                      'add_handler_registry',
-                     'add_item_handler_registry')
+                     'add_item_handler_registry',
+                     'add_file_dialog')
     if name_fcn in tup_no_parent:
         fcn(**kwargs)
         if 'set_primary_window' in misc and misc['set_primary_window']:
@@ -237,60 +266,3 @@ def _get_widget_params(cfg_item):
         misc = cfg_item._misc.to_dict()
 
     return (name_fcn, args, kwargs, bindings, misc)
-
-
-# -----------------------------------------------------------------------------
-def _select_internal_data_structures(iter_items):
-    """
-    Yield all items inthe specified iterator that posess internal fields.
-
-    """
-    for (tup_path, item) in iter_items:
-        if _has_internal_fields(tup_path, item):
-            yield (tup_path, item)
-
-
-# -----------------------------------------------------------------------------
-def _has_internal_fields(tup_path, item):
-    """
-    Return true if tup_path has no leading underscores but item.keys does.
-
-    This indicates that it is a data item at a
-    public location that contains internal
-    implementation-specific fields. (I.e. those
-    that begin with an underscore.)
-
-    """
-    is_container = isinstance(item, fl.util.Bureau)
-    if not is_container:
-        return False
-
-    is_internal = _has_internal_element(tup_path)
-    if is_internal:
-        return False
-
-    tup_fields          = tuple(item.keys())
-    has_internal_fields = _has_internal_element(tup_fields)
-
-    return has_internal_fields
-
-
-# -----------------------------------------------------------------------------
-def _has_internal_element(tup_str):
-    """
-    Return true if any element in tup_str starts with an underscore.
-
-    """
-    return any(_select_internal_elemnets(tup_str))
-
-
-# -----------------------------------------------------------------------------
-def _select_internal_elemnets(tup_str):
-    """
-    Yield each element in tup_str that starts with an underscore.
-
-    """
-    for str_element in tup_str:
-        if str_element.startswith('_'):
-            yield str_element
-
