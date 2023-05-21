@@ -119,17 +119,6 @@ class Bureau(collections.abc.MutableMapping):
         tables and supports callback registration
         for change listeners.
 
-        TODO: Support for trigger-rule-on-removal.
-        ==========================================
-
-        TODO: Add path/filter/rules parameter for data savers/exporters.
-        TODO: Save/Load (journal?/state?) to/from SQLITE
-
-        TODO: Support for remote sync (Load/update from journal)
-
-        TODO: Reactive programming with RxPy ???
-        TODO: Regex-based listening on paths. (jquery-like?) ???
-
         """
 
         # Bureau data is the underlying datastore
@@ -276,27 +265,6 @@ class Bureau(collections.abc.MutableMapping):
                                                    gen_leaf = True,
                                                    gen_path = True,
                                                    gen_obj  = True))
-
-    # -------------------------------------------------------------------------
-    def from_db(self, connection, path_root = tuple()):
-        """
-        Load data into the Bureau from the specified database.
-
-        """
-
-        (map_data, map_error) = load_from_db(filepath, str_format)
-        if map_error is None:
-            self.from_dict(path_root = path_root,
-                           map_item  = map_data)
-
-    # -------------------------------------------------------------------------
-    def to_db(self, connection):
-        """
-        Save data from the Bureau to the specified database.
-
-        """
-
-        save_to_db(self.to_dict(), connection)
 
     # -------------------------------------------------------------------------
     def from_file(self, filepath, str_format = None, path_root = tuple()):

@@ -119,6 +119,7 @@
     "#",
 
     { "type": "pep508", "spec":    "reactivex==4.0.4"                         },
+    { "type": "pep508", "spec":    "sqlitedict==2.1.0"                        },
 
     "",
     "",
