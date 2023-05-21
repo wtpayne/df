@@ -486,9 +486,26 @@ class SpecifyFlUtilBureau:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_provides_a_batch_update_context(self, monkeypatch):
+    def it_allows_batching_updates_via_context_manager(self, monkeypatch):
         """
         fl.util.Bureau containers provide a batched-updates context manager.
+
+        Test that 'Bureau' objects provide a
+        context manager for batch updates.
+
+        This test creates a 'Bureau' instance and
+        uses a 'batch_context' to perform a series
+        of operations including adding, deleting,
+        editing, undoing, and redoing actions.
+
+        Mocking is used to override the 'time'
+        function for consistency in the batch's
+        timestamp.
+
+        The test asserts that the final batch,
+        once transformed into a tuple of tuples,
+        matches the expected sequence of operations
+        and values.
 
         """
 
@@ -537,9 +554,22 @@ class SpecifyFlUtilBureau:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_can_be_updated_from_a_batch_record(self, monkeypatch):
+    def it_updates_data_from_batched_commands(self):
         """
         fl.util.Bureau containers can be updated with batches of commands.
+
+        Test that 'Bureau' objects can update
+        their data from a batch record consisting
+        of multiple commands.
+
+        This test creates a 'Bureau' instance and
+        a batch of commands including 'edit',
+        'undo' and 'redo' operations. The batch
+        is used to update the 'Bureau' instance
+        using the 'from_batch' method. The test
+        concludes by asserting that the final
+        values of the 'Bureau' object match the
+        expected results after batch updates.
 
         """
 
@@ -560,6 +590,54 @@ class SpecifyFlUtilBureau:
         assert soi.a.d == 200
         assert soi.b.e == 300
         assert soi.b.f == 500
+
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_synchronizes_data_between_bureaus_using_batch_context(self):
+        """
+        fl.util.Bureau containers can be kept in synch with another bureau.
+
+        Test the ability of 'Bureau' objects to
+        sync their data with another 'Bureau'
+        instance using batch_context.
+
+        This test operates by creating two 'Bureau'
+        instances, soi_01 and soi_02. Initially,
+        data is added to soi_01 within a batch_context,
+        and then this batch is used to sync soi_02
+        with soi_01. Equality of soi_01 and soi_02
+        is then asserted.
+
+        The process is repeated in reverse, adding
+        different data to soi_02 and syncing it to
+        soi_01 and finally checking equality of
+        both 'Bureau' instances again.
+
+        """
+
+        import fl.util
+
+        soi_01 = fl.util.Bureau()
+        soi_02 = fl.util.Bureau()
+
+        with soi_01.batch_context() as batch_01:
+            soi_01.a.c = 10
+            soi_01.a.d = 20
+            soi_01.b.e = 30
+            soi_01.b.f = 50
+
+        soi_02.from_batch(batch_01)
+        assert soi_02 == soi_01
+
+        with soi_02.batch_context() as batch_02:
+            soi_02.a.c = 600
+            soi_02.a.d = 700
+            soi_02.b.e = 800
+            soi_02.b.f = 900
+
+        soi_01.from_batch(batch_02)
+        assert soi_01 == soi_02
 
 
 # =============================================================================

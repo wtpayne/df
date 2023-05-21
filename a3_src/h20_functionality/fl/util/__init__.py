@@ -126,7 +126,6 @@ class Bureau(collections.abc.MutableMapping):
         TODO: Save/Load (journal?/state?) to/from SQLITE
 
         TODO: Support for remote sync (Load/update from journal)
-        TODO: Design mechanism for binding to other Bureau trees.
 
         TODO: Reactive programming with RxPy ???
         TODO: Regex-based listening on paths. (jquery-like?) ???
