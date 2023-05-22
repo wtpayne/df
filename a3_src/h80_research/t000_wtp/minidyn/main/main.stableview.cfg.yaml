@@ -35,3 +35,30 @@ vp:
             label:                "Open"
             callback:             _spec::flowforge.main.menu_file_open
 
+      tools:
+        _fcn:                     add_menu
+        _kwargs:
+          label:                  "Tools"
+
+        itemreg:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show Item Registry"
+            callback:             _spec::flowforge.main.menu_tools_itemreg
+
+    # --------------------------------------------------------------------------
+    # Main workspace
+    #
+    main:
+      _fcn:                       add_group
+      _kwargs:
+        horizontal:               True
+
+      # ------------------------------------------------------------------------
+      # Node editor
+      #
+      nodeeditor:
+        _fcn:                     add_node_editor
+        _kwargs:
+          callback:               _spec::flowforge.main.node_link
+          delink_callback:        _spec::flowforge.main.node_delink

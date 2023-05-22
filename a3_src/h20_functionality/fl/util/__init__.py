@@ -50,11 +50,13 @@ import collections.abc
 import contextlib
 import functools
 import importlib
+import inspect
 import itertools
 import os.path
 import pprint
 import string
 import time
+import types
 import typing
 
 
@@ -92,7 +94,11 @@ class Bureau(collections.abc.MutableMapping):
                           '_bureau_path_delimiter')
 
     # -------------------------------------------------------------------------
-    def __init__(self, path = None, engine = None, path_delimiter = '.'):
+    def __init__(self,
+                filepath         = None,
+                 _engine         = None,
+                 _path           = None,
+                 _path_delimiter = '.'):
         """
         Returns a new Bureau instance.
 
@@ -115,40 +121,46 @@ class Bureau(collections.abc.MutableMapping):
         edit/undo histories and supports simple
         undo and redo functionality.
 
-        Each tree also maintains unitary callback
-        tables and supports callback registration
-        for change listeners.
+        Each tree also maintains unitary rule
+        tables and supports rule registration
+        for responding to changes.
 
         """
 
-        # Bureau data is the underlying datastore
-        # for this node in the overall tree.
+        # The path delimiter (normally '.'') is
+        # used to delimit string paths.
         #
-        self._bureau_data = dict()
+        self._bureau_path_delimiter = _path_delimiter
+
+        # The path is the path to the current
+        # node in the tree. This is stored
+        # internally as a tuple of strings.
+        #
+        if _path is None:
+            self._bureau_path = tuple()
+        else:
+            self._bureau_path = _path
 
         # The engine handles undo/redo and
         # callbacks. There is a single engine
         # for each tree. All nodes in the tree
         # have a reference to it.
         #
-        if engine is None:
+        if _engine is None:
             self._bureau_engine = BureauEngine(bureau = self)
         else:
-            self._bureau_engine = engine
+            self._bureau_engine = _engine
 
-        # The path is the path to the current
-        # node in the tree. This is stored
-        # internally as a tuple of strings.
+        # Bureau data is the underlying datastore
+        # for this node in the overall tree.
         #
-        if path is None:
-            self._bureau_path = tuple()
-        else:
-            self._bureau_path = path
+        self._bureau_data = dict()
+        if filepath is not None:
+            with self.batch_context():
+                self.from_file(filepath  = filepath,
+                               str_format = None,
+                               path_root  = self._bureau_path)
 
-        # The path delimiter (normally '.'') is
-        # used to delimit string paths.
-        #
-        self._bureau_path_delimiter = path_delimiter
 
     # -------------------------------------------------------------------------
     def reset_engine(self, path = None, engine = None):
@@ -177,10 +189,11 @@ class Bureau(collections.abc.MutableMapping):
 
         """
 
-        return tuple(walkobj(obj      = self,
-                             gen_leaf = True,
-                             gen_path = True,
-                             gen_obj  = True))
+        return tuple(walkobj(obj            = self,
+                             gen_leaf       = True,
+                             gen_path       = True,
+                             gen_obj        = True,
+                             use_fat_leaves = True))
 
     # -------------------------------------------------------------------------
     def from_tuple(self, tup_kv, path_root = tuple()):
@@ -643,8 +656,9 @@ class BureauEngine():
 
         """
 
+        is_delete = cmd.operation == 'del'
         value_new = cmd.value_new
-        value_old = self._do_update(cmd.path, value_new)
+        value_old = self._do_update(cmd.path, value_new, is_delete)
 
         # Connect any newly added Bureau subtrees
         # to the engine, and disconnect any newly
@@ -693,8 +707,8 @@ class BureauEngine():
         # command as-is.
         #
         time_utc    = time.time()
-        is_leaf_new = is_leaf(value_new)
-        is_leaf_old = is_leaf(value_old)
+        is_leaf_new = is_leaf(value_new, use_fat_leaves = False)
+        is_leaf_old = is_leaf(value_old, use_fat_leaves = False)
 
         is_leaf_replaces_leaf     =      is_leaf_new  and      is_leaf_old
         is_leaf_replaces_branch   =      is_leaf_new  and (not is_leaf_old)
@@ -731,6 +745,12 @@ class BureauEngine():
 
         elif is_branch_replaces_leaf:
 
+            # TODO: HANDLE LISTS AND DICTS SEPARATELY
+            #       PRESERVE LIST TYPES
+
+            if isinstance(value_new, (tuple, list)):
+                pass
+
             for (relpath, leaf_new) in walkobj(obj         = value_new,
                                                gen_leaf    = True,
                                                gen_nonleaf = False,
@@ -746,6 +766,9 @@ class BureauEngine():
                                              value_old = value_old))
 
         elif is_branch_replaces_branch:
+
+            # TODO: HANDLE LISTS AND DICTS SEPARATELY
+            #       PRESERVE LIST TYPES
 
             for (relpath, leaf_old) in walkobj(obj         = value_old,
                                                gen_leaf    = True,
@@ -805,12 +828,12 @@ class BureauEngine():
         path_cursor = tuple()
         for name in _iter_path(path, self._bureau._bureau_path_delimiter):
             path_cursor = path_cursor + (name,)
-            (get_item, set_item) = _accessor_functions(cursor)
+            (get_item, set_item, del_item) = _accessor_functions(cursor)
             cursor = get_item(name)
         return cursor
 
     # -------------------------------------------------------------------------
-    def _do_update(self, tup_path, value_new):
+    def _do_update(self, tup_path, value_new, is_delete):
         """
         Sets a new value in the specified bureau and returns the old value.
 
@@ -872,19 +895,25 @@ class BureauEngine():
 
         # Avoid recursion and get the old value.
         #
-        (get_item, set_item) = _accessor_functions(cursor)
-        if name in tuple(cursor.keys()):  # NUST BE tuple(cursor.keys())
-            value_old    = get_item(name)
-            is_recursive = (value_old is value_new)
-            if is_recursive:
-                return value_old
-        else:
-            value_old = None
+        (get_item, set_item, del_item) = _accessor_functions(cursor)
+        tup_keys    = tuple(cursor.keys())  # NUST NOT CHECK DIRECTLY
+        is_new_name = name not in tup_keys
 
-        # Apply the change.
-        #
-        set_item(name, value_new)
-        return value_old
+        if is_new_name:
+
+            if not is_delete:
+                set_item(name, value_new)
+            return None
+
+        else:  # Name already exists
+
+            value_old = get_item(name)
+            if is_delete:
+                del_item(name)
+            else:
+                if not (value_old is value_new):
+                    set_item(name, value_new)
+            return value_old
 
     # -------------------------------------------------------------------------
     def _ensure_exists(self, tup_path_cursor, cursor, name):
@@ -904,12 +933,12 @@ class BureauEngine():
         cursor.
 
         """
-        (get_item, set_item) = _accessor_functions(cursor)
+        (get_item, set_item, del_item) = _accessor_functions(cursor)
         try:
             cursor = get_item(name)
         except KeyError:
-            bureau_new = Bureau(engine = self,
-                                path   = tup_path_cursor)
+            bureau_new = Bureau(_engine = self,
+                                _path   = tup_path_cursor)
             set_item(name, bureau_new)
             cursor = bureau_new
 
@@ -1015,13 +1044,15 @@ def _accessor_functions(item):
 
         get_item = item._bureau_data.__getitem__
         set_item = item._bureau_data.__setitem__
+        del_item = item._bureau_data.__delitem__
 
     else:
 
         get_item = item.__getitem__
         set_item = item.__setitem__
+        del_item = item.__delitem__
 
-    return (get_item, set_item)
+    return (get_item, set_item, del_item)
 
 
 # -----------------------------------------------------------------------------
@@ -1206,13 +1237,14 @@ def coroutine(fun):
 
 
 # -----------------------------------------------------------------------------
-def walkobj(obj:         typing.Any,              # pylint: disable=R0912,R0913
-            gen_leaf:    bool                 = False,
-            gen_nonleaf: bool                 = False,
-            gen_path:    bool                 = False,
-            gen_obj:     bool                 = False,
-            path:        typing.Tuple         = (),
-            memo:        typing.Optional[set] = None) -> typing.Iterator[
+def walkobj(obj:            typing.Any,          # pylint: disable=R0912,R0913
+            gen_leaf:       bool                 = False,
+            gen_nonleaf:    bool                 = False,
+            gen_path:       bool                 = False,
+            gen_obj:        bool                 = False,
+            use_fat_leaves: bool                 = False,
+            path:           typing.Tuple         = (),
+            memo:           typing.Optional[set] = None) -> typing.Iterator[
                                                             typing.Union[
                                                                 typing.Tuple,
                                                                 typing.Any]]:
@@ -1240,30 +1272,37 @@ def walkobj(obj:         typing.Any,              # pylint: disable=R0912,R0913
 
     Parameters:
 
-        obj (object):                   The object to be traversed.
+        obj (object):                       The object to be traversed.
 
-        gen_leaf (bool, optional):      If True, leaf nodes will be generated.
-                                        Default is False.
+        gen_leaf (bool, optional):          If True, leaf nodes will be
+                                            generated. Default is False.
 
-        gen_nonleaf (bool, optional):   If True, non-leaf nodes will be
-                                        generated. Default is False.
+        gen_nonleaf (bool, optional):       If True, non-leaf nodes will be
+                                            generated. Default is False.
 
-        gen_path (bool, optional):      If True, the path to the node will be
-                                        generated. Default is False.
+        gen_path (bool, optional):          If True, the path to the node will
+                                            be generated. Default is False.
 
-        gen_obj (bool, optional):       If True, the object at the node will
-                                        be generated. Default is False.
+        gen_obj (bool, optional):           If True, the object at the node
+                                            will be generated. Default is
+                                            False.
 
-        path (tuple, optional):         A tuple representing the path to the
-                                        current node. Default is an empty tuple.
+        use_fat_leaves (bool, optional):    If True, simple data structures
+                                            like lists or tuples of integers
+                                            will be considered as leaf rather
+                                            than nonleaf nodes.
 
-        memo (set, optional):           A set used to track visited objects to
-                                        avoid infinite recursion.
+        path (tuple, optional):             A tuple representing the path to
+                                            the current node. Default is an
+                                            empty tuple.
+
+        memo (set, optional):               A set used to track visited objects
+                                            to avoid infinite recursion.
 
     Yields:
 
-        tuple or object:                The configured information for each
-                                        node in the traversal.
+        tuple or object:                    The configured information for each
+                                            node in the traversal.
 
     Examples:
 
@@ -1282,10 +1321,7 @@ def walkobj(obj:         typing.Any,              # pylint: disable=R0912,R0913
     # path before returning control back up
     # the stack.
     #
-    is_itable    = isinstance(obj, collections.abc.Iterable)
-    is_leaf      = (not is_itable) or is_string(obj)
-
-    if is_leaf:
+    if is_leaf(obj, use_fat_leaves = use_fat_leaves):
         if gen_leaf:
             if gen_path and gen_obj:
                 yield (path, obj)
@@ -1345,13 +1381,14 @@ def walkobj(obj:         typing.Any,              # pylint: disable=R0912,R0913
             elif gen_obj:
                 yield component
 
-        for result in walkobj(obj         = component,
-                              gen_leaf    = gen_leaf,
-                              gen_nonleaf = gen_nonleaf,
-                              gen_path    = gen_path,
-                              gen_obj     = gen_obj,
-                              path        = childpath,
-                              memo        = memo):
+        for result in walkobj(obj            = component,
+                              gen_leaf       = gen_leaf,
+                              gen_nonleaf    = gen_nonleaf,
+                              gen_path       = gen_path,
+                              gen_obj        = gen_obj,
+                              use_fat_leaves = use_fat_leaves,
+                              path           = childpath,
+                              memo           = memo):
             yield result
 
     # We only need to guard against infinite
@@ -1804,14 +1841,101 @@ def from_spec(str_spec):
 
 
 # -----------------------------------------------------------------------------
-def is_leaf(obj):
+def is_leaf(obj, use_fat_leaves = False):
     """
     Return True if obj is a leaf data type, False otherwise.
 
+    The function identifies a 'leaf' as a data
+    type which doesn't contain any nested types.
+
+    Certain types are always considered 'leaves',
+    such as strings, int, float, bool, generators,
+    and coroutines.
+
+    Certain types are never considered 'leaves',
+    such as collections.abc.Mapping types.
+
+    If 'use_fat_leaves' is set to True, simple
+    lists and tuples containing only fundamental
+    numeric types or strings are also considered
+    to be 'leaves'.
+
+    Parameters:
+
+        obj (object):                    The object to be evaluated.
+
+        use_fat_leaves (bool, optional): Indicates if simple lists and tuples
+                                         containing only fundamental numeric
+                                         types or strings should also be
+                                         considered as 'leaves'. Defaults to
+                                         False.
+
+    Returns:
+
+        bool: True if the object is a leaf data type, False otherwise.
+
+    Raises:
+
+        None
+
+    Examples:
+
+        >>> is_leaf(5)
+        True
+
+        >>> is_leaf([1, 2, 3], use_fat_leaves=True)
+        True
+
+        >>> is_leaf({1: 'a'})
+        False
+
     """
 
-    is_itable = isinstance(obj, collections.abc.Iterable)
-    return (not is_itable) or is_string(obj)
+    # Mappings like Bureau and dict are never
+    # leaves of any sort, whereas atomic types
+    # like int and float and bool are always
+    # considered to be leaf items.
+    #
+    is_never_leaf = isinstance(obj, collections.abc.Mapping)
+    if is_never_leaf:
+        return False
+
+    # If a type is not iterable, then it is
+    # always considered to be a leaf. Strings,
+    # generators and coroutines are similarly
+    # always considered to be leaves, even though
+    # they are iterable. Generators and coroutines
+    # have to be considered as leaves as a
+    # practical matter since they can easily loop
+    # forever.
+    #
+    is_always_leaf = (    (not isinstance(obj, collections.abc.Iterable))
+                       or is_string(obj)
+                       or inspect.isgenerator(obj)
+                       or inspect.iscoroutine(obj))
+    if is_always_leaf:
+        return True
+
+    # Tuples and lists may or may not be leaves
+    # depending on whether 'use_fat_leaves' is
+    # enabled. ('Fat' leaves are lists or tuples
+    # filled only with atomic data types).
+    #
+    is_maybe_leaf = use_fat_leaves and isinstance(obj, (list, tuple))
+    if is_maybe_leaf:
+        tup_atomic  = (int, float, complex, bool, str)
+        is_fat_leaf = all((isinstance(it, tup_atomic) for it in obj))
+        return is_fat_leaf
+
+    # What we have left are any other iterable
+    # data types. Possibly a bit risky, but for
+    # now we assume that they are non-leaf
+    # data types and attempt to iterate through
+    # them. (Although may be safer in future
+    # to change this to return True or at least
+    # issue a warning.)
+    #
+    return False
 
 
 # -----------------------------------------------------------------------------

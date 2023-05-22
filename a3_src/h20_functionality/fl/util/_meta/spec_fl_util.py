@@ -48,30 +48,131 @@ class SpecifyFlUtilBureau:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_can_be_used_to_store_simple_values(self):
+    def it_can_use_integer_keys(self):
         """
-        fl.util.Bureau can written to and read from.
+        fl.util.Bureau can use integer keys.
+
+        """
+        import fl.util
+        soi      = fl.util.Bureau()
+        key      = 10203040
+        value    = 1234
+        soi[key] = value
+        assert soi[key] == value
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_use_string_keys(self):
+        """
+        fl.util.Bureau can use string keys.
 
         """
         import fl.util
         soi          = fl.util.Bureau()
-        value        = 100
+        value        = 1234
         soi['field'] = value
         assert soi['field'] == value
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_can_use_integer_keys(self):
+    def it_can_store_integer_values(self):
         """
-        fl.util.Bureau can use_integer_keys.
+        fl.util.Bureau can store and retrieve integer values.
 
         """
         import fl.util
-        soi      = fl.util.Bureau()
-        key      = 10
-        value    = 100
-        soi[key] = value
-        assert soi[key] == value
+        soi       = fl.util.Bureau()
+        value     = 1234
+        soi.field = value
+        assert soi.field == value
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_store_floating_point_values(self):
+        """
+        fl.util.Bureau can store and retrieve floating point values.
+
+        """
+        import fl.util
+        soi       = fl.util.Bureau()
+        value     = 1.234
+        soi.field = value
+        assert soi.field == value
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_store_string_values(self):
+        """
+        fl.util.Bureau can store and retrieve string values.
+
+        """
+        import fl.util
+        soi       = fl.util.Bureau()
+        value     = 'test_value'
+        soi.field = value
+        assert soi.field == value
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_store_arrays_of_integer_values(self):
+        """
+        fl.util.Bureau can store and retrieve arrays of integer values.
+
+        """
+        import fl.util
+        soi       = fl.util.Bureau()
+        value     = [1, 2, 3, 4]
+        soi.field = value
+        assert soi.field == value
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_store_tuples_of_integer_values(self):
+        """
+        fl.util.Bureau can store and retrieve tuples of integer values.
+
+        """
+        import fl.util
+        soi       = fl.util.Bureau()
+        value     = (1, 2, 3, 4)
+        soi.field = value
+        assert soi.field == value
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_store_sets_of_integer_values(self):
+        """
+        fl.util.Bureau can store and retrieve sets of integer values.
+
+        """
+        import fl.util
+        soi       = fl.util.Bureau()
+        value     = {1, 2, 3, 4}
+        soi.field = value
+        assert soi.field == value
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_store_nested_structures(self):
+        """
+        fl.util.Bureau can store and retrieve arrays of integer values.
+
+        """
+        import fl.util
+        soi         = fl.util.Bureau()
+        soi.field_1 = 1234
+        soi.field_2 = 1.234
+        soi.field_3 = 'onetwothreefour'
+        soi.field_4 = [1, 2, 3, 4]
+        soi.field_5 = (1, 2, 3, 4)
+        soi.field_6 = {1, 2, 3, 4}
+
+        assert soi.field_1 == 1234
+        assert soi.field_2 == 1.234
+        assert soi.field_3 == 'onetwothreefour'
+        assert soi.field_4 == [1, 2, 3, 4]
+        assert soi.field_5 == (1, 2, 3, 4)
+        assert soi.field_6 == {1, 2, 3, 4}
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
@@ -81,22 +182,9 @@ class SpecifyFlUtilBureau:
 
         """
         import fl.util
-        soi          = fl.util.Bureau()
-        soi['field'] = b'value'
-        assert str(soi) == "{'field': b'value'}"
-
-    # -------------------------------------------------------------------------
-    @pytest.mark.e002_general_research
-    def it_can_be_accessed_with_dot_notation(self):
-        """
-        fl.util.Bureau fields can be accessed using dot notation.
-
-        """
-        import fl.util
         soi       = fl.util.Bureau()
-        value     = 100
-        soi.field = value
-        assert soi.field == value
+        soi.field = b'value'
+        assert str(soi) == "{'field': b'value'}"
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
@@ -177,7 +265,7 @@ class SpecifyFlUtilBureau:
 
         """
         import fl.util
-        soi                      = fl.util.Bureau(path_delimiter = '_')
+        soi                      = fl.util.Bureau(_path_delimiter = '_')
         value                    = 100
         soi.field1_field2_field3 = value
 
@@ -342,7 +430,26 @@ class SpecifyFlUtilBureau:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_can_be_represented_as_a_key_value_tuple(self):
+    def it_can_represent_a_flat_structure_as_a_key_value_tuple(self):
+        """
+        fl.util.Bureau containers can be represented as key-value tuples.
+
+        """
+        import fl.util
+        soi   = fl.util.Bureau()
+        soi.a = 100
+        soi.b = 200
+        soi.c = 300
+        soi.d = 400
+
+        assert soi.to_tuple() == ((('a',), 100),
+                                  (('b',), 200),
+                                  (('c',), 300),
+                                  (('d',), 400))
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_represent_a_nested_structure_as_a_key_value_tuple(self):
         """
         fl.util.Bureau containers can be represented as key-value tuples.
 
@@ -358,6 +465,25 @@ class SpecifyFlUtilBureau:
                                   (('a', 'd'), 200),
                                   (('b', 'e'), 300),
                                   (('b', 'f'), 400))
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_represent_structures_with_lists_as_a_key_value_tuple(self):
+        """
+        fl.util.Bureau containers can be represented as key-value tuples.
+
+        """
+        import fl.util
+        soi    = fl.util.Bureau()
+        soi.a.c  = 1234
+        soi.a.d  = 5678
+        soi.b.e  = [10, 20, 30, 40]
+        soi.b.f  = (50, 60, 70, 80)
+
+        assert soi.to_tuple() == ((('a','c'), 1234),
+                                  (('a','d'), 5678),
+                                  (('b','e'), [10, 20, 30, 40]),
+                                  (('b','f'), (50, 60, 70, 80)))
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
@@ -877,3 +1003,62 @@ class SpecifyFlUtilDeserialize:
                                   b = 2.0,
                                   c = 'Some string',
                                   d = dict(e = 345))
+
+
+# =============================================================================
+class SpecifyFlUtilIsLeaf:
+    """
+    Spec for the fl.util.is_leaf function.
+
+    """
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_can_foo(self):
+        """
+        fl.util.is_leaf can ???.
+
+
+        """
+        import fl.util
+
+        # Test with atomic types
+        assert fl.util.is_leaf(5)       == True
+        assert fl.util.is_leaf(5.5)     == True
+        assert fl.util.is_leaf("Hello") == True
+        assert fl.util.is_leaf(True)    == True
+        assert fl.util.is_leaf(3+4j)    == True
+
+        # Test with mapping
+        assert fl.util.is_leaf({"a": 1, "b": 2}) == False
+
+        # Test with iterable types
+        assert fl.util.is_leaf([1, 2, 3]) == False
+        assert fl.util.is_leaf((1, 2, 3)) == False
+        assert fl.util.is_leaf({1, 2, 3}) == False
+
+        # Test with generator
+        generator = (x for x in range(10))
+        assert fl.util.is_leaf(generator) == True
+
+        # Test with coroutine
+        # async def coroutine():
+        #     yield None
+        # instance = coroutine()
+        # instance.send(None)
+        # assert fl.util.is_leaf(instance) == True
+
+        # Test with 'fat leaves' option
+        assert fl.util.is_leaf([1, 2, 3],   use_fat_leaves=True) == True
+        assert fl.util.is_leaf((1, 2, 3),   use_fat_leaves=True) == True
+        assert fl.util.is_leaf([1, "2", 3], use_fat_leaves=True) == True
+        assert fl.util.is_leaf((1, "2", 3), use_fat_leaves=True) == True
+
+        # Test with 'fat leaves' option
+        assert fl.util.is_leaf([1, dict(),  3], use_fat_leaves=True) == False
+        assert fl.util.is_leaf([1, dict(),  3], use_fat_leaves=True) == False
+        assert fl.util.is_leaf((1, tuple(), 3), use_fat_leaves=True) == False
+        assert fl.util.is_leaf((1, tuple(), 3), use_fat_leaves=True) == False
+        assert fl.util.is_leaf((1, list(),  3), use_fat_leaves=True) == False
+        assert fl.util.is_leaf((1, list(),  3), use_fat_leaves=True) == False
+

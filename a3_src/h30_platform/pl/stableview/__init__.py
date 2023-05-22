@@ -76,32 +76,27 @@ def main(dirpath_cfg, name_view):
     ctx.rule(cond = fl.util.is_leaf_at(('_fcn',)),
              act  = _update_widget)
 
-    ctx.ui = dearpygui.dearpygui
-
-    batch = ctx.batch_init()
+    ctx.ui                     = dearpygui.dearpygui
+    batch                      = ctx.batch_init()
     ctx.cfg.from_file(filepath = _filepath_cfg(dirpath_cfg, name_view))
+    ctx.coro_view              = fl.util.resolve(ctx.cfg.coro_view)(ctx)
 
-    # ctx.coro_view = fl.util.resolve(ctx.cfg.coro_view)(ctx)
-
-    # next(ctx.coro_view)                           # app early setup.
+    next(ctx.coro_view)                           # app early setup.
 
     ctx.ui.create_context()
     try:
-
-        ctx.batch_finalize(batch)  # Create widgets.
-
+        ctx.batch_finalize(batch)                 # Create widgets.
         ctx.ui.setup_dearpygui()
 
-    #     next(ctx.coro_view)                       # app late setup.
+        with ctx.batch_context():
+            next(ctx.coro_view)                   # app late setup.
 
         ctx.ui.show_viewport()
         while ctx.ui.is_dearpygui_running():
 
-    #         next(ctx.coro_view)                   # app runtime step.
-
             with ctx.batch_context():
+                next(ctx.coro_view)               # app runtime step.
                 ctx.ui.render_dearpygui_frame()
-
     finally:
         ctx.ui.destroy_context()
 
@@ -112,7 +107,6 @@ def _filepath_cfg(dirpath_cfg, name_view):
     Load configuration for the UI from the specified view.
 
     """
-
     filename_cfg = '{name}.stableview.cfg.yaml'.format(name = name_view)
     filepath_cfg = os.path.join(dirpath_cfg, name_view, filename_cfg)
     return filepath_cfg
@@ -135,6 +129,7 @@ def _update_widget(ctx, tup_cmd):
 
         if cmd.operation == 'edit':
             print('EDIT')
+            print(cmd)
 
 
 # -----------------------------------------------------------------------------
@@ -175,29 +170,25 @@ def _add_widget(ctx, cmd):
         if key.endswith('callback'):
             kwargs['user_data'] = ctx
 
-            def _callback(sender, app_data, ctx):
-                """
-                """
-                print('IN CALLBACK')
-                ctx.vp.browse._fcn    = 'add_file_dialog'
-                ctx.vp.browse._kwargs.directory_selector = True
-                ctx.vp.browse._kwargs.show               = True
+            ######################################################
+            ######################################################
+            # TODO: MAKE CALLBACK NUTATE CTX WITH LAMBDA ..      #
+            #       AND ALSO ADD RULE FOR THOSE CHANGES TOO?     #
+            ######################################################
+            ######################################################
 
-                # print('CALLBACK: ' + repr(tup_key))
-                # print(sender)
-                # print(app_data)
+            # def _callback(sender, app_data, ctx):
+            #     """
+            #     """
+            #     # print('CALLBACK: ' + repr(tup_key))
+            #     # print(sender)
+            #     # print(app_data)
 
-                # key_value = '_value' # Widget callback specific
-                # ctx[tup_path + (key_value,)] = app_data
+            #     # key_value = '_value' # Widget callback specific
+            #     # ctx[tup_path + (key_value,)] = app_data
 
-            kwargs[key] = _callback
+            # kwargs[key] = _callback
 
-        ######################################################
-        ######################################################
-        # TODO: MAKE CALLBACK NUTATE CTX WITH LAMBDA ..      #
-        #       AND ALSO ADD RULE FOR THOSE CHANGES TOO?     #
-        ######################################################
-        ######################################################
 
     # Handle nodes where the associated
     # DearPyGui function does not expect
