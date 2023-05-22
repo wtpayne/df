@@ -7,6 +7,7 @@ Functional specification for fl.util
 
 import textwrap
 import time
+import warnings
 
 import pytest
 
@@ -1014,20 +1015,48 @@ class SpecifyFlUtilIsLeaf:
 
     # -------------------------------------------------------------------------
     @pytest.mark.e002_general_research
-    def it_can_foo(self):
+    def it_detects_simple_data_types_as_leaf_nodes(self):
         """
-        fl.util.is_leaf can ???.
-
+        fl.util.is_leaf detects simple data typees as leaf elements.
 
         """
         import fl.util
 
-        # Test with atomic types
+        # Test with simple data types
         assert fl.util.is_leaf(5)       == True
         assert fl.util.is_leaf(5.5)     == True
         assert fl.util.is_leaf("Hello") == True
         assert fl.util.is_leaf(True)    == True
         assert fl.util.is_leaf(3+4j)    == True
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_detects_coroutines_and_generators_as_leaf_nodes(self):
+        """
+        fl.util.is_leaf detects coroutines and generators as non-leaf elements.
+
+        """
+        import fl.util
+
+        # Test with generator
+        generator = (x for x in range(10))
+        assert fl.util.is_leaf(generator) == True
+
+        # Test with coroutine
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            async def coroutine():
+                pass
+            assert fl.util.is_leaf(coroutine()) == True
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_detects_containers_as_non_leaf_nodes(self):
+        """
+        fl.util.is_leaf detects containers as non-leaf elements.
+
+        """
+        import fl.util
 
         # Test with mapping
         assert fl.util.is_leaf({"a": 1, "b": 2}) == False
@@ -1037,22 +1066,29 @@ class SpecifyFlUtilIsLeaf:
         assert fl.util.is_leaf((1, 2, 3)) == False
         assert fl.util.is_leaf({1, 2, 3}) == False
 
-        # Test with generator
-        generator = (x for x in range(10))
-        assert fl.util.is_leaf(generator) == True
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_detects_lists_of_simple_data_types_as_fat_leaf_nodes(self):
+        """
+        fl.util.is_leaf detects lists of simple data types as fat leaves.
 
-        # Test with coroutine
-        # async def coroutine():
-        #     yield None
-        # instance = coroutine()
-        # instance.send(None)
-        # assert fl.util.is_leaf(instance) == True
+        """
+        import fl.util
 
         # Test with 'fat leaves' option
-        assert fl.util.is_leaf([1, 2, 3],   use_fat_leaves=True) == True
-        assert fl.util.is_leaf((1, 2, 3),   use_fat_leaves=True) == True
-        assert fl.util.is_leaf([1, "2", 3], use_fat_leaves=True) == True
-        assert fl.util.is_leaf((1, "2", 3), use_fat_leaves=True) == True
+        assert fl.util.is_leaf([1, 2, 3],     use_fat_leaves=True) == True
+        assert fl.util.is_leaf((1, 2, 3),     use_fat_leaves=True) == True
+        assert fl.util.is_leaf([1, 2.3, '4'], use_fat_leaves=True) == True
+        assert fl.util.is_leaf((1, 2.3, '4'), use_fat_leaves=True) == True
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
+    def it_detects_lists_of_complex_data_types_as_non_fat_leaf_nodes(self):
+        """
+        fl.util.is_leaf detects lists of complex data types as non fat leaves.
+
+        """
+        import fl.util
 
         # Test with 'fat leaves' option
         assert fl.util.is_leaf([1, dict(),  3], use_fat_leaves=True) == False
