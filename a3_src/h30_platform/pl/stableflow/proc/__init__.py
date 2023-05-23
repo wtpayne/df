@@ -16,6 +16,8 @@ try:
 except ModuleNotFoundError:
     setproctitle = None  # pylint: disable=C0103
 
+import fl.util.alg
+
 import pl.stableflow.exception
 import pl.stableflow.gen.python
 import pl.stableflow.log
@@ -250,8 +252,7 @@ def _get_list_id_node_in_runorder(id_process, map_cfg_node, iter_cfg_edge):
                                             iter_cfg_edge = iter_cfg_edge,
                                             id_process    = id_process)
 
-    list_tranches = pl.stableflow.util.topological_sort(map_forward,
-                                                        map_backward)
+    list_tranches = fl.util.alg.topological_sort(map_forward, map_backward)
 
     list_id_node  = list(_specify_detailed_execution_order(list_tranches))
 

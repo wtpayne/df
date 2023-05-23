@@ -96,9 +96,9 @@ def _grid_layout(map_cfg_denorm):
     Each grid unit corresponds to a single node.
 
     """
-    list_tranche_global  = stableflow.util.topological_sort(
-                                        *_acyclic_data_flow(
-                                                map_cfg_denorm['edge']))
+    list_tranche_global  = stableflow.util.alg.topological_sort(
+                                                *_acyclic_data_flow(
+                                                    map_cfg_denorm['edge']))
 
     list_id_process      = _sorted_process_list(
                                         map_cfg_denorm,

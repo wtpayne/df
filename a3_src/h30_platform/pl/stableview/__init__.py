@@ -170,25 +170,13 @@ def _add_widget(ctx, cmd):
         if key.endswith('callback'):
             kwargs['user_data'] = ctx
 
-            ######################################################
-            ######################################################
-            # TODO: MAKE CALLBACK NUTATE CTX WITH LAMBDA ..      #
-            #       AND ALSO ADD RULE FOR THOSE CHANGES TOO?     #
-            ######################################################
-            ######################################################
-
-            # def _callback(sender, app_data, ctx):
-            #     """
-            #     """
-            #     # print('CALLBACK: ' + repr(tup_key))
-            #     # print(sender)
-            #     # print(app_data)
-
-            #     # key_value = '_value' # Widget callback specific
-            #     # ctx[tup_path + (key_value,)] = app_data
-
-            # kwargs[key] = _callback
-
+        #######################################################
+        #######################################################
+        # TODO: IN SOME CASES, WE WANT THE CALLBACK TO SIMPLY #
+        #       MUTATE THE CONFIG. WE CAN POSSIBLY DO THIS    #
+        #       WITH A SIMPLE LAMBDA AT THIS POINT.           #
+        #######################################################
+        #######################################################
 
     # Handle nodes where the associated
     # DearPyGui function does not expect

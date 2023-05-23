@@ -102,7 +102,6 @@ def _load_file(ctx, filepath):
     """
     stableflow_cfg = fl.util.Bureau(filepath = filepath)
 
-
     node          = ctx.cfg.vp.win.main.nodeeditor.node
     node._fcn     = 'add_node'
     kwargs        = node._kwargs
@@ -110,10 +109,9 @@ def _load_file(ctx, filepath):
     kwargs.id     = 'FooNode'
     kwargs.pos    = [100.0, 100.0]
 
-    print('LOADED')
-    print(repr(kwargs.pos))
-    print(type(kwargs.pos))
-    print(str(kwargs.pos))
+    #########################################
+    # TODO: LOOK AT LAYOUT CODE FROM BEFORE #
+    #########################################
 
     # for (id_node, cfg_node) in stableflow_cfg.node.items():
 

@@ -5,6 +5,9 @@ Functional specification for the fl.stableflow.cfg.util module.
 """
 
 
+import pytest
+
+
 # =============================================================================
 class SpecifyApply:
     """
@@ -13,6 +16,7 @@ class SpecifyApply:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_modifies_nested_struct_field_values_by_path(self):
         """
         Check apply can be used to modify nested struct fields.
@@ -25,6 +29,7 @@ class SpecifyApply:
         assert data['a']['b'] == 2
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_can_use_different_delimiters(self):
         """
         Check apply can be used to modify nested struct fields.

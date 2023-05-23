@@ -4,8 +4,9 @@ Functional specification for the fl.stableflow.cfg.override module.
 
 """
 
-
 import copy
+
+import pytest
 
 
 # =============================================================================
@@ -16,6 +17,7 @@ class SpecifyApply:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_changes_nothing_when_no_override_is_given(
                                                 self, valid_normalized_config):
         """
@@ -30,6 +32,7 @@ class SpecifyApply:
         assert cfg_orig == cfg_mod
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_can_override_a_single_field(self, valid_normalized_config):
         """
         Check apply makes no changes when the override is None.
@@ -48,6 +51,7 @@ class SpecifyApply:
         assert id_sys_mod  == 'some_other_name'
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_can_override_multiple_fields(self, valid_normalized_config):
         """
         Check apply makes no changes when the override is None.

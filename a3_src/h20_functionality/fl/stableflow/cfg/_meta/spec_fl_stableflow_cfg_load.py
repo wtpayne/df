@@ -7,6 +7,8 @@ Functional specification for the fl.stableflow.cfg.load module.
 
 import itertools
 
+import pytest
+
 import pl.stableflow.util
 
 
@@ -18,6 +20,7 @@ class SpecifyFromPath:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_a_python_dict(self, filepath_cfg_yaml):
         """
         Xact.cfg.from_path returns a dict.
@@ -29,6 +32,7 @@ class SpecifyFromPath:
                           dict)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_loads_a_single_yaml_file(self, dict_of_strings, filepath_cfg_yaml):
         """
         Xact.cfg.from_path can load configuration from a single YAML file.
@@ -40,6 +44,7 @@ class SpecifyFromPath:
                     dict_of_strings)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_loads_a_single_json_file(self, dict_of_strings, filepath_cfg_json):
         """
         Xact.cfg.from_path can load configuration from a single JSON file.
@@ -51,6 +56,7 @@ class SpecifyFromPath:
                     dict_of_strings)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_loads_a_single_xml_file(self, dict_of_strings, filepath_cfg_xml):
         """
         Xact.cfg.from_path can load configuration from a single XML file.
@@ -62,6 +68,7 @@ class SpecifyFromPath:
                     dict_of_strings)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_loads_a_directory_of_yaml_files(
                                     self, dict_of_strings, dirpath_cfg_yaml):
         """
@@ -74,6 +81,7 @@ class SpecifyFromPath:
                     dict_of_strings)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_loads_a_directory_of_json_files(
                                     self, dict_of_strings, dirpath_cfg_json):
         """
@@ -86,6 +94,7 @@ class SpecifyFromPath:
                     dict_of_strings)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_loads_a_directory_of_xml_files(
                                     self, dict_of_strings, dirpath_cfg_xml):
         """
@@ -106,6 +115,7 @@ class SpecifyFromFilePath:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_a_python_dict(self, filepath_cfg_yaml):
         """
         Xact.cfg.load.from_filepath returns a dict.
@@ -117,6 +127,7 @@ class SpecifyFromFilePath:
                           dict)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_loads_a_single_yaml_file(self, dict_of_strings, filepath_cfg_yaml):
         """
         Xact.cfg.load.from_filepath can load config. from a single YAML file.
@@ -128,6 +139,7 @@ class SpecifyFromFilePath:
                     dict_of_strings)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_loads_a_single_json_file(self, dict_of_strings, filepath_cfg_json):
         """
         Xact.cfg.load.from_filepath can load config. from a single JSON file.
@@ -139,6 +151,7 @@ class SpecifyFromFilePath:
                     dict_of_strings)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_loads_a_single_xml_file(self, dict_of_strings, filepath_cfg_xml):
         """
         Xact.cfg.load.from_filepath can load config. from a single XML file.
@@ -158,6 +171,7 @@ class SpecifyLoad:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_a_python_dict(self, dirpath_cfg_yaml):
         """
         Xact.cfg.load returns a dict.
@@ -169,6 +183,7 @@ class SpecifyLoad:
                           dict)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_loads_a_directory_of_yaml_files(
                                     self, dict_of_strings, dirpath_cfg_yaml):
         """
@@ -181,6 +196,7 @@ class SpecifyLoad:
                     dict_of_strings)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_loads_a_directory_of_json_files(
                                     self, dict_of_strings, dirpath_cfg_json):
         """
@@ -193,6 +209,7 @@ class SpecifyLoad:
                     dict_of_strings)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_loads_a_directory_of_xml_files(
                                     self, dict_of_strings, dirpath_cfg_xml):
         """

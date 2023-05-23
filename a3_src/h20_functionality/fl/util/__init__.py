@@ -48,16 +48,12 @@ license:
 import collections
 import collections.abc
 import contextlib
-import functools
 import importlib
-import inspect
-import itertools
-import os.path
 import pprint
-import string
 import time
-import types
-import typing
+
+import fl.util.alg
+import fl.util.io
 
 
 # Command used by Bureau and BureauEngine to mutate state.
@@ -189,11 +185,11 @@ class Bureau(collections.abc.MutableMapping):
 
         """
 
-        return tuple(walkobj(obj            = self,
-                             gen_leaf       = True,
-                             gen_path       = True,
-                             gen_obj        = True,
-                             use_fat_leaves = True))
+        return tuple(fl.util.alg.walk(obj            = self,
+                                      gen_leaf       = True,
+                                      gen_path       = True,
+                                      gen_obj        = True,
+                                      use_fat_leaves = True))
 
     # -------------------------------------------------------------------------
     def from_tuple(self, tup_kv, path_root = tuple()):
@@ -222,7 +218,7 @@ class Bureau(collections.abc.MutableMapping):
         representation.
 
         This method traverses the object using
-        the `walkobj` utility function (via the
+        the `walk` utility function (via the
         to_tuple method), which generates length
         two tuples where the first element is a
         path indicating a location in the Bureau
@@ -274,10 +270,11 @@ class Bureau(collections.abc.MutableMapping):
 
         """
         return self.from_tuple(path_root = path_root,
-                               tup_kv    = walkobj(obj      = map_item,
-                                                   gen_leaf = True,
-                                                   gen_path = True,
-                                                   gen_obj  = True))
+                               tup_kv    = fl.util.alg.walk(
+                                                        obj      = map_item,
+                                                        gen_leaf = True,
+                                                        gen_path = True,
+                                                        gen_obj  = True))
 
     # -------------------------------------------------------------------------
     def from_file(self, filepath, str_format = None, path_root = tuple()):
@@ -286,7 +283,9 @@ class Bureau(collections.abc.MutableMapping):
 
         """
 
-        (map_data, map_error) = load_from_filepath(filepath, str_format)
+        (map_data, map_error) = fl.util.io.load_from_filepath(
+                                                    filepath   = filepath,
+                                                    str_format = str_format)
         if map_error is None:
             self.from_dict(path_root = path_root,
                            map_item  = map_data)
@@ -298,7 +297,7 @@ class Bureau(collections.abc.MutableMapping):
 
         """
 
-        save_to_filepath(self.to_dict(), filepath, str_format)
+        fl.util.io.save_to_filepath(self.to_dict(), filepath, str_format)
 
     # -------------------------------------------------------------------------
     def pprint(self):
@@ -707,8 +706,8 @@ class BureauEngine():
         # command as-is.
         #
         time_utc    = time.time()
-        is_leaf_new = is_leaf(value_new, use_fat_leaves = False)
-        is_leaf_old = is_leaf(value_old, use_fat_leaves = False)
+        is_leaf_new = fl.util.alg.is_leaf(value_new, use_fat_leaves = False)
+        is_leaf_old = fl.util.alg.is_leaf(value_old, use_fat_leaves = False)
 
         is_leaf_replaces_leaf     =      is_leaf_new  and      is_leaf_old
         is_leaf_replaces_branch   =      is_leaf_new  and (not is_leaf_old)
@@ -729,11 +728,12 @@ class BureauEngine():
 
         elif is_leaf_replaces_branch:
 
-            for (relpath, leaf_old) in walkobj(obj         = value_old,
-                                               gen_leaf    = True,
-                                               gen_nonleaf = False,
-                                               gen_path    = True,
-                                               gen_obj     = True):
+            for (relpath, leaf_old) in fl.util.alg.walk(
+                                                    obj         = value_old,
+                                                    gen_leaf    = True,
+                                                    gen_nonleaf = False,
+                                                    gen_path    = True,
+                                                    gen_obj     = True):
                 self._cmd_counter += 1
                 idx_cmd = self._cmd_counter - 1
                 self._journal.append(Command(operation = operation,
@@ -751,11 +751,12 @@ class BureauEngine():
             if isinstance(value_new, (tuple, list)):
                 pass
 
-            for (relpath, leaf_new) in walkobj(obj         = value_new,
-                                               gen_leaf    = True,
-                                               gen_nonleaf = False,
-                                               gen_path    = True,
-                                               gen_obj     = True):
+            for (relpath, leaf_new) in fl.util.alg.walk(
+                                                    obj         = value_new,
+                                                    gen_leaf    = True,
+                                                    gen_nonleaf = False,
+                                                    gen_path    = True,
+                                                    gen_obj     = True):
                 self._cmd_counter += 1
                 idx_cmd = self._cmd_counter - 1
                 self._journal.append(Command(operation = operation,
@@ -770,11 +771,12 @@ class BureauEngine():
             # TODO: HANDLE LISTS AND DICTS SEPARATELY
             #       PRESERVE LIST TYPES
 
-            for (relpath, leaf_old) in walkobj(obj         = value_old,
-                                               gen_leaf    = True,
-                                               gen_nonleaf = False,
-                                               gen_path    = True,
-                                               gen_obj     = True):
+            for (relpath, leaf_old) in fl.util.alg.walk(
+                                                    obj         = value_old,
+                                                    gen_leaf    = True,
+                                                    gen_nonleaf = False,
+                                                    gen_path    = True,
+                                                    gen_obj     = True):
                 self._cmd_counter += 1
                 idx_cmd = self._cmd_counter - 1
                 self._journal.append(Command(operation = operation,
@@ -784,11 +786,12 @@ class BureauEngine():
                                              value_new = None,
                                              value_old = leaf_old))
 
-            for (relpath, leaf_new) in walkobj(obj         = value_new,
-                                               gen_leaf    = True,
-                                               gen_nonleaf = False,
-                                               gen_path    = True,
-                                               gen_obj     = True):
+            for (relpath, leaf_new) in fl.util.alg.walk(
+                                                    obj         = value_new,
+                                                    gen_leaf    = True,
+                                                    gen_nonleaf = False,
+                                                    gen_path    = True,
+                                                    gen_obj     = True):
                 self._cmd_counter += 1
                 idx_cmd = self._cmd_counter - 1
                 self._journal.append(Command(operation = operation,
@@ -811,11 +814,12 @@ class BureauEngine():
         Yield of the existing leaf items under the specified path.
 
         """
-        for (relpath, value) in walkobj(obj         = self._item_at(path),
-                                        gen_leaf    = True,
-                                        gen_nonleaf = False,
-                                        gen_path    = True,
-                                        gen_obj     = True):
+        for (relpath, value) in fl.util.alg.walk(
+                                            obj         = self._item_at(path),
+                                            gen_leaf    = True,
+                                            gen_nonleaf = False,
+                                            gen_path    = True,
+                                            gen_obj     = True):
             yield (path_cursor + relpath, value)
 
     # -------------------------------------------------------------------------
@@ -1237,580 +1241,6 @@ def coroutine(fun):
 
 
 # -----------------------------------------------------------------------------
-def walkobj(obj:            typing.Any,          # pylint: disable=R0912,R0913
-            gen_leaf:       bool                 = False,
-            gen_nonleaf:    bool                 = False,
-            gen_path:       bool                 = False,
-            gen_obj:        bool                 = False,
-            use_fat_leaves: bool                 = False,
-            path:           typing.Tuple         = (),
-            memo:           typing.Optional[set] = None) -> typing.Iterator[
-                                                            typing.Union[
-                                                                typing.Tuple,
-                                                                typing.Any]]:
-    """
-    Generate depth-first traversal over tree of mappings and other iterables.
-
-    This function performs a depth-first,
-    left-to-right recursive traversal over
-    the provided data structure, which is
-    assumed to consist of a finite, treelike
-    arrangement of nested collections.Mapping
-    and collections.Iterable types.
-
-    The function can be configured to yield
-    information about nodes in the tree:
-    leaf nodes, non-leaf (internal) nodes,
-    or both. Additionally, the information
-    yielded can be configured to include
-    the path to the node and/or the object
-    at the node itself.
-
-    Adapted from:
-
-        {http://code.activestate.com/recipes/577982-recursively-walk-python-objects/}
-
-    Parameters:
-
-        obj (object):                       The object to be traversed.
-
-        gen_leaf (bool, optional):          If True, leaf nodes will be
-                                            generated. Default is False.
-
-        gen_nonleaf (bool, optional):       If True, non-leaf nodes will be
-                                            generated. Default is False.
-
-        gen_path (bool, optional):          If True, the path to the node will
-                                            be generated. Default is False.
-
-        gen_obj (bool, optional):           If True, the object at the node
-                                            will be generated. Default is
-                                            False.
-
-        use_fat_leaves (bool, optional):    If True, simple data structures
-                                            like lists or tuples of integers
-                                            will be considered as leaf rather
-                                            than nonleaf nodes.
-
-        path (tuple, optional):             A tuple representing the path to
-                                            the current node. Default is an
-                                            empty tuple.
-
-        memo (set, optional):               A set used to track visited objects
-                                            to avoid infinite recursion.
-
-    Yields:
-
-        tuple or object:                    The configured information for each
-                                            node in the traversal.
-
-    Examples:
-
-        >>> data = {'a': 1, 'b': {'c': 2, 'd': [3, 4]}}
-        >>> list(walkobj(data, gen_leaf=True, gen_path=True))
-        [(('a',), 1), (('b', 'c'), 2), (('b', 'd', 0), 3), (('b', 'd', 1), 4)]
-
-    ---
-    type:   generator
-    ...
-
-    """
-    # If the object is elemental, it cannot be
-    # decomposed, so we must bottom out the
-    # recursion and yield the object and its'
-    # path before returning control back up
-    # the stack.
-    #
-    if is_leaf(obj, use_fat_leaves = use_fat_leaves):
-        if gen_leaf:
-            if gen_path and gen_obj:
-                yield (path, obj)
-            elif gen_path:
-                yield path
-            elif gen_obj:
-                yield obj
-        return
-
-    # Since this is a recursive function, we need
-    # to be on our guard against any references
-    # to objects back up the call stack (closer
-    # to the root of the tree). Any such
-    # references would be circular, leading to
-    # an infinite tree, and causing us to blow
-    # our stack in a fit of unbounded recursion.
-    #
-    # If we detect that we've already visited
-    # this object (using identity not equality),
-    # then the safe thing to do is to halt the
-    # recursive descent and return control back
-    # up the stack.
-    #
-    _id = id(obj)
-    if memo is None:
-        memo = set()
-    if _id in memo:
-        return
-    memo.add(_id)
-
-    # If the object is not elemental (i.e. it is
-    # an Iterable), then it may be decomposed, so
-    # we should recurse down into each component,
-    # yielding the results as we go. Of course,
-    # we need different iteration functions for
-    # mappings vs. other iterables.
-    #
-    def mapiter(mapping):
-        """
-        Return an iterator over the specified mapping or other iterable.
-
-        This function selects the appropriate
-        iteration function to use.
-
-        """
-        return getattr(mapping, 'items', mapping.items)()
-    itfcn = mapiter if isinstance(obj, collections.abc.Mapping) else enumerate
-
-    for pathpart, component in itfcn(obj):
-
-        childpath = path + (pathpart,)
-        if gen_nonleaf:
-            if gen_path and gen_obj:
-                yield (childpath, component)
-            elif gen_path:
-                yield childpath
-            elif gen_obj:
-                yield component
-
-        for result in walkobj(obj            = component,
-                              gen_leaf       = gen_leaf,
-                              gen_nonleaf    = gen_nonleaf,
-                              gen_path       = gen_path,
-                              gen_obj        = gen_obj,
-                              use_fat_leaves = use_fat_leaves,
-                              path           = childpath,
-                              memo           = memo):
-            yield result
-
-    # We only need to guard against infinite
-    # recursion within a branch of the call-tree.
-    # There is no danger in visiting the same item
-    # instance in sibling branches, so we can
-    # forget about objects once we are done
-    # with them and about to pop the stack.
-    #
-    memo.remove(_id)
-
-    return
-
-
-# -----------------------------------------------------------------------------
-def save_to_filepath(map_data, filepath, str_format = None):
-    """
-    Write the specified dict to the specified file in the specified format.
-
-    """
-
-    if str_format is None:
-        (_, str_ext) = os.path.splitext(filepath)
-        str_format   = str_ext[1:]
-
-    if str_format == 'pickle':
-        filemode = 'wb'
-    else:
-        filemode = 'wt'
-
-    (serial_data, map_error) = serialize(map_data, str_format)
-
-    if serial_data is not None:
-        with open(filepath, filemode) as file:
-            file.write(serial_data)
-
-    return map_error
-
-
-# -----------------------------------------------------------------------------
-def load_from_filepath(filepath, str_format = None):
-    """
-    Return data loaded from the specified file as a dict.
-
-    """
-
-    if str_format is None:
-        (_, str_ext) = os.path.splitext(filepath)
-        str_format   = str_ext[1:]
-
-    if str_format == 'pickle':
-        filemode = 'rb'
-    else:
-        filemode = 'rt'
-
-    with open(filepath, filemode) as file:
-        serial_data = file.read()
-
-    (map_data, map_error) = deserialize(serial_data, str_format)
-
-    return (map_data, map_error)
-
-
-# -----------------------------------------------------------------------------
-def serialize(map_data, str_format):
-    """
-    Return the specified data as a serialised string in the specified format.
-
-    """
-
-    lut = dict(pickle = serialize_to_pickle_bytes,
-               pkl    = serialize_to_pickle_bytes,
-               xml    = serialize_to_xml_string,
-               json   = serialize_to_json_string,
-               toml   = serialize_to_toml_string,
-               yaml   = serialize_to_yaml_string,
-               yml    = serialize_to_yaml_string)
-    return lut[str_format](map_data)
-
-
-# -----------------------------------------------------------------------------
-def deserialize(str_data, str_format):
-    """
-    Return the data encoded in the the specified string as a dict.
-
-    """
-
-    lut = dict(pickle = deserialize_from_pickle_bytes,
-               pkl    = deserialize_from_pickle_bytes,
-               xml    = deserialize_from_xml_string,
-               json   = deserialize_from_json_string,
-               toml   = deserialize_from_toml_string,
-               yaml   = deserialize_from_yaml_string,
-               yml    = deserialize_from_yaml_string)
-    return lut[str_format](str_data)
-
-
-# -----------------------------------------------------------------------------
-def serialize_to_pickle_bytes(map_data):
-    """
-    Return the specified data as pickled bytes.
-
-    """
-
-    import pickle # pylint: disable=C0415
-
-    bytes_pickle = None
-    map_error    = None
-
-    try:
-
-        bytes_pickle = pickle.dumps(obj             = map_data,
-                                    protocol        = pickle.DEFAULT_PROTOCOL,
-                                    fix_imports     = False,
-                                    buffer_callback = None)
-
-    except pickle.PicklingError as err:
-
-        map_error = dict(exception = err,
-                         message   = str(err))
-
-    return (bytes_pickle, map_error)
-
-
-# -----------------------------------------------------------------------------
-def deserialize_from_pickle_bytes(bytes_pickle):
-    """
-    Return the data encoded in the the specified pickled bytes as a dict.
-
-    """
-
-    import pickle # pylint: disable=C0415
-
-    map_data  = None
-    map_error = None
-
-    try:
-
-        map_data = pickle.loads(bytes_pickle,
-                                fix_imports = False)
-
-    except pickle.UnpicklingError as err:
-
-        map_error = dict(exception = err,
-                         message   = str(err))
-
-    return (map_data, map_error)
-
-
-
-# -----------------------------------------------------------------------------
-def serialize_to_xml_string(map_data):
-    """
-    Return the specified data as an XML string.
-
-    """
-
-    import xmltodict # pylint: disable=C0415
-
-    str_xml   = None
-    map_error = None
-
-    if len(map_data) > 1:
-        map_data = dict(root = map_data)
-
-    try:
-
-        str_xml = xmltodict.unparse(input_dict = map_data,
-                                    encoding = 'utf-8',
-                                    pretty     = True,
-                                    newl       = '\n'.format(),
-                                    indent     = '  ')
-
-    except TypeError as err:
-
-        map_error = dict(exception = err,
-                         message   = str(err))
-
-    else:
-
-        str_xml = str_xml.strip()
-
-    return (str_xml, map_error)
-
-
-# -----------------------------------------------------------------------------
-def deserialize_from_xml_string(str_xml):
-    """
-    Return the data encoded in the the specified XML string as a dict.
-
-    """
-
-    import xmltodict          # pylint: disable=C0415
-    import xml.parsers.expat  # pylint: disable=C0415
-
-    map_data  = None
-    map_error = None
-
-    str_xml = str_xml.strip()
-
-    # -------------------------------------------------------------------------
-    def _postproc(path, key, value):
-        """
-        """
-        tup_ctor_type = (int, float)
-        for ctor_type in tup_ctor_type:
-            try:
-                value = ctor_type(value)
-            except (ValueError, TypeError):
-                continue
-            else:
-                break
-        return (key, value)
-
-    try:
-
-        map_data = xmltodict.parse(str_xml,
-                                   encoding      = 'utf-8',
-                                   xml_attribs   = False,
-                                   postprocessor = _postproc)
-
-    except xml.parsers.expat.ExpatError as err:
-
-        map_error = dict(exception = err,
-                         message   = str(err),
-                         idx_line  = err.lineno - 1,
-                         idx_col   = err.offset)
-
-    else:
-
-        if tuple(map_data.keys()) == ('root',):
-            map_data = map_data['root']
-
-    return (map_data, map_error)
-
-
-# -----------------------------------------------------------------------------
-def serialize_to_json_string(map_data):
-    """
-    Return the specified data as a JSON string.
-
-    """
-
-    import json  # pylint: disable=C0415
-
-    str_json  = None
-    map_error = None
-
-    try:
-
-        str_json = json.dumps(map_data, indent = 2)
-
-    except TypeError as err:
-
-        map_error = dict(exception = err,
-                         message   = str(err))
-
-    else:
-
-        str_json = str_json.strip()
-
-    return (str_json, map_error)
-
-
-# -----------------------------------------------------------------------------
-def deserialize_from_json_string(str_json):
-    """
-    Return the data encoded in the the specified JSON string.
-
-    """
-
-    import json  # pylint: disable=C0415
-
-    map_data  = None
-    map_error = None
-
-    # Remove comment lines.
-    #
-    list_str_line = []
-    for str_line in str_json.strip().splitlines():
-        str_line_naked = str_line.strip()
-        if str_line_naked.startswith('//') or str_line_naked.startswith('#'):
-            continue
-        list_str_line.append(str_line)
-    str_json = ''.join(list_str_line)
-
-    try:
-
-        map_data = json.loads(str_json)
-
-    except json.JSONDecodeError as err:
-
-        map_error = dict(exception      = err,
-                         message        = str(err),
-                         idx_char_start = err.pos)
-
-    return (map_data, map_error)
-
-
-# -----------------------------------------------------------------------------
-def serialize_to_toml_string(map_data):
-    """
-    Return the specified data as a TOML string.
-
-    """
-
-    import toml  # pylint: disable=C0415
-
-    str_toml  = None
-    map_error = None
-
-    try:
-
-        str_toml = toml.dumps(map_data)
-
-    except TypeError as err:
-
-        map_error = dict(exception = err,
-                         message   = str(err))
-
-    else:
-
-        str_toml = str_toml.strip()
-
-    return (str_toml, map_error)
-
-
-# -----------------------------------------------------------------------------
-def deserialize_from_toml_string(str_toml):
-    """
-    Return the data encoded in the specified TOML string.
-
-    """
-
-    import toml  # pylint: disable=C0415
-
-    map_data  = None
-    map_error = None
-
-    str_toml  = str_toml.strip()
-
-    try:
-
-        map_data = toml.loads(str_toml)
-
-    except toml.TomlDecodeError as err:
-
-        map_error = dict(exception      = err,
-                         message        = err.msg,
-                         idx_char_start = err.pos,
-                         idx_line       = err.lineno - 1,
-                         idx_col        = err.colno)
-
-    return (map_data, map_error)
-
-
-# -----------------------------------------------------------------------------
-def serialize_to_yaml_string(map_data):
-    """
-    Return the specified data as a YAML string.
-
-    """
-
-    import yaml  # pylint: disable=C0415
-
-    str_yaml  = None
-    map_error = None
-
-    try:
-
-        str_yaml = yaml.dump(map_data, default_flow_style = False)
-
-    except yaml.YAMLError as err:
-
-        map_error = dict(exception = err,
-                         message   = str(err))
-
-    else:
-
-        str_yaml = str_yaml.strip()
-        #str_yaml = _reindent_yaml(str_yaml)
-
-    return (str_yaml, map_error)
-
-
-# -----------------------------------------------------------------------------
-def deserialize_from_yaml_string(str_yaml):
-    """
-    Return the data encoded in the specified YAML string.
-
-    """
-
-    import yaml  # pylint: disable=C0415
-
-    map_data  = None
-    map_error = None
-
-    loader = yaml.SafeLoader
-    yaml.add_constructor('!regex',
-                         lambda l, n: str(n.value),
-                         Loader = loader)
-
-    str_yaml = str_yaml.strip()
-
-    try:
-
-        map_data = yaml.load(str_yaml, Loader = loader)
-
-    except yaml.YAMLError as err:
-
-        map_error = dict(exception = err,
-                         message   = str(err))
-
-        if hasattr(err, 'problem_mark'):
-            mark = err.problem_mark
-            map_error['idx_line'] = mark.line
-            map_error['idx_col']  = mark.column
-
-    return (map_data, map_error)
-
-
-# -----------------------------------------------------------------------------
 def resolve(value):
     """
     Ensure that the provided value is fully resolved.
@@ -1820,7 +1250,7 @@ def resolve(value):
     to the actual value.
 
     """
-    if not is_string(value):
+    if not fl.util.alg.is_string(value):
         return value
 
     prefix = '_spec::'
@@ -1838,128 +1268,3 @@ def from_spec(str_spec):
     """
     (name_module, name_attrib) = str_spec.rsplit('.', 1)
     return getattr(importlib.import_module(name_module), name_attrib)
-
-
-# -----------------------------------------------------------------------------
-def is_leaf(obj, use_fat_leaves = False):
-    """
-    Return True if obj is a leaf data type, False otherwise.
-
-    The function identifies a 'leaf' as a data
-    type which doesn't contain any nested types.
-
-    Certain types are always considered 'leaves',
-    such as strings, int, float, bool, generators,
-    and coroutines.
-
-    Certain types are never considered 'leaves',
-    such as collections.abc.Mapping types.
-
-    If 'use_fat_leaves' is set to True, simple
-    lists and tuples containing only fundamental
-    numeric types or strings are also considered
-    to be 'leaves'.
-
-    Parameters:
-
-        obj (object):                    The object to be evaluated.
-
-        use_fat_leaves (bool, optional): Indicates if simple lists and tuples
-                                         containing only fundamental numeric
-                                         types or strings should also be
-                                         considered as 'leaves'. Defaults to
-                                         False.
-
-    Returns:
-
-        bool: True if the object is a leaf data type, False otherwise.
-
-    Raises:
-
-        None
-
-    Examples:
-
-        >>> is_leaf(5)
-        True
-
-        >>> is_leaf([1, 2, 3], use_fat_leaves=True)
-        True
-
-        >>> is_leaf({1: 'a'})
-        False
-
-    """
-
-    # Mappings like Bureau and dict are never
-    # leaves of any sort, whereas atomic types
-    # like int and float and bool are always
-    # considered to be leaf items.
-    #
-    is_never_leaf = isinstance(obj, collections.abc.Mapping)
-    if is_never_leaf:
-        return False
-
-    # If a type is not iterable, then it is
-    # always considered to be a leaf. Strings,
-    # generators and coroutines are similarly
-    # always considered to be leaves, even though
-    # they are iterable. Generators and coroutines
-    # have to be considered as leaves as a
-    # practical matter since they can easily loop
-    # forever.
-    #
-    is_always_leaf = (    (not isinstance(obj, collections.abc.Iterable))
-                       or is_string(obj)
-                       or inspect.isgenerator(obj)
-                       or inspect.iscoroutine(obj))
-    if is_always_leaf:
-        return True
-
-    # Tuples and lists may or may not be leaves
-    # depending on whether 'use_fat_leaves' is
-    # enabled. ('Fat' leaves are lists or tuples
-    # filled only with atomic data types).
-    #
-    is_maybe_leaf = use_fat_leaves and isinstance(obj, (list, tuple))
-    if is_maybe_leaf:
-        tup_atomic  = (int, float, complex, bool, str)
-        is_fat_leaf = all((isinstance(it, tup_atomic) for it in obj))
-        return is_fat_leaf
-
-    # What we have left are any other iterable
-    # data types. Possibly a bit risky, but for
-    # now we assume that they are non-leaf
-    # data types and attempt to iterate through
-    # them. (Although may be safer in future
-    # to change this to return True or at least
-    # issue a warning.)
-    #
-    return False
-
-
-# -----------------------------------------------------------------------------
-def is_string(obj):
-    """
-    Return true if obj is a string. Works in Python 2 and Python 3.
-
-    """
-
-    return isinstance(obj, string_types())
-
-
-# -----------------------------------------------------------------------------
-def string_types():
-    """
-    Return the string types for the current Python version.
-
-    """
-
-    is_python_2 = str is bytes
-    if is_python_2:  # pylint: disable=R1705
-
-        return (str, unicode)  # pylint: disable=E0602
-
-    else:
-
-        return (str, bytes)

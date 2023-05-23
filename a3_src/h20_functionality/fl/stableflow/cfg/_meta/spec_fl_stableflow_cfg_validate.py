@@ -16,6 +16,7 @@ class SpecifyNormalized:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_accepts_valid_data(self, valid_normalized_config):
         """
         Check normalized does not throw when given valid data.
@@ -26,6 +27,7 @@ class SpecifyNormalized:
         fl.stableflow.cfg.validate.normalized(valid_normalized_config)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_rejects_invalid_data(self, invalid_config):
         """
         Check normalized raises an exception when given invalid data.
@@ -46,6 +48,7 @@ class SpecifyDenormalized:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_accepts_valid_data(self, valid_normalized_config):
         """
         Check normalized does not throw when given valid data.
@@ -59,6 +62,7 @@ class SpecifyDenormalized:
         fl.stableflow.cfg.validate.denormalized(valid_denormalized_config)
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_rejects_invalid_data(self, invalid_config):
         """
         Check normalized raises an exception when given invalid data.

@@ -5,6 +5,9 @@ Functional specification for the fl.stableflow.cfg.edge module.
 """
 
 
+import pytest
+
+
 # =============================================================================
 class SpecifyDenormalize:
     """
@@ -13,6 +16,7 @@ class SpecifyDenormalize:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_adds_fields(self, valid_normalized_config):
         """
         Check edge.denormalize adds fields to the config structure.

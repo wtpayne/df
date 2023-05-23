@@ -13,6 +13,8 @@ import string
 
 import dill
 
+import fl.util.alg
+
 
 # =============================================================================
 class PathDict(collections.UserDict):  # pylint: disable=R0901
@@ -140,11 +142,11 @@ def format_all_strings(map_data):
     """
     map_dst = collections.defaultdict(set)  # id_field -> {path_to_dst}
     map_src = dict()                        # id_field -> path_to_src
-    for (tup_path, leaf) in walkobj(map_data,
-                                    gen_leaf    = True,
-                                    gen_nonleaf = False,
-                                    gen_path    = True,
-                                    gen_obj     = True):
+    for (tup_path, leaf) in fl.util.alg.walk(map_data,
+                                             gen_leaf    = True,
+                                             gen_nonleaf = False,
+                                             gen_path    = True,
+                                             gen_obj     = True):
 
         # Any field is a potential source of a parameter value.
         id_field          = '.'.join(str(item) for item in tup_path)
@@ -163,7 +165,7 @@ def format_all_strings(map_data):
         map_edge[path_src].update(set_path_dst)
 
     # Format content in topological order.
-    for set_rank in topological_sort(map_edge):
+    for set_rank in fl.util.alg.topological_sort(map_edge):
         for tup_path in sorted(set_rank):
             cursor = map_data
             parent = None
@@ -174,130 +176,6 @@ def format_all_strings(map_data):
                 parent[tup_path[-1]] = cursor.format(**map_data)
 
     return map_data
-
-
-# -----------------------------------------------------------------------------
-def walkobj(obj,                                  # pylint: disable=R0912,R0913
-            gen_leaf    = False,
-            gen_nonleaf = False,
-            gen_path    = False,
-            gen_obj     = False,
-            path        = (),
-            memo        = None):
-    """
-    Generate a walk over a treelike structure of mappings and other iterables.
-
-    Adapted from:
-    http:/code.activestate.com/recipes/577982-recursively-walk-python-objects/
-
-    This function performs a (depth-first left to
-    right recursive) traversal over the provided
-    data structure, which we assume to consist of
-    a finite; treelike arrangement of nested
-    collections.Mapping and collections.Iterable
-    types.
-
-    This function can be configured to yield
-    information about nodes in the tree: leaf
-    nodes; non-leaf (internal) nodes or both.
-
-    The information that is yielded may also be
-    configured: the path to the node can be
-    delivered as can the object at the node
-    itself.
-
-    ---
-    type:   generator
-    ...
-
-    """
-    # If the object is elemental, it cannot be
-    # decomposed, so we must bottom out the
-    # recursion and yield the object and its'
-    # path before returning control back up
-    # the stack.
-    #
-    is_itable    = isinstance(obj, collections.abc.Iterable)
-    is_leaf      = (not is_itable) or is_string(obj)
-
-    if is_leaf:
-        if gen_leaf:
-            if gen_path and gen_obj:
-                yield (path, obj)
-            elif gen_path:
-                yield path
-            elif gen_obj:
-                yield obj
-        return
-
-    # Since this is a recursive function, we need
-    # to be on our guard against any references
-    # to objects back up the call stack (closer
-    # to the root of the tree). Any such
-    # references would be circular, leading to
-    # an infinite tree, and causing us to blow
-    # our stack in a fit of unbounded recursion.
-    #
-    # If we detect that we've already visited
-    # this object (using identity not equality),
-    # then the safe thing to do is to halt the
-    # recursive descent and return control back
-    # up the stack.
-    #
-    _id = id(obj)
-    if memo is None:
-        memo = set()
-    if _id in memo:
-        return
-    memo.add(_id)
-
-    # If the object is not elemental (i.e. it is
-    # an Iterable), then it may be decomposed, so
-    # we should recurse down into each component,
-    # yielding the results as we go. Of course,
-    # we need different iteration functions for
-    # mappings vs. other iterables.
-    #
-    def mapiter(mapping):
-        """
-        Return an iterator over the specified mapping or other iterable.
-
-        This function selects the appropriate
-        iteration function to use.
-
-        """
-        return getattr(mapping, 'iteritems', mapping.items)()
-    itfcn = mapiter if isinstance(obj, collections.abc.Mapping) else enumerate
-
-    for pathpart, component in itfcn(obj):
-
-        childpath = path + (pathpart,)
-        if gen_nonleaf:
-            if gen_path and gen_obj:
-                yield (childpath, component)
-            elif gen_path:
-                yield childpath
-            elif gen_obj:
-                yield component
-
-        for result in walkobj(obj         = component,
-                              gen_leaf    = gen_leaf,
-                              gen_nonleaf = gen_nonleaf,
-                              gen_path    = gen_path,
-                              gen_obj     = gen_obj,
-                              path        = childpath,
-                              memo        = memo):
-            yield result
-
-    # We only need to guard against infinite
-    # recursion within a branch of the call-tree.
-    # There is no danger in visiting the same item
-    # instance in sibling branches, so we can
-    # forget about objects once we are done
-    # with them and about to pop the stack.
-    #
-    memo.remove(_id)
-    return
 
 
 # -----------------------------------------------------------------------------
@@ -346,126 +224,6 @@ def iter_format_string_fields(fmt_string):
 
 
 # -----------------------------------------------------------------------------
-def topological_sort(map_forward, map_backward = None):
-    """
-    Return nodes as list of sets of equivalent rank in topological order.
-
-    Get the tranche list for the directed
-    acyclic graph (data flow graph) of the
-    entire diagram. Each tranche is a set
-    of id_node strings indicating nodes with
-    equivalent rank in the topological sort
-    order.
-
-    """
-    # If the backward map has not been
-    # specified, we can easily build it
-    # by inverting the (bijective) forward
-    # mapping.
-    #
-    if map_backward is None:
-        map_backward = collections.defaultdict(set)
-        for (key, set_value) in map_forward.items():
-            for value in set_value:
-                map_backward[value].add(key)
-
-    set_node_out     = set(map_forward.keys())   # nodes with outbound edge(s)
-    set_node_in      = set(map_backward.keys())  # nodes With inbound edge(s)
-    set_node_sources = set_node_out - set_node_in
-
-    # Build a map from id_node -> indegree
-    # (count of inbound edges), populated
-    # from the map_backward dict.
-    #
-    map_indegree = dict((key, 0) for key in set_node_sources)
-    for (key, inbound) in map_backward.items():
-        map_indegree[key] = len(inbound)
-
-    # The output of the topological sort
-    # is a partial ordering represented
-    # as a list of sets; each set representing
-    # nodes of equal rank. Here we create
-    # the output list and fill it with
-    # nodes at rank zero, removing them
-    # from the graph.
-    #
-    set_rank_zero = _nodes_at_count_zero(map_indegree)
-    list_set_ranks = [set_rank_zero]
-    _del_items(map_indegree, set_rank_zero)
-
-    # The topological sort algorithm
-    # uses breadth first search. An
-    # indegree number is maintained
-    # for all nodes remaining in the
-    # graph. At each iteration, the
-    # 'source' nodes (indegree zero)
-    # are taken from the graph and
-    # added to the output, and the
-    # indegree of immediate downstream
-    # neighbors is decremented.
-    #
-    while True:
-
-        # Maintain indegree number.
-        set_prev = list_set_ranks[-1]
-        for id_node in _list_downstream_neighbors(set_prev, map_forward):
-            map_indegree[id_node] -= 1
-
-        # Find the next rank - terminate
-        # if it does not exist.
-        #
-        set_next = _nodes_at_count_zero(map_indegree)
-        if not set_next:
-            break
-
-        # If the next rank does exist,
-        # remove it from the graph and
-        # add it to the list of ranks.
-        #
-        _del_items(map_indegree, set_next)
-        list_set_ranks.append(set_next)
-
-    return list_set_ranks
-
-
-# -----------------------------------------------------------------------------
-def _nodes_at_count_zero(map_indegree):
-    """
-    Return the set of id_node with input degree zero.
-
-    """
-    return set(key for (key, count) in map_indegree.items() if count == 0)
-
-
-# -----------------------------------------------------------------------------
-def _del_items(map_data, set_keys):
-    """
-    Delete the specified items from the dict.
-
-    """
-    for key in set_keys:
-        del map_data[key]
-
-
-# -----------------------------------------------------------------------------
-def _list_downstream_neighbors(set_id_node, map_forward):
-    """
-    Return the list of downstream neighbors from the specified edge map.
-
-    The edge map should be provided as a dict
-    mapping from upstream nodes to downstream
-    nodes.
-
-    """
-    list_neighbors = list()
-    for id_node in set_id_node:
-        if id_node in map_forward:
-            for id_node_downstream in map_forward[id_node]:
-                list_neighbors.append(id_node_downstream)
-    return list_neighbors
-
-
-# -------------------------------------------------------------------------
 def _ensure_list(key, delim):
     """
     Ensure that key is represented as a list of names.

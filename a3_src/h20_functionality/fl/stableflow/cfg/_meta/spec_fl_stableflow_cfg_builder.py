@@ -5,6 +5,9 @@ Functional specification for the fl.stableflow.cfg.builder module.
 """
 
 
+import pytest
+
+
 # =============================================================================
 class SpecifySetSystemId:
     """
@@ -13,6 +16,7 @@ class SpecifySetSystemId:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_valid_configuration(self, valid_normalized_config):
         """
         Check builder.set_system_id returns valid configuration.
@@ -34,6 +38,7 @@ class SpecifyAddHost:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_valid_configuration(self, valid_normalized_config):
         """
         Check builder.add_host returns valid configuration.
@@ -55,6 +60,7 @@ class SpecifyRemoveHost:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_valid_configuration(self, valid_normalized_config):
         """
         Check builder.remove_host returns valid configuration.
@@ -79,6 +85,7 @@ class SpecifyAddProcess:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_valid_configuration(self, valid_normalized_config):
         """
         Check builder.add_process returns valid configuration.
@@ -101,6 +108,7 @@ class SpecifyRemoveProcess:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_valid_configuration(self, valid_normalized_config):
         """
         Check builder.remove_process returns valid configuration.
@@ -126,6 +134,7 @@ class SpecifyAddNode:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_valid_configuration(self, valid_normalized_config):
         """
         Check builder.add_node returns valid configuration.
@@ -151,6 +160,7 @@ class SpecifyRemoveNode:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_valid_configuration(self, valid_normalized_config):
         """
         Check builder.remove_node returns valid configuration.
@@ -177,6 +187,7 @@ class SpecifyAddEdge:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_valid_configuration(self, valid_normalized_config):
         """
         Check builder.add_edge returns valid configuration.
@@ -202,6 +213,7 @@ class SpecifyRemoveEdge:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_valid_configuration(self, valid_normalized_config):
         """
         Check builder.remove_edge returns valid configuration.
@@ -231,6 +243,7 @@ class SpecifyAddData:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_valid_configuration(self, valid_normalized_config):
         """
         Check builder.add_data returns valid configuration.
@@ -252,6 +265,7 @@ class SpecifyRemoveData:
     """
 
     # -------------------------------------------------------------------------
+    @pytest.mark.e002_general_research
     def it_returns_valid_configuration(self, valid_normalized_config):
         """
         Check builder.remove_data returns valid configuration.
