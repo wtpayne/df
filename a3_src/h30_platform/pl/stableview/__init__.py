@@ -223,6 +223,7 @@ def _add_widget(ctx, cmd):
                      'add_font_registry',
                      'add_handler_registry',
                      'add_item_handler_registry',
+                     'add_texture_registry',
                      'add_window')
     if name_fcn in tup_no_parent:
         fcn(**kwargs)

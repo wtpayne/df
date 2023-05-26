@@ -49,6 +49,10 @@ import collections
 import copy
 import os.path
 
+import dearpygui
+import PIL.Image
+import numpy
+
 import fl.util
 import fl.stableflow.cfg
 import fl.stableflow.cfg.edge
@@ -70,7 +74,7 @@ INDENT               = model.INDENT
 #
 FILEPATH_FONT_FIRA_CODE = da.env.path(
         control_tier = 'h10_resource',
-        relpath      = 'brand/font/FiraCodeNerdFontMono-Light.ttf',
+        relpath      = 'font/FiraCodeNerdFontMono-Light.ttf',
         id_env       = 'e002_general_research')
 
 FILEPATH_DEFAULT_LOAD = da.env.path(
@@ -83,6 +87,29 @@ FILEPATH_DEFAULT_SAVE = da.env.path(
         control_tier = 'h90_internal',
         relpath      = '/da/demo/dm001_workflow/dm001_workflow_saved.stableflow.cfg.yaml',
         id_env       = 'e002_general_research')
+
+
+
+
+BOTTOM_RIGHT = dearpygui.dearpygui.mvNodeMiniMap_Location_BottomRight
+NO_PADDING   = [0, 0]
+
+
+# -----------------------------------------------------------------------------
+def _load_icon(name):
+    """
+    """
+    filepath = da.env.path(
+                    control_tier = 'h10_resource',
+                    relpath      = 'icon/png/{name}.png'.format(name = name),
+                    id_env       = 'e002_general_research')
+    rgba = PIL.Image.open(filepath).convert("RGBA")
+    return numpy.array(rgba).flatten()
+
+
+ICON_PLAY_24X24  = _load_icon('play-solid')
+ICON_PAUSE_24X24 = _load_icon('pause-solid')
+ICON_STOP_24X24  = _load_icon('stop-solid')
 
 
 # -----------------------------------------------------------------------------
@@ -107,6 +134,10 @@ def coro(ctx):
     #ctx.pm.host.set_count(1)
     #ctx.pm.proc.set_count(1)
 
+    # import pprint
+    # pprint.pprint(ctx.ui.get_item_configuration('cfg.vp.win'))
+    # ctx.ui.configure_item('cfg.vp.win.main.toolbar', vertical_spacing = -1)
+
     yield  # Viewport is shown, main loop starts in gui.main().
 
     while True:
@@ -124,7 +155,7 @@ def coro(ctx):
 # -----------------------------------------------------------------------------
 def menu_file_open(sender, app_data, ctx):
     """
-    Callback for the file-open menu item.
+    Callback for the 'Open' button in the 'File' menu.
 
     """
 
@@ -174,94 +205,9 @@ def menu_file_open_ok(sender, app_data, ctx):
 
 
 # -----------------------------------------------------------------------------
-def _load_file(ctx, filepath):
-    """
-    Load file.
-
-    """
-
-    WIDTH_NODE     = 160
-
-    nodeeditor     = ctx.cfg.vp.win.main.nodeeditor
-    sfcfg          = fl.stableflow.cfg
-    fcn            = pl.stableview.fcn
-    map_cfg_norm   = sfcfg.prepare(path_cfg = filepath)
-    map_cfg_denorm = sfcfg.denormalize(copy.deepcopy(map_cfg_norm))
-    map_cfg_layout = sfcfg.layout.horizontal(map_cfg_denorm  = map_cfg_denorm,
-                                             diagram_border  = 10,
-                                             swimlane_title  = 0,
-                                             longbus_u       = 0,
-                                             crossbus_v      = 0,
-                                             node_size_x     = WIDTH_NODE,
-                                             node_size_y     = 70,
-                                             node_margin_x   = 40,
-                                             node_margin_y   = 40)
-
-    # Add nodes to the view model.
-    #
-    map_link = collections.defaultdict(dict)
-    for (id_node, cfg_node) in map_cfg_layout['node'].items():
-
-        node = fcn(nodeeditor['node_' + id_node],
-                   'add_node',
-                   label = id_node,
-                   pos   = [cfg_node['pos_x'], cfg_node['pos_y']])
-
-        # Keep a record of node config.
-        #
-        node._id  = id_node
-        node._cfg = map_cfg_norm['node'][id_node]
-
-        for (id_input, id_edge) in sorted(cfg_node['input'].items()):
-
-            attr = fcn(node['input_' + id_input],
-                       'add_node_attribute',
-                       label          = id_input,
-                       attribute_type = ctx.ui.mvNode_Attr_Input)
-
-            map_link[id_edge]['input'] = attr._str_path()
-
-            text = fcn(attr.text,
-                       'add_input_text',
-                       width         = WIDTH_NODE,
-                       default_value = id_input)
-
-        for (id_output, id_edge) in sorted(cfg_node['output'].items()):
-
-            attr = fcn(node['output_' + id_output],
-                       'add_node_attribute',
-                       label          = id_output,
-                       attribute_type = ctx.ui.mvNode_Attr_Output)
-
-            map_link[id_edge]['output'] = attr._str_path()
-
-            text = fcn(attr.text,
-                       'add_input_text',
-                       width         = WIDTH_NODE,
-                       default_value = id_output)
-
-    # Build lookup table for edge configuration.
-    #
-    map_edge = dict()
-    for cfg_edge in map_cfg_norm['edge']:
-        id_edge = sfcfg.edge.id_edge(cfg_edge)
-        map_edge[id_edge] = cfg_edge
-
-    # Add edges to the view model.
-    #
-    for (idx_edge, (id_edge, link)) in enumerate(map_link.items()):
-        edge = fcn(nodeeditor['edge_{:04d}'.format(idx_edge)],
-                   'add_node_link',
-                   attr_1   = link['input'],
-                   attr_2   = link['output'])
-        edge._id  = id_edge
-        edge._cfg = map_edge[id_edge]
-
-
-# -----------------------------------------------------------------------------
 def menu_file_save(sender, app_data, ctx):
     """
-    Callback for the file-save menu item.
+    Callback for the 'Save' button in the 'File' menu.
 
     """
 
@@ -292,7 +238,7 @@ def menu_file_save(sender, app_data, ctx):
 # -----------------------------------------------------------------------------
 def menu_file_save_cancel(sender, app_data, ctx):
     """
-    Callback for the 'cancel' button on the file-save dialog.
+    Callback for the 'Cancel' button on the file-save dialog.
 
     """
 
@@ -302,7 +248,7 @@ def menu_file_save_cancel(sender, app_data, ctx):
 # -----------------------------------------------------------------------------
 def menu_file_save_ok(sender, app_data, ctx):
     """
-    Callback for the 'ok' button on the file-save dialog.
+    Callback for the 'OK' button on the file-save dialog.
 
     """
 
@@ -311,34 +257,189 @@ def menu_file_save_ok(sender, app_data, ctx):
 
 
 # -----------------------------------------------------------------------------
-def _save_file(ctx, filepath):
+def menu_edit_undo(sender, app_data, ctx):
     """
-    Save file.
+    Callback for the 'Undo' button in the 'Edit' menu.
 
     """
-    cfg_save = {
-        'node': dict(),
-        'edge': list()
-    }
 
-    # Extract node and edge config from the view model
-    #
-    for (key, value) in ctx.cfg.vp.win.main.nodeeditor.items():
-        if key.startswith('node_'):
-            cfg_save['node'][value._id] = value._cfg
-        if key.startswith('edge_'):
-            cfg_save['edge'].append(value._cfg)
+    raise NotImplementedError('edit.undo')
 
-    # import pprint
-    # pprint.pprint(cfg_save)
 
-    ##################################################
-    # TODO: WHAT METADATA DO I NEED?                 #
-    #       WHERE WILL IT BE STORED?                 #
-    #       APPLICATION MODEL TO VIEW MODEL MAPPING? #
-    ##################################################
+# -----------------------------------------------------------------------------
+def menu_edit_redo(sender, app_data, ctx):
+    """
+    Callback for the 'Redo' button in the 'Edit' menu.
 
-    # THINK ABOUT DATA FLOW BETWEEN APPLICATION MODEL AND VIEW MODEL
+    """
+
+    raise NotImplementedError('edit.redo')
+
+
+# -----------------------------------------------------------------------------
+def menu_run_start(sender, app_data, ctx):
+    """
+    Callback for the 'Start' button in the 'Run' menu.
+
+    """
+
+    raise NotImplementedError('run.start')
+
+
+# -----------------------------------------------------------------------------
+def menu_run_pause(sender, app_data, ctx):
+    """
+    Callback for the 'Pause' button in the 'Run' menu.
+
+    """
+
+    raise NotImplementedError('run.pause')
+
+
+# -----------------------------------------------------------------------------
+def menu_run_stop(sender, app_data, ctx):
+    """
+    Callback for the 'Stop' button in the 'Run' menu.
+
+    """
+
+    raise NotImplementedError('run.stop')
+
+
+# -----------------------------------------------------------------------------
+def menu_tools_about(sender, app_data, ctx):
+    """
+    Callback for the 'Show About' button in the 'Tools' menu.
+
+    """
+
+    ctx.ui.show_tool(ctx.ui.mvTool_About)
+
+
+# -----------------------------------------------------------------------------
+def menu_tools_metrics(sender, app_data, ctx):
+    """
+    Callback for the 'Show Metrics' button in the 'Tools' menu.
+
+    """
+
+    ctx.ui.show_tool(ctx.ui.mvTool_Metrics)
+
+
+# -----------------------------------------------------------------------------
+def menu_tools_doc(sender, app_data, ctx):
+    """
+    Callback for the 'Show Documentation' button in the 'Tools' menu.
+
+    """
+
+    ctx.ui.show_tool(ctx.ui.mvTool_Doc)
+
+
+# -----------------------------------------------------------------------------
+def menu_tools_debug(sender, app_data, ctx):
+    """
+    Callback for the 'Show Debug Tool' button in the 'Tools' menu.
+
+    """
+
+    ctx.ui.show_tool(ctx.ui.mvTool_Debug)
+
+
+# -----------------------------------------------------------------------------
+def menu_tools_style(sender, app_data, ctx):
+    """
+    Callback for the 'Show Style Editor' button in the 'Tools' menu.
+
+    """
+
+    ctx.ui.show_tool(ctx.ui.mvTool_Style)
+
+
+# -----------------------------------------------------------------------------
+def menu_tools_font(sender, app_data, ctx):
+    """
+    Callback for the 'Show Font Editor' button in the 'Tools' menu.
+
+    """
+
+    ctx.ui.show_tool(ctx.ui.mvTool_Font)
+
+
+# -----------------------------------------------------------------------------
+def menu_tools_itemreg(sender, app_data, ctx):
+    """
+    Callback for the 'Show Item Registry' button in the 'Tools' menu.
+
+    """
+
+    ctx.ui.show_tool(ctx.ui.mvTool_ItemRegistry)
+
+
+# -----------------------------------------------------------------------------
+def menu_help_doc(sender, app_data, ctx):
+    """
+    Callback for the 'Documentation' button in the 'Help' menu.
+
+    """
+
+    raise NotImplementedError('help.doc')
+
+
+# -----------------------------------------------------------------------------
+def menu_help_about(sender, app_data, ctx):
+    """
+    Callback for the 'About' button in the 'Help' menu.
+
+    """
+
+    raise NotImplementedError('help.about')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # -----------------------------------------------------------------------------
@@ -352,18 +453,25 @@ def mouseright(sender, app_data, ctx):
     nodeeditor    = ctx.cfg.vp.win.main.nodeeditor
     list_selected = ctx.ui.get_selected_nodes(nodeeditor._str_path())
 
-    if len(list_selected) == 1:
+    if len(list_selected) == 0:
+        ctx.ui.configure_item('cfg.vp.win.ctx.node_add',  show = True)
+        ctx.ui.configure_item('cfg.vp.win.ctx.node_edit', show = False)
+        ctx.ui.configure_item('cfg.vp.win.ctx.node_del',  show = False)
+    elif len(list_selected) == 1:
         ctx.ui.configure_item('cfg.vp.win.ctx.node_add',  show = False)
         ctx.ui.configure_item('cfg.vp.win.ctx.node_edit', show = True)
         ctx.ui.configure_item('cfg.vp.win.ctx.node_del',  show = True)
     else:
-        ctx.ui.configure_item('cfg.vp.win.ctx.node_add',  show = True)
+        ctx.ui.configure_item('cfg.vp.win.ctx.node_add',  show = False)
         ctx.ui.configure_item('cfg.vp.win.ctx.node_edit', show = False)
-        ctx.ui.configure_item('cfg.vp.win.ctx.node_del',  show = False)
+        ctx.ui.configure_item('cfg.vp.win.ctx.node_del',  show = True)
 
+    width  = ctx.cfg.vp.win.ctx._kwargs.width
+    height = ctx.cfg.vp.win.ctx._kwargs.height
     ctx.ui.configure_item('cfg.vp.win.ctx',
-                          pos  = ctx.ui.get_mouse_pos(local = False),
-                          show = True)
+                          min_size = [width, height],
+                          pos      = ctx.ui.get_mouse_pos(local = False),
+                          show     = True)
 
 
 # -----------------------------------------------------------------------------
@@ -415,6 +523,7 @@ def ctx_node_del(sender, app_data, ctx):
     """
     print('DEL NODE')
 
+
 # -----------------------------------------------------------------------------
 def ctx_node_cancel(sender, app_data, ctx):
     """
@@ -426,9 +535,8 @@ def ctx_node_cancel(sender, app_data, ctx):
                           show = False)
 
 
-
 # -----------------------------------------------------------------------------
-def node_link(sender, app_data, ctx):
+def node_link(sender, app_data):
     """
     """
     print('LINK CALLBACK')
@@ -436,7 +544,7 @@ def node_link(sender, app_data, ctx):
 
 
 # -----------------------------------------------------------------------------
-def node_delink(sender, app_data, ctx):
+def node_delink(sender, app_data):
     """
     """
     print('DELINK CALLBACK')
@@ -520,71 +628,154 @@ def node_delink(sender, app_data, ctx):
 
 
 
-# # -----------------------------------------------------------------------------
-# def menu_file_save(sender, app_data, ctx):
-#     """
-#     """
-#     pass
 
 
-# # -----------------------------------------------------------------------------
-# def menu_file_save(sender, app_data, ctx):
-#     """
-#     """
-#     pass
 
 
-# -----------------------------------------------------------------------------
-def menu_tools_about(sender, app_data, ctx):
-    """
-    """
-    ctx.ui.show_tool(ctx.ui.mvTool_About)
 
 
-# -----------------------------------------------------------------------------
-def menu_tools_metrics(sender, app_data, ctx):
-    """
-    """
-    ctx.ui.show_tool(ctx.ui.mvTool_Metrics)
 
 
-# -----------------------------------------------------------------------------
-def menu_tools_doc(sender, app_data, ctx):
-    """
-    """
-    ctx.ui.show_tool(ctx.ui.mvTool_Doc)
 
 
-# -----------------------------------------------------------------------------
-def menu_tools_debug(sender, app_data, ctx):
-    """
-    """
-    ctx.ui.show_tool(ctx.ui.mvTool_Debug)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # -----------------------------------------------------------------------------
-def menu_tools_style(sender, app_data, ctx):
+def _load_file(ctx, filepath):
     """
+    Load file.
+
     """
-    ctx.ui.show_tool(ctx.ui.mvTool_Style)
+
+    WIDTH_NODE     = 160
+
+    nodeeditor     = ctx.cfg.vp.win.main.nodeeditor
+    sfcfg          = fl.stableflow.cfg
+    fcn            = pl.stableview.fcn
+    map_cfg_norm   = sfcfg.prepare(path_cfg = filepath)
+    map_cfg_denorm = sfcfg.denormalize(copy.deepcopy(map_cfg_norm))
+    map_cfg_layout = sfcfg.layout.horizontal(map_cfg_denorm  = map_cfg_denorm,
+                                             diagram_border  = 10,
+                                             swimlane_title  = 0,
+                                             longbus_u       = 0,
+                                             crossbus_v      = 0,
+                                             node_size_x     = WIDTH_NODE,
+                                             node_size_y     = 70,
+                                             node_margin_x   = 40,
+                                             node_margin_y   = 40)
+
+    # Add nodes to the view model.
+    #
+    map_link = collections.defaultdict(dict)
+    for (id_node, cfg_node) in map_cfg_layout['node'].items():
+
+        node = fcn(nodeeditor['node_' + id_node],
+                   'add_node',
+                   label = id_node,
+                   pos   = [cfg_node['pos_x'], cfg_node['pos_y']])
+
+        # Keep a record of node config.
+        #
+        node._id  = id_node
+        node._cfg = map_cfg_norm['node'][id_node]
+
+        for (id_input, id_edge) in sorted(cfg_node['input'].items()):
+
+            attr = fcn(node['input_' + id_input],
+                       'add_node_attribute',
+                       label          = id_input,
+                       attribute_type = ctx.ui.mvNode_Attr_Input)
+
+            map_link[id_edge]['input'] = attr._str_path()
+
+            text = fcn(attr.text,
+                       'add_input_text',
+                       width         = WIDTH_NODE,
+                       default_value = id_input)
+
+        for (id_output, id_edge) in sorted(cfg_node['output'].items()):
+
+            attr = fcn(node['output_' + id_output],
+                       'add_node_attribute',
+                       label          = id_output,
+                       attribute_type = ctx.ui.mvNode_Attr_Output)
+
+            map_link[id_edge]['output'] = attr._str_path()
+
+            text = fcn(attr.text,
+                       'add_input_text',
+                       width         = WIDTH_NODE,
+                       default_value = id_output)
+
+    # Build lookup table for edge configuration.
+    #
+    map_edge = dict()
+    for cfg_edge in map_cfg_norm['edge']:
+        id_edge = sfcfg.edge.id_edge(cfg_edge)
+        map_edge[id_edge] = cfg_edge
+
+    # Add edges to the view model.
+    #
+    for (idx_edge, (id_edge, link)) in enumerate(map_link.items()):
+        edge = fcn(nodeeditor['edge_{:04d}'.format(idx_edge)],
+                   'add_node_link',
+                   show     = True,
+                   attr_1   = link['input'],
+                   attr_2   = link['output'])
+        edge._id  = id_edge
+        edge._cfg = map_edge[id_edge]
+
 
 
 # -----------------------------------------------------------------------------
-def menu_tools_font(sender, app_data, ctx):
+def _save_file(ctx, filepath):
     """
+    Save file.
+
     """
-    ctx.ui.show_tool(ctx.ui.mvTool_Font)
+    cfg_save = {
+        'node': dict(),
+        'edge': list()
+    }
 
+    # Extract node and edge config from the view model
+    #
+    for (key, value) in ctx.cfg.vp.win.main.nodeeditor.items():
+        if key.startswith('node_'):
+            cfg_save['node'][value._id] = value._cfg
+        if key.startswith('edge_'):
+            cfg_save['edge'].append(value._cfg)
 
-# -----------------------------------------------------------------------------
-def menu_tools_itemreg(sender, app_data, ctx):
-    """
-    """
-    ctx.ui.show_tool(ctx.ui.mvTool_ItemRegistry)
+    # import pprint
+    # pprint.pprint(cfg_save)
 
+    ##################################################
+    # TODO: WHAT METADATA DO I NEED?                 #
+    #       WHERE WILL IT BE STORED?                 #
+    #       APPLICATION MODEL TO VIEW MODEL MAPPING? #
+    ##################################################
 
-# # -----------------------------------------------------------------------------
-# def menu_help_about(sender, app_data, ctx):
-#     """
-#     """
-#     pass
+    # THINK ABOUT DATA FLOW BETWEEN APPLICATION MODEL AND VIEW MODEL
+

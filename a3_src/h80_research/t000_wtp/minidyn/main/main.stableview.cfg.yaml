@@ -4,9 +4,9 @@
 coro_view:                        _spec::flowforge.main.coro
 
 # ------------------------------------------------------------------------------
-# Global event handlers.
+# Event handler registry.
 #
-globhandler:
+event:
   _fcn:                           add_handler_registry
 
   mouseright:
@@ -15,6 +15,9 @@ globhandler:
       button:                     _spec::dearpygui.dearpygui.mvMouseButton_Right
       callback:                   _spec::flowforge.main.mouseright
 
+# ------------------------------------------------------------------------------
+# Font registry
+#
 font:
   _fcn:                           add_font_registry
 
@@ -23,6 +26,33 @@ font:
     _kwargs:
       file:                       _spec::flowforge.main.FILEPATH_FONT_FIRA_CODE
       size:                       10
+
+# ------------------------------------------------------------------------------
+# Icon texture registry
+#
+icon:
+  _fcn:                           add_texture_registry
+
+  play_24x24:
+    _fcn:                         add_static_texture
+    _kwargs:
+      width:                      24
+      height:                     24
+      default_value:              _spec::flowforge.main.ICON_PLAY_24X24
+
+  pause_24x24:
+    _fcn:                         add_static_texture
+    _kwargs:
+      width:                      24
+      height:                     24
+      default_value:              _spec::flowforge.main.ICON_PAUSE_24X24
+
+  stop_24x24:
+    _fcn:                         add_static_texture
+    _kwargs:
+      width:                      24
+      height:                     24
+      default_value:              _spec::flowforge.main.ICON_STOP_24X24
 
 # ------------------------------------------------------------------------------
 # Viewport and top level window.
@@ -46,12 +76,13 @@ vp:
       _fcn:                       add_window
       _kwargs:
         label:                    "Edit"
-        modal:                    False
         popup:                    True
+        no_move:                  True
+        modal:                    False
+        autosize:                 False
         show:                     False
-        no_title_bar:             True
-        width:                    90
-        height:                   10
+        width:                    85
+        height:                   20
 
       node_add:
         _fcn:                     add_button
@@ -104,6 +135,46 @@ vp:
             label:                "Save"
             callback:             _spec::flowforge.main.menu_file_save
 
+      edit:
+        _fcn:                     add_menu
+        _kwargs:
+          label:                  "Edit"
+
+        undo:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Undo"
+            callback:             _spec::flowforge.main.menu_edit_undo
+
+        redo:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Redo"
+            callback:             _spec::flowforge.main.menu_edit_redo
+
+      run:
+        _fcn:                     add_menu
+        _kwargs:
+          label:                  "Run"
+
+        start:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Start"
+            callback:             _spec::flowforge.main.menu_run_start
+
+        pause:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Pause"
+            callback:             _spec::flowforge.main.menu_run_pause
+
+        stop:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Stop"
+            callback:             _spec::flowforge.main.menu_run_stop
+
       tools:
         _fcn:                     add_menu
         _kwargs:
@@ -130,7 +201,7 @@ vp:
         debug:
           _fcn:                   add_menu_item
           _kwargs:
-            label:                "Show Debug"
+            label:                "Show Debug Tool"
             callback:             _spec::flowforge.main.menu_tools_debug
 
         style:
@@ -151,20 +222,83 @@ vp:
             label:                "Show Item Registry"
             callback:             _spec::flowforge.main.menu_tools_itemreg
 
-    # --------------------------------------------------------------------------
+      help:
+        _fcn:                     add_menu
+        _kwargs:
+          label:                  "Help"
+
+        doc:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Documentation"
+            callback:             _spec::flowforge.main.menu_help_doc
+
+        about:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "About"
+            callback:             _spec::flowforge.main.menu_help_about
+
+    # -------------------------------------------------------------------------
     # Main workspace
     #
     main:
       _fcn:                       add_group
       _kwargs:
-        horizontal:               True
+        horizontal:               False
 
-      # ------------------------------------------------------------------------
+      toolbar:
+        _fcn:                     add_group
+        _kwargs:
+          horizontal:             True
+          horizontal_spacing:     0.0
+
+        pad_left:
+          _fcn:                   add_spacer
+          _kwargs:
+            width:                0
+
+        play:
+          _fcn:                   add_image_button
+          _kwargs:
+            label:                "Play"
+            texture_tag:          cfg.icon.play_24x24
+            callback:             _spec::flowforge.main.ctx_node_edit
+
+        pause:
+          _fcn:                   add_image_button
+          _kwargs:
+            label:                "Pause"
+            texture_tag:          cfg.icon.pause_24x24
+            callback:             _spec::flowforge.main.ctx_node_edit
+
+        stop:
+          _fcn:                   add_image_button
+          _kwargs:
+            label:                "Stop"
+            texture_tag:          cfg.icon.stop_24x24
+            callback:             _spec::flowforge.main.ctx_node_edit
+
+
+      #   # ---------------------------------------------------------------------
+      #   # Sidebar
+      #   #
+      #   side:
+      #     _fcn:                     add_child_window
+      #     _kwargs:
+      #       width:                  _spec::flowforge.main.SIDEBAR_WIDTH
+      #       border:                 True
+      #       autosize_y:             True
+
+      # ---------------------------------------------------------------------
       # Node editor
       #
       nodeeditor:
         _fcn:                     add_node_editor
         _kwargs:
+          minimap:                True
+          tracked:                True
+          minimap_location:       _spec::flowforge.main.BOTTOM_RIGHT
           callback:               _spec::flowforge.main.node_link
           delink_callback:        _spec::flowforge.main.node_delink
 
