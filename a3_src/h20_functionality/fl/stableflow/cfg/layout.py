@@ -44,8 +44,108 @@ license:
 ...
 """
 
+
+import collections
+
+import fl.util.alg
+
+
 # -------------------------------------------------------------------------
-def grid(map_cfg_denorm):
+def horizontal(map_cfg_denorm,
+               diagram_border = 10,
+               swimlane_title = 30,
+               longbus_u      = 60,
+               crossbus_v     = 30,
+               node_size_x    = 400,
+               node_size_y    = 250,
+               node_margin_x  = 10,
+               node_margin_y  = 10):
+
+    """
+    """
+
+    (map_idx_node,
+     map_idx_proc,
+     count_tranche) = _abstract_grid(map_cfg_denorm = map_cfg_denorm)
+
+    for (id_node, (idx_u, idx_v)) in map_idx_node.items():
+        map_cfg_denorm['node'][id_node]['idx_u'] = idx_u
+        map_cfg_denorm['node'][id_node]['idx_v'] = idx_v
+
+    for (id_proc, (idx_u, size_u)) in map_idx_proc.items():
+        map_cfg_denorm['process'][id_proc]['idx_u']  = idx_u
+        map_cfg_denorm['process'][id_proc]['size_u'] = size_u
+
+    map_cfg_denorm['system']['count_tranche'] = count_tranche
+
+    node_stride_x  = (node_size_x + node_margin_x)
+    node_stride_y  = (node_size_y + node_margin_y + crossbus_v)
+
+    # Layout nodes in the grid.
+    #
+    for (id_node, cfg_node) in map_cfg_denorm['node'].items():
+
+        cfg_node['size_x'] = node_size_x
+        cfg_node['size_y'] = node_size_y
+        cfg_node['pos_x']  = (   diagram_border
+                               + swimlane_title
+                               + longbus_u
+                               + node_margin_x
+                               + (node_stride_x * cfg_node['idx_v']))
+        cfg_node['pos_y']  = (   diagram_border
+                               + (node_stride_y * cfg_node['idx_u']))
+
+        cfg_node['input']  = dict()
+        cfg_node['output'] = dict()
+
+    # Layout process swimlanes.
+    #
+    for (id_proc, cfg_proc) in map_cfg_denorm['process'].items():
+
+        idx_u  = cfg_proc['idx_u']
+        size_u = cfg_proc['size_u']
+        size_v = map_cfg_denorm['system']['count_tranche']
+
+        cfg_proc['pos_x']  = diagram_border + longbus_u + (idx_u * node_size_x)
+        cfg_proc['pos_y']  = diagram_border
+        cfg_proc['size_x'] = (   node_margin_x
+                               + node_margin_x
+                               + (size_u * node_stride_x))
+        cfg_proc['size_v'] = (   node_margin_y
+                               + node_margin_y
+                               + (size_v * node_stride_y))
+
+    # Layout edges.
+    #
+    for cfg_edge in map_cfg_denorm['edge']:
+
+        id_node_src = cfg_edge['id_node_src']
+        id_node_dst = cfg_edge['id_node_dst']
+        cfg_src     = map_cfg_denorm['node'][id_node_src]
+        cfg_dst     = map_cfg_denorm['node'][id_node_dst]
+
+        cfg_edge['pos_x_start'] = cfg_src['pos_x'] + (cfg_src['size_x'] / 2)
+        cfg_edge['pos_y_start'] = cfg_src['pos_y'] + cfg_src['size_y']
+        cfg_edge['pos_x_end']   = cfg_dst['pos_x'] + (cfg_dst['size_x'] / 2)
+        cfg_edge['pos_y_end']   = cfg_dst['pos_y']
+
+    # Ports.
+    #
+    for cfg_edge in map_cfg_denorm['edge']:
+
+        id_edge     = cfg_edge['id_edge']
+        id_node_src = cfg_edge['id_node_src']
+        id_port_src = cfg_edge['relpath_src'][-1]
+        id_node_dst = cfg_edge['id_node_dst']
+        id_port_dst = cfg_edge['relpath_dst'][-1]
+        map_cfg_denorm['node'][id_node_dst]['input'][id_port_dst]  = id_edge
+        map_cfg_denorm['node'][id_node_src]['output'][id_port_src] = id_edge
+
+    return map_cfg_denorm
+
+
+# -------------------------------------------------------------------------
+def _abstract_grid(map_cfg_denorm):
     """
     Lay out nodes, swimlanes and buses in an abstract grid.
 
@@ -220,14 +320,15 @@ def _2d_node_indices(map_cfg_denorm, list_tranche_global, map_size_tranche_max):
 
     """
     # Grid positioning transverse to
-    # swimlane direction. "x" axis,
-    # assuming vertical swimlanes.
+    # swimlane direction. u is the "x"
+    # axis with vertical swimlanes, y
+    # axis with horizontal swimlanes.
     #
-    idx_x                 = 0
-    map_idx_x_min_process = dict()
+    idx_u                 = 0
+    map_idx_u_min_process = dict()
     for (id_process, size_tranche_max) in map_size_tranche_max.items():
-        map_idx_x_min_process[id_process] = idx_x
-        idx_x += size_tranche_max
+        map_idx_u_min_process[id_process] = idx_u
+        idx_u += size_tranche_max
 
     # x and y grid position for each node.
     #
@@ -236,10 +337,10 @@ def _2d_node_indices(map_cfg_denorm, list_tranche_global, map_size_tranche_max):
     for (idx_tranche, set_id_node) in enumerate(list_tranche_global):
         for (idx_node, id_node) in enumerate(sorted(set_id_node)):
             id_process            = map_node[id_node]['process']
-            idx_x_min_process     = map_idx_x_min_process[id_process]
-            idx_x_node            = idx_x_min_process + idx_node
-            idx_y_node            = idx_tranche
-            map_idx_node[id_node] = (idx_x_node, idx_y_node)
+            idx_u_min_process     = map_idx_u_min_process[id_process]
+            idx_u_node            = idx_u_min_process + idx_node
+            idx_v_node            = idx_tranche
+            map_idx_node[id_node] = (idx_u_node, idx_v_node)
 
     # Sort by tranche and then by
     # position within the tranche.
@@ -262,15 +363,15 @@ def _2d_process_indices(list_id_process, map_size_tranche_max):
     The first element of the tuple is the start
     index (in abstract grid units).
 
-    The second element of the tuple is the size
+    The second element of the tuple is the length
     of the swimlane (in abstract grid units).
 
     """
     map_idx_proc = dict()
-    idx_x        = 0
+    idx_u        = 0
     for id_proc in list_id_process:
-        size_x = map_size_tranche_max[id_proc]
-        map_idx_proc[id_proc] = (idx_x, size_x)
-        idx_x  += size_x
+        size_u = map_size_tranche_max[id_proc]
+        map_idx_proc[id_proc] = (idx_u, size_u)
+        idx_u  += size_u
 
     return map_idx_proc

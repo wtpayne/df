@@ -45,9 +45,18 @@ license:
 """
 
 
+import collections
+import copy
 import os.path
 
 import fl.util
+import fl.stableflow.cfg
+import fl.stableflow.cfg.edge
+import fl.stableflow.cfg.layout
+
+import pl.stableview
+
+import da.env
 
 from . import model
 
@@ -55,6 +64,25 @@ from . import model
 SIDEBAR_WIDTH        = model.SIDEBAR_WIDTH
 SIDEBAR_WIDGET_WIDTH = model.SIDEBAR_WIDGET_WIDTH
 INDENT               = model.INDENT
+
+# TODO: USE SOME OTHER NON-INTERNAL-SPECIFIC
+#       WAY OF GETTING RESOURCES.
+#
+FILEPATH_FONT_FIRA_CODE = da.env.path(
+        control_tier = 'h10_resource',
+        relpath      = 'brand/font/FiraCodeNerdFontMono-Light.ttf',
+        id_env       = 'e002_general_research')
+
+FILEPATH_DEFAULT_LOAD = da.env.path(
+        control_tier = 'h90_internal',
+        relpath      = 'da/cli/service/process_assistant/process_assistant.stableflow.cfg.yaml',
+        # relpath    = 'da/demo/dm001_workflow/dm001_workflow.stableflow.cfg.yaml'
+        id_env       = 'e002_general_research')
+
+FILEPATH_DEFAULT_SAVE = da.env.path(
+        control_tier = 'h90_internal',
+        relpath      = '/da/demo/dm001_workflow/dm001_workflow_saved.stableflow.cfg.yaml',
+        id_env       = 'e002_general_research')
 
 
 # -----------------------------------------------------------------------------
@@ -73,9 +101,8 @@ def coro(ctx):
 
     yield  # Context is created and widgets are added in gui.main().
 
-    _load_file(
-        ctx      = ctx,
-        filepath = '/media/wtp/Data1/dev/df/ws00_pri/a3_src/h90_internal/da/demo/dm001_workflow/dm001_workflow.stableflow.cfg.yaml')
+    _load_file(ctx = ctx, filepath = FILEPATH_DEFAULT_LOAD)
+    _save_file(ctx = ctx, filepath = FILEPATH_DEFAULT_SAVE)
 
     #ctx.pm.host.set_count(1)
     #ctx.pm.proc.set_count(1)
@@ -95,59 +122,44 @@ def coro(ctx):
 
 
 # -----------------------------------------------------------------------------
-def _load_file(ctx, filepath):
-    """
-    Load file.
-
-    """
-    stableflow_cfg = fl.util.Bureau(filepath = filepath)
-
-    node          = ctx.cfg.vp.win.main.nodeeditor.node
-    node._fcn     = 'add_node'
-    kwargs        = node._kwargs
-    kwargs.label  = 'Foo'
-    kwargs.id     = 'FooNode'
-    kwargs.pos    = [100.0, 100.0]
-
-    #########################################
-    # TODO: LOOK AT LAYOUT CODE FROM BEFORE #
-    #########################################
-
-    # for (id_node, cfg_node) in stableflow_cfg.node.items():
-
-        # import pprint
-        # pprint.pprint(cfg_node.to_dict())
-
-
-# -----------------------------------------------------------------------------
 def menu_file_open(sender, app_data, ctx):
     """
     Callback for the file-open menu item.
 
     """
-    open_file                 = ctx.vp.open_file
-    open_file._fcn            = 'add_file_dialog'
-    kwargs                    = open_file._kwargs
-    kwargs.directory_selector = False
-    kwargs.modal              = True
-    kwargs.show               = True
-    kwargs.label              = 'Open file'
-    kwargs.callback           = '_spec::flowforge.main.menu_file_open_ok'
-    kwargs.cancel_callback    = '_spec::flowforge.main.menu_file_open_cancel'
-    kwargs.width              = 700
-    kwargs.height             = 500
-    kwargs.default_path       = os.path.expanduser('~')
-    kwargs.file_count         = 1
-    # dialog_kwargs.max_size - seems to cause segfault
-    # dialog_kwargs.min_size - seems to cause segfault
 
-    extension = open_file.extension
-    extension._fcn = 'add_file_extension'
-    ext_kwargs               = extension._kwargs
-    ext_kwargs.label         = 'yaml'
-    ext_kwargs.extension     = '.yaml'
-    ext_kwargs.width         = 200
-    ext_kwargs.height        = 100
+    fcn = pl.stableview.fcn
+    open_file = fcn(
+            ctx.vp.open_file,
+            'add_file_dialog',
+            directory_selector = False,
+            modal              = True,
+            show               = True,
+            label              = 'Open file',
+            callback           = '_spec::flowforge.main.menu_file_open_ok',
+            cancel_callback    = '_spec::flowforge.main.menu_file_open_cancel',
+            width              = 700,
+            height             = 500,
+            default_path       = os.path.expanduser('~'),
+            file_count         = 1)
+
+    extension = fcn(
+            open_file.extension,
+            'add_file_extension',
+            label         = 'yaml',
+            extension     = '.yaml',
+            width         = 200,
+            height        = 100)
+
+
+# -----------------------------------------------------------------------------
+def menu_file_open_cancel(sender, app_data, ctx):
+    """
+    Callback for the 'cancel' button on the file-open dialog.
+
+    """
+
+    del ctx.vp.open_file
 
 
 # -----------------------------------------------------------------------------
@@ -156,21 +168,270 @@ def menu_file_open_ok(sender, app_data, ctx):
     Callback for the 'ok' button on the file-open dialog.
 
     """
+
     _load_file(ctx, filepath = app_data['file_path_name'])
+    del ctx.vp.open_file
 
 
 # -----------------------------------------------------------------------------
-def menu_file_open_cancel(sender, app_data, ctx):
+def _load_file(ctx, filepath):
     """
+    Load file.
+
     """
-    del ctx.vp.open_file
+
+    WIDTH_NODE     = 160
+
+    nodeeditor     = ctx.cfg.vp.win.main.nodeeditor
+    sfcfg          = fl.stableflow.cfg
+    fcn            = pl.stableview.fcn
+    map_cfg_norm   = sfcfg.prepare(path_cfg = filepath)
+    map_cfg_denorm = sfcfg.denormalize(copy.deepcopy(map_cfg_norm))
+    map_cfg_layout = sfcfg.layout.horizontal(map_cfg_denorm  = map_cfg_denorm,
+                                             diagram_border  = 10,
+                                             swimlane_title  = 0,
+                                             longbus_u       = 0,
+                                             crossbus_v      = 0,
+                                             node_size_x     = WIDTH_NODE,
+                                             node_size_y     = 70,
+                                             node_margin_x   = 40,
+                                             node_margin_y   = 40)
+
+    # Add nodes to the view model.
+    #
+    map_link = collections.defaultdict(dict)
+    for (id_node, cfg_node) in map_cfg_layout['node'].items():
+
+        node = fcn(nodeeditor['node_' + id_node],
+                   'add_node',
+                   label = id_node,
+                   pos   = [cfg_node['pos_x'], cfg_node['pos_y']])
+
+        # Keep a record of node config.
+        #
+        node._id  = id_node
+        node._cfg = map_cfg_norm['node'][id_node]
+
+        for (id_input, id_edge) in sorted(cfg_node['input'].items()):
+
+            attr = fcn(node['input_' + id_input],
+                       'add_node_attribute',
+                       label          = id_input,
+                       attribute_type = ctx.ui.mvNode_Attr_Input)
+
+            map_link[id_edge]['input'] = attr._str_path()
+
+            text = fcn(attr.text,
+                       'add_input_text',
+                       width         = WIDTH_NODE,
+                       default_value = id_input)
+
+        for (id_output, id_edge) in sorted(cfg_node['output'].items()):
+
+            attr = fcn(node['output_' + id_output],
+                       'add_node_attribute',
+                       label          = id_output,
+                       attribute_type = ctx.ui.mvNode_Attr_Output)
+
+            map_link[id_edge]['output'] = attr._str_path()
+
+            text = fcn(attr.text,
+                       'add_input_text',
+                       width         = WIDTH_NODE,
+                       default_value = id_output)
+
+    # Build lookup table for edge configuration.
+    #
+    map_edge = dict()
+    for cfg_edge in map_cfg_norm['edge']:
+        id_edge = sfcfg.edge.id_edge(cfg_edge)
+        map_edge[id_edge] = cfg_edge
+
+    # Add edges to the view model.
+    #
+    for (idx_edge, (id_edge, link)) in enumerate(map_link.items()):
+        edge = fcn(nodeeditor['edge_{:04d}'.format(idx_edge)],
+                   'add_node_link',
+                   attr_1   = link['input'],
+                   attr_2   = link['output'])
+        edge._id  = id_edge
+        edge._cfg = map_edge[id_edge]
+
+
+# -----------------------------------------------------------------------------
+def menu_file_save(sender, app_data, ctx):
+    """
+    Callback for the file-save menu item.
+
+    """
+
+    fcn = pl.stableview.fcn
+    save_file = fcn(
+            ctx.vp.save_file,
+            'add_file_dialog',
+            directory_selector = False,
+            modal              = True,
+            show               = True,
+            label              = 'Save file',
+            callback           = '_spec::flowforge.main.menu_file_save_ok',
+            cancel_callback    = '_spec::flowforge.main.menu_file_save_cancel',
+            width              = 700,
+            height             = 500,
+            default_path       = os.path.expanduser('~'),
+            file_count         = 1)
+
+    extension = fcn(
+            save_file.extension,
+            'add_file_extension',
+            label     = 'yaml',
+            extension = '.yaml',
+            width     = 200,
+            height    = 100)
+
+
+# -----------------------------------------------------------------------------
+def menu_file_save_cancel(sender, app_data, ctx):
+    """
+    Callback for the 'cancel' button on the file-save dialog.
+
+    """
+
+    del ctx.vp.save_file
+
+
+# -----------------------------------------------------------------------------
+def menu_file_save_ok(sender, app_data, ctx):
+    """
+    Callback for the 'ok' button on the file-save dialog.
+
+    """
+
+    _save_file(ctx, filepath = app_data['file_path_name'])
+    del ctx.vp.save_file
+
+
+# -----------------------------------------------------------------------------
+def _save_file(ctx, filepath):
+    """
+    Save file.
+
+    """
+    cfg_save = {
+        'node': dict(),
+        'edge': list()
+    }
+
+    # Extract node and edge config from the view model
+    #
+    for (key, value) in ctx.cfg.vp.win.main.nodeeditor.items():
+        if key.startswith('node_'):
+            cfg_save['node'][value._id] = value._cfg
+        if key.startswith('edge_'):
+            cfg_save['edge'].append(value._cfg)
+
+    # import pprint
+    # pprint.pprint(cfg_save)
+
+    ##################################################
+    # TODO: WHAT METADATA DO I NEED?                 #
+    #       WHERE WILL IT BE STORED?                 #
+    #       APPLICATION MODEL TO VIEW MODEL MAPPING? #
+    ##################################################
+
+    # THINK ABOUT DATA FLOW BETWEEN APPLICATION MODEL AND VIEW MODEL
+
+
+# -----------------------------------------------------------------------------
+def mouseright(sender, app_data, ctx):
+    """
+    Mouse right click handler.
+
+    Displays the right click context menu.
+
+    """
+    nodeeditor    = ctx.cfg.vp.win.main.nodeeditor
+    list_selected = ctx.ui.get_selected_nodes(nodeeditor._str_path())
+
+    if len(list_selected) == 1:
+        ctx.ui.configure_item('cfg.vp.win.ctx.node_add',  show = False)
+        ctx.ui.configure_item('cfg.vp.win.ctx.node_edit', show = True)
+        ctx.ui.configure_item('cfg.vp.win.ctx.node_del',  show = True)
+    else:
+        ctx.ui.configure_item('cfg.vp.win.ctx.node_add',  show = True)
+        ctx.ui.configure_item('cfg.vp.win.ctx.node_edit', show = False)
+        ctx.ui.configure_item('cfg.vp.win.ctx.node_del',  show = False)
+
+    ctx.ui.configure_item('cfg.vp.win.ctx',
+                          pos  = ctx.ui.get_mouse_pos(local = False),
+                          show = True)
+
+
+# -----------------------------------------------------------------------------
+def ctx_node_add(sender, app_data, ctx):
+    """
+    Add button on right click context menu.
+
+    """
+    ctx.ui.configure_item(ctx.cfg.vp.win.ctx._str_path(), show = False)
+    pos    = ctx.ui.get_item_pos('cfg.vp.win.ctx')
+    pos[0] = pos[0] - 40
+    pos[1] = pos[1] - 20
+
+    idx_node_max = 0
+    for name in ctx.cfg.vp.win.main.nodeeditor.keys():
+        prefix = 'node_'
+        if not name.startswith(prefix):
+            continue
+        suffix = name[len(prefix):]
+        try:
+            idx_node = int(suffix)
+        except ValueError:
+            continue
+        else:
+            idx_node_max = max(idx_node_max, idx_node)
+
+    id_node    = '{:04d}'.format(idx_node_max + 1)
+    nodeeditor = ctx.cfg.vp.win.main.nodeeditor
+    node       = pl.stableview.fcn(nodeeditor['node_' + id_node],
+                                   'add_node',
+                                   label = id_node,
+                                   pos   = pos)
+
+
+# -----------------------------------------------------------------------------
+def ctx_node_edit(sender, app_data, ctx):
+    """
+    Edit button on right click context menu.
+
+    """
+    print('EDIT NODE')
+
+
+# -----------------------------------------------------------------------------
+def ctx_node_del(sender, app_data, ctx):
+    """
+    Delete button on right click context menu.
+
+    """
+    print('DEL NODE')
+
+# -----------------------------------------------------------------------------
+def ctx_node_cancel(sender, app_data, ctx):
+    """
+    Cancel button on right click context menu.
+
+    """
+    ctx.ui.configure_item('cfg.vp.win.ctx',
+                          pos  = ctx.ui.get_mouse_pos(local = False),
+                          show = False)
+
 
 
 # -----------------------------------------------------------------------------
 def node_link(sender, app_data, ctx):
     """
     """
-    pass
+    print('LINK CALLBACK')
     # ctx.ui.add_node_link(app_data[0], app_data[1], parent=sender)
 
 
@@ -178,42 +439,8 @@ def node_link(sender, app_data, ctx):
 def node_delink(sender, app_data, ctx):
     """
     """
-    pass
+    print('DELINK CALLBACK')
     # ctx.ui.delete_item(app_data)
-
-
-# -----------------------------------------------------------------------------
-def menu_tools_itemreg(sender, app_data, ctx):
-    """
-    """
-    ctx.ui.show_tool(ctx.ui.mvTool_ItemRegistry)
-
-
-
-# # -----------------------------------------------------------------------------
-# def mouseright(sender, app_data, ctx):
-#     """
-#     Mouse right click handler.
-
-#     Displays the right click context menu.
-
-#     """
-#     ctx.ui.configure_item('vp.win.ctx',
-#                           pos  = ctx.ui.get_mouse_pos(local = False),
-#                           show = True)
-
-
-# # -----------------------------------------------------------------------------
-# def ctx_addnode(sender, app_data, ctx):
-#     """
-#     Add Node button callback from the right click context menu.
-
-#     """
-#     pos    = ctx.ui.get_item_pos('vp.win.ctx')
-#     pos[0] = pos[0] - 40
-#     pos[1] = pos[1] - 20
-#     ctx.pm.node.add(pos)
-#     ctx.ui.configure_item("vp.win.ctx", show = False)
 
 
 # # -----------------------------------------------------------------------------
@@ -307,53 +534,53 @@ def menu_tools_itemreg(sender, app_data, ctx):
 #     pass
 
 
-# # -----------------------------------------------------------------------------
-# def menu_tools_about(sender, app_data, ctx):
-#     """
-#     """
-#     ctx.ui.show_tool(ctx.ui.mvTool_About)
+# -----------------------------------------------------------------------------
+def menu_tools_about(sender, app_data, ctx):
+    """
+    """
+    ctx.ui.show_tool(ctx.ui.mvTool_About)
 
 
-# # -----------------------------------------------------------------------------
-# def menu_tools_metrics(sender, app_data, ctx):
-#     """
-#     """
-#     ctx.ui.show_tool(ctx.ui.mvTool_Metrics)
+# -----------------------------------------------------------------------------
+def menu_tools_metrics(sender, app_data, ctx):
+    """
+    """
+    ctx.ui.show_tool(ctx.ui.mvTool_Metrics)
 
 
-# # -----------------------------------------------------------------------------
-# def menu_tools_doc(sender, app_data, ctx):
-#     """
-#     """
-#     ctx.ui.show_tool(ctx.ui.mvTool_Doc)
+# -----------------------------------------------------------------------------
+def menu_tools_doc(sender, app_data, ctx):
+    """
+    """
+    ctx.ui.show_tool(ctx.ui.mvTool_Doc)
 
 
-# # -----------------------------------------------------------------------------
-# def menu_tools_debug(sender, app_data, ctx):
-#     """
-#     """
-#     ctx.ui.show_tool(ctx.ui.mvTool_Debug)
+# -----------------------------------------------------------------------------
+def menu_tools_debug(sender, app_data, ctx):
+    """
+    """
+    ctx.ui.show_tool(ctx.ui.mvTool_Debug)
 
 
-# # -----------------------------------------------------------------------------
-# def menu_tools_style(sender, app_data, ctx):
-#     """
-#     """
-#     ctx.ui.show_tool(ctx.ui.mvTool_Style)
+# -----------------------------------------------------------------------------
+def menu_tools_style(sender, app_data, ctx):
+    """
+    """
+    ctx.ui.show_tool(ctx.ui.mvTool_Style)
 
 
-# # -----------------------------------------------------------------------------
-# def menu_tools_font(sender, app_data, ctx):
-#     """
-#     """
-#     ctx.ui.show_tool(ctx.ui.mvTool_Font)
+# -----------------------------------------------------------------------------
+def menu_tools_font(sender, app_data, ctx):
+    """
+    """
+    ctx.ui.show_tool(ctx.ui.mvTool_Font)
 
 
-# # -----------------------------------------------------------------------------
-# def menu_tools_demo(sender, app_data, ctx):
-#     """
-#     """
-#     pass
+# -----------------------------------------------------------------------------
+def menu_tools_itemreg(sender, app_data, ctx):
+    """
+    """
+    ctx.ui.show_tool(ctx.ui.mvTool_ItemRegistry)
 
 
 # # -----------------------------------------------------------------------------

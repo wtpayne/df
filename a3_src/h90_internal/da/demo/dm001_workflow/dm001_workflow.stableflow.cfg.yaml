@@ -95,7 +95,7 @@ edge:
 
 - owner: system_controller
   data:  py_dict
-  src:   system_controller.outputs.control_main_process_controller
+  src:   system_controller.outputs.control_main
   dst:   main_process_controller.inputs.control
 
 - owner: main_process_controller

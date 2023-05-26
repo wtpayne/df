@@ -159,6 +159,16 @@ class Bureau(collections.abc.MutableMapping):
 
 
     # -------------------------------------------------------------------------
+    def _str_path(self):
+        """
+        Return a delimited string representation of the path.
+
+        """
+
+        return self._bureau_path_delimiter.join(self._bureau_path)
+
+
+    # -------------------------------------------------------------------------
     def reset_engine(self, path = None, engine = None):
         """
         Disconnect this Bureau from it's engine and replace with a new one.

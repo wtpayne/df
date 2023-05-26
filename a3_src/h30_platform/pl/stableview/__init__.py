@@ -70,6 +70,10 @@ def main(dirpath_cfg, name_view):
     The cfg data structure defines the basic
     layout and structure of the GUI.
 
+    TODO: HOW DO I MODIFY PATHS IN THE CONFIG
+          SO THAT THEY POINT TO THE RIGHT ASSET
+          DIRECTORY? (cfg.font.fira_code._kwargs.file)
+
     """
 
     ctx = fl.util.Bureau()
@@ -84,8 +88,10 @@ def main(dirpath_cfg, name_view):
     next(ctx.coro_view)                           # app early setup.
 
     ctx.ui.create_context()
+
     try:
         ctx.batch_finalize(batch)                 # Create widgets.
+
         ctx.ui.setup_dearpygui()
 
         with ctx.batch_context():
@@ -144,6 +150,24 @@ def _del_widget(ctx, cmd):
     ctx.ui.delete_item(tag)
 
 
+# -------------------------------------------------------------------------
+def fcn(cfg, fcn, *args, **kwargs):
+    """
+    """
+    cfg._fcn = fcn
+
+    if args:
+        cfg.args = list()
+        for item in args:
+            cfg.args.append(item)
+
+    if kwargs:
+        for (key, value) in kwargs.items():
+            cfg._kwargs[key] = value
+
+    return cfg
+
+
 # -----------------------------------------------------------------------------
 def _add_widget(ctx, cmd):
     """
@@ -184,6 +208,7 @@ def _add_widget(ctx, cmd):
     # parameter.
     #
     tup_no_tag = ('create_viewport',
+                  'bind_item_font',
                   'bind_item_handler_registry')
     if name_fcn in tup_no_tag:
         fcn(**kwargs)
@@ -193,11 +218,12 @@ def _add_widget(ctx, cmd):
 
     # Handle functions with
     # no parent parameter.
-    #
-    tup_no_parent = ('add_window',
+
+    tup_no_parent = ('add_file_dialog',
+                     'add_font_registry',
                      'add_handler_registry',
                      'add_item_handler_registry',
-                     'add_file_dialog')
+                     'add_window')
     if name_fcn in tup_no_parent:
         fcn(**kwargs)
         if 'set_primary_window' in misc and misc['set_primary_window']:

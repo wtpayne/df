@@ -4,19 +4,82 @@
 coro_view:                        _spec::flowforge.main.coro
 
 # ------------------------------------------------------------------------------
+# Global event handlers.
+#
+globhandler:
+  _fcn:                           add_handler_registry
+
+  mouseright:
+    _fcn:                         add_mouse_click_handler
+    _kwargs:
+      button:                     _spec::dearpygui.dearpygui.mvMouseButton_Right
+      callback:                   _spec::flowforge.main.mouseright
+
+font:
+  _fcn:                           add_font_registry
+
+  fira_code:
+    _fcn:                         add_font
+    _kwargs:
+      file:                       _spec::flowforge.main.FILEPATH_FONT_FIRA_CODE
+      size:                       10
+
+# ------------------------------------------------------------------------------
 # Viewport and top level window.
 #
 vp:
   _fcn:                           create_viewport
   _kwargs:
     title:                        "FlowForge"
-    width:                        1024
+    width:                        2048
     height:                       768
 
   win:
     _fcn:                         add_window
     _misc:
       set_primary_window:         True
+
+    # --------------------------------------------------------------------------
+    # Right-click context menu.
+    #
+    ctx:
+      _fcn:                       add_window
+      _kwargs:
+        label:                    "Edit"
+        modal:                    False
+        popup:                    True
+        show:                     False
+        no_title_bar:             True
+        width:                    90
+        height:                   10
+
+      node_add:
+        _fcn:                     add_button
+        _kwargs:
+          label:                  "Add Node"
+          width:                  85
+          callback:               _spec::flowforge.main.ctx_node_add
+
+      node_edit:
+        _fcn:                     add_button
+        _kwargs:
+          label:                  "Edit Node"
+          width:                  85
+          callback:               _spec::flowforge.main.ctx_node_edit
+
+      node_del:
+        _fcn:                     add_button
+        _kwargs:
+          label:                  "Delete Node"
+          width:                  85
+          callback:               _spec::flowforge.main.ctx_node_del
+
+      node_cancel:
+        _fcn:                     add_button
+        _kwargs:
+          label:                  "Cancel"
+          width:                  85
+          callback:               _spec::flowforge.main.ctx_node_cancel
 
     # --------------------------------------------------------------------------
     # Application menubar
@@ -35,10 +98,52 @@ vp:
             label:                "Open"
             callback:             _spec::flowforge.main.menu_file_open
 
+        save:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Save"
+            callback:             _spec::flowforge.main.menu_file_save
+
       tools:
         _fcn:                     add_menu
         _kwargs:
           label:                  "Tools"
+
+        about:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show About"
+            callback:             _spec::flowforge.main.menu_tools_about
+
+        metrics:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show Metrics"
+            callback:             _spec::flowforge.main.menu_tools_metrics
+
+        doc:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show Documentation"
+            callback:             _spec::flowforge.main.menu_tools_doc
+
+        debug:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show Debug"
+            callback:             _spec::flowforge.main.menu_tools_debug
+
+        style:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show Style Editor"
+            callback:             _spec::flowforge.main.menu_tools_style
+
+        font:
+          _fcn:                   add_menu_item
+          _kwargs:
+            label:                "Show Font Editor"
+            callback:             _spec::flowforge.main.menu_tools_font
 
         itemreg:
           _fcn:                   add_menu_item
@@ -62,3 +167,18 @@ vp:
         _kwargs:
           callback:               _spec::flowforge.main.node_link
           delink_callback:        _spec::flowforge.main.node_delink
+
+
+binding:
+
+  win_font:
+    _fcn:                         bind_item_font
+    _kwargs:
+      item:                       cfg.vp.win
+      font:                       cfg.font.fira_code
+
+  ctx_font:
+    _fcn:                         bind_item_font
+    _kwargs:
+      item:                       cfg.vp.win.ctx
+      font:                       cfg.font.fira_code

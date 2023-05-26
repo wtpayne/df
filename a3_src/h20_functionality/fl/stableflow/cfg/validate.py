@@ -74,7 +74,7 @@ def _normalized_cfg_schema():
             'entry_point_obj_ref': { 'type':    'string',
                                      'pattern': '^[A-Za-z0-9_.:]*$'  },
             'id_edge':             { 'type':    'string',
-                                     'pattern': '^[a-z0-9_./-]*$'    },
+                                     'pattern': '^[a-z0-9_./:]*$'    },
             'edge_direction':      { 'type':    'string',
                                      'pattern': '^feedforward|feedback$'    },
             'path_cfg':        { 'type': 'string'                           },
