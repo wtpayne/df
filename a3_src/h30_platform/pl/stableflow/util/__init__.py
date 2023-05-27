@@ -79,7 +79,7 @@ def clear_outputs(outputs,
 
     """
     if iter_name_output is None:
-        iter_name_output = list(outputs.keys())
+        iter_name_output = tuple(outputs.keys())
 
     if iter_field_to_clear is None:
         iter_field_to_clear = ('list',)

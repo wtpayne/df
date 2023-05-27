@@ -3,17 +3,17 @@
 ---
 
 title:
-    "Utility module."
+    "Utility package."
 
 description:
-    "This module contains various bits of
+    "This package contains various bits of
     general purpose utility functionality."
 
 id:
     "b34331cb-926d-4efa-aa88-0797b7067ed3"
 
 type:
-    dt003_python_module
+    dt002_python_package
 
 validation_level:
     v00_minimum
@@ -181,7 +181,7 @@ class Bureau(collections.abc.MutableMapping):
         if engine is None:
             self._bureau_engine = BureauEngine(bureau = self)
         else:
-            self._bureau_engine = Engine
+            self._bureau_engine = engine
 
         if path is None:
             self._bureau_path = tuple()
@@ -281,10 +281,11 @@ class Bureau(collections.abc.MutableMapping):
         """
         return self.from_tuple(path_root = path_root,
                                tup_kv    = fl.util.alg.walk(
-                                                        obj      = map_item,
-                                                        gen_leaf = True,
-                                                        gen_path = True,
-                                                        gen_obj  = True))
+                                                    obj            = map_item,
+                                                    gen_leaf       = True,
+                                                    gen_path       = True,
+                                                    gen_obj        = True,
+                                                    use_fat_leaves = True))
 
     # -------------------------------------------------------------------------
     def from_file(self, filepath, str_format = None, path_root = tuple()):
@@ -316,6 +317,15 @@ class Bureau(collections.abc.MutableMapping):
 
         """
         pprint.pprint(self.to_dict())
+
+    # -------------------------------------------------------------------------
+    def __contains__(self, item):
+        """
+        Return true if item is in self, false otherwise.
+
+        """
+
+        return self._bureau_data.__contains__(item)
 
     # -------------------------------------------------------------------------
     def __getitem__(self, key):
@@ -477,6 +487,7 @@ class Bureau(collections.abc.MutableMapping):
         Context manager for processing updates as a batch.
 
         """
+
         batch = self.batch_init()
 
         try:
@@ -494,7 +505,10 @@ class Bureau(collections.abc.MutableMapping):
     # -------------------------------------------------------------------------
     def batch_init(self):
         """
+        Initialize the batch.
+
         """
+
         self._bureau_engine._journal.clear()
         self._bureau_engine._do_keep_journal = True
         batch = list()
@@ -503,7 +517,10 @@ class Bureau(collections.abc.MutableMapping):
     # -------------------------------------------------------------------------
     def batch_finalize(self, batch):
         """
+        Finalize the batch.
+
         """
+
         self._bureau_engine._do_keep_journal = False
         batch[:] = self._bureau_engine._journal
 
@@ -517,6 +534,7 @@ class Bureau(collections.abc.MutableMapping):
         Update the Bureau using the specified journal segment.
 
         """
+
         for tup_cmd in batch:
             cmd = Command._make(tup_cmd)
             self._bureau_engine.set_item(path      = cmd.path,
@@ -824,6 +842,7 @@ class BureauEngine():
         Yield of the existing leaf items under the specified path.
 
         """
+
         for (relpath, value) in fl.util.alg.walk(
                                             obj         = self._item_at(path),
                                             gen_leaf    = True,
@@ -838,6 +857,7 @@ class BureauEngine():
         Return a reference to the item at the specified path.
 
         """
+
         cursor      = self._bureau._bureau_data
         path_cursor = tuple()
         for name in _iter_path(path, self._bureau._bureau_path_delimiter):
@@ -910,8 +930,7 @@ class BureauEngine():
         # Avoid recursion and get the old value.
         #
         (get_item, set_item, del_item) = _accessor_functions(cursor)
-        tup_keys    = tuple(cursor.keys())  # NUST NOT CHECK DIRECTLY
-        is_new_name = name not in tup_keys
+        is_new_name = name not in cursor
 
         if is_new_name:
 
@@ -947,6 +966,7 @@ class BureauEngine():
         cursor.
 
         """
+
         (get_item, set_item, del_item) = _accessor_functions(cursor)
         try:
             cursor = get_item(name)
@@ -968,6 +988,7 @@ class BureauEngine():
         Add a rule.
 
         """
+
         has_rule      = rule      is not None
         has_condition = cond      is not None
         has_action    = act       is not None
@@ -1001,7 +1022,7 @@ class BureauEngine():
         # affect the specified path.
         #
         if has_tup_path:
-            rule = Rule(cond = (is_root_in(tup_path),) + rule.cond,
+            rule = Rule(cond = (fl.rule.is_root_in(tup_path),) + rule.cond,
                         act  = rule.act)
 
         self._list_rule.append(rule)
@@ -1014,6 +1035,7 @@ class BureauEngine():
         Invoke rules for the specified batch of commands.
 
         """
+
         list_cmd = list()
         for rule in self._list_rule:
 
@@ -1119,96 +1141,6 @@ def _iter_path(path, delim):
         #
         except TypeError:
             yield path
-
-
-# -----------------------------------------------------------------------------
-def always():
-    """
-    Return an always-true indicator function.
-
-    """
-    def _indicator(cmd):
-        """
-        Return True.
-
-        """
-        return True
-    return _indicator
-
-
-# -----------------------------------------------------------------------------
-def never():
-    """
-    Return a never-true indicator function.
-
-    """
-    def _indicator(cmd):
-        """
-        Return False.
-
-        """
-        return False
-    return _indicator
-
-
-# -----------------------------------------------------------------------------
-def is_not(fcn):
-    """
-    Return indicator that negates the specified indicator.
-
-    """
-    def _indicator(cmd):
-        """
-        Return the negation of the specified indicator.
-
-        """
-        return not fcn(cmd)
-    return _indicator
-
-
-# -----------------------------------------------------------------------------
-def is_root_in(tup_path_root):
-    """
-    Return indicator that checks cmd.path is rooted in the specified location.
-
-    """
-    def _indicator(cmd):
-        """
-        Return True iff cmd.path is rooted in the specified location.
-
-        """
-        return cmd.path[:len(tup_path_root)] == tup_path_root
-    return _indicator
-
-
-# -----------------------------------------------------------------------------
-def is_leaf_at(tup_path_leaf):
-    """
-    Return indicator that checks cmd.path leafed at the specified location.
-
-    """
-    def _indicator(cmd):
-        """
-        Return True iff cmd.path is leafed at the specified location.
-
-        """
-        return cmd.path[-len(tup_path_leaf):] == tup_path_leaf
-    return _indicator
-
-
-# -----------------------------------------------------------------------------
-def is_operation(operation):
-    """
-    Return indicator that checks cmd.operation.
-
-    """
-    def _indicator(cmd):
-        """
-        Return True iff cmd.path is leafed at the specified location.
-
-        """
-        return cmd.operation == operation
-    return _indicator
 
 
 # =============================================================================

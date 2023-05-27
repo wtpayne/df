@@ -54,7 +54,7 @@ def valid_partly_denormalized_config():
                 'data':         'some_data_type',
                 'src':          'some_node.outputs.port',
                 'dst':          'some_node.inputs.port',
-                'id_edge':      'some_node.outputs.port-some_node.inputs.port',
+                'id_edge':      'some_node.outputs.port:some_node.inputs.port',
                 'relpath_src':  ['some_node', 'outputs', 'port'],
                 'relpath_dst':  ['some_node', 'inputs', 'port'],
                 'id_node_src':  'some_node',

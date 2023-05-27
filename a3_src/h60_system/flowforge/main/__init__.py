@@ -89,8 +89,6 @@ FILEPATH_DEFAULT_SAVE = da.env.path(
         id_env       = 'e002_general_research')
 
 
-
-
 BOTTOM_RIGHT = dearpygui.dearpygui.mvNodeMiniMap_Location_BottomRight
 NO_PADDING   = [0, 0]
 
@@ -98,19 +96,24 @@ NO_PADDING   = [0, 0]
 # -----------------------------------------------------------------------------
 def _load_icon(name):
     """
+    TODO: MOVE THIS INTO A BUILD STEP WHERE WE COMPILE ASSETS.
+
     """
     filepath = da.env.path(
-                    control_tier = 'h10_resource',
-                    relpath      = 'icon/png/{name}.png'.format(name = name),
-                    id_env       = 'e002_general_research')
+        control_tier = 'h10_resource',
+        relpath      = 'icon/dark/solid/{name}/16x16.png'.format(name = name),
+        id_env       = 'e002_general_research')
     rgba = PIL.Image.open(filepath).convert("RGBA")
     return numpy.array(rgba).flatten()
 
 
-ICON_PLAY_24X24  = _load_icon('play-solid')
-ICON_PAUSE_24X24 = _load_icon('pause-solid')
-ICON_STOP_24X24  = _load_icon('stop-solid')
+ICON_PLAY_16X16  = _load_icon('play')
+ICON_PAUSE_16X16 = _load_icon('pause')
+ICON_STOP_16X16  = _load_icon('stop')
 
+#####################################
+# TODO: MOVE THIS INTO A BUILD STEP #
+#####################################
 
 # -----------------------------------------------------------------------------
 def coro(ctx):
@@ -396,50 +399,67 @@ def menu_help_about(sender, app_data, ctx):
     raise NotImplementedError('help.about')
 
 
+# -----------------------------------------------------------------------------
+def host_count(sender, app_data, ctx):
+    """
+    Set the number of process hosts in the system.
+
+    """
+
+    raise NotImplementedError('side.tab.cfg.host.count')
 
 
 
+# -----------------------------------------------------------------------------
+def proc_count(sender, app_data, ctx):
+    """
+    Set the number of processes in the system.
+
+    """
+
+    raise NotImplementedError('side.tab.cfg.prochost.count')
 
 
 
+# -----------------------------------------------------------------------------
+def node_id(sender, app_data, ctx):
+    """
+    Callback for the vp.win.main.side.tab.cfg.node.id input_text widget.
+
+    """
+
+    raise NotImplementedError('side.tab.cfg.node.id')
 
 
 
+# -----------------------------------------------------------------------------
+def node_proc(sender, app_data, ctx):
+    """
+    Callback for the vp.win.main.side.tab.cfg.node.proc combo widget.
+
+    """
+
+    raise NotImplementedError('side.tab.cfg.node.proc')
 
 
+# -----------------------------------------------------------------------------
+def node_input_count(sender, app_data, ctx):
+    """
+    Callback for the vp.win.main.side.tab.cfg.node.countin input_int widget.
+
+    """
+
+    raise NotImplementedError('side.tab.cfg.node.input_count')
 
 
+# -----------------------------------------------------------------------------
+def node_output_count(sender, app_data, ctx):
+    """
+    Callback for the vp.win.main.side.tab.cfg.node.countout input_int widget.
 
+    """
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    raise NotImplementedError('side.tab.cfg.node.output_count')
 
 
 # -----------------------------------------------------------------------------
@@ -450,7 +470,7 @@ def mouseright(sender, app_data, ctx):
     Displays the right click context menu.
 
     """
-    nodeeditor    = ctx.cfg.vp.win.main.nodeeditor
+    nodeeditor    = ctx.vm.vp.win.main.nodeeditor
     list_selected = ctx.ui.get_selected_nodes(nodeeditor._str_path())
 
     if len(list_selected) == 0:
@@ -466,8 +486,8 @@ def mouseright(sender, app_data, ctx):
         ctx.ui.configure_item('cfg.vp.win.ctx.node_edit', show = False)
         ctx.ui.configure_item('cfg.vp.win.ctx.node_del',  show = True)
 
-    width  = ctx.cfg.vp.win.ctx._kwargs.width
-    height = ctx.cfg.vp.win.ctx._kwargs.height
+    width  = ctx.vm.vp.win.ctx._kwargs.width
+    height = ctx.vm.vp.win.ctx._kwargs.height
     ctx.ui.configure_item('cfg.vp.win.ctx',
                           min_size = [width, height],
                           pos      = ctx.ui.get_mouse_pos(local = False),
@@ -480,13 +500,13 @@ def ctx_node_add(sender, app_data, ctx):
     Add button on right click context menu.
 
     """
-    ctx.ui.configure_item(ctx.cfg.vp.win.ctx._str_path(), show = False)
+    ctx.ui.configure_item(ctx.vm.vp.win.ctx._str_path(), show = False)
     pos    = ctx.ui.get_item_pos('cfg.vp.win.ctx')
     pos[0] = pos[0] - 40
     pos[1] = pos[1] - 20
 
     idx_node_max = 0
-    for name in ctx.cfg.vp.win.main.nodeeditor.keys():
+    for name in ctx.vm.vp.win.main.nodeeditor.keys():
         prefix = 'node_'
         if not name.startswith(prefix):
             continue
@@ -499,7 +519,7 @@ def ctx_node_add(sender, app_data, ctx):
             idx_node_max = max(idx_node_max, idx_node)
 
     id_node    = '{:04d}'.format(idx_node_max + 1)
-    nodeeditor = ctx.cfg.vp.win.main.nodeeditor
+    nodeeditor = ctx.vm.vp.win.main.nodeeditor
     node       = pl.stableview.fcn(nodeeditor['node_' + id_node],
                                    'add_node',
                                    label = id_node,
@@ -551,117 +571,6 @@ def node_delink(sender, app_data):
     # ctx.ui.delete_item(app_data)
 
 
-# # -----------------------------------------------------------------------------
-# def menu_edit_addnode(sender, app_data, ctx):
-#     """
-#     Callback for the vp.win.menu.edit.addnode menu_item widget.
-
-#     """
-#     ctx.pm.node.add(pos = None)
-
-
-# # -----------------------------------------------------------------------------
-# def side_cfg_sys_id(sender, app_data, ctx):
-#     """
-#     Set the system id.
-
-#     """
-#     ctx.pm.sys.set_id(id_system = app_data)
-
-
-# # -----------------------------------------------------------------------------
-# def side_cfg_host_count(sender, app_data, ctx):
-#     """
-#     Set the number of process hosts in the system.
-
-#     """
-#     ctx.pm.host.set_count(count_new = app_data)
-
-
-# # -----------------------------------------------------------------------------
-# def side_cfg_proc_count(sender, app_data, ctx):
-#     """
-#     Set the number of processes in the system.
-
-#     """
-#     ctx.pm.proc.set_count(count_new = app_data)
-
-
-# # -----------------------------------------------------------------------------
-# def side_cfg_node_id(sender, app_data, ctx):
-#     """
-#     Callback for the vp.win.main.side.tab.cfg.node.id input_text widget.
-
-#     """
-#     ctx.pm.node.selected().set_id(app_data)
-
-
-# # -----------------------------------------------------------------------------
-# def side_cfg_node_proc(sender, app_data, ctx):
-#     """
-#     Callback for the vp.win.main.side.tab.cfg.node.proc combo widget.
-
-#     """
-#     ctx.pm.node.selected().set_proc(app_data)
-
-
-# # -----------------------------------------------------------------------------
-# def side_cfg_node_input_count(sender, app_data, ctx):
-#     """
-#     Callback for the vp.win.main.side.tab.cfg.node.countin input_int widget.
-
-#     """
-#     ctx.pm.node.selected().set_input_count(count_new = app_data)
-
-
-# # -----------------------------------------------------------------------------
-# def side_cfg_node_output_count(sender, app_data, ctx):
-#     """
-#     Callback for the vp.win.main.side.tab.cfg.node.countout input_int widget.
-
-#     """
-#     ctx.pm.node.selected().set_output_count(app_data)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # -----------------------------------------------------------------------------
 def _load_file(ctx, filepath):
     """
@@ -671,7 +580,7 @@ def _load_file(ctx, filepath):
 
     WIDTH_NODE     = 160
 
-    nodeeditor     = ctx.cfg.vp.win.main.nodeeditor
+    nodeeditor     = ctx.vm.vp.win.main.nodeeditor
     sfcfg          = fl.stableflow.cfg
     fcn            = pl.stableview.fcn
     map_cfg_norm   = sfcfg.prepare(path_cfg = filepath)
@@ -748,7 +657,6 @@ def _load_file(ctx, filepath):
         edge._cfg = map_edge[id_edge]
 
 
-
 # -----------------------------------------------------------------------------
 def _save_file(ctx, filepath):
     """
@@ -762,7 +670,7 @@ def _save_file(ctx, filepath):
 
     # Extract node and edge config from the view model
     #
-    for (key, value) in ctx.cfg.vp.win.main.nodeeditor.items():
+    for (key, value) in ctx.vm.vp.win.main.nodeeditor.items():
         if key.startswith('node_'):
             cfg_save['node'][value._id] = value._cfg
         if key.startswith('edge_'):

@@ -53,8 +53,8 @@ import os.path
 import dearpygui.dearpygui
 import ruamel.yaml
 
+import fl.rule
 import fl.util
-
 
 try:
     __version__ = importlib.metadata.version('stableview')
@@ -77,15 +77,25 @@ def main(dirpath_cfg, name_view):
     """
 
     ctx = fl.util.Bureau()
-    ctx.rule(cond = fl.util.is_leaf_at(('_fcn',)),
-             act  = _update_widget)
+    ctx.rule(cond = (fl.rule.is_root_in(('vm',)),
+                     fl.rule.is_leaf_at(('_fcn',))),
+             act  = _update_from_view_model)
+    ctx.rule(cond = fl.rule.is_root_in(('am',)),
+             act  = _update_from_application_model)
 
-    ctx.ui                     = dearpygui.dearpygui
-    batch                      = ctx.batch_init()
-    ctx.cfg.from_file(filepath = _filepath_cfg(dirpath_cfg, name_view))
-    ctx.coro_view              = fl.util.resolve(ctx.cfg.coro_view)(ctx)
+    ctx.ui                      = dearpygui.dearpygui
+    batch                       = ctx.batch_init()
 
-    next(ctx.coro_view)                           # app early setup.
+    # View model.
+    #
+    ctx.vm.from_file(filepath = _filepath_cfg(dirpath_cfg, name_view))
+    ctx.vm.coro               = fl.util.resolve(ctx.vm.coro)(ctx)
+
+    # Application model.
+    #
+    ctx.app
+
+    next(ctx.vm.coro)                           # app early setup.
 
     ctx.ui.create_context()
 
@@ -95,13 +105,13 @@ def main(dirpath_cfg, name_view):
         ctx.ui.setup_dearpygui()
 
         with ctx.batch_context():
-            next(ctx.coro_view)                   # app late setup.
+            next(ctx.vm.coro)                   # app late setup.
 
         ctx.ui.show_viewport()
         while ctx.ui.is_dearpygui_running():
 
             with ctx.batch_context():
-                next(ctx.coro_view)               # app runtime step.
+                next(ctx.vm.coro)               # app runtime step.
                 ctx.ui.render_dearpygui_frame()
     finally:
         ctx.ui.destroy_context()
@@ -117,11 +127,23 @@ def _filepath_cfg(dirpath_cfg, name_view):
     filepath_cfg = os.path.join(dirpath_cfg, name_view, filename_cfg)
     return filepath_cfg
 
+# -----------------------------------------------------------------------------
+def update_from_view(sender, app_data, ctx):
+    """
+    Update bound values from the view (widget).
+
+    """
+
+    if '_bind' in ctx[sender]:
+        for path in ctx[sender]._bind:
+            ctx[path] = app_data
+    return None
+
 
 # -----------------------------------------------------------------------------
-def _update_widget(ctx, tup_cmd):
+def _update_from_view_model(ctx, tup_cmd):
     """
-    Delete corresponding to the specified commands.
+    Update widgets corresponding to the specified commands.
 
     """
 
@@ -139,6 +161,17 @@ def _update_widget(ctx, tup_cmd):
 
 
 # -----------------------------------------------------------------------------
+def _update_from_application_model(ctx, tup_cmd):
+    """
+    TBD
+
+    """
+    print('UPDATE APP!!!')
+    import pprint
+    pprint.pprint(tup_cmd)
+
+
+# -----------------------------------------------------------------------------
 def _del_widget(ctx, cmd):
     """
     Delete the widget being referenced by the specified command.
@@ -153,13 +186,14 @@ def _del_widget(ctx, cmd):
 # -------------------------------------------------------------------------
 def fcn(cfg, fcn, *args, **kwargs):
     """
+    Add _fcn and _kwargs
     """
     cfg._fcn = fcn
 
     if args:
         cfg.args = list()
         for item in args:
-            cfg.args.append(item)
+            cfg._args.append(item)
 
     if kwargs:
         for (key, value) in kwargs.items():
@@ -186,21 +220,12 @@ def _add_widget(ctx, cmd):
     # constants) from specification strings
     # to their actual (e.g. callable) values.
     #
-    tup_key = tuple(kwargs.keys())
-    for key in tup_key:
+    for key in tuple(kwargs.keys()):  # Keys change, so iterate over a copy.
 
         kwargs[key] = fl.util.resolve(value = kwargs[key])
 
         if key.endswith('callback'):
             kwargs['user_data'] = ctx
-
-        #######################################################
-        #######################################################
-        # TODO: IN SOME CASES, WE WANT THE CALLBACK TO SIMPLY #
-        #       MUTATE THE CONFIG. WE CAN POSSIBLY DO THIS    #
-        #       WITH A SIMPLE LAMBDA AT THIS POINT.           #
-        #######################################################
-        #######################################################
 
     # Handle nodes where the associated
     # DearPyGui function does not expect
@@ -216,9 +241,9 @@ def _add_widget(ctx, cmd):
     tag_item      = '.'.join(tup_path)
     kwargs['tag'] = tag_item
 
-    # Handle functions with
+    # Handle functions known to have
     # no parent parameter.
-
+    #
     tup_no_parent = ('add_file_dialog',
                      'add_font_registry',
                      'add_handler_registry',
@@ -254,21 +279,19 @@ def _get_widget_params(cfg_item):
     bindings = dict()
     misc     = dict()
 
-    tup_keys = tuple(cfg_item.keys())
-
-    if '_fcn' in tup_keys:
+    if '_fcn' in cfg_item:
         name_fcn = cfg_item._fcn
 
-    if '_args' in tup_keys:
+    if '_args' in cfg_item:
         args = cfg_item._args
 
-    if '_kwargs' in tup_keys:
+    if '_kwargs' in cfg_item:
         kwargs = cfg_item._kwargs.to_dict()
 
-    if '_bindings' in tup_keys:
+    if '_bindings' in cfg_item:
         bindings = cfg_item._bindings.to_dict()
 
-    if '_misc' in tup_keys:
+    if '_misc' in cfg_item:
         misc = cfg_item._misc.to_dict()
 
     return (name_fcn, args, kwargs, bindings, misc)

@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Vieww logic as a coroutine.
 #
-coro_view:                        _spec::flowforge.main.coro
+coro:                             _spec::flowforge.main.coro
 
 # ------------------------------------------------------------------------------
 # Event handler registry.
@@ -33,26 +33,26 @@ font:
 icon:
   _fcn:                           add_texture_registry
 
-  play_24x24:
+  play_16x16:
     _fcn:                         add_static_texture
     _kwargs:
-      width:                      24
-      height:                     24
-      default_value:              _spec::flowforge.main.ICON_PLAY_24X24
+      width:                      16
+      height:                     16
+      default_value:              _spec::flowforge.main.ICON_PLAY_16X16
 
-  pause_24x24:
+  pause_16x16:
     _fcn:                         add_static_texture
     _kwargs:
-      width:                      24
-      height:                     24
-      default_value:              _spec::flowforge.main.ICON_PAUSE_24X24
+      width:                      16
+      height:                     16
+      default_value:              _spec::flowforge.main.ICON_PAUSE_16X16
 
-  stop_24x24:
+  stop_16x16:
     _fcn:                         add_static_texture
     _kwargs:
-      width:                      24
-      height:                     24
-      default_value:              _spec::flowforge.main.ICON_STOP_24X24
+      width:                      16
+      height:                     16
+      default_value:              _spec::flowforge.main.ICON_STOP_16X16
 
 # ------------------------------------------------------------------------------
 # Viewport and top level window.
@@ -83,6 +83,11 @@ vp:
         show:                     False
         width:                    85
         height:                   20
+
+      edit:
+        _fcn:                     add_text
+        _kwargs:
+          default_value:          ""
 
       node_add:
         _fcn:                     add_button
@@ -239,58 +244,212 @@ vp:
             label:                "About"
             callback:             _spec::flowforge.main.menu_help_about
 
+    toolbar:
+      _fcn:                       add_group
+      _kwargs:
+        horizontal:               True
+        horizontal_spacing:       0.0
+
+      pad_left:
+        _fcn:                     add_spacer
+        _kwargs:
+          width:                  0
+
+      play:
+        _fcn:                     add_image_button
+        _kwargs:
+          label:                  "Play"
+          texture_tag:            vm.icon.play_16x16
+          callback:               _spec::flowforge.main.ctx_node_edit
+
+      pause:
+        _fcn:                     add_image_button
+        _kwargs:
+          label:                  "Pause"
+          texture_tag:            vm.icon.pause_16x16
+          callback:               _spec::flowforge.main.ctx_node_edit
+
+      stop:
+        _fcn:                     add_image_button
+        _kwargs:
+          label:                  "Stop"
+          texture_tag:            vm.icon.stop_16x16
+          callback:               _spec::flowforge.main.ctx_node_edit
+
+
     # -------------------------------------------------------------------------
     # Main workspace
     #
     main:
       _fcn:                       add_group
       _kwargs:
-        horizontal:               False
+        horizontal:               True
 
-      toolbar:
-        _fcn:                     add_group
+      # -----------------------------------------------------------------------
+      # Sidebar
+      #
+      side:
+        _fcn:                     add_child_window
         _kwargs:
-          horizontal:             True
-          horizontal_spacing:     0.0
+          width:                  _spec::flowforge.main.SIDEBAR_WIDTH
+          border:                 True
+          autosize_y:             True
 
-        pad_left:
-          _fcn:                   add_spacer
-          _kwargs:
-            width:                0
+        tab:
+          _fcn:                   add_tab_bar
 
-        play:
-          _fcn:                   add_image_button
-          _kwargs:
-            label:                "Play"
-            texture_tag:          cfg.icon.play_24x24
-            callback:             _spec::flowforge.main.ctx_node_edit
+          cfg:
+            _fcn:                 add_tab
+            _kwargs:
+              label:              "Cfg"
 
-        pause:
-          _fcn:                   add_image_button
-          _kwargs:
-            label:                "Pause"
-            texture_tag:          cfg.icon.pause_24x24
-            callback:             _spec::flowforge.main.ctx_node_edit
+            sys:
+              _fcn:               add_collapsing_header
+              _kwargs:
+                label:            "System"
 
-        stop:
-          _fcn:                   add_image_button
-          _kwargs:
-            label:                "Stop"
-            texture_tag:          cfg.icon.stop_24x24
-            callback:             _spec::flowforge.main.ctx_node_edit
+              id:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "System ID"
+                  indent:         _spec::flowforge.main.INDENT
+                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  callback:       _spec::pl.stableview.update_from_view
+                  on_enter:       True
+                _bind:
+                  -               am.system.id
 
+              separator:
+                _fcn:             add_separator
 
-      #   # ---------------------------------------------------------------------
-      #   # Sidebar
-      #   #
-      #   side:
-      #     _fcn:                     add_child_window
-      #     _kwargs:
-      #       width:                  _spec::flowforge.main.SIDEBAR_WIDTH
-      #       border:                 True
-      #       autosize_y:             True
+            host:
+              _fcn:               add_collapsing_header
+              _kwargs:
+                label:            "Host"
 
-      # ---------------------------------------------------------------------
+              count:
+                _fcn:             add_input_int
+                _kwargs:
+                  label:          "Host count"
+                  indent:         _spec::flowforge.main.INDENT
+                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  default_value:  1
+                  min_value:      1  # We rely on there being at least one host.
+                  min_clamped:    True
+                  callback:       _spec::flowforge.main.host_count
+
+              separator:
+                _fcn:             add_separator
+
+            proc:
+              _fcn:               add_collapsing_header
+              _kwargs:
+                label:            "Process"
+
+              count:
+                _fcn:             add_input_int
+                _kwargs:
+                  label:          "Process count"
+                  indent:         _spec::flowforge.main.INDENT
+                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  default_value:  1
+                  min_value:      1
+                  min_clamped:    True
+                  callback:       _spec::flowforge.main.proc_count
+
+              separator:
+                _fcn:             add_separator
+
+            node:
+              _fcn:               add_collapsing_header
+              _kwargs:
+                label:            "Node"
+
+              id:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "Node ID"
+                  indent:         _spec::flowforge.main.INDENT
+                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  callback:       _spec::flowforge.main.node_id
+
+              # proc:
+              #   _fcn:             add_combo
+              #   _kwargs:
+              #     label:          "Process ID"
+              #     items:          [""]
+              #     indent:         _spec::flowforge.main.INDENT
+              #     width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+              #     callback:       _spec::flowforge.main.node_proc
+
+              func:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "Implementation"
+                  indent:         _spec::flowforge.main.INDENT
+                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+
+              state:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "State data type"
+                  indent:         _spec::flowforge.main.INDENT
+                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+
+              cfg:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "Configuration"
+                  indent:         _spec::flowforge.main.INDENT
+                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+
+              countin:
+                _fcn:             add_input_int
+                _kwargs:
+                  label:          "Input count"
+                  indent:         _spec::flowforge.main.INDENT
+                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  min_value:      0
+                  min_clamped:    True
+                  callback:       _spec::flowforge.main.node_input_count
+
+              countout:
+                _fcn:             add_input_int
+                _kwargs:
+                  label:          "Output count"
+                  indent:         _spec::flowforge.main.INDENT
+                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  min_value:      0
+                  min_clamped:    True
+                  callback:       _spec::flowforge.main.node_output_count
+
+              separator:
+                _fcn:             add_separator
+
+            # Edges
+            edge:
+              _fcn:               add_collapsing_header
+              _kwargs:
+                label:            "Edge"
+
+              owner:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "Owner"
+                  indent:         _spec::flowforge.main.INDENT
+                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+
+              datatype:
+                _fcn:             add_input_text
+                _kwargs:
+                  label:          "Data type"
+                  indent:         _spec::flowforge.main.INDENT
+                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+
+              separator:
+                _fcn:             add_separator
+
+      # -----------------------------------------------------------------------
       # Node editor
       #
       nodeeditor:
@@ -308,11 +467,11 @@ binding:
   win_font:
     _fcn:                         bind_item_font
     _kwargs:
-      item:                       cfg.vp.win
-      font:                       cfg.font.fira_code
+      item:                       vm.vp.win
+      font:                       vm.font.fira_code
 
   ctx_font:
     _fcn:                         bind_item_font
     _kwargs:
-      item:                       cfg.vp.win.ctx
-      font:                       cfg.font.fira_code
+      item:                       vm.vp.win.ctx
+      font:                       vm.font.fira_code
