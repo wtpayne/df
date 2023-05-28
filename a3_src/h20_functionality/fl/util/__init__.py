@@ -258,17 +258,90 @@ class Bureau(collections.abc.MutableMapping):
 
         """
 
+        tup_path_val = sorted(self.to_tuple(), key = lambda item: len(item[0]))
+
+        # If a path has one or more non-integer
+        # keys, then it must be represented by
+        # a dictionary. On the other hand, if
+        # all keys are integers, then we can
+        # use a list or a tuple instead.
+        #
+        set_path_maybe_list = set()
+        set_path_never_list = set()
+        for (tup_path, _) in tup_path_val:
+            for (idx, name) in enumerate(tup_path):
+
+                is_integer_key = True
+                try:
+                    _ = int(name)
+                except ValueError:
+                    is_integer_key = False
+
+                if is_integer_key:
+                    set_path_maybe_list.add(tup_path[0:idx])
+                else:
+                    set_path_never_list.add(tup_path[0:idx])
+
+        set_path_use_list = set_path_maybe_list - set_path_never_list
+
+        #
         output = dict()
+        for (tup_path, value) in tup_path_val:
 
-        for (tup_path, value) in sorted(self.to_tuple(),
-                                        key = lambda item: len(item[0])):
+            # Go through path from root to leaf.
+            #
+            cursor         = output
+            tup_path_accum = tuple()
+            for (idx, name) in enumerate(tup_path[:-1]):
+                tup_path_accum = tup_path_accum + (name,)
+                is_list        = tup_path_accum in set_path_use_list
 
-            cursor = output
-            for name in tup_path[:-1]:
-                if name not in cursor:
-                    cursor[name] = dict()
+                # Create nodes in the tree as
+                # required. If the current node
+                # is a dictionary, then it is
+                # easy enough to add either
+                # a list or a dict in the named
+                # slot as required.
+                #
+                if isinstance(cursor, dict):
+                    if (name not in cursor):
+                        if is_list:
+                            cursor[name] = list()
+                        else:
+                            cursor[name] = dict()
+
+                # If on the other hand, the
+                # current node is a list, then
+                # we need to be careful to
+                # extend the list to the required
+                # size before adding values.
+                #
+                else:
+
+                    assert isinstance(cursor, list)
+
+                    # Extend the list as needed.
+                    #
+                    idx      = int(name)
+                    len_list = len(cursor)
+                    if idx >= len_list:
+                        len_needed = (idx + 1)  # Because 0-based
+                        shortfall  = len_needed - len_list
+                        cursor    += [None] * shortfall
+
+                    # Add either a list or a
+                    # dict to the index as
+                    # required.
+                    #
+                    if cursor[idx] is None:
+                        if is_list:
+                            cursor[idx] = list()
+                        else:
+                            cursor[idx] = dict()
+
                 cursor = cursor[name]
-            name = tup_path[-1]
+
+            name         = tup_path[-1]
             cursor[name] = value
 
         return output

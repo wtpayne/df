@@ -67,51 +67,55 @@ def main(dirpath_cfg, name_view):
     """
     Main update/event loop for the ui.
 
-    The cfg data structure defines the basic
-    layout and structure of the GUI.
+    We use an MVVM architecture with an
+    application model (ctx.am), a view
+    model (ctx.vm) and a view (ctx.ui).
 
-    TODO: HOW DO I MODIFY PATHS IN THE CONFIG
-          SO THAT THEY POINT TO THE RIGHT ASSET
-          DIRECTORY? (cfg.font.fira_code._kwargs.file)
+    ctx.am --> ctx.vm --> ctx.ui
+
 
     """
 
     ctx = fl.util.Bureau()
-    ctx.rule(cond = (fl.rule.is_root_in(('vm',)),
-                     fl.rule.is_leaf_at(('_fcn',))),
-             act  = _update_from_view_model)
-    ctx.rule(cond = fl.rule.is_root_in(('am',)),
-             act  = _update_from_application_model)
 
-    ctx.ui                      = dearpygui.dearpygui
-    batch                       = ctx.batch_init()
-
-    # View model.
+    # Create the view (ctx.ui), view
+    # model (ctx.vm) and application
+    # model (ctx.am).
     #
+    batch = ctx.batch_init()
+    ctx.ui = dearpygui.dearpygui
     ctx.vm.from_file(filepath = _filepath_cfg(dirpath_cfg, name_view))
-    ctx.vm.coro               = fl.util.resolve(ctx.vm.coro)(ctx)
+    ctx.am = fl.util.Bureau()
 
-    # Application model.
+    ctx.vm.coro   = fl.util.resolve(ctx.vm.coro)(ctx)
+    # ctx.am.update = fl.util.resolve(ctx.vm.am_update)(ctx)
+
+    # Add rules for responding to
+    # changes in the view model (vm)
+    # and the application model (am),
     #
-    ctx.app
+    ctx.am.rule(cond = fl.rule.always(),
+                act  = _update_from_application_model)  # TODO: ctx.am.update FROM CONFIGURATION?
+    ctx.vm.rule(cond = fl.rule.is_leaf_at(('_fcn',)),
+                act  = _update_from_view_model)
 
-    next(ctx.vm.coro)                           # app early setup.
+    next(ctx.vm.coro)                             # app early setup.
 
     ctx.ui.create_context()
 
     try:
-        ctx.batch_finalize(batch)                 # Create widgets.
+        ctx.batch_finalize(batch)                 # Trigger rules, create view.
 
         ctx.ui.setup_dearpygui()
 
         with ctx.batch_context():
-            next(ctx.vm.coro)                   # app late setup.
+            next(ctx.vm.coro)                     # app late setup.
 
         ctx.ui.show_viewport()
         while ctx.ui.is_dearpygui_running():
 
             with ctx.batch_context():
-                next(ctx.vm.coro)               # app runtime step.
+                next(ctx.vm.coro)                 # app runtime step.
                 ctx.ui.render_dearpygui_frame()
     finally:
         ctx.ui.destroy_context()
@@ -166,9 +170,12 @@ def _update_from_application_model(ctx, tup_cmd):
     TBD
 
     """
-    print('UPDATE APP!!!')
-    import pprint
-    pprint.pprint(tup_cmd)
+
+    pass
+
+    # print('UPDATE APP!!!')
+    # import pprint
+    # pprint.pprint(tup_cmd)
 
 
 # -----------------------------------------------------------------------------

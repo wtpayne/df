@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Vieww logic as a coroutine.
 #
-coro:                             _spec::flowforge.main.coro
+coro:                              _spec::flowforge.main.coro
+am_update:                         _spec::flowforge.main.am_update
 
 # ------------------------------------------------------------------------------
 # Event handler registry.
@@ -317,7 +318,7 @@ vp:
                   callback:       _spec::pl.stableview.update_from_view
                   on_enter:       True
                 _bind:
-                  -               am.system.id
+                  -               am.system.id_system
 
               separator:
                 _fcn:             add_separator

@@ -131,13 +131,20 @@ def coro(ctx):
 
     yield  # Context is created and widgets are added in gui.main().
 
-    _load_file(ctx = ctx, filepath = FILEPATH_DEFAULT_LOAD)
-    _save_file(ctx = ctx, filepath = FILEPATH_DEFAULT_SAVE)
+    ##########################
+    # DEBUG - AUTO LOAD FILE #
+    ##########################
+    ctx.am.from_dict(fl.stableflow.cfg.prepare(FILEPATH_DEFAULT_LOAD))
+    # ctx.am.to_file(filepath = FILEPATH_DEFAULT_SAVE)
+
+    # _save_file(ctx = ctx, filepath = FILEPATH_DEFAULT_SAVE)
 
     #ctx.pm.host.set_count(1)
     #ctx.pm.proc.set_count(1)
 
     # import pprint
+    # pprint.pprint(ctx.am.to_dict())
+
     # pprint.pprint(ctx.ui.get_item_configuration('cfg.vp.win'))
     # ctx.ui.configure_item('cfg.vp.win.main.toolbar', vertical_spacing = -1)
 
@@ -203,7 +210,7 @@ def menu_file_open_ok(sender, app_data, ctx):
 
     """
 
-    _load_file(ctx, filepath = app_data['file_path_name'])
+    ctx.am.from_dict(fl.stableflow.cfg.prepare(app_data['file_path_name']))
     del ctx.vp.open_file
 
 
@@ -255,7 +262,7 @@ def menu_file_save_ok(sender, app_data, ctx):
 
     """
 
-    _save_file(ctx, filepath = app_data['file_path_name'])
+    ctx.am.to_file(filepath = app_data['file_path_name'])
     del ctx.vp.save_file
 
 
@@ -572,89 +579,88 @@ def node_delink(sender, app_data):
 
 
 # -----------------------------------------------------------------------------
-def _load_file(ctx, filepath):
+def _layout(ctx):
     """
-    Load file.
+    Layout the file.
 
     """
 
-    WIDTH_NODE     = 160
+    # WIDTH_NODE     = 160
+    # fcn            = pl.stableview.fcn
 
-    nodeeditor     = ctx.vm.vp.win.main.nodeeditor
-    sfcfg          = fl.stableflow.cfg
-    fcn            = pl.stableview.fcn
-    map_cfg_norm   = sfcfg.prepare(path_cfg = filepath)
-    map_cfg_denorm = sfcfg.denormalize(copy.deepcopy(map_cfg_norm))
-    map_cfg_layout = sfcfg.layout.horizontal(map_cfg_denorm  = map_cfg_denorm,
-                                             diagram_border  = 10,
-                                             swimlane_title  = 0,
-                                             longbus_u       = 0,
-                                             crossbus_v      = 0,
-                                             node_size_x     = WIDTH_NODE,
-                                             node_size_y     = 70,
-                                             node_margin_x   = 40,
-                                             node_margin_y   = 40)
+    # nodeeditor     = ctx.vm.vp.win.main.nodeeditor
+    # map_cfg_denorm = sfcfg.denormalize(copy.deepcopy(map_cfg_norm))
+    # map_cfg_layout = sfcfg.layout.horizontal(map_cfg_denorm  = map_cfg_denorm,
+    #                                          diagram_border  = 10,
+    #                                          swimlane_title  = 0,
+    #                                          longbus_u       = 0,
+    #                                          crossbus_v      = 0,
+    #                                          node_size_x     = WIDTH_NODE,
+    #                                          node_size_y     = 70,
+    #                                          node_margin_x   = 40,
+    #                                          node_margin_y   = 40)
 
-    # Add nodes to the view model.
-    #
-    map_link = collections.defaultdict(dict)
-    for (id_node, cfg_node) in map_cfg_layout['node'].items():
 
-        node = fcn(nodeeditor['node_' + id_node],
-                   'add_node',
-                   label = id_node,
-                   pos   = [cfg_node['pos_x'], cfg_node['pos_y']])
+    # # Add nodes to the view model.
+    # #
+    # map_link = collections.defaultdict(dict)
+    # for (id_node, cfg_node) in map_cfg_layout['node'].items():
 
-        # Keep a record of node config.
-        #
-        node._id  = id_node
-        node._cfg = map_cfg_norm['node'][id_node]
+    #     node = fcn(nodeeditor['node_' + id_node],
+    #                'add_node',
+    #                label = id_node,
+    #                pos   = [cfg_node['pos_x'], cfg_node['pos_y']])
 
-        for (id_input, id_edge) in sorted(cfg_node['input'].items()):
+    #     # Keep a record of node config.
+    #     #
+    #     node._id  = id_node
+    #     node._cfg = map_cfg_norm['node'][id_node]
 
-            attr = fcn(node['input_' + id_input],
-                       'add_node_attribute',
-                       label          = id_input,
-                       attribute_type = ctx.ui.mvNode_Attr_Input)
+    #     for (id_input, id_edge) in sorted(cfg_node['input'].items()):
 
-            map_link[id_edge]['input'] = attr._str_path()
+    #         attr = fcn(node['input_' + id_input],
+    #                    'add_node_attribute',
+    #                    label          = id_input,
+    #                    attribute_type = ctx.ui.mvNode_Attr_Input)
 
-            text = fcn(attr.text,
-                       'add_input_text',
-                       width         = WIDTH_NODE,
-                       default_value = id_input)
+    #         map_link[id_edge]['input'] = attr._str_path()
 
-        for (id_output, id_edge) in sorted(cfg_node['output'].items()):
+    #         text = fcn(attr.text,
+    #                    'add_input_text',
+    #                    width         = WIDTH_NODE,
+    #                    default_value = id_input)
 
-            attr = fcn(node['output_' + id_output],
-                       'add_node_attribute',
-                       label          = id_output,
-                       attribute_type = ctx.ui.mvNode_Attr_Output)
+    #     for (id_output, id_edge) in sorted(cfg_node['output'].items()):
 
-            map_link[id_edge]['output'] = attr._str_path()
+    #         attr = fcn(node['output_' + id_output],
+    #                    'add_node_attribute',
+    #                    label          = id_output,
+    #                    attribute_type = ctx.ui.mvNode_Attr_Output)
 
-            text = fcn(attr.text,
-                       'add_input_text',
-                       width         = WIDTH_NODE,
-                       default_value = id_output)
+    #         map_link[id_edge]['output'] = attr._str_path()
 
-    # Build lookup table for edge configuration.
-    #
-    map_edge = dict()
-    for cfg_edge in map_cfg_norm['edge']:
-        id_edge = sfcfg.edge.id_edge(cfg_edge)
-        map_edge[id_edge] = cfg_edge
+    #         text = fcn(attr.text,
+    #                    'add_input_text',
+    #                    width         = WIDTH_NODE,
+    #                    default_value = id_output)
 
-    # Add edges to the view model.
-    #
-    for (idx_edge, (id_edge, link)) in enumerate(map_link.items()):
-        edge = fcn(nodeeditor['edge_{:04d}'.format(idx_edge)],
-                   'add_node_link',
-                   show     = True,
-                   attr_1   = link['input'],
-                   attr_2   = link['output'])
-        edge._id  = id_edge
-        edge._cfg = map_edge[id_edge]
+    # # Build lookup table for edge configuration.
+    # #
+    # map_edge = dict()
+    # for cfg_edge in map_cfg_norm['edge']:
+    #     id_edge = sfcfg.edge.id_edge(cfg_edge)
+    #     map_edge[id_edge] = cfg_edge
+
+    # # Add edges to the view model.
+    # #
+    # for (idx_edge, (id_edge, link)) in enumerate(map_link.items()):
+    #     edge = fcn(nodeeditor['edge_{:04d}'.format(idx_edge)],
+    #                'add_node_link',
+    #                show     = True,
+    #                attr_1   = link['input'],
+    #                attr_2   = link['output'])
+    #     edge._id  = id_edge
+    #     edge._cfg = map_edge[id_edge]
 
 
 # -----------------------------------------------------------------------------
@@ -670,11 +676,11 @@ def _save_file(ctx, filepath):
 
     # Extract node and edge config from the view model
     #
-    for (key, value) in ctx.vm.vp.win.main.nodeeditor.items():
-        if key.startswith('node_'):
-            cfg_save['node'][value._id] = value._cfg
-        if key.startswith('edge_'):
-            cfg_save['edge'].append(value._cfg)
+    # for (key, value) in ctx.vm.vp.win.main.nodeeditor.items():
+    #     if key.startswith('node_'):
+    #         cfg_save['node'][value._id] = value._cfg
+    #     if key.startswith('edge_'):
+    #         cfg_save['edge'].append(value._cfg)
 
     # import pprint
     # pprint.pprint(cfg_save)
