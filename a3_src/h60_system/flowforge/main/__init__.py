@@ -53,10 +53,11 @@ import dearpygui
 import PIL.Image
 import numpy
 
-import fl.util
+import fl.rule
 import fl.stableflow.cfg
 import fl.stableflow.cfg.edge
 import fl.stableflow.cfg.layout
+import fl.util
 
 import pl.stableview
 
@@ -129,15 +130,18 @@ def coro(ctx):
     #
     #ctx.pm = model.Model(ctx)
 
+    ctx.am.rule(cond = fl.rule.always(),
+                act  = _update_from_application_model)  # TODO: ctx.am.update FROM CONFIGURATION?
+
     yield  # Context is created and widgets are added in gui.main().
 
-    ##########################
-    # DEBUG - AUTO LOAD FILE #
-    ##########################
-    ctx.am.from_dict(fl.stableflow.cfg.prepare(FILEPATH_DEFAULT_LOAD))
-    # ctx.am.to_file(filepath = FILEPATH_DEFAULT_SAVE)
+    #######################################
+    # AUTO LOAD FILE FOR EASIER DEBUGGING #
+    #######################################
 
-    # _save_file(ctx = ctx, filepath = FILEPATH_DEFAULT_SAVE)
+    with ctx.batch_context():
+        ctx.am.from_dict(fl.stableflow.cfg.prepare(FILEPATH_DEFAULT_LOAD))
+    # ctx.am.to_file(filepath = FILEPATH_DEFAULT_SAVE)
 
     #ctx.pm.host.set_count(1)
     #ctx.pm.proc.set_count(1)
@@ -163,14 +167,100 @@ def coro(ctx):
 
 
 # -----------------------------------------------------------------------------
+def _update_from_application_model(ctx, tup_cmd):
+    """
+    TBD
+
+    """
+
+    WIDTH_NODE     = 160
+    widget         = pl.stableview.widget
+
+    nodeeditor     = ctx.vm.vp.win.main.nodeeditor
+    map_cfg_norm   = copy.deepcopy(ctx.am.to_dict())
+    map_cfg_denorm = fl.stableflow.cfg.denormalize(map_cfg_norm)
+    map_cfg_layout = fl.stableflow.cfg.layout.horizontal(
+                                            map_cfg_denorm  = map_cfg_denorm,
+                                            diagram_border  = 10,
+                                            swimlane_title  = 0,
+                                            longbus_u       = 0,
+                                            crossbus_v      = 0,
+                                            node_size_x     = WIDTH_NODE,
+                                            node_size_y     = 70,
+                                            node_margin_x   = 40,
+                                            node_margin_y   = 40)
+
+    # Add nodes to the view model.
+    #
+    with ctx.batch_context():
+        map_link = collections.defaultdict(dict)
+        for (id_node, cfg_node) in map_cfg_layout['node'].items():
+
+            node = widget(nodeeditor['node_' + id_node],
+                          'add_node',
+                          label = id_node,
+                          pos   = [cfg_node['pos_x'], cfg_node['pos_y']])
+
+            # Keep a record of node config.
+            #
+            node._id  = id_node
+            node._cfg = map_cfg_norm['node'][id_node]
+
+            for (id_input, id_edge) in sorted(cfg_node['input'].items()):
+                attr = widget(node['input_' + id_input],
+                              'add_node_attribute',
+                              label          = id_input,
+                              attribute_type = ctx.ui.mvNode_Attr_Input)
+
+                map_link[id_edge]['input'] = attr._str_path()
+
+                text = widget(attr.text,
+                              'add_input_text',
+                              width         = WIDTH_NODE,
+                              default_value = id_input)
+
+            for (id_output, id_edge) in sorted(cfg_node['output'].items()):
+
+                attr = widget(node['output_' + id_output],
+                              'add_node_attribute',
+                              label          = id_output,
+                              attribute_type = ctx.ui.mvNode_Attr_Output)
+
+                map_link[id_edge]['output'] = attr._str_path()
+
+                text = widget(attr.text,
+                              'add_input_text',
+                              width         = WIDTH_NODE,
+                              default_value = id_output)
+
+        # Build lookup table for edge configuration.
+        #
+        map_edge = dict()
+        for cfg_edge in map_cfg_norm['edge']:
+            id_edge = fl.stableflow.cfg.edge.id_edge(cfg_edge)
+            map_edge[id_edge] = cfg_edge
+
+        # Add edges to the view model.
+        #
+        for (idx_edge, (id_edge, link)) in enumerate(map_link.items()):
+            edge = widget(nodeeditor['edge_{:04d}'.format(idx_edge)],
+                          'add_node_link',
+                          show     = True,
+                          attr_1   = link['input'],
+                          attr_2   = link['output'])
+            edge._id  = id_edge
+            edge._cfg = map_edge[id_edge]
+
+
+# -----------------------------------------------------------------------------
 def menu_file_open(sender, app_data, ctx):
     """
     Callback for the 'Open' button in the 'File' menu.
 
     """
 
-    fcn = pl.stableview.fcn
-    open_file = fcn(
+    widget    = pl.stableview.widget
+    open_file = widget(
             ctx.vp.open_file,
             'add_file_dialog',
             directory_selector = False,
@@ -184,7 +274,7 @@ def menu_file_open(sender, app_data, ctx):
             default_path       = os.path.expanduser('~'),
             file_count         = 1)
 
-    extension = fcn(
+    extension = widget(
             open_file.extension,
             'add_file_extension',
             label         = 'yaml',
@@ -221,8 +311,8 @@ def menu_file_save(sender, app_data, ctx):
 
     """
 
-    fcn = pl.stableview.fcn
-    save_file = fcn(
+    widget    = pl.stableview.widget
+    save_file = widget(
             ctx.vp.save_file,
             'add_file_dialog',
             directory_selector = False,
@@ -236,7 +326,7 @@ def menu_file_save(sender, app_data, ctx):
             default_path       = os.path.expanduser('~'),
             file_count         = 1)
 
-    extension = fcn(
+    extension = widget(
             save_file.extension,
             'add_file_extension',
             label     = 'yaml',
@@ -477,6 +567,7 @@ def mouseright(sender, app_data, ctx):
     Displays the right click context menu.
 
     """
+
     nodeeditor    = ctx.vm.vp.win.main.nodeeditor
     list_selected = ctx.ui.get_selected_nodes(nodeeditor._str_path())
 
@@ -507,6 +598,7 @@ def ctx_node_add(sender, app_data, ctx):
     Add button on right click context menu.
 
     """
+
     ctx.ui.configure_item(ctx.vm.vp.win.ctx._str_path(), show = False)
     pos    = ctx.ui.get_item_pos('cfg.vp.win.ctx')
     pos[0] = pos[0] - 40
@@ -527,10 +619,11 @@ def ctx_node_add(sender, app_data, ctx):
 
     id_node    = '{:04d}'.format(idx_node_max + 1)
     nodeeditor = ctx.vm.vp.win.main.nodeeditor
-    node       = pl.stableview.fcn(nodeeditor['node_' + id_node],
-                                   'add_node',
-                                   label = id_node,
-                                   pos   = pos)
+    widget     = pl.stableview.widget
+    node       = widget(nodeeditor['node_' + id_node],
+                        'add_node',
+                        label = id_node,
+                        pos   = pos)
 
 
 # -----------------------------------------------------------------------------
@@ -539,6 +632,7 @@ def ctx_node_edit(sender, app_data, ctx):
     Edit button on right click context menu.
 
     """
+
     print('EDIT NODE')
 
 
@@ -548,6 +642,7 @@ def ctx_node_del(sender, app_data, ctx):
     Delete button on right click context menu.
 
     """
+
     print('DEL NODE')
 
 
@@ -557,6 +652,7 @@ def ctx_node_cancel(sender, app_data, ctx):
     Cancel button on right click context menu.
 
     """
+
     ctx.ui.configure_item('cfg.vp.win.ctx',
                           pos  = ctx.ui.get_mouse_pos(local = False),
                           show = False)
@@ -566,6 +662,7 @@ def ctx_node_cancel(sender, app_data, ctx):
 def node_link(sender, app_data):
     """
     """
+
     print('LINK CALLBACK')
     # ctx.ui.add_node_link(app_data[0], app_data[1], parent=sender)
 
@@ -574,105 +671,23 @@ def node_link(sender, app_data):
 def node_delink(sender, app_data):
     """
     """
+
     print('DELINK CALLBACK')
     # ctx.ui.delete_item(app_data)
 
 
-# -----------------------------------------------------------------------------
-def _layout(ctx):
-    """
-    Layout the file.
-
-    """
-
-    # WIDTH_NODE     = 160
-    # fcn            = pl.stableview.fcn
-
-    # nodeeditor     = ctx.vm.vp.win.main.nodeeditor
-    # map_cfg_denorm = sfcfg.denormalize(copy.deepcopy(map_cfg_norm))
-    # map_cfg_layout = sfcfg.layout.horizontal(map_cfg_denorm  = map_cfg_denorm,
-    #                                          diagram_border  = 10,
-    #                                          swimlane_title  = 0,
-    #                                          longbus_u       = 0,
-    #                                          crossbus_v      = 0,
-    #                                          node_size_x     = WIDTH_NODE,
-    #                                          node_size_y     = 70,
-    #                                          node_margin_x   = 40,
-    #                                          node_margin_y   = 40)
-
-
-    # # Add nodes to the view model.
-    # #
-    # map_link = collections.defaultdict(dict)
-    # for (id_node, cfg_node) in map_cfg_layout['node'].items():
-
-    #     node = fcn(nodeeditor['node_' + id_node],
-    #                'add_node',
-    #                label = id_node,
-    #                pos   = [cfg_node['pos_x'], cfg_node['pos_y']])
-
-    #     # Keep a record of node config.
-    #     #
-    #     node._id  = id_node
-    #     node._cfg = map_cfg_norm['node'][id_node]
-
-    #     for (id_input, id_edge) in sorted(cfg_node['input'].items()):
-
-    #         attr = fcn(node['input_' + id_input],
-    #                    'add_node_attribute',
-    #                    label          = id_input,
-    #                    attribute_type = ctx.ui.mvNode_Attr_Input)
-
-    #         map_link[id_edge]['input'] = attr._str_path()
-
-    #         text = fcn(attr.text,
-    #                    'add_input_text',
-    #                    width         = WIDTH_NODE,
-    #                    default_value = id_input)
-
-    #     for (id_output, id_edge) in sorted(cfg_node['output'].items()):
-
-    #         attr = fcn(node['output_' + id_output],
-    #                    'add_node_attribute',
-    #                    label          = id_output,
-    #                    attribute_type = ctx.ui.mvNode_Attr_Output)
-
-    #         map_link[id_edge]['output'] = attr._str_path()
-
-    #         text = fcn(attr.text,
-    #                    'add_input_text',
-    #                    width         = WIDTH_NODE,
-    #                    default_value = id_output)
-
-    # # Build lookup table for edge configuration.
-    # #
-    # map_edge = dict()
-    # for cfg_edge in map_cfg_norm['edge']:
-    #     id_edge = sfcfg.edge.id_edge(cfg_edge)
-    #     map_edge[id_edge] = cfg_edge
-
-    # # Add edges to the view model.
-    # #
-    # for (idx_edge, (id_edge, link)) in enumerate(map_link.items()):
-    #     edge = fcn(nodeeditor['edge_{:04d}'.format(idx_edge)],
-    #                'add_node_link',
-    #                show     = True,
-    #                attr_1   = link['input'],
-    #                attr_2   = link['output'])
-    #     edge._id  = id_edge
-    #     edge._cfg = map_edge[id_edge]
 
 
 # -----------------------------------------------------------------------------
-def _save_file(ctx, filepath):
-    """
-    Save file.
+# def _save_file(ctx, filepath):
+#     """
+#     Save file.
 
-    """
-    cfg_save = {
-        'node': dict(),
-        'edge': list()
-    }
+#     """
+#     cfg_save = {
+#         'node': dict(),
+#         'edge': list()
+#     }
 
     # Extract node and edge config from the view model
     #

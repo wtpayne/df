@@ -193,6 +193,9 @@ class Bureau(collections.abc.MutableMapping):
         """
         Return a representation of self as a key-value tuple.
 
+        Note that recursive structures and non-
+        traversable data types are NOT supported.
+
         """
 
         return tuple(fl.util.alg.walk(obj            = self,
@@ -284,6 +287,9 @@ class Bureau(collections.abc.MutableMapping):
 
         set_path_use_list = set_path_maybe_list - set_path_never_list
 
+        # Go through each leaf path-value pair
+        # in tup_path_val, creating internal
+        # nodes in the tree as required.
         #
         output = dict()
         for (tup_path, value) in tup_path_val:

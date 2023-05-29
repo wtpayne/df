@@ -90,12 +90,13 @@ def main(dirpath_cfg, name_view):
     ctx.vm.coro   = fl.util.resolve(ctx.vm.coro)(ctx)
     # ctx.am.update = fl.util.resolve(ctx.vm.am_update)(ctx)
 
-    # Add rules for responding to
-    # changes in the view model (vm)
-    # and the application model (am),
+    # Add rules for responding to changes in the
+    # view model (vm). Rules for responding to
+    # changes in the application model will be by
+    # their nature application-specific and
+    # therefore are colocated with application
+    # specific design elements.
     #
-    ctx.am.rule(cond = fl.rule.always(),
-                act  = _update_from_application_model)  # TODO: ctx.am.update FROM CONFIGURATION?
     ctx.vm.rule(cond = fl.rule.is_leaf_at(('_fcn',)),
                 act  = _update_from_view_model)
 
@@ -131,6 +132,7 @@ def _filepath_cfg(dirpath_cfg, name_view):
     filepath_cfg = os.path.join(dirpath_cfg, name_view, filename_cfg)
     return filepath_cfg
 
+
 # -----------------------------------------------------------------------------
 def update_from_view(sender, app_data, ctx):
     """
@@ -150,6 +152,7 @@ def _update_from_view_model(ctx, tup_cmd):
     Update widgets corresponding to the specified commands.
 
     """
+    print('UP VM')
 
     for cmd in tup_cmd:
 
@@ -165,20 +168,6 @@ def _update_from_view_model(ctx, tup_cmd):
 
 
 # -----------------------------------------------------------------------------
-def _update_from_application_model(ctx, tup_cmd):
-    """
-    TBD
-
-    """
-
-    pass
-
-    # print('UPDATE APP!!!')
-    # import pprint
-    # pprint.pprint(tup_cmd)
-
-
-# -----------------------------------------------------------------------------
 def _del_widget(ctx, cmd):
     """
     Delete the widget being referenced by the specified command.
@@ -191,9 +180,10 @@ def _del_widget(ctx, cmd):
 
 
 # -------------------------------------------------------------------------
-def fcn(cfg, fcn, *args, **kwargs):
+def widget(cfg, fcn, *args, **kwargs):
     """
-    Add _fcn and _kwargs
+    Add the specfied widget to the view model.
+
     """
     cfg._fcn = fcn
 

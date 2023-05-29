@@ -337,7 +337,9 @@ vp:
                   default_value:  1
                   min_value:      1  # We rely on there being at least one host.
                   min_clamped:    True
-                  callback:       _spec::flowforge.main.host_count
+                  callback:       _spec::pl.stableview.update_from_view
+                _bind:
+                  -               aux.host.count
 
               separator:
                 _fcn:             add_separator
@@ -356,7 +358,9 @@ vp:
                   default_value:  1
                   min_value:      1
                   min_clamped:    True
-                  callback:       _spec::flowforge.main.proc_count
+                  callback:       _spec::pl.stableview.update_from_view
+                _bind:
+                  -               aux.proc.count
 
               separator:
                 _fcn:             add_separator
@@ -372,7 +376,9 @@ vp:
                   label:          "Node ID"
                   indent:         _spec::flowforge.main.INDENT
                   width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
-                  callback:       _spec::flowforge.main.node_id
+                  callback:       _spec::pl.stableview.update_from_view
+                _bind:
+                  -               aux.node.selected.id
 
               # proc:
               #   _fcn:             add_combo
