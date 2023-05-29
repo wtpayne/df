@@ -130,8 +130,8 @@ def coro(ctx):
     #
     #ctx.pm = model.Model(ctx)
 
-    ctx.am.rule(cond = fl.rule.always(),
-                act  = _update_from_application_model)  # TODO: ctx.am.update FROM CONFIGURATION?
+    ctx.app.rule(cond = fl.rule.always(),
+                 act  = _update_from_application_model)  # TODO: ctx.app.update FROM CONFIGURATION?
 
     yield  # Context is created and widgets are added in gui.main().
 
@@ -140,17 +140,17 @@ def coro(ctx):
     #######################################
 
     with ctx.batch_context():
-        ctx.am.from_dict(fl.stableflow.cfg.prepare(FILEPATH_DEFAULT_LOAD))
-    # ctx.am.to_file(filepath = FILEPATH_DEFAULT_SAVE)
+        ctx.app.from_dict(fl.stableflow.cfg.prepare(FILEPATH_DEFAULT_LOAD))
+    # ctx.app.to_file(filepath = FILEPATH_DEFAULT_SAVE)
 
     #ctx.pm.host.set_count(1)
     #ctx.pm.proc.set_count(1)
 
     # import pprint
-    # pprint.pprint(ctx.am.to_dict())
+    # pprint.pprint(ctx.app.to_dict())
 
-    # pprint.pprint(ctx.ui.get_item_configuration('cfg.vp.win'))
-    # ctx.ui.configure_item('cfg.vp.win.main.toolbar', vertical_spacing = -1)
+    # pprint.pprint(ctx.ui.get_item_configuration('view.vp.win'))
+    # ctx.ui.configure_item('view.vp.win.main.toolbar', vertical_spacing = -1)
 
     yield  # Viewport is shown, main loop starts in gui.main().
 
@@ -177,7 +177,7 @@ def _update_from_application_model(ctx, tup_cmd):
     widget         = pl.stableview.widget
 
     nodeeditor     = ctx.view.vp.win.main.nodeeditor
-    map_cfg_norm   = copy.deepcopy(ctx.am.to_dict())
+    map_cfg_norm   = copy.deepcopy(ctx.app.to_dict())
     map_cfg_denorm = fl.stableflow.cfg.denormalize(map_cfg_norm)
     map_cfg_layout = fl.stableflow.cfg.layout.horizontal(
                                             map_cfg_denorm  = map_cfg_denorm,
@@ -300,7 +300,7 @@ def menu_file_open_ok(sender, app_data, ctx):
 
     """
 
-    ctx.am.from_dict(fl.stableflow.cfg.prepare(app_data['file_path_name']))
+    ctx.app.from_dict(fl.stableflow.cfg.prepare(app_data['file_path_name']))
     del ctx.vp.open_file
 
 
@@ -352,7 +352,7 @@ def menu_file_save_ok(sender, app_data, ctx):
 
     """
 
-    ctx.am.to_file(filepath = app_data['file_path_name'])
+    ctx.app.to_file(filepath = app_data['file_path_name'])
     del ctx.vp.save_file
 
 
@@ -497,69 +497,6 @@ def menu_help_about(sender, app_data, ctx):
 
 
 # -----------------------------------------------------------------------------
-def host_count(sender, app_data, ctx):
-    """
-    Set the number of process hosts in the system.
-
-    """
-
-    raise NotImplementedError('side.tab.cfg.host.count')
-
-
-
-# -----------------------------------------------------------------------------
-def proc_count(sender, app_data, ctx):
-    """
-    Set the number of processes in the system.
-
-    """
-
-    raise NotImplementedError('side.tab.cfg.prochost.count')
-
-
-
-# -----------------------------------------------------------------------------
-def node_id(sender, app_data, ctx):
-    """
-    Callback for the vp.win.main.side.tab.cfg.node.id input_text widget.
-
-    """
-
-    raise NotImplementedError('side.tab.cfg.node.id')
-
-
-
-# -----------------------------------------------------------------------------
-def node_proc(sender, app_data, ctx):
-    """
-    Callback for the vp.win.main.side.tab.cfg.node.proc combo widget.
-
-    """
-
-    raise NotImplementedError('side.tab.cfg.node.proc')
-
-
-# -----------------------------------------------------------------------------
-def node_input_count(sender, app_data, ctx):
-    """
-    Callback for the vp.win.main.side.tab.cfg.node.countin input_int widget.
-
-    """
-
-    raise NotImplementedError('side.tab.cfg.node.input_count')
-
-
-# -----------------------------------------------------------------------------
-def node_output_count(sender, app_data, ctx):
-    """
-    Callback for the vp.win.main.side.tab.cfg.node.countout input_int widget.
-
-    """
-
-    raise NotImplementedError('side.tab.cfg.node.output_count')
-
-
-# -----------------------------------------------------------------------------
 def mouseright(sender, app_data, ctx):
     """
     Mouse right click handler.
@@ -568,28 +505,31 @@ def mouseright(sender, app_data, ctx):
 
     """
 
-    nodeeditor    = ctx.view.vp.win.main.nodeeditor
-    list_selected = ctx.ui.get_selected_nodes(nodeeditor._str_path())
+    nodeeditor     = ctx.view.vp.win.main.nodeeditor
+    configure      = ctx.ui.configure_item
+    path           = 'view.vp.win.ctx'
+    list_selected  = ctx.ui.get_selected_nodes(nodeeditor._str_path())
+    count_selected = len(list_selected)
+    str_title      = 'Edit ({count})'.format(count = count_selected)
 
-    if len(list_selected) == 0:
-        ctx.ui.configure_item('cfg.vp.win.ctx.node_add',  show = True)
-        ctx.ui.configure_item('cfg.vp.win.ctx.node_edit', show = False)
-        ctx.ui.configure_item('cfg.vp.win.ctx.node_del',  show = False)
-    elif len(list_selected) == 1:
-        ctx.ui.configure_item('cfg.vp.win.ctx.node_add',  show = False)
-        ctx.ui.configure_item('cfg.vp.win.ctx.node_edit', show = True)
-        ctx.ui.configure_item('cfg.vp.win.ctx.node_del',  show = True)
+    if count_selected == 0:
+        configure(path + '.title',     default_value = 'Create')
+        configure(path + '.node_add',  show          = True)
+        configure(path + '.node_edit', show          = False)
+        configure(path + '.node_del',  show          = False)
+    elif count_selected == 1:
+        configure(path + '.title',     default_value = str_title)
+        configure(path + '.node_add',  show          = False)
+        configure(path + '.node_edit', show          = True)
+        configure(path + '.node_del',  show          = True)
     else:
-        ctx.ui.configure_item('cfg.vp.win.ctx.node_add',  show = False)
-        ctx.ui.configure_item('cfg.vp.win.ctx.node_edit', show = False)
-        ctx.ui.configure_item('cfg.vp.win.ctx.node_del',  show = True)
+        configure(path + '.title',     default_value = str_title)
+        configure(path + '.node_add',  show          = False)
+        configure(path + '.node_edit', show          = False)
+        configure(path + '.node_del',  show          = True)
 
-    width  = ctx.view.vp.win.ctx._kwargs.width
-    height = ctx.view.vp.win.ctx._kwargs.height
-    ctx.ui.configure_item('cfg.vp.win.ctx',
-                          min_size = [width, height],
-                          pos      = ctx.ui.get_mouse_pos(local = False),
-                          show     = True)
+    configure(path, pos  = ctx.ui.get_mouse_pos(local = False),
+                    show = True)
 
 
 # -----------------------------------------------------------------------------
@@ -600,7 +540,7 @@ def ctx_node_add(sender, app_data, ctx):
     """
 
     ctx.ui.configure_item(ctx.view.vp.win.ctx._str_path(), show = False)
-    pos    = ctx.ui.get_item_pos('cfg.vp.win.ctx')
+    pos    = ctx.ui.get_item_pos('view.vp.win.ctx')
     pos[0] = pos[0] - 40
     pos[1] = pos[1] - 20
 
@@ -653,7 +593,7 @@ def ctx_node_cancel(sender, app_data, ctx):
 
     """
 
-    ctx.ui.configure_item('cfg.vp.win.ctx',
+    ctx.ui.configure_item('view.vp.win.ctx',
                           pos  = ctx.ui.get_mouse_pos(local = False),
                           show = False)
 
@@ -674,8 +614,6 @@ def node_delink(sender, app_data):
 
     print('DELINK CALLBACK')
     # ctx.ui.delete_item(app_data)
-
-
 
 
 # -----------------------------------------------------------------------------

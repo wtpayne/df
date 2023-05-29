@@ -69,9 +69,9 @@ def main(dirpath_cfg, name_view):
 
     We use an MVVM architecture with an
     application model (ctx.app), a view
-    model (ctx.view) and a view (ctx.ui).
+    model (ctx.vm) and a view (ctx.view).
 
-    ctx.app --> ctx.view --> ctx.ui
+    ctx.app <--> ctx.vm <--> ctx.view
 
     """
 
@@ -79,12 +79,14 @@ def main(dirpath_cfg, name_view):
     # the UI architecture:-
     #
     #   1. The application model (ctx.app).
-    #   2. The view model (ctx.view)
-    #   3. The view API (ctx.ui)
+    #   2. The view model (ctx.vm)
+    #   3. The view (ctx.view)
+    #   4. The UI API
     #
     ctx     = fl.util.Bureau()
     batch   = ctx.batch_init()
     ctx.app = fl.util.Bureau()
+    ctx.vm  = fl.util.Bureau()
     ctx.view.from_file(filepath = _filepath_cfg_view(dirpath_cfg, name_view))
     ctx.ui  = dearpygui.dearpygui
 

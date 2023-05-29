@@ -80,12 +80,13 @@ vp:
         popup:                    True
         no_move:                  True
         modal:                    False
-        autosize:                 False
+        autosize:                 True
         show:                     False
         width:                    85
         height:                   20
+        min_size:                 [85,20]
 
-      edit:
+      title:
         _fcn:                     add_text
         _kwargs:
           default_value:          ""
@@ -318,7 +319,7 @@ vp:
                   callback:       _spec::pl.stableview.update_bound_values
                   on_enter:       True
                 _bind:
-                  -               am.system.id_system
+                  -               app.system.id_system
 
               separator:
                 _fcn:             add_separator
@@ -339,7 +340,7 @@ vp:
                   min_clamped:    True
                   callback:       _spec::pl.stableview.update_bound_values
                 _bind:
-                  -               aux.host.count
+                  -               vm.host.count
 
               separator:
                 _fcn:             add_separator
@@ -360,7 +361,7 @@ vp:
                   min_clamped:    True
                   callback:       _spec::pl.stableview.update_bound_values
                 _bind:
-                  -               aux.proc.count
+                  -               vm.proc.count
 
               separator:
                 _fcn:             add_separator
@@ -378,7 +379,7 @@ vp:
                   width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
                   callback:       _spec::pl.stableview.update_bound_values
                 _bind:
-                  -               aux.node.selected.id
+                  -               vm.node.selected.id
 
               # proc:
               #   _fcn:             add_combo
@@ -395,6 +396,7 @@ vp:
                   label:          "Implementation"
                   indent:         _spec::flowforge.main.INDENT
                   width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  callback:       _spec::pl.stableview.update_bound_values
 
               state:
                 _fcn:             add_input_text
@@ -402,6 +404,7 @@ vp:
                   label:          "State data type"
                   indent:         _spec::flowforge.main.INDENT
                   width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  callback:       _spec::pl.stableview.update_bound_values
 
               cfg:
                 _fcn:             add_input_text
@@ -409,6 +412,7 @@ vp:
                   label:          "Configuration"
                   indent:         _spec::flowforge.main.INDENT
                   width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  callback:       _spec::pl.stableview.update_bound_values
 
               countin:
                 _fcn:             add_input_int
@@ -418,7 +422,7 @@ vp:
                   width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
                   min_value:      0
                   min_clamped:    True
-                  callback:       _spec::flowforge.main.node_input_count
+                  callback:       _spec::pl.stableview.update_bound_values
 
               countout:
                 _fcn:             add_input_int
@@ -428,7 +432,7 @@ vp:
                   width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
                   min_value:      0
                   min_clamped:    True
-                  callback:       _spec::flowforge.main.node_output_count
+                  callback:       _spec::pl.stableview.update_bound_values
 
               separator:
                 _fcn:             add_separator
@@ -445,6 +449,7 @@ vp:
                   label:          "Owner"
                   indent:         _spec::flowforge.main.INDENT
                   width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  callback:       _spec::pl.stableview.update_bound_values
 
               datatype:
                 _fcn:             add_input_text
@@ -452,6 +457,7 @@ vp:
                   label:          "Data type"
                   indent:         _spec::flowforge.main.INDENT
                   width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  callback:       _spec::pl.stableview.update_bound_values
 
               separator:
                 _fcn:             add_separator
