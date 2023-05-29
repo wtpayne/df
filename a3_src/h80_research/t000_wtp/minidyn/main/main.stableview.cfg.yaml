@@ -260,21 +260,21 @@ vp:
         _fcn:                     add_image_button
         _kwargs:
           label:                  "Play"
-          texture_tag:            vm.icon.play_16x16
+          texture_tag:            view.icon.play_16x16
           callback:               _spec::flowforge.main.ctx_node_edit
 
       pause:
         _fcn:                     add_image_button
         _kwargs:
           label:                  "Pause"
-          texture_tag:            vm.icon.pause_16x16
+          texture_tag:            view.icon.pause_16x16
           callback:               _spec::flowforge.main.ctx_node_edit
 
       stop:
         _fcn:                     add_image_button
         _kwargs:
           label:                  "Stop"
-          texture_tag:            vm.icon.stop_16x16
+          texture_tag:            view.icon.stop_16x16
           callback:               _spec::flowforge.main.ctx_node_edit
 
 
@@ -315,7 +315,7 @@ vp:
                   label:          "System ID"
                   indent:         _spec::flowforge.main.INDENT
                   width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
-                  callback:       _spec::pl.stableview.update_from_view
+                  callback:       _spec::pl.stableview.update_bound_values
                   on_enter:       True
                 _bind:
                   -               am.system.id_system
@@ -337,7 +337,7 @@ vp:
                   default_value:  1
                   min_value:      1  # We rely on there being at least one host.
                   min_clamped:    True
-                  callback:       _spec::pl.stableview.update_from_view
+                  callback:       _spec::pl.stableview.update_bound_values
                 _bind:
                   -               aux.host.count
 
@@ -358,7 +358,7 @@ vp:
                   default_value:  1
                   min_value:      1
                   min_clamped:    True
-                  callback:       _spec::pl.stableview.update_from_view
+                  callback:       _spec::pl.stableview.update_bound_values
                 _bind:
                   -               aux.proc.count
 
@@ -376,7 +376,7 @@ vp:
                   label:          "Node ID"
                   indent:         _spec::flowforge.main.INDENT
                   width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
-                  callback:       _spec::pl.stableview.update_from_view
+                  callback:       _spec::pl.stableview.update_bound_values
                 _bind:
                   -               aux.node.selected.id
 
@@ -474,11 +474,11 @@ binding:
   win_font:
     _fcn:                         bind_item_font
     _kwargs:
-      item:                       vm.vp.win
-      font:                       vm.font.fira_code
+      item:                       view.vp.win
+      font:                       view.font.fira_code
 
   ctx_font:
     _fcn:                         bind_item_font
     _kwargs:
-      item:                       vm.vp.win.ctx
-      font:                       vm.font.fira_code
+      item:                       view.vp.win.ctx
+      font:                       view.font.fira_code

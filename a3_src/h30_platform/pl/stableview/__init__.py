@@ -68,39 +68,40 @@ def main(dirpath_cfg, name_view):
     Main update/event loop for the ui.
 
     We use an MVVM architecture with an
-    application model (ctx.am), a view
-    model (ctx.vm) and a view (ctx.ui).
+    application model (ctx.app), a view
+    model (ctx.view) and a view (ctx.ui).
 
-    ctx.am --> ctx.vm --> ctx.ui
-
+    ctx.app --> ctx.view --> ctx.ui
 
     """
 
-    ctx = fl.util.Bureau()
-
-    # Create the view (ctx.ui), view
-    # model (ctx.vm) and application
-    # model (ctx.am).
+    # Initialize the various component parts of
+    # the UI architecture:-
     #
-    batch = ctx.batch_init()
-    ctx.ui = dearpygui.dearpygui
-    ctx.vm.from_file(filepath = _filepath_cfg(dirpath_cfg, name_view))
-    ctx.am = fl.util.Bureau()
-
-    ctx.vm.coro   = fl.util.resolve(ctx.vm.coro)(ctx)
-    # ctx.am.update = fl.util.resolve(ctx.vm.am_update)(ctx)
+    #   1. The application model (ctx.app).
+    #   2. The view model (ctx.view)
+    #   3. The view API (ctx.ui)
+    #
+    ctx     = fl.util.Bureau()
+    batch   = ctx.batch_init()
+    ctx.app = fl.util.Bureau()
+    ctx.view.from_file(filepath = _filepath_cfg_view(dirpath_cfg, name_view))
+    ctx.ui  = dearpygui.dearpygui
 
     # Add rules for responding to changes in the
-    # view model (vm). Rules for responding to
-    # changes in the application model will be by
-    # their nature application-specific and
-    # therefore are colocated with application
-    # specific design elements.
+    # view model. Rules for responding to changes
+    # in the application model will be by their
+    # nature application-specific and therefore
+    # are colocated with application specific
+    # design elements.
     #
-    ctx.vm.rule(cond = fl.rule.is_leaf_at(('_fcn',)),
-                act  = _update_from_view_model)
+    ctx.view.rule(cond = fl.rule.is_leaf_at(('_fcn',)),
+                  act  = _update_dearpygui_widgets)
 
-    next(ctx.vm.coro)                             # app early setup.
+    # Application coroutine
+    #
+    ctx.coro = fl.util.resolve(ctx.view.coro)(ctx)
+    next(ctx.coro)                                # app early setup.
 
     ctx.ui.create_context()
 
@@ -110,20 +111,20 @@ def main(dirpath_cfg, name_view):
         ctx.ui.setup_dearpygui()
 
         with ctx.batch_context():
-            next(ctx.vm.coro)                     # app late setup.
+            next(ctx.coro)                        # app late setup.
 
         ctx.ui.show_viewport()
         while ctx.ui.is_dearpygui_running():
 
             with ctx.batch_context():
-                next(ctx.vm.coro)                 # app runtime step.
+                next(ctx.coro)                    # app runtime step.
                 ctx.ui.render_dearpygui_frame()
     finally:
         ctx.ui.destroy_context()
 
 
 # -----------------------------------------------------------------------------
-def _filepath_cfg(dirpath_cfg, name_view):
+def _filepath_cfg_view(dirpath_cfg, name_view):
     """
     Load configuration for the UI from the specified view.
 
@@ -134,25 +135,45 @@ def _filepath_cfg(dirpath_cfg, name_view):
 
 
 # -----------------------------------------------------------------------------
-def update_from_view(sender, app_data, ctx):
+def update_bound_values(sender, app_data, ctx):
     """
-    Update bound values from the view (widget).
+    Update bound values with app_data.
+
+    This function is intended to be registered as
+    a callback handler on various widgets in the
+    view, allowing any number of bound values to
+    be updated in response to user input or other
+    UI events.
+
+    We have arranged things so that the dearpygui
+    tag for each widget is also the dot delimited
+    string path of the corresponding item in the
+    view model data structure.
+
+    This means that we are able to easily look
+    up the configured bindings for each widget
+    just by using the 'sender' tag as an index
+    into the context data structure.
+
+    Similarly, the bindings themselves are just
+    lists of dot-delimited bound paths that
+    need to be updated with the callback
+    app_Data value.
 
     """
 
     if '_bind' in ctx[sender]:
-        for path in ctx[sender]._bind:
-            ctx[path] = app_data
+        for bound_path in ctx[sender]._bind:
+            ctx[bound_path] = app_data
     return None
 
 
 # -----------------------------------------------------------------------------
-def _update_from_view_model(ctx, tup_cmd):
+def _update_dearpygui_widgets(ctx, tup_cmd):
     """
     Update widgets corresponding to the specified commands.
 
     """
-    print('UP VM')
 
     for cmd in tup_cmd:
 

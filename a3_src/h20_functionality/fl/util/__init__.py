@@ -238,11 +238,6 @@ class Bureau(collections.abc.MutableMapping):
         and the second element is the value at
         that path location.
 
-        The paths are sorted by their length as
-        a (probably unnecessary) sanity check
-        to ensure that parent dictionaries are
-        created before their children.
-
         For each path-value pair, this method
         creates nested dictionaries within the
         output dictionary according to the path,
@@ -261,96 +256,7 @@ class Bureau(collections.abc.MutableMapping):
 
         """
 
-        tup_path_val = sorted(self.to_tuple(), key = lambda item: len(item[0]))
-
-        # If a path has one or more non-integer
-        # keys, then it must be represented by
-        # a dictionary. On the other hand, if
-        # all keys are integers, then we can
-        # use a list or a tuple instead.
-        #
-        set_path_maybe_list = set()
-        set_path_never_list = set()
-        for (tup_path, _) in tup_path_val:
-            for (idx, name) in enumerate(tup_path):
-
-                is_integer_key = True
-                try:
-                    _ = int(name)
-                except ValueError:
-                    is_integer_key = False
-
-                if is_integer_key:
-                    set_path_maybe_list.add(tup_path[0:idx])
-                else:
-                    set_path_never_list.add(tup_path[0:idx])
-
-        set_path_use_list = set_path_maybe_list - set_path_never_list
-
-        # Go through each leaf path-value pair
-        # in tup_path_val, creating internal
-        # nodes in the tree as required.
-        #
-        output = dict()
-        for (tup_path, value) in tup_path_val:
-
-            # Go through path from root to leaf.
-            #
-            cursor         = output
-            tup_path_accum = tuple()
-            for (idx, name) in enumerate(tup_path[:-1]):
-                tup_path_accum = tup_path_accum + (name,)
-                is_list        = tup_path_accum in set_path_use_list
-
-                # Create nodes in the tree as
-                # required. If the current node
-                # is a dictionary, then it is
-                # easy enough to add either
-                # a list or a dict in the named
-                # slot as required.
-                #
-                if isinstance(cursor, dict):
-                    if (name not in cursor):
-                        if is_list:
-                            cursor[name] = list()
-                        else:
-                            cursor[name] = dict()
-
-                # If on the other hand, the
-                # current node is a list, then
-                # we need to be careful to
-                # extend the list to the required
-                # size before adding values.
-                #
-                else:
-
-                    assert isinstance(cursor, list)
-
-                    # Extend the list as needed.
-                    #
-                    idx      = int(name)
-                    len_list = len(cursor)
-                    if idx >= len_list:
-                        len_needed = (idx + 1)  # Because 0-based
-                        shortfall  = len_needed - len_list
-                        cursor    += [None] * shortfall
-
-                    # Add either a list or a
-                    # dict to the index as
-                    # required.
-                    #
-                    if cursor[idx] is None:
-                        if is_list:
-                            cursor[idx] = list()
-                        else:
-                            cursor[idx] = dict()
-
-                cursor = cursor[name]
-
-            name         = tup_path[-1]
-            cursor[name] = value
-
-        return output
+        return tup_path_val_to_dict(tup_path_val = self.to_tuple())
 
     # -------------------------------------------------------------------------
     def from_dict(self, map_item, path_root = tuple()):
@@ -1137,6 +1043,147 @@ class BureauEngine():
             rule.act(self._bureau, list_cmd)
 
         return None
+
+
+# -------------------------------------------------------------------------
+def tup_path_val_to_dict(tup_path_val):
+    """
+    Return a representation of tup_path_val as a nested dict.
+
+    This function converts the specified
+    tuple of path-value pairs into a nested
+    dictionary representation.
+
+    The paths are sorted by their length as
+    a (probably unnecessary) sanity check
+    to ensure that parent dictionaries are
+    created before their children.
+
+    For each path-value pair, this method
+    creates nested dictionaries within the
+    output dictionary according to the path,
+    and sets the innermost dictionary's value
+    according to the value.
+
+    The resulting dictionary has the same
+    nested structure as the original object,
+    and can be used for purposes like
+    serialization.
+
+    :returns:   A nested dictionary representation of the object. The
+                keys in the dictionary correspond to the paths in the
+                object, and the values in the dictionary correspond
+                to the values in the object.
+
+    """
+
+    tup_path_val = sorted(tup_path_val, key = lambda item: len(item[0]))
+
+    set_path_referent_as_list = _set_path_referent_as_list(tup_path_val)
+
+    # Go through each leaf path-value pair
+    # in tup_path_val, creating internal
+    # nodes in the tree as required.
+    #
+    output = dict()
+    for (tup_path, value) in tup_path_val:
+
+        # Go through path from root to leaf.
+        #
+        cursor         = output
+        tup_path_accum = tuple()
+        for (idx, name) in enumerate(tup_path[:-1]):
+            tup_path_accum = tup_path_accum + (name,)
+            do_use_list    = tup_path_accum in set_path_referent_as_list
+            if do_use_list:
+                ctor = list
+            else:
+                ctor = dict
+
+            # Create nodes in the tree as
+            # required. If the current node
+            # is a dictionary, then it is
+            # easy enough to add either
+            # a list or a dict in the named
+            # slot as required.
+            #
+            if isinstance(cursor, dict):
+                if (name not in cursor):
+                    cursor[name] = ctor()
+
+            # If on the other hand, the
+            # current node is a list, then
+            # we need to be careful to
+            # extend the list to the required
+            # size before adding values.
+            #
+            else:
+
+                # Extend the list as needed.
+                #
+                idx      = int(name)
+                len_list = len(cursor)
+                if idx >= len_list:
+                    len_needed = (idx + 1)  # Because 0-based
+                    shortfall  = len_needed - len_list
+                    cursor    += [None] * shortfall
+
+                # Add either a list or a
+                # dict to the index as
+                # required.
+                #
+                if cursor[idx] is None:
+                    cursor[name] = ctor()
+
+            cursor = cursor[name]
+
+        name         = tup_path[-1]
+        cursor[name] = value
+
+    return output
+
+
+# -----------------------------------------------------------------------------
+def _set_path_referent_as_list(tup_path_val):
+    """
+    Return the set of paths whose referents can be represented as lists.
+
+    If the referent of a path has one or
+    more non-integer keys, then it must
+    be represented by a mapping of some sort
+    such as a 'dict'.
+
+    On the other hand, if the referent of
+    a path has nothing but integer keys,
+    then we can use a (possibly sparse)
+    ordered collection such as a 'list' or
+    a 'tuple' instead of a mapping.
+
+    TODO: Give some thought as to whether
+          we actually want to use a list
+          if the integer indices are very
+          sparsely distributed.
+
+    """
+    set_path_maybe_list = set()
+    set_path_never_list = set()
+    for (tup_path, _) in tup_path_val:
+        for (idx, name) in enumerate(tup_path):
+
+            is_integer_key = True
+            try:
+                _ = int(name)
+            except ValueError:
+                is_integer_key = False
+
+            if is_integer_key:
+                set_path_maybe_list.add(tup_path[0:idx])
+            else:
+                set_path_never_list.add(tup_path[0:idx])
+
+    set_path_referent_as_list = set_path_maybe_list - set_path_never_list
+    return set_path_referent_as_list
+
 
 # -----------------------------------------------------------------------------
 def _accessor_functions(item):

@@ -176,7 +176,7 @@ def _update_from_application_model(ctx, tup_cmd):
     WIDTH_NODE     = 160
     widget         = pl.stableview.widget
 
-    nodeeditor     = ctx.vm.vp.win.main.nodeeditor
+    nodeeditor     = ctx.view.vp.win.main.nodeeditor
     map_cfg_norm   = copy.deepcopy(ctx.am.to_dict())
     map_cfg_denorm = fl.stableflow.cfg.denormalize(map_cfg_norm)
     map_cfg_layout = fl.stableflow.cfg.layout.horizontal(
@@ -568,7 +568,7 @@ def mouseright(sender, app_data, ctx):
 
     """
 
-    nodeeditor    = ctx.vm.vp.win.main.nodeeditor
+    nodeeditor    = ctx.view.vp.win.main.nodeeditor
     list_selected = ctx.ui.get_selected_nodes(nodeeditor._str_path())
 
     if len(list_selected) == 0:
@@ -584,8 +584,8 @@ def mouseright(sender, app_data, ctx):
         ctx.ui.configure_item('cfg.vp.win.ctx.node_edit', show = False)
         ctx.ui.configure_item('cfg.vp.win.ctx.node_del',  show = True)
 
-    width  = ctx.vm.vp.win.ctx._kwargs.width
-    height = ctx.vm.vp.win.ctx._kwargs.height
+    width  = ctx.view.vp.win.ctx._kwargs.width
+    height = ctx.view.vp.win.ctx._kwargs.height
     ctx.ui.configure_item('cfg.vp.win.ctx',
                           min_size = [width, height],
                           pos      = ctx.ui.get_mouse_pos(local = False),
@@ -599,13 +599,13 @@ def ctx_node_add(sender, app_data, ctx):
 
     """
 
-    ctx.ui.configure_item(ctx.vm.vp.win.ctx._str_path(), show = False)
+    ctx.ui.configure_item(ctx.view.vp.win.ctx._str_path(), show = False)
     pos    = ctx.ui.get_item_pos('cfg.vp.win.ctx')
     pos[0] = pos[0] - 40
     pos[1] = pos[1] - 20
 
     idx_node_max = 0
-    for name in ctx.vm.vp.win.main.nodeeditor.keys():
+    for name in ctx.view.vp.win.main.nodeeditor.keys():
         prefix = 'node_'
         if not name.startswith(prefix):
             continue
@@ -618,7 +618,7 @@ def ctx_node_add(sender, app_data, ctx):
             idx_node_max = max(idx_node_max, idx_node)
 
     id_node    = '{:04d}'.format(idx_node_max + 1)
-    nodeeditor = ctx.vm.vp.win.main.nodeeditor
+    nodeeditor = ctx.view.vp.win.main.nodeeditor
     widget     = pl.stableview.widget
     node       = widget(nodeeditor['node_' + id_node],
                         'add_node',
@@ -691,7 +691,7 @@ def node_delink(sender, app_data):
 
     # Extract node and edge config from the view model
     #
-    # for (key, value) in ctx.vm.vp.win.main.nodeeditor.items():
+    # for (key, value) in ctx.view.vp.win.main.nodeeditor.items():
     #     if key.startswith('node_'):
     #         cfg_save['node'][value._id] = value._cfg
     #     if key.startswith('edge_'):
