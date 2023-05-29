@@ -91,11 +91,11 @@ def main(dirpath_cfg, name_view):
     ctx.ui  = dearpygui.dearpygui
 
     # Add rules for responding to changes in the
-    # view model. Rules for responding to changes
-    # in the application model will be by their
-    # nature application-specific and therefore
-    # are colocated with application specific
-    # design elements.
+    # view. Rules for responding to changes in
+    # the view model and application model will
+    # be by their nature application-specific
+    # and therefore are colocated with
+    # application specific design elements.
     #
     ctx.view.rule(cond = fl.rule.is_leaf_at(('_fcn',)),
                   act  = _update_dearpygui_widgets)
