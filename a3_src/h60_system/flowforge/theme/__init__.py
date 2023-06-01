@@ -45,17 +45,20 @@ license:
 """
 
 
-from . import light
-from . import dark
+ID_THEME              = 'light'
+SIDEBAR_WIDTH         = 250
+SIDEBAR_WIDGET_WIDTH  = 100
+INDENT                = 7
+NODE_WIDGET_WIDTH     = 80
 
+if ID_THEME == 'light':
+    from . import light
+    globals().update(light.theme())
 
-id_theme = 'light'
-
-if id_theme == 'light':
-     globals().update(light.theme())
-
-elif id_theme == 'dark':
-     globals().update(dark.theme())
+elif ID_THEME == 'dark':
+    from . import dark
+    globals().update(dark.theme())
 
 else:
-     globals().update(light.theme())
+    from . import light
+    globals().update(light.theme())

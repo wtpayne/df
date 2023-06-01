@@ -50,8 +50,6 @@ import copy
 import os.path
 
 import dearpygui
-import PIL.Image
-import numpy
 
 import fl.rule
 import fl.stableflow.cfg
@@ -61,55 +59,6 @@ import fl.util
 
 import pl.stableview
 
-import da.env
-
-from . import model
-
-SIDEBAR_WIDTH        = model.SIDEBAR_WIDTH
-SIDEBAR_WIDGET_WIDTH = model.SIDEBAR_WIDGET_WIDTH
-INDENT               = model.INDENT
-
-# TODO: USE SOME OTHER NON-INTERNAL-SPECIFIC
-#       WAY OF GETTING RESOURCES.
-#
-FILEPATH_FONT_PRIMARY = da.env.path(
-        control_tier = 'h10_resource',
-        relpath      = 'font/tecnico/fino.ttf',
-        id_env       = 'e002_general_research')
-
-FILEPATH_DEFAULT_LOAD = da.env.path(
-        control_tier = 'h90_internal',
-        relpath      = 'da/cli/service/process_assistant/process_assistant.stableflow.cfg.yaml',
-        # relpath    = 'da/demo/dm001_workflow/dm001_workflow.stableflow.cfg.yaml'
-        id_env       = 'e002_general_research')
-
-FILEPATH_DEFAULT_SAVE = da.env.path(
-        control_tier = 'h90_internal',
-        relpath      = '/da/demo/dm001_workflow/dm001_workflow_saved.stableflow.cfg.yaml',
-        id_env       = 'e002_general_research')
-
-
-# -----------------------------------------------------------------------------
-def _load_icon(name):
-    """
-    TODO: MOVE THIS INTO A BUILD STEP WHERE WE COMPILE ASSETS.
-
-    """
-    filepath = da.env.path(
-        control_tier = 'h10_resource',
-        relpath      = 'icon/dark/solid/{name}/16x16.png'.format(name = name),
-        id_env       = 'e002_general_research')
-    rgba = PIL.Image.open(filepath).convert("RGBA")
-    return numpy.array(rgba).flatten()
-
-
-ICON_PLAY_16X16  = _load_icon('play')
-ICON_PAUSE_16X16 = _load_icon('pause')
-ICON_STOP_16X16  = _load_icon('stop')
-
-#####################################
-# TODO: MOVE THIS INTO A BUILD STEP #
-#####################################
 
 # -----------------------------------------------------------------------------
 def coro(ctx):
@@ -123,18 +72,8 @@ def coro(ctx):
 
     yield  # Context is created and widgets are added in gui.main().
 
-    #######################################
-    #######################################
-    #######################################
-    # AUTO LOAD FILE FOR EASIER DEBUGGING #
-    #######################################
-
     with ctx.batch_context():
-        ctx.app.from_dict(fl.stableflow.cfg.prepare(FILEPATH_DEFAULT_LOAD))
-
-    #######################################
-    #######################################
-    #######################################
+        ctx.app.from_dict(fl.stableflow.cfg.prepare(_last_opened_path()))
 
     yield  # Viewport is shown, main loop starts in gui.main().
 
@@ -144,22 +83,18 @@ def coro(ctx):
 
 
 # -----------------------------------------------------------------------------
-def resize(sender, app_data, ctx):
+def _last_opened_path():
     """
-    Handle window resize events.
+    Return the path of the last opened model.
 
     """
-    rect_win = ctx.ui.get_item_rect_size('view.vp.win')
-    rect_btn = ctx.ui.get_item_rect_size('view.vp.win.toolbar.grp_btn')
 
-    width_win = rect_win[0]
-    width_btn = rect_btn[0]
-
-    half_win  = int(width_win / 2)
-    half_btn  = int(width_btn / 2)
-    padding   = max(0, half_win - half_btn)
-
-    ctx.ui.set_item_width('view.vp.win.toolbar.pad_left', padding)
+    import da.env
+    return da.env.path(
+            control_tier = 'h90_internal',
+            relpath      = 'da/cli/service/process_assistant/process_assistant.stableflow.cfg.yaml',
+            # relpath    = 'da/demo/dm001_workflow/dm001_workflow.stableflow.cfg.yaml'
+            id_env       = 'e002_general_research')
 
 
 # -----------------------------------------------------------------------------
@@ -246,6 +181,71 @@ def _update_from_application_model(ctx, tup_cmd):
                           attr_2   = link['output'])
             edge._id  = id_edge
             edge._cfg = map_edge[id_edge]
+
+
+
+# -----------------------------------------------------------------------------
+def mouseright(sender, app_data, ctx):
+    """
+    Mouse right click handler.
+
+    Displays the right click context menu.
+
+    """
+
+    nodeeditor     = ctx.view.vp.win.main.nodeeditor
+    configure      = ctx.ui.configure_item
+    path           = 'view.vp.win.ctx'
+    list_selected  = ctx.ui.get_selected_nodes(nodeeditor._str_path())
+    count_selected = len(list_selected)
+    str_title      = 'Edit ({count})'.format(count = count_selected)
+
+    if count_selected == 0:
+        configure(path + '.title',     default_value = 'Create')
+        configure(path + '.node_add',  show          = True)
+        configure(path + '.node_edit', show          = False)
+        configure(path + '.node_del',  show          = False)
+    elif count_selected == 1:
+        configure(path + '.title',     default_value = str_title)
+        configure(path + '.node_add',  show          = False)
+        configure(path + '.node_edit', show          = True)
+        configure(path + '.node_del',  show          = True)
+    else:
+        configure(path + '.title',     default_value = str_title)
+        configure(path + '.node_add',  show          = False)
+        configure(path + '.node_edit', show          = False)
+        configure(path + '.node_del',  show          = True)
+
+    configure(path, pos  = ctx.ui.get_mouse_pos(local = False),
+                    show = True)
+
+
+# -----------------------------------------------------------------------------
+def keypress(sender, app_data, ctx):
+    """
+    Keypress handler.
+
+    """
+    print('KEY')
+
+
+# -----------------------------------------------------------------------------
+def resize(sender, app_data, ctx):
+    """
+    Handle window resize events.
+
+    """
+    rect_win = ctx.ui.get_item_rect_size('view.vp.win')
+    rect_btn = ctx.ui.get_item_rect_size('view.vp.win.toolbar.grp_btn')
+
+    width_win = rect_win[0]
+    width_btn = rect_btn[0]
+
+    half_win  = int(width_win / 2)
+    half_btn  = int(width_btn / 2)
+    padding   = max(0, half_win - half_btn)
+
+    ctx.ui.set_item_width('view.vp.win.toolbar.pad_left', padding)
 
 
 # -----------------------------------------------------------------------------
@@ -490,42 +490,6 @@ def menu_help_about(sender, app_data, ctx):
     """
 
     raise NotImplementedError('help.about')
-
-
-# -----------------------------------------------------------------------------
-def mouseright(sender, app_data, ctx):
-    """
-    Mouse right click handler.
-
-    Displays the right click context menu.
-
-    """
-
-    nodeeditor     = ctx.view.vp.win.main.nodeeditor
-    configure      = ctx.ui.configure_item
-    path           = 'view.vp.win.ctx'
-    list_selected  = ctx.ui.get_selected_nodes(nodeeditor._str_path())
-    count_selected = len(list_selected)
-    str_title      = 'Edit ({count})'.format(count = count_selected)
-
-    if count_selected == 0:
-        configure(path + '.title',     default_value = 'Create')
-        configure(path + '.node_add',  show          = True)
-        configure(path + '.node_edit', show          = False)
-        configure(path + '.node_del',  show          = False)
-    elif count_selected == 1:
-        configure(path + '.title',     default_value = str_title)
-        configure(path + '.node_add',  show          = False)
-        configure(path + '.node_edit', show          = True)
-        configure(path + '.node_del',  show          = True)
-    else:
-        configure(path + '.title',     default_value = str_title)
-        configure(path + '.node_add',  show          = False)
-        configure(path + '.node_edit', show          = False)
-        configure(path + '.node_del',  show          = True)
-
-    configure(path, pos  = ctx.ui.get_mouse_pos(local = False),
-                    show = True)
 
 
 # -----------------------------------------------------------------------------

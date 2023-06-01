@@ -3,14 +3,14 @@
 ---
 
 title:
-    "Light theme for FlowForge."
+    "Dark theme for FlowForge."
 
 description:
-    "This python module defines the light
+    "This python module defines the dark
     theme for the FlowForge system."
 
 id:
-    "7a3a84d9-061b-4ebb-9e51-dcd7f51f404f"
+    "ad2b77d5-a3cc-4fbb-b46d-e2517cf88ada"
 
 type:
     dt003_python_module
@@ -47,72 +47,76 @@ license:
 
 import fl.util
 
-from . import brand
+from .. import brand
+from .. import font
+from .. import icon
 
 
 # -----------------------------------------------------------------------------
 def theme():
     """
-    Return the light theme.
+    Return the dark theme.
 
     """
 
     theme   = fl.util.Bureau()
     palette = brand.palette()
 
+    theme.FILEPATH_FONT_PRIMARY = font.path(id_theme = 'dark',
+                                            id_font  = 'primary')
+    theme.ICON_PLAY_16X16       = icon.load(id_theme = 'dark',
+                                            id_icon  = 'play')
+    theme.ICON_PAUSE_16X16      = icon.load(id_theme = 'dark',
+                                            id_icon  = 'pause')
+    theme.ICON_STOP_16X16       = icon.load(id_theme = 'dark',
+                                            id_icon  = 'stop')
+
     # Core style
     #
-    theme.ALPHA_X                         = 1.0
-    theme.ALPHA_Y                         = 1.0
-
-    theme.WINDOW_PADDING_X                = None
-    theme.WINDOW_PADDING_Y                = None
-    theme.WINDOW_ROUNDING_X               = 3
-    theme.WINDOW_ROUNDING_Y               = 3
+    theme.ALPHA_X                         = 1
+    theme.ALPHA_Y                         = 1
+    theme.WINDOW_PADDING_X                = 1
+    theme.WINDOW_PADDING_Y                = 1
+    theme.WINDOW_ROUNDING_X               = 1
+    theme.WINDOW_ROUNDING_Y               = 1
     theme.WINDOW_BORDER_SIZE_X            = 1
     theme.WINDOW_BORDER_SIZE_Y            = 1
     theme.WINDOW_MIN_SIZE_X               = 1
     theme.WINDOW_MIN_SIZE_Y               = 1
     theme.WINDOW_TITLE_ALIGN_X            = 1
     theme.WINDOW_TITLE_ALIGN_Y            = 1
-
     theme.CHILD_ROUNDING_X                = 1
     theme.CHILD_ROUNDING_Y                = 1
     theme.CHILD_BORDER_SIZE_X             = 1
     theme.CHILD_BORDER_SIZE_Y             = 1
-
     theme.POPUP_ROUNDING_X                = 1
     theme.POPUP_ROUNDING_Y                = 1
     theme.POPUP_BORDER_SIZE_X             = 1
     theme.POPUP_BORDER_SIZE_Y             = 1
-
-    theme.FRAME_PADDING_X                 = 0
-    theme.FRAME_PADDING_Y                 = 0
-    theme.FRAME_ROUNDING_X                = 3
-    theme.FRAME_ROUNDING_Y                = 3
-    theme.FRAME_BORDER_SIZE_X             = 0
-    theme.FRAME_BORDER_SIZE_Y             = 0
-
-    theme.ITEM_SPACING_X                  = 2
-    theme.ITEM_SPACING_Y                  = 2
-    theme.ITEM_INNER_SPACING_X            = 0
-    theme.ITEM_INNER_SPACING_Y            = 0
-
+    theme.FRAME_PADDING_X                 = 1
+    theme.FRAME_PADDING_Y                 = 1
+    theme.FRAME_ROUNDING_X                = 1
+    theme.FRAME_ROUNDING_Y                = 1
+    theme.FRAME_BORDER_SIZE_X             = 1
+    theme.FRAME_BORDER_SIZE_Y             = 1
+    theme.ITEM_SPACING_X                  = 1
+    theme.ITEM_SPACING_Y                  = 1
+    theme.ITEM_INNER_SPACING_X            = 1
+    theme.ITEM_INNER_SPACING_Y            = 1
     theme.INDENT_SPACING_X                = 1
     theme.INDENT_SPACING_Y                = 1
     theme.CELL_PADDING_X                  = 1
     theme.CELL_PADDING_Y                  = 1
-    theme.SCROLLBAR_SIZE_X                = 10
-    theme.SCROLLBAR_SIZE_Y                = 10
-    theme.SCROLLBAR_ROUNDING_X            = 3
-    theme.SCROLLBAR_ROUNDING_Y            = 3
+    theme.SCROLLBAR_SIZE_X                = 1
+    theme.SCROLLBAR_SIZE_Y                = 1
+    theme.SCROLLBAR_ROUNDING_X            = 1
+    theme.SCROLLBAR_ROUNDING_Y            = 1
     theme.GRAB_MIN_SIZE_X                 = 1
     theme.GRAB_MIN_SIZE_Y                 = 1
     theme.GRAB_ROUNDING_X                 = 1
     theme.GRAB_ROUNDING_Y                 = 1
     theme.TAB_ROUNDING_X                  = 1
     theme.TAB_ROUNDING_Y                  = 1
-
     theme.BUTTON_TEXT_ALIGN_X             = 1
     theme.BUTTON_TEXT_ALIGN_Y             = 1
     theme.SELECTABLE_TEXT_ALIGN_X         = 1
@@ -122,35 +126,32 @@ def theme():
     #
     theme.GRID_SPACING_X                  = 8
     theme.GRID_SPACING_Y                  = 8
-
-    theme.NODE_CORNER_ROUNDING_X          = 5
-    theme.NODE_CORNER_ROUNDING_Y          = 5
-    theme.NODE_PADDING_HORIZONTAL_X       = 5
-    theme.NODE_PADDING_HORIZONTAL_Y       = 5
-    theme.NODE_PADDING_VERTICAL_X         = 5
-    theme.NODE_PADDING_VERTICAL_Y         = 5
+    theme.NODE_CORNER_ROUNDING_X          = 3
+    theme.NODE_CORNER_ROUNDING_Y          = 3
+    theme.NODE_PADDING_HORIZONTAL_X       = 1
+    theme.NODE_PADDING_HORIZONTAL_Y       = 1
+    theme.NODE_PADDING_VERTICAL_X         = 1
+    theme.NODE_PADDING_VERTICAL_Y         = 1
     theme.NODE_BORDER_THICKNESS_X         = 1
     theme.NODE_BORDER_THICKNESS_Y         = 1
-
     theme.LINK_THICKNESS_X                = 1
     theme.LINK_THICKNESS_Y                = 1
     theme.LINK_LINE_SEGMENTS_PER_LENGTH_X = 1
     theme.LINK_LINE_SEGMENTS_PER_LENGTH_Y = 1
-    theme.LINK_HOVER_DISTANCE_X           = 10
-    theme.LINK_HOVER_DISTANCE_Y           = 10
-
-    theme.PIN_CIRCLE_RADIUS_X             = 3
-    theme.PIN_CIRCLE_RADIUS_Y             = 3
-    theme.PIN_QUAD_SIDE_LENGTH_X          = 3
-    theme.PIN_QUAD_SIDE_LENGTH_Y          = 3
-    theme.PIN_TRIANGLE_SIDE_LENGTH_X      = 3
-    theme.PIN_TRIANGLE_SIDE_LENGTH_Y      = 3
+    theme.LINK_HOVER_DISTANCE_X           = 1
+    theme.LINK_HOVER_DISTANCE_Y           = 1
+    theme.PIN_CIRCLE_RADIUS_X             = 1
+    theme.PIN_CIRCLE_RADIUS_Y             = 1
+    theme.PIN_QUAD_SIDE_LENGTH_X          = 1
+    theme.PIN_QUAD_SIDE_LENGTH_Y          = 1
+    theme.PIN_TRIANGLE_SIDE_LENGTH_X      = 1
+    theme.PIN_TRIANGLE_SIDE_LENGTH_Y      = 1
     theme.PIN_LINE_THICKNESS_X            = 1
     theme.PIN_LINE_THICKNESS_Y            = 1
-    theme.PIN_HOVER_RADIUS_X              = 10
-    theme.PIN_HOVER_RADIUS_Y              = 10
-    theme.PIN_OFFSET_X                    = 0
-    theme.PIN_OFFSET_Y                    = 0
+    theme.PIN_HOVER_RADIUS_X              = 1
+    theme.PIN_HOVER_RADIUS_Y              = 1
+    theme.PIN_OFFSET_X                    = 1
+    theme.PIN_OFFSET_Y                    = 1
 
     # Plot style
     #

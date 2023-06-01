@@ -4,6 +4,7 @@
 coro:                             _spec::flowforge.main.coro
 am_update:                        _spec::flowforge.main.am_update
 
+
 # -----------------------------------------------------------------------------
 # Event and item handler registry.
 #
@@ -17,6 +18,11 @@ handle:
       _kwargs:
         button:                   _spec::dearpygui.dearpygui.mvMouseButton_Right
         callback:                 _spec::flowforge.main.mouseright
+
+    keypress:
+      _fcn:                       add_key_press_handler
+      _kwargs:
+        callback:                 _spec::flowforge.main.keypress
 
   vp:
     win:
@@ -37,8 +43,9 @@ font:
   primary:
     _fcn:                         add_font
     _kwargs:
-      file:                       _spec::flowforge.main.FILEPATH_FONT_PRIMARY
+      file:                       _spec::flowforge.theme.FILEPATH_FONT_PRIMARY
       size:                       14
+
 
 # -----------------------------------------------------------------------------
 # Icon texture registry
@@ -51,21 +58,22 @@ icon:
     _kwargs:
       width:                      16
       height:                     16
-      default_value:              _spec::flowforge.main.ICON_PLAY_16X16
+      default_value:              _spec::flowforge.theme.ICON_PLAY_16X16
 
   pause_16x16:
     _fcn:                         add_static_texture
     _kwargs:
       width:                      16
       height:                     16
-      default_value:              _spec::flowforge.main.ICON_PAUSE_16X16
+      default_value:              _spec::flowforge.theme.ICON_PAUSE_16X16
 
   stop_16x16:
     _fcn:                         add_static_texture
     _kwargs:
       width:                      16
       height:                     16
-      default_value:              _spec::flowforge.main.ICON_STOP_16X16
+      default_value:              _spec::flowforge.theme.ICON_STOP_16X16
+
 
 # -----------------------------------------------------------------------------
 # Light theme
@@ -81,10 +89,10 @@ theme:
       _kwargs:
         item_type:                  _spec::dearpygui.dearpygui.mvAll
 
+
       # -----------------------------------------------------------------------
       # Core style.
       #
-
       style_alpha:
         _fcn:                       add_theme_style
         _kwargs:
@@ -288,7 +296,6 @@ theme:
       # -----------------------------------------------------------------------
       # Node style.
       #
-
       style_grid_spacing:
         _fcn:                       add_theme_style
         _kwargs:
@@ -408,7 +415,6 @@ theme:
       # -----------------------------------------------------------------------
       # Plot style.
       #
-
       # style_line_weight:
       #   _fcn:                       add_theme_style
       #   _kwargs:
@@ -628,7 +634,6 @@ theme:
       # -----------------------------------------------------------------------
       # Core colors.
       #
-
       color_text:
         _fcn:                       add_theme_color
         _kwargs:
@@ -1036,7 +1041,6 @@ theme:
       # -----------------------------------------------------------------------
       # Node editor colours.
       #
-
       color_grid_background:
         _fcn:                       add_theme_color
         _kwargs:
@@ -1158,8 +1162,6 @@ theme:
       # -----------------------------------------------------------------------
       # Plot colours.
       #
-
-
       color_line:
         _fcn:                         add_theme_color
         _kwargs:
@@ -1402,6 +1404,7 @@ vp:
           width:                  85
           callback:               _spec::flowforge.main.ctx_node_cancel
 
+
     # -------------------------------------------------------------------------
     # Application menubar
     #
@@ -1567,6 +1570,7 @@ vp:
             texture_tag:          view.icon.stop_16x16
             callback:             _spec::flowforge.main.ctx_node_edit
 
+
     # -------------------------------------------------------------------------
     # Main workspace
     #
@@ -1575,13 +1579,14 @@ vp:
       _kwargs:
         horizontal:               True
 
+
       # -----------------------------------------------------------------------
       # Sidebar
       #
       side:
         _fcn:                     add_child_window
         _kwargs:
-          width:                  _spec::flowforge.main.SIDEBAR_WIDTH
+          width:                  _spec::flowforge.theme.SIDEBAR_WIDTH
           border:                 True
           autosize_y:             True
 
@@ -1602,8 +1607,8 @@ vp:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "System ID"
-                  indent:         _spec::flowforge.main.INDENT
-                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  indent:         _spec::flowforge.theme.INDENT
+                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
                   callback:       _spec::pl.stableview.update_bound_values
                   on_enter:       True
                 _bind:
@@ -1621,8 +1626,8 @@ vp:
                 _fcn:             add_input_int
                 _kwargs:
                   label:          "Host count"
-                  indent:         _spec::flowforge.main.INDENT
-                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  indent:         _spec::flowforge.theme.INDENT
+                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
                   default_value:  1
                   min_value:      1  # We rely on there being at least one host.
                   min_clamped:    True
@@ -1642,8 +1647,8 @@ vp:
                 _fcn:             add_input_int
                 _kwargs:
                   label:          "Process count"
-                  indent:         _spec::flowforge.main.INDENT
-                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  indent:         _spec::flowforge.theme.INDENT
+                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
                   default_value:  1
                   min_value:      1
                   min_clamped:    True
@@ -1663,8 +1668,8 @@ vp:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "Node ID"
-                  indent:         _spec::flowforge.main.INDENT
-                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  indent:         _spec::flowforge.theme.INDENT
+                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
                   callback:       _spec::pl.stableview.update_bound_values
                 _bind:
                   -               vm.node.selected.id
@@ -1674,40 +1679,40 @@ vp:
               #   _kwargs:
               #     label:          "Process ID"
               #     items:          [""]
-              #     indent:         _spec::flowforge.main.INDENT
-              #     width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+              #     indent:         _spec::flowforge.theme.INDENT
+              #     width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
               #     callback:       _spec::flowforge.main.node_proc
 
               func:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "Implementation"
-                  indent:         _spec::flowforge.main.INDENT
-                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  indent:         _spec::flowforge.theme.INDENT
+                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
                   callback:       _spec::pl.stableview.update_bound_values
 
               state:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "State data type"
-                  indent:         _spec::flowforge.main.INDENT
-                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  indent:         _spec::flowforge.theme.INDENT
+                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
                   callback:       _spec::pl.stableview.update_bound_values
 
               cfg:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "Configuration"
-                  indent:         _spec::flowforge.main.INDENT
-                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  indent:         _spec::flowforge.theme.INDENT
+                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
                   callback:       _spec::pl.stableview.update_bound_values
 
               countin:
                 _fcn:             add_input_int
                 _kwargs:
                   label:          "Input count"
-                  indent:         _spec::flowforge.main.INDENT
-                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  indent:         _spec::flowforge.theme.INDENT
+                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
                   min_value:      0
                   min_clamped:    True
                   callback:       _spec::pl.stableview.update_bound_values
@@ -1716,8 +1721,8 @@ vp:
                 _fcn:             add_input_int
                 _kwargs:
                   label:          "Output count"
-                  indent:         _spec::flowforge.main.INDENT
-                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  indent:         _spec::flowforge.theme.INDENT
+                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
                   min_value:      0
                   min_clamped:    True
                   callback:       _spec::pl.stableview.update_bound_values
@@ -1735,20 +1740,21 @@ vp:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "Owner"
-                  indent:         _spec::flowforge.main.INDENT
-                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  indent:         _spec::flowforge.theme.INDENT
+                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
                   callback:       _spec::pl.stableview.update_bound_values
 
               datatype:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "Data type"
-                  indent:         _spec::flowforge.main.INDENT
-                  width:          _spec::flowforge.main.SIDEBAR_WIDGET_WIDTH
+                  indent:         _spec::flowforge.theme.INDENT
+                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
                   callback:       _spec::pl.stableview.update_bound_values
 
               separator:
                 _fcn:             add_separator
+
 
       # -----------------------------------------------------------------------
       # Node editor
@@ -1763,13 +1769,18 @@ vp:
           delink_callback:        _spec::flowforge.main.node_delink
 
 
-binding:
+# -----------------------------------------------------------------------------
+# Event handler, font and theme bindings.
+#
+bind:
 
-  win_item_handler:
-    _fcn:                         bind_item_handler_registry
-    _kwargs:
-      item:                       view.vp.win
-      handler_registry:           view.handle.vp.win
+  handle:
+    vp:
+      win:
+        _fcn:                     bind_item_handler_registry
+        _kwargs:
+          item:                   view.vp.win
+          handler_registry:       view.handle.vp.win
 
   win_font:
     _fcn:                         bind_item_font
