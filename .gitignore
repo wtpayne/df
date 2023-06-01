@@ -153,10 +153,6 @@
 # excluded.
 #
 
-# Jetbrains metadata
-#
-.idea
-
 # Secrets files for python-dotenv.
 #
 *.env
@@ -166,7 +162,24 @@
 *.pyc
 *__pycache__*
 
-# Python build output.
+# Python build and test output.
 #
 *.egg-info/
-*.pytest_cache*
+*.pytest_cache/
+
+# Editor metadata (Atom, Eclipse, EMACS, Gradle,
+# Jetbrains, Visual Studio, VSCode and XCode)
+#
+.atom/
+.metadata/
+.classpath/
+.project/
+.emacs
+.emacs.d/
+.gradle/
+.idea/
+.vs/
+.vscode/
+.xcodeproj/
+.xcworkspace/
+.xcuserstate
