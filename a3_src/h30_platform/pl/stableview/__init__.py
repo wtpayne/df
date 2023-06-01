@@ -205,7 +205,7 @@ def _del_widget(ctx, cmd):
 # -------------------------------------------------------------------------
 def widget(cfg, fcn, *args, **kwargs):
     """
-    Add the specfied widget to the view model.
+    Add the specfied widget to the view.
 
     """
     cfg._fcn = fcn
@@ -254,6 +254,7 @@ def _add_widget(ctx, cmd):
     #
     tup_no_tag = ('create_viewport',
                   'bind_item_font',
+                  'bind_theme',
                   'bind_item_handler_registry')
     if name_fcn in tup_no_tag:
         fcn(**kwargs)
@@ -269,6 +270,7 @@ def _add_widget(ctx, cmd):
                      'add_handler_registry',
                      'add_item_handler_registry',
                      'add_texture_registry',
+                     'add_theme',
                      'add_window')
     if name_fcn in tup_no_parent:
         fcn(**kwargs)

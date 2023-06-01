@@ -144,20 +144,10 @@ def editor():
     """
     import da.env.run
 
-    # dirpath_editor = da.env.path(
-    #                         process_area = 'a3_src',
-    #                         control_tier = 'h60_system',
-    #                         relpath      = 'flowforge')
-    # sys.exit(da.env.run.python_function(
-    #                         spec         = 'pl.stableview.main',
-    #                         iter_args    = (dirpath_editor, 'main'),
-    #                         id_env       = 'e002_general_research'))
-
-
     dirpath_editor = da.env.path(
                             process_area = 'a3_src',
-                            control_tier = 'h80_research',
-                            relpath      = 't000_wtp/minidyn')
+                            control_tier = 'h60_system',
+                            relpath      = 'flowforge')
     sys.exit(da.env.run.python_function(
                             spec         = 'pl.stableview.main',
                             iter_args    = (dirpath_editor, 'main'),

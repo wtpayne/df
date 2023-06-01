@@ -65,7 +65,6 @@ import da.env
 
 from . import model
 
-
 SIDEBAR_WIDTH        = model.SIDEBAR_WIDTH
 SIDEBAR_WIDGET_WIDTH = model.SIDEBAR_WIDGET_WIDTH
 INDENT               = model.INDENT
@@ -73,9 +72,9 @@ INDENT               = model.INDENT
 # TODO: USE SOME OTHER NON-INTERNAL-SPECIFIC
 #       WAY OF GETTING RESOURCES.
 #
-FILEPATH_FONT_FIRA_CODE = da.env.path(
+FILEPATH_FONT_PRIMARY = da.env.path(
         control_tier = 'h10_resource',
-        relpath      = 'font/FiraCodeNerdFontMono-Light.ttf',
+        relpath      = 'font/tecnico/fino.ttf',
         id_env       = 'e002_general_research')
 
 FILEPATH_DEFAULT_LOAD = da.env.path(
@@ -88,10 +87,6 @@ FILEPATH_DEFAULT_SAVE = da.env.path(
         control_tier = 'h90_internal',
         relpath      = '/da/demo/dm001_workflow/dm001_workflow_saved.stableflow.cfg.yaml',
         id_env       = 'e002_general_research')
-
-
-BOTTOM_RIGHT = dearpygui.dearpygui.mvNodeMiniMap_Location_BottomRight
-NO_PADDING   = [0, 0]
 
 
 # -----------------------------------------------------------------------------
