@@ -1,20 +1,32 @@
 # -----------------------------------------------------------------------------
 # Vieww logic as a coroutine.
 #
-coro:                              _spec::flowforge.main.coro
-am_update:                         _spec::flowforge.main.am_update
+coro:                             _spec::flowforge.main.coro
+am_update:                        _spec::flowforge.main.am_update
 
 # -----------------------------------------------------------------------------
-# Event handler registry.
+# Event and item handler registry.
 #
-event:
-  _fcn:                           add_handler_registry
+handle:
 
-  mouseright:
-    _fcn:                         add_mouse_click_handler
-    _kwargs:
-      button:                     _spec::dearpygui.dearpygui.mvMouseButton_Right
-      callback:                   _spec::flowforge.main.mouseright
+  global:
+    _fcn:                         add_handler_registry
+
+    mouseright:
+      _fcn:                       add_mouse_click_handler
+      _kwargs:
+        button:                   _spec::dearpygui.dearpygui.mvMouseButton_Right
+        callback:                 _spec::flowforge.main.mouseright
+
+  vp:
+    win:
+      _fcn:                       add_item_handler_registry
+
+      resize:
+        _fcn:                     add_item_resize_handler
+        _kwargs:
+          callback:               _spec::flowforge.main.resize
+
 
 # -----------------------------------------------------------------------------
 # Font registry
@@ -1332,13 +1344,14 @@ vp:
   _fcn:                           create_viewport
   _kwargs:
     title:                        "FlowForge"
-    width:                        2048
-    height:                       768
+    width:                        2400
+    height:                       900
 
   win:
     _fcn:                         add_window
     _misc:
       set_primary_window:         True
+
 
     # -------------------------------------------------------------------------
     # Right-click context menu.
@@ -1527,27 +1540,32 @@ vp:
         _kwargs:
           width:                  0
 
-      play:
-        _fcn:                     add_image_button
+      grp_btn:
+        _fcn:                     add_group
         _kwargs:
-          label:                  "Play"
-          texture_tag:            view.icon.play_16x16
-          callback:               _spec::flowforge.main.ctx_node_edit
+          horizontal:             True
+          horizontal_spacing:     0.0
 
-      pause:
-        _fcn:                     add_image_button
-        _kwargs:
-          label:                  "Pause"
-          texture_tag:            view.icon.pause_16x16
-          callback:               _spec::flowforge.main.ctx_node_edit
+        play:
+          _fcn:                   add_image_button
+          _kwargs:
+            label:                "Play"
+            texture_tag:          view.icon.play_16x16
+            callback:             _spec::flowforge.main.ctx_node_edit
 
-      stop:
-        _fcn:                     add_image_button
-        _kwargs:
-          label:                  "Stop"
-          texture_tag:            view.icon.stop_16x16
-          callback:               _spec::flowforge.main.ctx_node_edit
+        pause:
+          _fcn:                   add_image_button
+          _kwargs:
+            label:                "Pause"
+            texture_tag:          view.icon.pause_16x16
+            callback:             _spec::flowforge.main.ctx_node_edit
 
+        stop:
+          _fcn:                   add_image_button
+          _kwargs:
+            label:                "Stop"
+            texture_tag:          view.icon.stop_16x16
+            callback:             _spec::flowforge.main.ctx_node_edit
 
     # -------------------------------------------------------------------------
     # Main workspace
@@ -1746,6 +1764,12 @@ vp:
 
 
 binding:
+
+  win_item_handler:
+    _fcn:                         bind_item_handler_registry
+    _kwargs:
+      item:                       view.vp.win
+      handler_registry:           view.handle.vp.win
 
   win_font:
     _fcn:                         bind_item_font

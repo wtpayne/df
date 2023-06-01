@@ -117,13 +117,6 @@ def coro(ctx):
     Main coroutine for the app.
 
     """
-    # We set up the presentation model here
-    # because it does not require the dearpygui
-    # context and is required by the callbacks
-    # that are bound to the widgets during their
-    # creation.
-    #
-    #ctx.pm = model.Model(ctx)
 
     ctx.app.rule(cond = fl.rule.always(),
                  act  = _update_from_application_model)  # TODO: ctx.app.update FROM CONFIGURATION?
@@ -131,34 +124,42 @@ def coro(ctx):
     yield  # Context is created and widgets are added in gui.main().
 
     #######################################
+    #######################################
+    #######################################
     # AUTO LOAD FILE FOR EASIER DEBUGGING #
     #######################################
 
     with ctx.batch_context():
         ctx.app.from_dict(fl.stableflow.cfg.prepare(FILEPATH_DEFAULT_LOAD))
-    # ctx.app.to_file(filepath = FILEPATH_DEFAULT_SAVE)
 
-    #ctx.pm.host.set_count(1)
-    #ctx.pm.proc.set_count(1)
-
-    # import pprint
-    # pprint.pprint(ctx.app.to_dict())
-
-    # pprint.pprint(ctx.ui.get_item_configuration('view.vp.win'))
-    # ctx.ui.configure_item('view.vp.win.main.toolbar', vertical_spacing = -1)
+    #######################################
+    #######################################
+    #######################################
 
     yield  # Viewport is shown, main loop starts in gui.main().
 
     while True:
 
-        # print('A')
-
-        #ctx.pm.node.update_selected_nodes()
-        #ctx.pm.edge.update_selected_edges()
-
         yield  # Frame is rendered, is_dearpygui_running check in gui.main().
 
-        # print('B')
+
+# -----------------------------------------------------------------------------
+def resize(sender, app_data, ctx):
+    """
+    Handle window resize events.
+
+    """
+    rect_win = ctx.ui.get_item_rect_size('view.vp.win')
+    rect_btn = ctx.ui.get_item_rect_size('view.vp.win.toolbar.grp_btn')
+
+    width_win = rect_win[0]
+    width_btn = rect_btn[0]
+
+    half_win  = int(width_win / 2)
+    half_btn  = int(width_btn / 2)
+    padding   = max(0, half_win - half_btn)
+
+    ctx.ui.set_item_width('view.vp.win.toolbar.pad_left', padding)
 
 
 # -----------------------------------------------------------------------------
