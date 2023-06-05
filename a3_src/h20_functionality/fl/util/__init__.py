@@ -1284,21 +1284,39 @@ class DotDict(dict):
 # -----------------------------------------------------------------------------
 def coroutine(fun):
     """
-    Return a decorator function that primes communications with a coroutine.
+    This module provides the 'coroutine' decorator for priming coroutines.
 
-    ---
-    type:   function
-    ...
+    A coroutine in Python is a function containing
+    the 'yield' statement, and can be used to handle
+    asynchronous tasks elegantly.
+
+    However, before a coroutine can start responding
+    to 'send()' or '__next__()' calls, it must be
+    'primed' to advance its execution to the first
+    'yield' expression. This module's 'coroutine'
+    decorator provides a way to automatically prime
+    coroutines upon their creation.
+
+    Functions:
+
+        coroutine (fun: Callable) -> Callable :
+
+                A decorator function that primes a coroutine by automatically
+                advancing its execution to the first 'yield' statement.
+
+    Example:
+
+        @coroutine
+        def my_coroutine():
+            while True:
+                received = yield
+                # process received value
 
     """
 
     def primed(*args, **kwargs):
         """
         Wrapper for coroutines that 'primes' it by sending the first message.
-
-        ---
-        type:   function
-        ...
 
         """
         coro = fun(*args, **kwargs)
@@ -1309,30 +1327,98 @@ def coroutine(fun):
 
 
 # -----------------------------------------------------------------------------
-def resolve(value):
+def resolve(value, ctx = None):
     """
-    Ensure that the provided value is fully resolved.
+    Resolves a string to its actual value.
 
-    If the provided value is a string starting
-    with the prefix '_spec::' then resolve it
-    to the actual value.
+    The function handles strings starting with
+    '_spec::' or '_ref::', interpreting them as
+    module specifications and context references
+    respectively. For '_spec::', it imports the
+    module and fetches the attribute, while for
+    '_ref::', it fetches the attribute from the
+    provided context.
+
+    If the value is not a string, or does not
+    start with the recognized prefixes, it is
+    returned as is.
+
+    The function performs a maximum of
+    'count_indir_max' iterations of resolution,
+    raising a RuntimeError if this limit is
+    exceeded.
+
+    Parameters:
+
+        value (str or Any):     The value to be resolved. Could be string
+                                (with specific prefixes) or any other data
+                                type.
+
+        ctx (dict, optional):   Context in which the '_ref::' prefixed values
+                                should be resolved.
+
+    Returns:
+
+        Any:                    The resolved value, which could be any
+                                data type.
+
+    Raises:
+
+        RuntimeError:   If the maximum limit of resolution levels
+                        ('count_indir_max') is exceeded.
 
     """
-    if not fl.util.alg.is_string(value):
-        return value
 
-    prefix = '_spec::'
-    if not value.startswith(prefix):
-        return value
+    prefix_spec     = '_spec::'
+    prefix_ref      = '_ref::'
+    count_indir_max = 10
 
-    return from_spec(str_spec = value[len(prefix):])
+
+    for _ in range(count_indir_max):
+
+        if not fl.util.alg.is_string(value):
+            return value
+
+        if value.startswith(prefix_spec):
+            value = from_spec(value[len(prefix_spec):])
+        elif value.startswith(prefix_ref):
+            value = ctx[value[len(prefix_ref):]]
+        else:
+            return value
+
+    raise RuntimeError('Maximum number of levels of indirection exceeded.')
 
 
 # -----------------------------------------------------------------------------
 def from_spec(str_spec):
     """
-    Import the module and return the attribute in the specified spec.
+    Imports a module and fetches a specified attribute from it.
+
+    The function receives a string in the format
+    'module.attribute', and returns the value of
+    the attribute from the specified module. It
+    uses the Python built-in 'importlib' to
+    dynamically import the module.
+
+    Parameters:
+
+        str_spec (str):     The string specifying the module and the
+                            attribute, in the format 'module.attribute'.
+
+    Returns:
+
+        Any:                The attribute fetched from the specified
+                            module.
+
+    Raises:
+
+        ImportError:        If the module specified in 'str_spec'
+                            cannot be imported.
+
+        AttributeError:     If the attribute specified in 'str_spec'
+                            does not exist in the module.
 
     """
+
     (name_module, name_attrib) = str_spec.rsplit('.', 1)
     return getattr(importlib.import_module(name_module), name_attrib)

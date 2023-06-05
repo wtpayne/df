@@ -159,8 +159,8 @@ def _load_theme(ctx, dirpath_app, id_theme):
             map_theme[key] = fl.util.resolve(value)
 
     map_theme['icon_play']    = _load_icon(ctx, dirpath_theme, 'play')
-    map_theme['icon_play']    = _load_icon(ctx, dirpath_theme, 'pause')
-    map_theme['icon_play']    = _load_icon(ctx, dirpath_theme, 'stop')
+    map_theme['icon_pause']   = _load_icon(ctx, dirpath_theme, 'pause')
+    map_theme['icon_stop']    = _load_icon(ctx, dirpath_theme, 'stop')
     map_theme['font_primary'] = _filepath_font(dirpath_theme, 'default')
 
     return map_theme
@@ -323,13 +323,13 @@ def _add_widget(ctx, cmd):
     #
     for key in tuple(kwargs.keys()):  # Keys change, so iterate over a copy.
 
-        value = kwargs[key]
-        if isinstance(value, str):
-            prefix = '_ref::'
-            if value.startswith(prefix):
-                kwargs[key] = ctx[value[len(prefix):]]
+        # value = kwargs[key]
+        # if isinstance(value, str):
+        #     prefix = '_ref::'
+        #     if value.startswith(prefix):
+        #         kwargs[key] = ctx[value[len(prefix):]]
 
-        kwargs[key] = fl.util.resolve(value = kwargs[key])
+        kwargs[key] = fl.util.resolve(value = kwargs[key], ctx = ctx)
 
         if key.endswith('callback'):
             kwargs['user_data'] = ctx
