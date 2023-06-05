@@ -55,6 +55,8 @@ import ruamel.yaml
 
 import fl.rule
 import fl.util
+import fl.util.debug
+import fl.util.io
 
 try:
     __version__ = importlib.metadata.version('stableview')
@@ -63,7 +65,7 @@ except importlib.metadata.PackageNotFoundError:
 
 
 # -----------------------------------------------------------------------------
-def main(dirpath_cfg, name_view):
+def main(dirpath_app, id_view, id_theme):
     """
     Main update/event loop for the ui.
 
@@ -75,64 +77,143 @@ def main(dirpath_cfg, name_view):
 
     """
 
-    # Initialize the various component parts of
-    # the UI architecture:-
-    #
-    #   1. The application model (ctx.app).
-    #   2. The view model (ctx.vm)
-    #   3. The view (ctx.view)
-    #   4. The UI API
-    #
-    ctx     = fl.util.Bureau()
-    batch   = ctx.batch_init()
-    ctx.app = fl.util.Bureau()
-    ctx.vm  = fl.util.Bureau()
-    ctx.view.from_file(filepath = _filepath_cfg_view(dirpath_cfg, name_view))
-    ctx.ui  = dearpygui.dearpygui
+    with fl.util.debug.rich_exception_printing_context(show_locals = False):
 
-    # Add rules for responding to changes in the
-    # view. Rules for responding to changes in
-    # the view model and application model will
-    # be by their nature application-specific
-    # and therefore are colocated with
-    # application specific design elements.
-    #
-    ctx.view.rule(cond = fl.rule.is_leaf_at(('_fcn',)),
-                  act  = _update_dearpygui_widgets)
+        # Initialize the various component parts of
+        # the UI architecture:-
+        #
+        #   1. The application model (ctx.app).
+        #   2. The view model (ctx.vm)
+        #   3. The view (ctx.view)
+        #   4. The UI API
+        #
+        ctx     = fl.util.Bureau()
+        batch   = ctx.batch_init()
+        ctx.ui  = dearpygui.dearpygui
+        ctx.app = fl.util.Bureau()
+        ctx.vm  = fl.util.Bureau()
+        ctx.view.from_file(filepath = _filepath_cfg_view(dirpath_app, id_view))
+        ctx.theme.from_dict(_load_theme(ctx, dirpath_app, id_theme))
 
-    # Application coroutine
-    #
-    ctx.coro = fl.util.resolve(ctx.view.coro)(ctx)
-    next(ctx.coro)                                # app early setup.
+        # Add rules for responding to changes in the
+        # view. Rules for responding to changes in
+        # the view model and application model will
+        # be by their nature application-specific
+        # and therefore are colocated with
+        # application specific design elements.
+        #
+        ctx.view.rule(cond = fl.rule.is_leaf_at(('_fcn',)),
+                      act  = _update_dearpygui_widgets)
 
-    ctx.ui.create_context()
+        # Application coroutine
+        #
+        ctx.coro = fl.util.resolve(ctx.view.coro)(ctx)
+        next(ctx.coro)                            # app early setup.
 
-    try:
-        ctx.batch_finalize(batch)                 # Trigger rules, create view.
+        ctx.ui.create_context()
 
-        ctx.ui.setup_dearpygui()
+        try:
+            ctx.batch_finalize(batch)             # Trigger rules, create view.
 
-        with ctx.batch_context():
-            next(ctx.coro)                        # app late setup.
-
-        ctx.ui.show_viewport()
-        while ctx.ui.is_dearpygui_running():
+            ctx.ui.setup_dearpygui()
 
             with ctx.batch_context():
-                next(ctx.coro)                    # app runtime step.
-                ctx.ui.render_dearpygui_frame()
-    finally:
-        ctx.ui.destroy_context()
+                next(ctx.coro)                    # app late setup.
+
+            ctx.ui.show_viewport()
+            while ctx.ui.is_dearpygui_running():
+
+                with ctx.batch_context():
+                    next(ctx.coro)                # app runtime step.
+                    ctx.ui.render_dearpygui_frame()
+        finally:
+            ctx.ui.destroy_context()
 
 
 # -----------------------------------------------------------------------------
-def _filepath_cfg_view(dirpath_cfg, name_view):
+def _load_theme(ctx, dirpath_app, id_theme):
+    """
+    Update ctx.view with the specified theme.
+
+    """
+
+    dirpath_theme      = os.path.join(dirpath_app, 'theme', id_theme)
+    filename_cfg_theme = '{id}.flowforge.theme.yaml'.format(id = id_theme)
+    filepath_cfg_theme = os.path.join(dirpath_theme, filename_cfg_theme)
+
+    if not os.path.isfile(filepath_cfg_theme):
+        raise RuntimeError(
+                'Could not find theme configuration: ' + filepath_cfg_theme)
+
+    (map_cfg_theme,
+     map_error) = fl.util.io.load_from_filepath(filepath_cfg_theme)
+
+    if map_error:
+        msg = 'Could not load theme configuration: ' + filepath_cfg_theme
+        raise RuntimeError(msg) from map_error['exception']
+
+    # Resolve any references in the thing.
+    map_theme = dict()
+    for id_section in ('color', 'style', 'form'):
+        for (key, value) in map_cfg_theme[id_section].items():
+            map_theme[key] = fl.util.resolve(value)
+
+    map_theme['icon_play']    = _load_icon(ctx, dirpath_theme, 'play')
+    map_theme['icon_play']    = _load_icon(ctx, dirpath_theme, 'pause')
+    map_theme['icon_play']    = _load_icon(ctx, dirpath_theme, 'stop')
+    map_theme['font_primary'] = _filepath_font(dirpath_theme, 'default')
+
+    return map_theme
+
+
+# -----------------------------------------------------------------------------
+def _filepath_font(dirpath_theme, id_font):
+    """
+    Return the filepath to the specifiewd font.
+
+    """
+
+    filename_font = '{id_font}.ttf'.format(id_font = id_font)
+    filepath_font = os.path.join(dirpath_theme, filename_font)
+
+    if not os.path.isfile(filepath_font):
+        raise RuntimeError('Could not find font: ' + filepath_font)
+
+    return filepath_font
+
+
+# -----------------------------------------------------------------------------
+def _load_icon(ctx, dirpath_theme, id_icon, width = 16, height = 16):
+    """
+    Return the file path to the specified icon.
+
+    """
+
+    filename_png = '{id}.png'.format(id = id_icon)
+    filepath_png = os.path.join(dirpath_theme, filename_png)
+
+    if not os.path.isfile(filepath_png):
+        raise RuntimeError('Could not find icon: ' + filepath_png)
+
+    (width_png, height_png, channels, data) = ctx.ui.load_image(filepath_png)
+
+    if not width_png == width:
+        raise RuntimeError('Incorrect icon width: ' + filepath_png)
+
+    if not height_png == height:
+        raise RuntimeError('Incorrect icon height: ' + filepath_png)
+
+    return data
+
+
+# -----------------------------------------------------------------------------
+def _filepath_cfg_view(dirpath_app, id_view):
     """
     Load configuration for the UI from the specified view.
 
     """
-    filename_cfg = '{name}.stableview.cfg.yaml'.format(name = name_view)
-    filepath_cfg = os.path.join(dirpath_cfg, name_view, filename_cfg)
+    filename_cfg = '{name}.stableview.cfg.yaml'.format(name = id_view)
+    filepath_cfg = os.path.join(dirpath_app, id_view, filename_cfg)
     return filepath_cfg
 
 
@@ -241,6 +322,12 @@ def _add_widget(ctx, cmd):
     # to their actual (e.g. callable) values.
     #
     for key in tuple(kwargs.keys()):  # Keys change, so iterate over a copy.
+
+        value = kwargs[key]
+        if isinstance(value, str):
+            prefix = '_ref::'
+            if value.startswith(prefix):
+                kwargs[key] = ctx[value[len(prefix):]]
 
         kwargs[key] = fl.util.resolve(value = kwargs[key])
 

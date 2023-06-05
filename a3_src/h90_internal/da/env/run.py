@@ -233,9 +233,18 @@ def python_function(spec,
 
     if map_kwargs:
         list_kwargs = list()
-        for (kw, value) in map_kwargs.items():
-            list_kwargs.append('{kw} = {value}'.format(kw = kw, value = value))
+        for (key, value) in map_kwargs.items():
+            if isinstance(value, str):
+                list_kwargs.append('{key} = "{value}"'.format(
+                                                        key   = key,
+                                                        value = repr(value)))
+            else:
+                list_kwargs.append('{key} = {value}'.format(
+                                                        key   = key,
+                                                        value = repr(value)))
+
         str_args += ','.join(list_kwargs)
+
 
     str_python_source = "'import {mod}; {mod}.{fcn}({arg})'".format(
                                                         mod = name_module,

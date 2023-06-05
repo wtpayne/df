@@ -120,41 +120,30 @@ import fl.util
 
 
 
-# -----------------------------------------------------------------------------
-def palette():
-    """
-    Return the brand color palette.
+background_white   = [250, 250, 250]
+background_dark    = [ 50,  50,  50]
 
-    """
+light_grey_tint_4  = [244, 244, 244]
+light_grey_tint_3  = [228, 228, 228]
+light_grey_tint_2  = [220, 220, 220]
+light_grey_tint_1  = [210, 210, 210]
+light_grey_mid     = [200, 200, 200]
+light_grey_shade_1 = [190, 190, 190]
+light_grey_shade_2 = [180, 180, 180]
+light_grey_shade_3 = [170, 170, 170]
+light_grey_shade_4 = [160, 160, 160]
+light_grey_shade_5 = [150, 150, 150]
 
-    palette = fl.util.Bureau()
+dark_grey_tint_4   = [120, 120, 120]
+dark_grey_tint_3   = [110, 110, 110]
+dark_grey_tint_2   = [100, 100, 100]
+dark_grey_tint_1   = [ 90,  90,  90]
+dark_grey_mid      = [ 80,  80,  80]
+dark_grey_shade_1  = [ 70,  70,  70]
+dark_grey_shade_2  = [ 60,  60,  60]
+dark_grey_shade_3  = [ 50,  50,  50]
+dark_grey_shade_4  = [ 40,  40,  40]
+dark_grey_shade_5  = [ 30,  30,  30]
 
-    palette.BACKGROUND_WHITE   = [250, 250, 250]
-    palette.BACKGROUND_DARK    = [ 50,  50,  50]
-
-    palette.LIGHT_GREY_TINT_4  = [244, 244, 244]
-    palette.LIGHT_GREY_TINT_3  = [228, 228, 228]
-    palette.LIGHT_GREY_TINT_2  = [220, 220, 220]
-    palette.LIGHT_GREY_TINT_1  = [210, 210, 210]
-    palette.LIGHT_GREY_MID     = [200, 200, 200]
-    palette.LIGHT_GREY_SHADE_1 = [190, 190, 190]
-    palette.LIGHT_GREY_SHADE_2 = [180, 180, 180]
-    palette.LIGHT_GREY_SHADE_3 = [170, 170, 170]
-    palette.LIGHT_GREY_SHADE_4 = [160, 160, 160]
-    palette.LIGHT_GREY_SHADE_5 = [150, 150, 150]
-
-    palette.DARK_GREY_TINT_4   = [120, 120, 120]
-    palette.DARK_GREY_TINT_3   = [110, 110, 110]
-    palette.DARK_GREY_TINT_2   = [100, 100, 100]
-    palette.DARK_GREY_TINT_1   = [ 90,  90,  90]
-    palette.DARK_GREY_MID      = [ 80,  80,  80]
-    palette.DARK_GREY_SHADE_1  = [ 70,  70,  70]
-    palette.DARK_GREY_SHADE_2  = [ 60,  60,  60]
-    palette.DARK_GREY_SHADE_3  = [ 50,  50,  50]
-    palette.DARK_GREY_SHADE_4  = [ 40,  40,  40]
-    palette.DARK_GREY_SHADE_5  = [ 30,  30,  30]
-
-    palette.ACCENT_A           = [240, 105,  20]
-
-    return palette
+accent_a           = [240, 105,  20]
 

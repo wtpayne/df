@@ -3,14 +3,14 @@
 ---
 
 title:
-    "Stableflow theme icon module."
+    "Font asset module."
 
 description:
-    "Provides functions for preparing and
-    loading icon assets."
+    "This python module defines functions
+    for preparing font assets."
 
 id:
-    "3cfe0496-9a1c-49e6-b25a-96316b08071a"
+    "beffb9cd-642a-42b8-a6e6-7d67cd2737aa"
 
 type:
     dt003_python_module
@@ -45,29 +45,24 @@ license:
 """
 
 
-# -----------------------------------------------------------------------------
-def build(filepath_icon_src, id_theme, id_icon, color_fg, color_bg):
-    """
-    Create an icon file.
-
-    """
-    import PIL.Image
-    import numpy
-
-    rgba = PIL.Image.open(filepath).convert("RGBA")
-    return numpy.array(rgba).flatten()
-
-    filepath_icon_src
+import os.path
+import shutil
 
 
 # -----------------------------------------------------------------------------
-def load(id_theme, id_icon):
+def prepare(rootpath_font,
+            relpath_font,
+            rootpath_theme,
+            id_theme,
+            id_font):
     """
-    TODO: MOVE THIS INTO A BUILD STEP WHERE WE COMPILE ASSETS.
+    Copy and rename the specified font to the theme asset directory.
 
     """
-    import da.env
-    filepath = da.env.path(
-        control_tier = 'h10_resource',
-        relpath      = 'icon/dark/solid/{id}/16x16.png'.format(id = id_icon),
-        id_env       = 'e002_general_research')
+
+    filepath_src = os.path.join(rootpath_font, relpath_font)
+    dirpath_dst  = os.path.join(rootpath_theme, id_theme)
+    filename_dst = '{id_font}.ttf'.format(id_font = id_font)
+    filepath_dst = os.path.join(dirpath_dst, filename_dst)
+
+    shutil.copy(filepath_src, filepath_dst)

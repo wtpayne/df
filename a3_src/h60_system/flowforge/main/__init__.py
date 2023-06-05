@@ -13,7 +13,7 @@ id:
     "555345dc-41c5-4810-a4fc-7ccbcde432af"
 
 type:
-    dt003_python_module
+    dt002_python_package
 
 validation_level:
     v00_minimum

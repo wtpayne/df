@@ -3,20 +3,20 @@
 ---
 
 title:
-    "Stableflow theme font module."
+    "Utility debug functions module."
 
 description:
-    "Provides functions for preparing and
-    locating font assets."
+    "This module contains various utility
+    debug functions."
 
 id:
-    "0e457d79-3f2e-457f-a69c-7be2c2f6c017"
+    "4f768de3-10cd-4ff9-a20e-2541f2790cfc"
 
 type:
     dt003_python_module
 
 validation_level:
-    v00_minimum
+    v00_minimums
 
 protection:
     k00_general
@@ -45,18 +45,28 @@ license:
 """
 
 
-# -----------------------------------------------------------------------------
-def build(filepath_font, name):
-    """
-    """
-    pass
+import contextlib
+import sys
+
+import rich.console
+
 
 # -----------------------------------------------------------------------------
-def path(id_theme, id_font):
+@contextlib.contextmanager
+def rich_exception_printing_context(debug = True, show_locals = False):
     """
+    Context manager for printing nice exception stack traces.
+
+    Uses the rich.console.Console print_exception method.
+
     """
-    import da.env
-    return da.env.path(
-        control_tier = 'h10_resource',
-        relpath      = 'font/tecnico/fino.ttf',
-        id_env       = 'e002_general_research')
+
+    if debug:
+        try:
+            yield
+        except Exception as err:
+            console = rich.console.Console()
+            console.print_exception(show_locals = show_locals)
+            sys.exit(1)
+    else:
+        yield

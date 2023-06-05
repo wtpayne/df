@@ -287,7 +287,7 @@ def serialize_to_xml_string(map_data):
 
 
 # -----------------------------------------------------------------------------
-def deserialize_from_xml_string(str_xml):
+def deserialize_from_xml_string(str_xml, xml_attribs = False):
     """
     Return the data encoded in the the specified XML string as a dict.
 
@@ -319,7 +319,7 @@ def deserialize_from_xml_string(str_xml):
 
         map_data = xmltodict.parse(str_xml,
                                    encoding      = 'utf-8',
-                                   xml_attribs   = False,
+                                   xml_attribs   = xml_attribs,
                                    postprocessor = _postproc)
 
     except xml.parsers.expat.ExpatError as err:

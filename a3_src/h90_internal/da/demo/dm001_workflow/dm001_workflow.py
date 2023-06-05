@@ -137,20 +137,50 @@ def test():
 
 
 # -----------------------------------------------------------------------------
+def prepare():
+    """
+    Prepare assets.
+
+    """
+
+    import da.env
+    import da.env.run
+
+    rootpath_font  = da.env.path(control_tier = 'h10_resource',
+                                 relpath      = 'font',
+                                 id_env       = 'e002_general_research')
+    rootpath_icon  = da.env.path(control_tier = 'h10_resource',
+                                 relpath      = 'icon',
+                                 id_env       = 'e002_general_research')
+    rootpath_theme = da.env.path(control_tier = 'h60_system',
+                                 relpath      = 'flowforge/theme',
+                                 id_env       = 'e002_general_research')
+
+    sys.exit(da.env.run.python_function(
+                        spec         = 'flowforge.theme.prepare.all_assets',
+                        map_kwargs   = { 'rootpath_theme': rootpath_theme,
+                                         'rootpath_font':  rootpath_font,
+                                         'rootpath_icon':  rootpath_icon },
+                        id_env       = 'e002_general_research'))
+
+
+# -----------------------------------------------------------------------------
 def editor():
     """
     Run the FlowForge editor.
 
     """
+    import da.env
     import da.env.run
 
-    dirpath_editor = da.env.path(
+    dirpath_app   = da.env.path(
                             process_area = 'a3_src',
                             control_tier = 'h60_system',
                             relpath      = 'flowforge')
+
     sys.exit(da.env.run.python_function(
                             spec         = 'pl.stableview.main',
-                            iter_args    = (dirpath_editor, 'main'),
+                            iter_args    = (dirpath_app, 'main', 'light'),
                             id_env       = 'e002_general_research'))
 
 

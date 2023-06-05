@@ -43,7 +43,7 @@ font:
   primary:
     _fcn:                         add_font
     _kwargs:
-      file:                       _spec::flowforge.theme.FILEPATH_FONT_PRIMARY
+      file:                       _ref::theme.font_primary
       size:                       14
 
 
@@ -53,26 +53,26 @@ font:
 icon:
   _fcn:                           add_texture_registry
 
-  play_16x16:
+  play:
     _fcn:                         add_static_texture
     _kwargs:
       width:                      16
       height:                     16
-      default_value:              _spec::flowforge.theme.ICON_PLAY_16X16
+      default_value:              _ref::theme.icon_play
 
-  pause_16x16:
+  pause:
     _fcn:                         add_static_texture
     _kwargs:
       width:                      16
       height:                     16
-      default_value:              _spec::flowforge.theme.ICON_PAUSE_16X16
+      default_value:              _ref::theme.icon_pause
 
-  stop_16x16:
+  stop:
     _fcn:                         add_static_texture
     _kwargs:
       width:                      16
       height:                     16
-      default_value:              _spec::flowforge.theme.ICON_STOP_16X16
+      default_value:              _ref::theme.icon_stop
 
 
 # -----------------------------------------------------------------------------
@@ -97,8 +97,8 @@ theme:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvStyleVar_Alpha
-          x:                        _spec::flowforge.theme.ALPHA_X
-          y:                        _spec::flowforge.theme.ALPHA_Y
+          x:                        _ref::theme.alpha_x
+          y:                        _ref::theme.alpha_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -106,40 +106,40 @@ theme:
       #   _fcn:                       add_thIeme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_WindowPadding
-      #     x:                        _spec::flowforge.theme.WINDOW_PADDING_X
-      #     y:                        _spec::flowforge.theme.WINDOW_PADDING_Y
+      #     x:                        _ref::theme.window_padding_x
+      #     y:                        _ref::theme.window_padding_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       style_window_rounding:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvStyleVar_WindowRounding
-          x:                        _spec::flowforge.theme.WINDOW_ROUNDING_X
-          y:                        _spec::flowforge.theme.WINDOW_ROUNDING_Y
+          x:                        _ref::theme.window_rounding_x
+          y:                        _ref::theme.window_rounding_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       style_window_border_size:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvStyleVar_WindowBorderSize
-          x:                        _spec::flowforge.theme.WINDOW_BORDER_SIZE_X
-          y:                        _spec::flowforge.theme.WINDOW_BORDER_SIZE_Y
+          x:                        _ref::theme.window_border_size_x
+          y:                        _ref::theme.window_border_size_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       # style_window_min_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_WindowMinSize
-      #     x:                        _spec::flowforge.theme.WINDOW_MIN_SIZE_X
-      #     y:                        _spec::flowforge.theme.WINDOW_MIN_SIZE_Y
+      #     x:                        _ref::theme.window_min_size_x
+      #     y:                        _ref::theme.window_min_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       # style_window_title_align:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_WindowTitleAlign
-      #     x:                        _spec::flowforge.theme.WINDOW_TITLE_ALIGN_X
-      #     y:                        _spec::flowforge.theme.WINDOW_TITLE_ALIGN_Y
+      #     x:                        _ref::theme.window_title_align_x
+      #     y:                        _ref::theme.window_title_align_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -147,16 +147,16 @@ theme:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_ChildRounding
-      #     x:                        _spec::flowforge.theme.CHILD_ROUNDING_X
-      #     y:                        _spec::flowforge.theme.CHILD_ROUNDING_Y
+      #     x:                        _ref::theme.child_rounding_x
+      #     y:                        _ref::theme.child_rounding_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       # style_child_border_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_ChildBorderSize
-      #     x:                        _spec::flowforge.theme.CHILD_BORDER_SIZE_X
-      #     y:                        _spec::flowforge.theme.CHILD_BORDER_SIZE_Y
+      #     x:                        _ref::theme.child_border_size_x
+      #     y:                        _ref::theme.child_border_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -164,16 +164,16 @@ theme:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_PopupRounding
-      #     x:                        _spec::flowforge.theme.POPUP_ROUNDING_X
-      #     y:                        _spec::flowforge.theme.POPUP_ROUNDING_Y
+      #     x:                        _ref::theme.popup_rounding_x
+      #     y:                        _ref::theme.popup_rounding_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       # style_popup_border_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_PopupBorderSize
-      #     x:                        _spec::flowforge.theme.POPUP_BORDER_SIZE_X
-      #     y:                        _spec::flowforge.theme.POPUP_BORDER_SIZE_Y
+      #     x:                        _ref::theme.popup_border_size_x
+      #     y:                        _ref::theme.popup_border_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -181,24 +181,24 @@ theme:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvStyleVar_FramePadding
-          x:                        _spec::flowforge.theme.FRAME_PADDING_X
-          y:                        _spec::flowforge.theme.FRAME_PADDING_Y
+          x:                        _ref::theme.frame_padding_x
+          y:                        _ref::theme.frame_padding_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       style_frame_rounding:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvStyleVar_FrameRounding
-          x:                        _spec::flowforge.theme.FRAME_ROUNDING_X
-          y:                        _spec::flowforge.theme.FRAME_ROUNDING_Y
+          x:                        _ref::theme.frame_rounding_x
+          y:                        _ref::theme.frame_rounding_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       style_frame_border_size:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvStyleVar_FrameBorderSize
-          x:                        _spec::flowforge.theme.FRAME_BORDER_SIZE_X
-          y:                        _spec::flowforge.theme.FRAME_BORDER_SIZE_Y
+          x:                        _ref::theme.frame_border_size_x
+          y:                        _ref::theme.frame_border_size_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -206,16 +206,16 @@ theme:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvStyleVar_ItemSpacing
-          x:                        _spec::flowforge.theme.ITEM_SPACING_X
-          y:                        _spec::flowforge.theme.ITEM_SPACING_Y
+          x:                        _ref::theme.item_spacing_x
+          y:                        _ref::theme.item_spacing_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       style_item_inner_spacing:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvStyleVar_ItemInnerSpacing
-          x:                        _spec::flowforge.theme.ITEM_INNER_SPACING_X
-          y:                        _spec::flowforge.theme.ITEM_INNER_SPACING_Y
+          x:                        _ref::theme.item_inner_spacing_x
+          y:                        _ref::theme.item_inner_spacing_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -223,56 +223,56 @@ theme:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvStyleVar_IndentSpacing
-          x:                        _spec::flowforge.theme.INDENT_SPACING_X
-          y:                        _spec::flowforge.theme.INDENT_SPACING_Y
+          x:                        _ref::theme.indent_spacing_x
+          y:                        _ref::theme.indent_spacing_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       style_cell_padding:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvStyleVar_CellPadding
-          x:                        _spec::flowforge.theme.CELL_PADDING_X
-          y:                        _spec::flowforge.theme.CELL_PADDING_Y
+          x:                        _ref::theme.cell_padding_x
+          y:                        _ref::theme.cell_padding_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       style_scrollbar_size:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvStyleVar_ScrollbarSize
-          x:                        _spec::flowforge.theme.SCROLLBAR_SIZE_X
-          y:                        _spec::flowforge.theme.SCROLLBAR_SIZE_Y
+          x:                        _ref::theme.scrollbar_size_x
+          y:                        _ref::theme.scrollbar_size_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       style_scrollbar_rounding:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvStyleVar_ScrollbarRounding
-          x:                        _spec::flowforge.theme.SCROLLBAR_ROUNDING_X
-          y:                        _spec::flowforge.theme.SCROLLBAR_ROUNDING_Y
+          x:                        _ref::theme.scrollbar_rounding_x
+          y:                        _ref::theme.scrollbar_rounding_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       # style_grab_min_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_GrabMinSize
-      #     x:                        _spec::flowforge.theme.GRAB_MIN_SIZE_X
-      #     y:                        _spec::flowforge.theme.GRAB_MIN_SIZE_Y
+      #     x:                        _ref::theme.grab_min_size_x
+      #     y:                        _ref::theme.grab_min_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       # style_grab_rounding:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_GrabRounding
-      #     x:                        _spec::flowforge.theme.GRAB_ROUNDING_X
-      #     y:                        _spec::flowforge.theme.GRAB_ROUNDING_Y
+      #     x:                        _ref::theme.grab_rounding_x
+      #     y:                        _ref::theme.grab_rounding_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       # style_tab_rounding:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_TabRounding
-      #     x:                        _spec::flowforge.theme.TAB_ROUNDING_X
-      #     y:                        _spec::flowforge.theme.TAB_ROUNDING_Y
+      #     x:                        _ref::theme.tab_rounding_x
+      #     y:                        _ref::theme.tab_rounding_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -280,16 +280,16 @@ theme:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_ButtonTextAlign
-      #     x:                        _spec::flowforge.theme.BUTTON_TEXT_ALIGN_X
-      #     y:                        _spec::flowforge.theme.BUTTON_TEXT_ALIGN_Y
+      #     x:                        _ref::theme.button_text_align_x
+      #     y:                        _ref::theme.button_text_align_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       # style_selectable_text_align:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_SelectableTextAlign
-      #     x:                        _spec::flowforge.theme.SELECTABLE_TEXT_ALIGN_X
-      #     y:                        _spec::flowforge.theme.SELECTABLE_TEXT_ALIGN_Y
+      #     x:                        _ref::theme.selectable_text_align_x
+      #     y:                        _ref::theme.selectable_text_align_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -300,8 +300,8 @@ theme:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_GridSpacing
-          x:                        _spec::flowforge.theme.GRID_SPACING_X
-          y:                        _spec::flowforge.theme.GRID_SPACING_Y
+          x:                        _ref::theme.grid_spacing_x
+          y:                        _ref::theme.grid_spacing_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
 
@@ -309,32 +309,32 @@ theme:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_NodeCornerRounding
-          x:                        _spec::flowforge.theme.NODE_CORNER_ROUNDING_X
-          y:                        _spec::flowforge.theme.NODE_CORNER_ROUNDING_Y
+          x:                        _ref::theme.node_corner_rounding_x
+          y:                        _ref::theme.node_corner_rounding_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       # style_node_padding_horizontal:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_NodePaddingHorizontal
-      #     x:                        _spec::flowforge.theme.NODE_PADDING_HORIZONTAL_X
-      #     y:                        _spec::flowforge.theme.NODE_PADDING_HORIZONTAL_Y
+      #     x:                        _ref::theme.node_padding_horizontal_x
+      #     y:                        _ref::theme.node_padding_horizontal_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       # style_node_padding_vertical:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_NodePaddingVertical
-      #     x:                        _spec::flowforge.theme.NODE_PADDING_VERTICAL_X
-      #     y:                        _spec::flowforge.theme.NODE_PADDING_VERTICAL_Y
+      #     x:                        _ref::theme.node_padding_vertical_x
+      #     y:                        _ref::theme.node_padding_vertical_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       style_node_border_thickness:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_NodeBorderThickness
-          x:                        _spec::flowforge.theme.NODE_BORDER_THICKNESS_X
-          y:                        _spec::flowforge.theme.NODE_BORDER_THICKNESS_Y
+          x:                        _ref::theme.node_border_thickness_x
+          y:                        _ref::theme.node_border_thickness_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
 
@@ -342,24 +342,24 @@ theme:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_LinkThickness
-          x:                        _spec::flowforge.theme.LINK_THICKNESS_X
-          y:                        _spec::flowforge.theme.LINK_THICKNESS_Y
+          x:                        _ref::theme.link_thickness_x
+          y:                        _ref::theme.link_thickness_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       style_link_line_segments_per_length:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_LinkLineSegmentsPerLength
-          x:                        _spec::flowforge.theme.LINK_LINE_SEGMENTS_PER_LENGTH_X
-          y:                        _spec::flowforge.theme.LINK_LINE_SEGMENTS_PER_LENGTH_Y
+          x:                        _ref::theme.link_line_segments_per_length_x
+          y:                        _ref::theme.link_line_segments_per_length_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       style_link_hover_distance:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_LinkHoverDistance
-          x:                        _spec::flowforge.theme.LINK_HOVER_DISTANCE_X
-          y:                        _spec::flowforge.theme.LINK_HOVER_DISTANCE_Y
+          x:                        _ref::theme.link_hover_distance_x
+          y:                        _ref::theme.link_hover_distance_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
 
@@ -367,48 +367,48 @@ theme:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_PinCircleRadius
-          x:                        _spec::flowforge.theme.PIN_CIRCLE_RADIUS_X
-          y:                        _spec::flowforge.theme.PIN_CIRCLE_RADIUS_Y
+          x:                        _ref::theme.pin_circle_radius_x
+          y:                        _ref::theme.pin_circle_radius_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       style_pin_quad_side_length:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_PinQuadSideLength
-          x:                        _spec::flowforge.theme.PIN_QUAD_SIDE_LENGTH_X
-          y:                        _spec::flowforge.theme.PIN_QUAD_SIDE_LENGTH_Y
+          x:                        _ref::theme.pin_quad_side_length_x
+          y:                        _ref::theme.pin_quad_side_length_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       style_pin_triangle_side_length:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_PinTriangleSideLength
-          x:                        _spec::flowforge.theme.PIN_TRIANGLE_SIDE_LENGTH_X
-          y:                        _spec::flowforge.theme.PIN_TRIANGLE_SIDE_LENGTH_Y
+          x:                        _ref::theme.pin_triangle_side_length_x
+          y:                        _ref::theme.pin_triangle_side_length_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       style_pin_line_thickness:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_PinLineThickness
-          x:                        _spec::flowforge.theme.PIN_LINE_THICKNESS_X
-          y:                        _spec::flowforge.theme.PIN_LINE_THICKNESS_Y
+          x:                        _ref::theme.pin_line_thickness_x
+          y:                        _ref::theme.pin_line_thickness_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       style_pin_hover_radius:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_PinHoverRadius
-          x:                        _spec::flowforge.theme.PIN_HOVER_RADIUS_X
-          y:                        _spec::flowforge.theme.PIN_HOVER_RADIUS_Y
+          x:                        _ref::theme.pin_hover_radius_x
+          y:                        _ref::theme.pin_hover_radius_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       style_pin_offset:
         _fcn:                       add_theme_style
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeStyleVar_PinOffset
-          x:                        _spec::flowforge.theme.PIN_OFFSET_X
-          y:                        _spec::flowforge.theme.PIN_OFFSET_Y
+          x:                        _ref::theme.pin_offset_x
+          y:                        _ref::theme.pin_offset_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
 
@@ -419,216 +419,216 @@ theme:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LineWeight
-      #     x:                        _spec::flowforge.theme.LINE_WEIGHT_X
-      #     y:                        _spec::flowforge.theme.LINE_WEIGHT_Y
+      #     x:                        _ref::theme.line_weight_x
+      #     y:                        _ref::theme.line_weight_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_marker:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_Marker
-      #     x:                        _spec::flowforge.theme.MARKER_X
-      #     y:                        _spec::flowforge.theme.MARKER_Y
+      #     x:                        _ref::theme.marker_x
+      #     y:                        _ref::theme.marker_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_marker_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MarkerSize
-      #     x:                        _spec::flowforge.theme.MARKER_SIZE_X
-      #     y:                        _spec::flowforge.theme.MARKER_SIZE_Y
+      #     x:                        _ref::theme.marker_size_x
+      #     y:                        _ref::theme.marker_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_marker_weight:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MarkerWeight
-      #     x:                        _spec::flowforge.theme.MARKER_WEIGHT_X
-      #     y:                        _spec::flowforge.theme.MARKER_WEIGHT_Y
+      #     x:                        _ref::theme.marker_weight_x
+      #     y:                        _ref::theme.marker_weight_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_fill_alpha:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_FillAlpha
-      #     x:                        _spec::flowforge.theme.FILL_ALPHA_X
-      #     y:                        _spec::flowforge.theme.FILL_ALPHA_Y
+      #     x:                        _ref::theme.fill_alpha_x
+      #     y:                        _ref::theme.fill_alpha_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_error_bar_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_ErrorBarSize
-      #     x:                        _spec::flowforge.theme.ERROR_BAR_SIZE_X
-      #     y:                        _spec::flowforge.theme.ERROR_BAR_SIZE_Y
+      #     x:                        _ref::theme.error_bar_size_x
+      #     y:                        _ref::theme.error_bar_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_error_bar_weight:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_ErrorBarWeight
-      #     x:                        _spec::flowforge.theme.ERROR_BAR_WEIGHT_X
-      #     y:                        _spec::flowforge.theme.ERROR_BAR_WEIGHT_Y
+      #     x:                        _ref::theme.error_bar_weight_x
+      #     y:                        _ref::theme.error_bar_weight_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_digital_bit_height:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_DigitalBitHeight
-      #     x:                        _spec::flowforge.theme.DIGITAL_BIT_HEIGHT_X
-      #     y:                        _spec::flowforge.theme.DIGITAL_BIT_HEIGHT_Y
+      #     x:                        _ref::theme.digital_bit_height_x
+      #     y:                        _ref::theme.digital_bit_height_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_digital_bit_gap:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_DigitalBitGap
-      #     x:                        _spec::flowforge.theme.DIGITAL_BIT_GAP_X
-      #     y:                        _spec::flowforge.theme.DIGITAL_BIT_GAP_Y
+      #     x:                        _ref::theme.digital_bit_gap_x
+      #     y:                        _ref::theme.digital_bit_gap_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_plot_border_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_PlotBorderSize
-      #     x:                        _spec::flowforge.theme.PLOT_BORDER_SIZE_X
-      #     y:                        _spec::flowforge.theme.PLOT_BORDER_SIZE_Y
+      #     x:                        _ref::theme.plot_border_size_x
+      #     y:                        _ref::theme.plot_border_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_minor_alpha:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MinorAlpha
-      #     x:                        _spec::flowforge.theme.MINOR_ALPHA_X
-      #     y:                        _spec::flowforge.theme.MINOR_ALPHA_Y
+      #     x:                        _ref::theme.minor_alpha_x
+      #     y:                        _ref::theme.minor_alpha_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_major_tick_len:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MajorTickLen
-      #     x:                        _spec::flowforge.theme.MAJOR_TICK_LEN_X
-      #     y:                        _spec::flowforge.theme.MAJOR_TICK_LEN_Y
+      #     x:                        _ref::theme.major_tick_len_x
+      #     y:                        _ref::theme.major_tick_len_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_minor_tick_len:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MinorTickLen
-      #     x:                        _spec::flowforge.theme.MINOR_TICK_LEN_X
-      #     y:                        _spec::flowforge.theme.MINOR_TICK_LEN_Y
+      #     x:                        _ref::theme.minor_tick_len_x
+      #     y:                        _ref::theme.minor_tick_len_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_major_tick_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MajorTickSize
-      #     x:                        _spec::flowforge.theme.MAJOR_TICK_SIZE_X
-      #     y:                        _spec::flowforge.theme.MAJOR_TICK_SIZE_Y
+      #     x:                        _ref::theme.major_tick_size_x
+      #     y:                        _ref::theme.major_tick_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_minor_tick_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MinorTickSize
-      #     x:                        _spec::flowforge.theme.MINOR_TICK_SIZE_X
-      #     y:                        _spec::flowforge.theme.MINOR_TICK_SIZE_Y
+      #     x:                        _ref::theme.minor_tick_size_x
+      #     y:                        _ref::theme.minor_tick_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_major_grid_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MajorGridSize
-      #     x:                        _spec::flowforge.theme.MAJOR_GRID_SIZE_X
-      #     y:                        _spec::flowforge.theme.MAJOR_GRID_SIZE_Y
+      #     x:                        _ref::theme.major_grid_size_x
+      #     y:                        _ref::theme.major_grid_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_minor_grid_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MinorGridSize
-      #     x:                        _spec::flowforge.theme.MINOR_GRID_SIZE_X
-      #     y:                        _spec::flowforge.theme.MINOR_GRID_SIZE_Y
+      #     x:                        _ref::theme.minor_grid_size_x
+      #     y:                        _ref::theme.minor_grid_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_plot_padding:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_PlotPadding
-      #     x:                        _spec::flowforge.theme.PLOT_PADDING_X
-      #     y:                        _spec::flowforge.theme.PLOT_PADDING_Y
+      #     x:                        _ref::theme.plot_padding_x
+      #     y:                        _ref::theme.plot_padding_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_label_padding:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LabelPadding
-      #     x:                        _spec::flowforge.theme.LABEL_PADDING_X
-      #     y:                        _spec::flowforge.theme.LABEL_PADDING_Y
+      #     x:                        _ref::theme.label_padding_x
+      #     y:                        _ref::theme.label_padding_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_legend_padding:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LegendPadding
-      #     x:                        _spec::flowforge.theme.LEGEND_PADDING_X
-      #     y:                        _spec::flowforge.theme.LEGEND_PADDING_Y
+      #     x:                        _ref::theme.legend_padding_x
+      #     y:                        _ref::theme.legend_padding_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_legend_inner_padding:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LegendInnerPadding
-      #     x:                        _spec::flowforge.theme.LEGEND_INNER_PADDING_X
-      #     y:                        _spec::flowforge.theme.LEGEND_INNER_PADDING_Y
+      #     x:                        _ref::theme.legend_inner_padding_x
+      #     y:                        _ref::theme.legend_inner_padding_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_legend_spacing:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LegendSpacing
-      #     x:                        _spec::flowforge.theme.LEGEND_SPACING_X
-      #     y:                        _spec::flowforge.theme.LEGEND_SPACING_Y
+      #     x:                        _ref::theme.legend_spacing_x
+      #     y:                        _ref::theme.legend_spacing_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_mouse_pos_padding:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MousePosPadding
-      #     x:                        _spec::flowforge.theme.MOUSE_POS_PADDING_X
-      #     y:                        _spec::flowforge.theme.MOUSE_POS_PADDING_Y
+      #     x:                        _ref::theme.mouse_pos_padding_x
+      #     y:                        _ref::theme.mouse_pos_padding_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_annotation_padding:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_AnnotationPadding
-      #     x:                        _spec::flowforge.theme.ANNOTATION_PADDING_X
-      #     y:                        _spec::flowforge.theme.ANNOTATION_PADDING_Y
+      #     x:                        _ref::theme.annotation_padding_x
+      #     y:                        _ref::theme.annotation_padding_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_fit_padding:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_FitPadding
-      #     x:                        _spec::flowforge.theme.FIT_PADDING_X
-      #     y:                        _spec::flowforge.theme.FIT_PADDING_Y
+      #     x:                        _ref::theme.fit_padding_x
+      #     y:                        _ref::theme.fit_padding_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_plot_default_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_PlotDefaultSize
-      #     x:                        _spec::flowforge.theme.PLOT_DEFAULT_SIZE_X
-      #     y:                        _spec::flowforge.theme.PLOT_DEFAULT_SIZE_Y
+      #     x:                        _ref::theme.plot_default_size_x
+      #     y:                        _ref::theme.plot_default_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # style_plot_min_size:
       #   _fcn:                       add_theme_style
       #   _kwargs:
       #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_PlotMinSize
-      #     x:                        _spec::flowforge.theme.PLOT_MIN_SIZE_X
-      #     y:                        _spec::flowforge.theme.PLOT_MIN_SIZE_Y
+      #     x:                        _ref::theme.plot_min_size_x
+      #     y:                        _ref::theme.plot_min_size_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # -----------------------------------------------------------------------
@@ -638,21 +638,21 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_Text
-          value:                    _spec::flowforge.theme.TEXT
+          value:                    _ref::theme.text
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_text_disabled:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TextDisabled
-          value:                    _spec::flowforge.theme.TEXT_DISABLED
+          value:                    _ref::theme.text_disabled
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_text_selected_bg:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TextSelectedBg
-          value:                    _spec::flowforge.theme.TEXT_SELECTED_BG
+          value:                    _ref::theme.text_selected_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -660,28 +660,28 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_WindowBg
-          value:                    _spec::flowforge.theme.WINDOW_BG
+          value:                    _ref::theme.window_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_child_bg:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_ChildBg
-          value:                    _spec::flowforge.theme.CHILD_BG
+          value:                    _ref::theme.child_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_popup_bg:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_PopupBg
-          value:                    _spec::flowforge.theme.POPUP_BG
+          value:                    _ref::theme.popup_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_modal_window_dim_bg:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_ModalWindowDimBg
-          value:                    _spec::flowforge.theme.MODAL_WINDOW_DIM_BG
+          value:                    _ref::theme.modal_window_dim_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -689,21 +689,21 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_NavHighlight
-          value:                    _spec::flowforge.theme.NAV_HIGHLIGHT
+          value:                    _ref::theme.nav_highlight
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_nav_windowing_dim_bg:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_NavWindowingDimBg
-          value:                    _spec::flowforge.theme.NAV_WINDOWING_DIM_BG
+          value:                    _ref::theme.nav_windowing_dim_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_nav_windowing_highlight:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_NavWindowingHighlight
-          value:                    _spec::flowforge.theme.NAV_WINDOWING_HIGHLIGHT
+          value:                    _ref::theme.nav_windowing_highlight
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -711,14 +711,14 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_DockingEmptyBg
-          value:                    _spec::flowforge.theme.DOCKING_EMPTY_BG
+          value:                    _ref::theme.docking_empty_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_docking_preview:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_DockingPreview
-          value:                    _spec::flowforge.theme.DOCKING_PREVIEW
+          value:                    _ref::theme.docking_preview
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -726,7 +726,7 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_DragDropTarget
-          value:                    _spec::flowforge.theme.DRAG_DROP_TARGET
+          value:                    _ref::theme.drag_drop_target
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -734,21 +734,21 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TitleBg
-          value:                    _spec::flowforge.theme.TITLE_BG
+          value:                    _ref::theme.title_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_title_bg_active:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TitleBgActive
-          value:                    _spec::flowforge.theme.TITLE_BG_ACTIVE
+          value:                    _ref::theme.title_bg_active
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_title_bg_collapsed:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TitleBgCollapsed
-          value:                    _spec::flowforge.theme.TITLE_BG_COLLAPSED
+          value:                    _ref::theme.title_bg_collapsed
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -756,7 +756,7 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_MenuBarBg
-          value:                    _spec::flowforge.theme.MENU_BAR_BG
+          value:                    _ref::theme.menu_bar_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -764,21 +764,21 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_FrameBg
-          value:                    _spec::flowforge.theme.FRAME_BG
+          value:                    _ref::theme.frame_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_frame_bg_active:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_FrameBgActive
-          value:                    _spec::flowforge.theme.FRAME_BG_ACTIVE
+          value:                    _ref::theme.frame_bg_active
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_frame_bg_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_FrameBgHovered
-          value:                    _spec::flowforge.theme.FRAME_BG_HOVERED
+          value:                    _ref::theme.frame_bg_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -786,14 +786,14 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_Border
-          value:                    _spec::flowforge.theme.BORDER
+          value:                    _ref::theme.border
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_border_shadow:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_BorderShadow
-          value:                    _spec::flowforge.theme.BORDER_SHADOW
+          value:                    _ref::theme.border_shadow
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -801,28 +801,28 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_ScrollbarBg
-          value:                    _spec::flowforge.theme.SCROLLBAR_BG
+          value:                    _ref::theme.scrollbar_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_scrollbar_grab:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_ScrollbarGrab
-          value:                    _spec::flowforge.theme.SCROLLBAR_GRAB
+          value:                    _ref::theme.scrollbar_grab
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_scrollbar_grab_active:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_ScrollbarGrabActive
-          value:                    _spec::flowforge.theme.SCROLLBAR_GRAB_ACTIVE
+          value:                    _ref::theme.scrollbar_grab_active
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_scrollbar_grab_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_ScrollbarGrabHovered
-          value:                    _spec::flowforge.theme.SCROLLBAR_GRAB_HOVERED
+          value:                    _ref::theme.scrollbar_grab_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -830,21 +830,21 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_ResizeGrip
-          value:                    _spec::flowforge.theme.RESIZE_GRIP
+          value:                    _ref::theme.resize_grip
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_resize_grip_active:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_ResizeGripActive
-          value:                    _spec::flowforge.theme.RESIZE_GRIP_ACTIVE
+          value:                    _ref::theme.resize_grip_active
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_resize_grip_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_ResizeGripHovered
-          value:                    _spec::flowforge.theme.RESIZE_GRIP_HOVERED
+          value:                    _ref::theme.resize_grip_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -852,21 +852,21 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_Header
-          value:                    _spec::flowforge.theme.HEADER
+          value:                    _ref::theme.header
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_header_active:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_HeaderActive
-          value:                    _spec::flowforge.theme.HEADER_ACTIVE
+          value:                    _ref::theme.header_active
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_header_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_HeaderHovered
-          value:                    _spec::flowforge.theme.HEADER_HOVERED
+          value:                    _ref::theme.header_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -874,7 +874,7 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_CheckMark
-          value:                    _spec::flowforge.theme.CHECK_MARK
+          value:                    _ref::theme.check_mark
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -882,21 +882,21 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_Button
-          value:                    _spec::flowforge.theme.BUTTON
+          value:                    _ref::theme.button
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_button_active:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_ButtonActive
-          value:                    _spec::flowforge.theme.BUTTON_ACTIVE
+          value:                    _ref::theme.button_active
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_button_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_ButtonHovered
-          value:                    _spec::flowforge.theme.BUTTON_HOVERED
+          value:                    _ref::theme.button_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -904,21 +904,21 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_Separator
-          value:                    _spec::flowforge.theme.SEPARATOR
+          value:                    _ref::theme.separator
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_separator_active:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_SeparatorActive
-          value:                    _spec::flowforge.theme.SEPARATOR_ACTIVE
+          value:                    _ref::theme.separator_active
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_separator_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_SeparatorHovered
-          value:                    _spec::flowforge.theme.SEPARATOR_HOVERED
+          value:                    _ref::theme.separator_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -926,14 +926,14 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_SliderGrab
-          value:                    _spec::flowforge.theme.SLIDER_GRAB
+          value:                    _ref::theme.slider_grab
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_slider_grab_active:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_SliderGrabActive
-          value:                    _spec::flowforge.theme.SLIDER_GRAB_ACTIVE
+          value:                    _ref::theme.slider_grab_active
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -941,35 +941,35 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_Tab
-          value:                    _spec::flowforge.theme.TAB
+          value:                    _ref::theme.tab
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_tab_active:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TabActive
-          value:                    _spec::flowforge.theme.TAB_ACTIVE
+          value:                    _ref::theme.tab_active
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_tab_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TabHovered
-          value:                    _spec::flowforge.theme.TAB_HOVERED
+          value:                    _ref::theme.tab_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_tab_unfocused:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TabUnfocused
-          value:                    _spec::flowforge.theme.TAB_UNFOCUSED
+          value:                    _ref::theme.tab_unfocused
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_tab_unfocused_active:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TabUnfocusedActive
-          value:                    _spec::flowforge.theme.TAB_UNFOCUSED_ACTIVE
+          value:                    _ref::theme.tab_unfocused_active
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -977,35 +977,35 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TableBorderLight
-          value:                    _spec::flowforge.theme.TABLE_BORDER_LIGHT
+          value:                    _ref::theme.table_border_light
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_table_border_strong:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TableBorderStrong
-          value:                    _spec::flowforge.theme.TABLE_BORDER_STRONG
+          value:                    _ref::theme.table_border_strong
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_table_header_bg:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TableHeaderBg
-          value:                    _spec::flowforge.theme.TABLE_HEADER_BG
+          value:                    _ref::theme.table_header_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_table_row_bg:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TableRowBg
-          value:                    _spec::flowforge.theme.TABLE_ROW_BG
+          value:                    _ref::theme.table_row_bg
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_table_row_bg_alt:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_TableRowBgAlt
-          value:                    _spec::flowforge.theme.TABLE_ROW_BG_ALT
+          value:                    _ref::theme.table_row_bg_alt
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -1013,28 +1013,28 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_PlotHistogram
-          value:                    _spec::flowforge.theme.PLOT_HISTOGRAM
+          value:                    _ref::theme.plot_histogram
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_plot_histogram_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_PlotHistogramHovered
-          value:                    _spec::flowforge.theme.PLOT_HISTOGRAM_HOVERED
+          value:                    _ref::theme.plot_histogram_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_plot_lines:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_PlotLines
-          value:                    _spec::flowforge.theme.PLOT_LINES
+          value:                    _ref::theme.plot_lines
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
       color_plot_lines_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvThemeCol_PlotLinesHovered
-          value:                    _spec::flowforge.theme.PLOT_LINES_HOVERED
+          value:                    _ref::theme.plot_lines_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
@@ -1045,14 +1045,14 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_GridBackground
-          value:                    _spec::flowforge.theme.GRID_BACKGROUND
+          value:                    _ref::theme.grid_background
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       color_grid_line:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_GridLine
-          value:                    _spec::flowforge.theme.GRID_LINE
+          value:                    _ref::theme.grid_line
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
 
@@ -1060,28 +1060,28 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_NodeOutline
-          value:                    _spec::flowforge.theme.NODE_OUTLINE
+          value:                    _ref::theme.node_outline
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       color_node_background:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_NodeBackground
-          value:                    _spec::flowforge.theme.NODE_BACKGROUND
+          value:                    _ref::theme.node_background
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       color_node_background_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_NodeBackgroundHovered
-          value:                    _spec::flowforge.theme.NODE_BACKGROUND_HOVERED
+          value:                    _ref::theme.node_background_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       color_node_background_selected:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_NodeBackgroundSelected
-          value:                    _spec::flowforge.theme.NODE_BACKGROUND_SELECTED
+          value:                    _ref::theme.node_background_selected
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
 
@@ -1089,21 +1089,21 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_TitleBar
-          value:                    _spec::flowforge.theme.TITLE_BAR
+          value:                    _ref::theme.title_bar
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       color_title_bar_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_TitleBarHovered
-          value:                    _spec::flowforge.theme.TITLE_BAR_HOVERED
+          value:                    _ref::theme.title_bar_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       color_title_bar_selected:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_TitleBarSelected
-          value:                    _spec::flowforge.theme.TITLE_BAR_SELECTED
+          value:                    _ref::theme.title_bar_selected
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
 
@@ -1111,14 +1111,14 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_Pin
-          value:                    _spec::flowforge.theme.PIN
+          value:                    _ref::theme.pin
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       color_pin_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_PinHovered
-          value:                    _spec::flowforge.theme.PIN_HOVERED
+          value:                    _ref::theme.pin_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
 
@@ -1126,21 +1126,21 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_Link
-          value:                    _spec::flowforge.theme.LINK
+          value:                    _ref::theme.link
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       color_link_hovered:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_LinkHovered
-          value:                    _spec::flowforge.theme.LINK_HOVERED
+          value:                    _ref::theme.link_hovered
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       color_link_selected:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_LinkSelected
-          value:                    _spec::flowforge.theme.LINK_SELECTED
+          value:                    _ref::theme.link_selected
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
 
@@ -1148,14 +1148,14 @@ theme:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_BoxSelector
-          value:                    _spec::flowforge.theme.BOX_SELECTOR
+          value:                    _ref::theme.box_selector
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
       color_box_selector_outline:
         _fcn:                       add_theme_color
         _kwargs:
           target:                   _spec::dearpygui.dearpygui.mvNodeCol_BoxSelectorOutline
-          value:                    _spec::flowforge.theme.BOX_SELECTOR_OUTLINE
+          value:                    _ref::theme.box_selector_outline
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
 
@@ -1166,35 +1166,35 @@ theme:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_Line
-          value:                      _spec::flowforge.theme.LINE
+          value:                      _ref::theme.line
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_fill:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_Fill
-          value:                      _spec::flowforge.theme.FILL
+          value:                      _ref::theme.fill
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_marker_outline:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_MarkerOutline
-          value:                      _spec::flowforge.theme.MARKEROUTLINE
+          value:                      _ref::theme.markeroutline
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_marker_fill:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_MarkerFill
-          value:                      _spec::flowforge.theme.MARKERFILL
+          value:                      _ref::theme.markerfill
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_error_bar:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_ErrorBar
-          value:                      _spec::flowforge.theme.ERRORBAR
+          value:                      _ref::theme.errorbar
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # mvPlotCol_FrameBg interferes with mvThemeCol_FrameBg, so should leave
@@ -1204,21 +1204,21 @@ theme:
       #   _fcn:                         add_theme_color
       #   _kwargs:
       #     target:                     _spec::dearpygui.dearpygui.mvPlotCol_FrameBg
-      #     value:                      _spec::flowforge.theme.FRAMEBG
+      #     value:                      _ref::theme.framebg
       #     category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_plot_bg:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_PlotBg
-          value:                      _spec::flowforge.theme.PLOTBG
+          value:                      _ref::theme.plotbg
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_plot_border:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_PlotBorder
-          value:                      _spec::flowforge.theme.PLOTBORDER
+          value:                      _ref::theme.plotborder
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
 
@@ -1226,21 +1226,21 @@ theme:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_LegendBg
-          value:                      _spec::flowforge.theme.LEGENDBG
+          value:                      _ref::theme.legendbg
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_legend_border:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_LegendBorder
-          value:                      _spec::flowforge.theme.LEGENDBORDER
+          value:                      _ref::theme.legendborder
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_legend_text:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_LegendText
-          value:                      _spec::flowforge.theme.LEGENDTEXT
+          value:                      _ref::theme.legendtext
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
 
@@ -1248,14 +1248,14 @@ theme:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_TitleText
-          value:                      _spec::flowforge.theme.TITLETEXT
+          value:                      _ref::theme.titletext
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_inlay_text:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_InlayText
-          value:                      _spec::flowforge.theme.INLAYTEXT
+          value:                      _ref::theme.inlaytext
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
 
@@ -1263,14 +1263,14 @@ theme:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_XAxis
-          value:                      _spec::flowforge.theme.XAXIS
+          value:                      _ref::theme.xaxis
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_x_axis_grid:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_XAxisGrid
-          value:                      _spec::flowforge.theme.XAXISGRID
+          value:                      _ref::theme.xaxisgrid
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
 
@@ -1278,42 +1278,42 @@ theme:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_YAxis
-          value:                      _spec::flowforge.theme.YAXIS
+          value:                      _ref::theme.yaxis
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_y_axis_grid:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_YAxisGrid
-          value:                      _spec::flowforge.theme.YAXISGRID
+          value:                      _ref::theme.yaxisgrid
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_y_axis2:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_YAxis2
-          value:                      _spec::flowforge.theme.YAXIS2
+          value:                      _ref::theme.yaxis2
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_y_axis_grid2:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_YAxisGrid2
-          value:                      _spec::flowforge.theme.YAXISGRID2
+          value:                      _ref::theme.yaxisgrid2
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_y_axis3:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_YAxis3
-          value:                      _spec::flowforge.theme.YAXIS3
+          value:                      _ref::theme.yaxis3
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_y_axis_grid3:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_YAxisGrid3
-          value:                      _spec::flowforge.theme.YAXISGRID3
+          value:                      _ref::theme.yaxisgrid3
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
 
@@ -1321,21 +1321,21 @@ theme:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_Selection
-          value:                      _spec::flowforge.theme.SELECTION
+          value:                      _ref::theme.selection
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_query:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_Query
-          value:                      _spec::flowforge.theme.QUERY
+          value:                      _ref::theme.query
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       color_crosshairs:
         _fcn:                         add_theme_color
         _kwargs:
           target:                     _spec::dearpygui.dearpygui.mvPlotCol_Crosshairs
-          value:                      _spec::flowforge.theme.CROSSHAIRS
+          value:                      _ref::theme.crosshairs
           category:                   _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
 
@@ -1553,21 +1553,21 @@ vp:
           _fcn:                   add_image_button
           _kwargs:
             label:                "Play"
-            texture_tag:          view.icon.play_16x16
+            texture_tag:          view.icon.play
             callback:             _spec::flowforge.main.ctx_node_edit
 
         pause:
           _fcn:                   add_image_button
           _kwargs:
             label:                "Pause"
-            texture_tag:          view.icon.pause_16x16
+            texture_tag:          view.icon.pause
             callback:             _spec::flowforge.main.ctx_node_edit
 
         stop:
           _fcn:                   add_image_button
           _kwargs:
             label:                "Stop"
-            texture_tag:          view.icon.stop_16x16
+            texture_tag:          view.icon.stop
             callback:             _spec::flowforge.main.ctx_node_edit
 
 
@@ -1586,7 +1586,7 @@ vp:
       side:
         _fcn:                     add_child_window
         _kwargs:
-          width:                  _spec::flowforge.theme.SIDEBAR_WIDTH
+          width:                  _ref::theme.sidebar_width
           border:                 True
           autosize_y:             True
 
@@ -1607,8 +1607,8 @@ vp:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "System ID"
-                  indent:         _spec::flowforge.theme.INDENT
-                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
+                  indent:         _ref::theme.indent
+                  width:          _ref::theme.sidebar_widget_width
                   callback:       _spec::pl.stableview.update_bound_values
                   on_enter:       True
                 _bind:
@@ -1626,8 +1626,8 @@ vp:
                 _fcn:             add_input_int
                 _kwargs:
                   label:          "Host count"
-                  indent:         _spec::flowforge.theme.INDENT
-                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
+                  indent:         _ref::theme.indent
+                  width:          _ref::theme.sidebar_widget_width
                   default_value:  1
                   min_value:      1  # We rely on there being at least one host.
                   min_clamped:    True
@@ -1647,8 +1647,8 @@ vp:
                 _fcn:             add_input_int
                 _kwargs:
                   label:          "Process count"
-                  indent:         _spec::flowforge.theme.INDENT
-                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
+                  indent:         _ref::theme.indent
+                  width:          _ref::theme.sidebar_widget_width
                   default_value:  1
                   min_value:      1
                   min_clamped:    True
@@ -1668,8 +1668,8 @@ vp:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "Node ID"
-                  indent:         _spec::flowforge.theme.INDENT
-                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
+                  indent:         _ref::theme.indent
+                  width:          _ref::theme.sidebar_widget_width
                   callback:       _spec::pl.stableview.update_bound_values
                 _bind:
                   -               vm.node.selected.id
@@ -1679,40 +1679,40 @@ vp:
               #   _kwargs:
               #     label:          "Process ID"
               #     items:          [""]
-              #     indent:         _spec::flowforge.theme.INDENT
-              #     width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
+              #     indent:         _ref::theme.indent
+              #     width:          _ref::theme.sidebar_widget_width
               #     callback:       _spec::flowforge.main.node_proc
 
               func:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "Implementation"
-                  indent:         _spec::flowforge.theme.INDENT
-                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
+                  indent:         _ref::theme.indent
+                  width:          _ref::theme.sidebar_widget_width
                   callback:       _spec::pl.stableview.update_bound_values
 
               state:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "State data type"
-                  indent:         _spec::flowforge.theme.INDENT
-                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
+                  indent:         _ref::theme.indent
+                  width:          _ref::theme.sidebar_widget_width
                   callback:       _spec::pl.stableview.update_bound_values
 
               cfg:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "Configuration"
-                  indent:         _spec::flowforge.theme.INDENT
-                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
+                  indent:         _ref::theme.indent
+                  width:          _ref::theme.sidebar_widget_width
                   callback:       _spec::pl.stableview.update_bound_values
 
               countin:
                 _fcn:             add_input_int
                 _kwargs:
                   label:          "Input count"
-                  indent:         _spec::flowforge.theme.INDENT
-                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
+                  indent:         _ref::theme.indent
+                  width:          _ref::theme.sidebar_widget_width
                   min_value:      0
                   min_clamped:    True
                   callback:       _spec::pl.stableview.update_bound_values
@@ -1721,8 +1721,8 @@ vp:
                 _fcn:             add_input_int
                 _kwargs:
                   label:          "Output count"
-                  indent:         _spec::flowforge.theme.INDENT
-                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
+                  indent:         _ref::theme.indent
+                  width:          _ref::theme.sidebar_widget_width
                   min_value:      0
                   min_clamped:    True
                   callback:       _spec::pl.stableview.update_bound_values
@@ -1740,16 +1740,16 @@ vp:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "Owner"
-                  indent:         _spec::flowforge.theme.INDENT
-                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
+                  indent:         _ref::theme.indent
+                  width:          _ref::theme.sidebar_widget_width
                   callback:       _spec::pl.stableview.update_bound_values
 
               datatype:
                 _fcn:             add_input_text
                 _kwargs:
                   label:          "Data type"
-                  indent:         _spec::flowforge.theme.INDENT
-                  width:          _spec::flowforge.theme.SIDEBAR_WIDGET_WIDTH
+                  indent:         _ref::theme.indent
+                  width:          _ref::theme.sidebar_widget_width
                   callback:       _spec::pl.stableview.update_bound_values
 
               separator:
