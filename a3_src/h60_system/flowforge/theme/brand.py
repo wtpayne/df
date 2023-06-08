@@ -123,6 +123,7 @@ import fl.util
 background_white   = [250, 250, 250]
 background_dark    = [ 50,  50,  50]
 
+light_grey_tint_5  = [244, 244, 244]
 light_grey_tint_4  = [244, 244, 244]
 light_grey_tint_3  = [228, 228, 228]
 light_grey_tint_2  = [220, 220, 220]

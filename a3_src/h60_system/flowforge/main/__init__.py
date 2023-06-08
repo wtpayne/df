@@ -58,7 +58,7 @@ import fl.stableflow.cfg.layout
 import fl.util
 
 import pl.stableview
-
+import pl.stableflow.sys
 
 # -----------------------------------------------------------------------------
 def coro(ctx):
@@ -373,36 +373,6 @@ def menu_edit_redo(sender, app_data, ctx):
 
 
 # -----------------------------------------------------------------------------
-def menu_run_start(sender, app_data, ctx):
-    """
-    Callback for the 'Start' button in the 'Run' menu.
-
-    """
-
-    raise NotImplementedError('run.start')
-
-
-# -----------------------------------------------------------------------------
-def menu_run_pause(sender, app_data, ctx):
-    """
-    Callback for the 'Pause' button in the 'Run' menu.
-
-    """
-
-    raise NotImplementedError('run.pause')
-
-
-# -----------------------------------------------------------------------------
-def menu_run_stop(sender, app_data, ctx):
-    """
-    Callback for the 'Stop' button in the 'Run' menu.
-
-    """
-
-    raise NotImplementedError('run.stop')
-
-
-# -----------------------------------------------------------------------------
 def menu_tools_about(sender, app_data, ctx):
     """
     Callback for the 'Show About' button in the 'Tools' menu.
@@ -561,6 +531,7 @@ def ctx_node_cancel(sender, app_data, ctx):
 # -----------------------------------------------------------------------------
 def node_link(sender, app_data):
     """
+
     """
 
     print('LINK CALLBACK')
@@ -574,6 +545,58 @@ def node_delink(sender, app_data):
 
     print('DELINK CALLBACK')
     # ctx.ui.delete_item(app_data)
+
+
+
+# -----------------------------------------------------------------------------
+def system_play(sender, app_data, ctx):
+    """
+    Play the system.
+
+    """
+
+    pass
+
+    # try:
+    #     cfg = ctx.app.to_dict()
+    #     # rootpath_env =  #### TODO?
+    #     fl.stableflow.cfg.set_launch_command(cfg, rootpath_env)
+    #     pl.stableflow.sys.start()
+    #     print('START 2')
+    # except Exception as err:
+    #     print(err)
+
+
+# -----------------------------------------------------------------------------
+def system_pause(sender, app_data, ctx):
+    """
+    Pause the system.
+
+    """
+
+    pass
+    # try:
+    #     print('PAUSE 1')
+    #     pl.stableflow.sys.pause()
+    #     print('PAUSE 2')
+    # except Exception as err:
+    #     print(err)
+
+
+# -----------------------------------------------------------------------------
+def system_stop(sender, app_data, ctx):
+    """
+    Stop the system.
+
+    """
+
+    pass
+    # try:
+    #     print('STOP 1')
+    #     pl.stableflow.sys.stop(ctx.app.to_dict())
+    #     print('STOP 2')
+    # except Exception as err:
+    #     print(err)
 
 
 # -----------------------------------------------------------------------------

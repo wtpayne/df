@@ -1450,23 +1450,23 @@ vp:
         _kwargs:
           label:                  "Run"
 
-        start:
+        play:
           _fcn:                   add_menu_item
           _kwargs:
-            label:                "Start"
-            callback:             _spec::flowforge.main.menu_run_start
+            label:                "Play"
+            callback:             _spec::flowforge.main.system_play
 
         pause:
           _fcn:                   add_menu_item
           _kwargs:
             label:                "Pause"
-            callback:             _spec::flowforge.main.menu_run_pause
+            callback:             _spec::flowforge.main.system_pause
 
         stop:
           _fcn:                   add_menu_item
           _kwargs:
             label:                "Stop"
-            callback:             _spec::flowforge.main.menu_run_stop
+            callback:             _spec::flowforge.main.system_stop
 
       tools:
         _fcn:                     add_menu
@@ -1554,21 +1554,21 @@ vp:
           _kwargs:
             label:                "Play"
             texture_tag:          view.icon.play
-            callback:             _spec::flowforge.main.ctx_node_edit
+            callback:             _spec::flowforge.main.system_play
 
         pause:
           _fcn:                   add_image_button
           _kwargs:
             label:                "Pause"
             texture_tag:          view.icon.pause
-            callback:             _spec::flowforge.main.ctx_node_edit
+            callback:             _spec::flowforge.main.system_pause
 
         stop:
           _fcn:                   add_image_button
           _kwargs:
             label:                "Stop"
             texture_tag:          view.icon.stop
-            callback:             _spec::flowforge.main.ctx_node_edit
+            callback:             _spec::flowforge.main.system_stop
 
 
     # -------------------------------------------------------------------------
