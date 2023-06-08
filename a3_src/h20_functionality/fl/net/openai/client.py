@@ -3,7 +3,7 @@
 ---
 
 title:
-    "OpenAI API support module."
+    "OpenAI HTTP API integration support module."
 
 description:
     "This Python module is designed to interact

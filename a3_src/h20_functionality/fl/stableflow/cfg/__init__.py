@@ -26,6 +26,25 @@ from fl.stableflow.cfg.exception import CfgError
 
 
 # -----------------------------------------------------------------------------
+def set_launch_command(cfg, rootpath_env):
+    """
+    Set each launch command as required for each host environment.
+
+    """
+
+    for cfg_host in cfg['host'].values():
+
+        id_env         = cfg_host.get('environment', None)
+        dirpath_env    = os.path.join(rootpath_env, id_env)
+        relpath_py     = 'bin/python3'
+        filepath_py    = os.path.join(dirpath_env, relpath_py)
+        spec_module    = 'pl.stableflow.cli.command'
+        str_launch_cmd = '{python} -m {module}'.format(python = filepath_py,
+                                                       module = spec_module)
+        cfg_host['launch_cmd'] = str_launch_cmd
+
+
+# -----------------------------------------------------------------------------
 @loguru.logger.catch(exclude = CfgError)
 def prepare(path_cfg       = None,  # pylint: disable=R0913
             string_cfg     = None,
@@ -38,6 +57,7 @@ def prepare(path_cfg       = None,  # pylint: disable=R0913
     Load configuration and override fields as required.
 
     """
+
     has_cfg_files  = path_cfg is not None
     has_cfg_string = string_cfg is not None
     has_cfg_map    = map_cfg is not None
@@ -132,6 +152,7 @@ def denormalize(cfg):
     such information explicit.
 
     """
+
     return fl.stableflow.cfg.queue.denormalize(
                 fl.stableflow.cfg.edge.denormalize(
                     fl.stableflow.cfg.data.denormalize(cfg)))
@@ -143,6 +164,7 @@ def merge_dicts(first, second):
     Merge two dictionaries. second takes priority.
 
     """
+
     return dict(_merge_dicts(first, second))
 
 
@@ -152,6 +174,7 @@ def _merge_dicts(first, second):
     Merge two dictionaries (recursive function). second takes priority.
 
     """
+
     for key in set(first.keys()).union(second.keys()):
         _in_first  = key in first
         _in_second = key in second

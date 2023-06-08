@@ -3,16 +3,18 @@
 ---
 
 title:
-    "Discord integration stableflow-edict component."
+    "Discord HTTP API integration support module."
 
 description:
-    "Discord integration"
+    "This Python module is designed to interact
+    with the Discord API using a separate process
+    for handling requests and responses."
 
 id:
-    "8747de1c-76ac-4f63-a88d-f67a60515571"
+    "08a41d6d-9b21-4248-b87a-9f4c7a003648"
 
 type:
-    dt004_python_stableflow_edict_component
+    dt003_python_module
 
 validation_level:
     v00_minimum
@@ -49,79 +51,42 @@ import multiprocessing
 import os
 import queue
 
-import dotenv
+import fl.util
 
 
 # -----------------------------------------------------------------------------
-def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
+@fl.util.coroutine
+def coro(cfg_client):
     """
-    Discord client component coroutine.
+    Yield results for workflow coroutines sent to the OpenAI web API.
+
+    Start the client in a separate process.
 
     """
 
-    # Initialize outputs.
-    #
-    signal = None
-    for id_out in outputs.keys():
-        outputs[id_out]['ena']  = False
-        outputs[id_out]['ts']   = dict()
-        outputs[id_out]['list'] = list()
-
-    # Load secrets from a .env
-    # file and load configuration.
-    #
-    dotenv.load_dotenv(dotenv_path = cfg['filepath_env'],
-                       verbose     = True,
-                       override    = False)
-    cfg_client                  = dict()
-    cfg_client['str_token']     = os.environ[cfg['envvar_token']]
-    cfg_client['secs_interval'] = cfg.get('secs_interval', 5)
-
-    # Start the client in a separate process.
-    #
-    str_name_process  = 'discord-bot'
-    fcn_client        = _discord_client
-    queue_to_client   = multiprocessing.Queue()  # stableflow --> client
-    queue_from_client = multiprocessing.Queue()  # client     --> stableflow
-    tup_args          = (cfg_client, queue_to_client, queue_from_client)
-    proc_client       = multiprocessing.Process(target = fcn_client,
-                                                args   = tup_args,
-                                                name   = str_name_process,
-                                                daemon = True)  # So we get terminated
+    str_name_process = 'discord-bot'
+    fcn_client       = _discord_client
+    queue_to_app     = multiprocessing.Queue()  # stableflow --> client
+    queue_from_app   = multiprocessing.Queue()  # client     --> stableflow
+    tup_args         = (cfg_client, queue_to_app, queue_from_app)
+    proc_client      = multiprocessing.Process(target = fcn_client,
+                                               args   = tup_args,
+                                               name   = str_name_process,
+                                               daemon = True)  # So we get terminated
     proc_client.start()
 
-    # Loop forever, sending messages
-    # to and from the discord client
-    # via the two message queues.
-    #
+    list_to_app   = list()
+    list_from_app = list()
+
     while True:
 
-        inputs = yield (outputs, signal)
+        (list_to_app) = yield (list_from_app)
 
-        # Reset outputs.
-        #
-        for id_out in outputs.keys():
-            outputs[id_out]['ena'] = False
-            outputs[id_out]['ts'].clear()
-            outputs[id_out]['list'].clear()
-
-        # Take any messages that
-        # we recieve from the rest
-        # of the stableflow system
-        # and forward them on to
-        # the discord client so that
-        # they can be printed in
-        # the specified channel.
-        #
-        map_ts = dict()
-        for (id_in, pkt_in) in inputs.items():
-            if pkt_in['ena']:
-                map_ts = pkt_in['ts']
-                for tup_msg in pkt_in['list']:
-                    try:
-                        queue_to_client.put(tup_msg, block = False)
-                    except queue.Full:
-                        pass  # TODO: LOG SOME SORT OF ERROR?
+        for tup_msg in list_to_app:
+            try:
+                queue_to_app.put(tup_msg, block = False)
+            except queue.Full:
+                pass  # TODO: LOG SOME SORT OF ERROR?
 
         # Retrieve any messages that
         # a user has input into the
@@ -130,27 +95,17 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         # stableflow system for
         # further processing.
         #
-        list_msg = list()
+        list_from_app = list()
         while True:
             try:
-                list_msg.append(queue_from_client.get(block = False))
+                list_from_app.append(queue_from_app.get(block = False))
             except queue.Empty:
                 break
 
-        # If any messages have been
-        # received from the discord
-        # client, then place them
-        # in the component output.
-        #
-        if list_msg:
-            for id_out in outputs.keys():
-                outputs[id_out]['ena'] = True
-                outputs[id_out]['ts'].update(map_ts)
-                outputs[id_out]['list'][:] = list_msg
 
 
 # -----------------------------------------------------------------------------
-def _discord_client(cfg_client, queue_to_client, queue_from_client):
+def _discord_client(cfg_client, queue_to_app, queue_from_app):
     """
     Run the discord client.
 
@@ -158,6 +113,7 @@ def _discord_client(cfg_client, queue_to_client, queue_from_client):
 
     import io
     import logging
+    import os
 
     import discord
     import discord.ext
@@ -171,7 +127,7 @@ def _discord_client(cfg_client, queue_to_client, queue_from_client):
     loghandler = logging.StreamHandler(buffer_log)
 
     # -------------------------------------------------------------------------
-    async def _service_msg_queue(cfg_client, queue_to_client):
+    async def _service_msg_queue(cfg_client, queue_to_app):
         """
         Message queue servicing coroutine.
 
@@ -200,10 +156,9 @@ def _discord_client(cfg_client, queue_to_client, queue_from_client):
             #     msg = dict(type = 'log',
             #                msg  = str_log)
             #     try:
-            #         queue_from_client.put(msg, block = False)
+            #         queue_from_app.put(msg, block = False)
             #     except queue.Full:
             #         pass  # TODO: LOG SOME SORT OF ERROR?
-
 
             # Try to pull the next message
             # from the queue. If none are
@@ -211,7 +166,7 @@ def _discord_client(cfg_client, queue_to_client, queue_from_client):
             # little while then try again.
             #
             try:
-                tup_msg = queue_to_client.get(block = False)
+                tup_msg = queue_to_app.get(block = False)
             except queue.Empty:
                 await asyncio.sleep(secs_interval)
                 continue
@@ -242,7 +197,7 @@ def _discord_client(cfg_client, queue_to_client, queue_from_client):
         """
         task_msg = discord_client.loop.create_task(
                                     coro = _service_msg_queue(
-                                                cfg_client, queue_to_client))
+                                                cfg_client, queue_to_app))
 
     # -------------------------------------------------------------------------
     @discord_client.event
@@ -257,19 +212,19 @@ def _discord_client(cfg_client, queue_to_client, queue_from_client):
         This coroutine is intended to
         simply forward the content of
         the message to the rest of the
-        system via the queue_from_client
+        system via the queue_from_app
         queue.
 
         """
         if not message.author.bot:
-            msg = dict(type       = 'message',
+            msg = dict(msg_type   = 'message',
                        id_prev    = None,
                        id_msg     = message.id,
                        id_author  = message.author.id,
                        id_channel = message.channel.id,
                        content    = message.content)
             try:
-                queue_from_client.put(msg, block = False)
+                queue_from_app.put(msg, block = False)
             except queue.Full:
                 pass  # TODO: LOG SOME SORT OF ERROR?
 
@@ -296,20 +251,21 @@ def _discord_client(cfg_client, queue_to_client, queue_from_client):
         This coroutine is intended to
         simply forward the content of
         the message to the rest of the
-        system via the queue_from_client
+        system via the queue_from_app
         queue.
 
         """
         if not msg_after.author.bot:
             try:
-                msg = dict(type       = 'message',
+                msg = dict(msg_type   = 'message',
                            id_prev    = msg_before.id,
                            id_msg     = msg_after.id,
                            id_author  = msg_after.author.id,
                            id_channel = msg_after.channel.id,
                            content    = msg_after.content)
-                queue_from_client.put(msg, block = False)
+                queue_from_app.put(msg, block = False)
             except queue.Full:
                 pass  # TODO: LOG SOME SORT OF ERROR?
 
     discord_client.run(cfg_client['str_token'], log_handler = loghandler)
+    # discord_client.run(cfg_client['str_token'])

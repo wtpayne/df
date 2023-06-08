@@ -36,7 +36,8 @@ def from_path(path_cfg):
     if os.path.isfile(path_cfg):
         return from_filepath(path_cfg)
 
-    raise CfgError('The specified configuration path does not exist.')
+    raise CfgError(
+            'The specified configuration path does not exist: ' + path_cfg)
 
 
 # -----------------------------------------------------------------------------

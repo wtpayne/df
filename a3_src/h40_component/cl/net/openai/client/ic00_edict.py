@@ -3,11 +3,11 @@
 ---
 
 title:
-    "OpenAI agent stableflow-edict component."
+    "OpenAI client stableflow-edict component."
 
 description:
-    "This component enables communication with
-    the OpenAI web API."
+    "This component enables integration with
+    the OpenAI HTTP API."
 
 id:
     "8d2b1939-cea9-4af0-9528-7cc5e44d0a5c"

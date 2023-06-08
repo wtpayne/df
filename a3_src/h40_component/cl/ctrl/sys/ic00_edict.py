@@ -44,6 +44,7 @@ license:
 """
 
 
+import calendar
 import datetime
 import time
 
@@ -112,16 +113,19 @@ def step(inputs, state, outputs):
     """
     (time_us, load_rel) = _execution_rate_control(inputs, state)
     (do_halt, retval)   = _halt_signal_control(inputs, state, time_us)
-    (id_year, id_day, id_hour, id_min, id_sec) = _temporal_aggregation_codes()
+    tup_time            = _time_codes()
+    (id_year, id_day, id_hour, id_min, id_sec, unix_time, weekday) = tup_time
 
     map_ts = dict()
     map_ts['idx']       = state['idx']
-    map_ts['ts_rel_us'] = time_us  # Monotonic us. Arbitrary zero.
+    map_ts['ts_rel_us'] = time_us    # Monotonic us. Arbitrary zero.
+    map_ts['unix_time'] = unix_time  # Nonmonotonic secs from 1970/01/01 epoch.
     map_ts['id_year']   = id_year
     map_ts['id_day']    = id_day
     map_ts['id_hour']   = id_hour
     map_ts['id_min']    = id_min
     map_ts['id_sec']    = id_sec
+    map_ts['weekday']   = weekday
 
     for key in outputs.keys():
         outputs[key]['ena']         = True
@@ -250,19 +254,20 @@ def _halt_signal_control(inputs, state, time_us):
 
 
 # -----------------------------------------------------------------------------
-def _temporal_aggregation_codes():
+def _time_codes():
     """
     Return temporal aggregation codes.
 
     """
-    gmt     = time.gmtime()
-    id_year = gmt.tm_year
-    id_day  = (id_year * 1000) + gmt.tm_yday
-    id_hour = (id_day  *  100) + gmt.tm_hour  # pylint: disable=E222
-    id_min  = (id_hour *  100) + gmt.tm_min   # pylint: disable=E222
-    id_sec  = (id_min  *  100) + gmt.tm_sec   # pylint: disable=E222
-
-    return (id_year, id_day, id_hour, id_min, id_sec)
+    gmt       = time.gmtime()
+    unix_time = calendar.timegm(gmt)
+    weekday   = gmt.tm_wday
+    id_year   = gmt.tm_year
+    id_day    = (id_year * 1000) + gmt.tm_yday
+    id_hour   = (id_day  *  100) + gmt.tm_hour  # pylint: disable=E222
+    id_min    = (id_hour *  100) + gmt.tm_min   # pylint: disable=E222
+    id_sec    = (id_min  *  100) + gmt.tm_sec   # pylint: disable=E222
+    return (id_year, id_day, id_hour, id_min, id_sec, unix_time, weekday)
 
 
 # -----------------------------------------------------------------------------
