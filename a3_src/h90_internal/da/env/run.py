@@ -66,7 +66,7 @@ import da.env
 
 
 # -----------------------------------------------------------------------------
-def stableflow_start(path_cfg, tup_overrides = None):
+def stableflow_start(path_cfg = None, map_cfg = None, tup_overrides = None):
     """
     Run a python module in the specified environment.
 
@@ -79,10 +79,12 @@ def stableflow_start(path_cfg, tup_overrides = None):
     with pl.stableflow.log.logger.catch(onerror = lambda _: sys.exit(1)):
 
         try:
-
-            cfg = fl.stableflow.cfg.prepare(
-                                    path_cfg      = path_cfg,
-                                    tup_overrides = tup_overrides)
+            if map_cfg and (not path_cfg) and (not tup_overrides):
+                cfg = map_cfg
+            else:
+                cfg = fl.stableflow.cfg.prepare(
+                                        path_cfg      = path_cfg,
+                                        tup_overrides = tup_overrides)
             _update_all_environments(cfg)
             _configure_all_launch_commands(cfg)
 

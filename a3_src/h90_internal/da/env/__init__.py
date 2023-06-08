@@ -119,6 +119,16 @@ def iter_cfg_env():
 
 
 # -----------------------------------------------------------------------------
+def dirpath_env_root():
+    """
+    Return the directory path to the environment root.
+
+    """
+
+    return os.path.join(rootpath(), 'a0_env', 'venv')
+
+
+# -----------------------------------------------------------------------------
 def path(process_area = 'a3_src',
          control_tier = None,
          id_env       = None,
@@ -153,9 +163,7 @@ def path(process_area = 'a3_src',
     # a0_env process area
     elif process_area in ('a0_env',):
         assert id_env is not None and id_env.startswith('e')
-        tup_path_parts = (dirpath_root,
-                          process_area,
-                          'venv',
+        tup_path_parts = (dirpath_env_root(),
                           id_env,
                           relpath)
 
