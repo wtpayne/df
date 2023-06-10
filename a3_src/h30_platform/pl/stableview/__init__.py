@@ -50,6 +50,7 @@ import copy
 import importlib.metadata
 import os.path
 
+import appdirs
 import dearpygui.dearpygui
 import ruamel.yaml
 
@@ -65,15 +66,9 @@ except importlib.metadata.PackageNotFoundError:
 
 
 # -----------------------------------------------------------------------------
-def main(dirpath_app, id_view, id_theme):
+def main(dirpath_app, id_org, id_app, **kwargs):
     """
     Main update/event loop for the ui.
-
-    We use an MVVM architecture with an
-    application model (ctx.app), a view
-    model (ctx.vm) and a view (ctx.view).
-
-    ctx.app <--> ctx.vm <--> ctx.view
 
     """
 
@@ -82,28 +77,58 @@ def main(dirpath_app, id_view, id_theme):
         # Initialize the various component parts of
         # the UI architecture:-
         #
-        #   1. The application model (ctx.app).
-        #   2. The view model (ctx.vm)
-        #   3. The view (ctx.view)
-        #   4. The UI API
+        #   1. ctx.ui    - The DearPyGui API.
+        #   2. ctx.app   - The application model.
+        #   3. ctx.cfg   - General configuration.
+        #   4. ctx.theme - Theme configuration.
+        #   5. ctx.view  - The view model.
+        #   6. ctx.store - Persistent data store.
+        #
+        # We also add rules for responding to
+        # changes in the view. Rules for
+        # responding to changes in the view model
+        # and application model will be by their
+        # nature application-specific and therefore
+        # are colocated with application specific
+        # design elements.
         #
         ctx     = fl.util.Bureau()
-        batch   = ctx.batch_init()
         ctx.ui  = dearpygui.dearpygui
         ctx.app = fl.util.Bureau()
-        ctx.vm  = fl.util.Bureau()
-        ctx.view.from_file(filepath = _filepath_cfg_view(dirpath_app, id_view))
-        ctx.theme.from_dict(_load_theme(ctx, dirpath_app, id_theme))
 
-        # Add rules for responding to changes in the
-        # view. Rules for responding to changes in
-        # the view model and application model will
-        # be by their nature application-specific
-        # and therefore are colocated with
-        # application specific design elements.
+        # The configuration must be loaded
+        # before the theme so that the theme
+        # can be set with configuration.
         #
+        ctx.cfg = fl.util.Bureau()
+        _load_cfg(ctx, id_app, id_org, **kwargs)
+
+        # The theme must be loaded before
+        # the view rules are triggered, as
+        # the view configuration has
+        # references to theme elements
+        # which need to be resolved. The rules
+        # are triggered on ctx.batch_finalize()
+        #
+        ctx.theme = fl.util.Bureau()
+        _load_theme(ctx, dirpath_app, ctx.cfg.id_theme)
+
+        # The view has the configuration for
+        # most of the structure and layout of
+        # UI elments.
+        #
+        batch = ctx.batch_init()
+        filepath_cfg_view = _filepath_cfg_view(dirpath_app, ctx.cfg.id_view)
+        ctx.view.from_file(filepath_cfg_view)
         ctx.view.rule(cond = fl.rule.is_leaf_at(('_fcn',)),
                       act  = _update_dearpygui_widgets)
+
+        # The store must be loaded after view
+        # so it can add UI elements to an already
+        # existing structure/
+        #
+        ctx.store = fl.util.Bureau()
+        _load_store(ctx, id_app, id_org)
 
         # Application coroutine
         #
@@ -131,9 +156,54 @@ def main(dirpath_app, id_view, id_theme):
 
 
 # -----------------------------------------------------------------------------
+def _load_store(ctx, id_app, id_org):
+    """
+    Update ctx.store with persistent stored data.
+
+    """
+
+    filename = '{id}.cfg.yaml'.format(id = id_app)
+    for (id_cfg, dirpath) in (
+                    ('site_data',   appdirs.site_data_dir(   id_app, id_org)),
+                    ('user_data',   appdirs.user_data_dir(   id_app, id_org))):
+
+        filepath_cfg = os.path.join(dirpath, filename)
+        ctx.cfg['filepath_' + id_cfg] = filepath_cfg
+        if os.path.isfile(filepath_cfg):
+            ctx.store.from_file(filepath = filepath_cfg)
+
+
+    filepath = '/media/wtp/Data1/dev/df/ws00_pri/a3_src/h60_system/routine/routine.stableflow.cfg.yaml'
+    code     = fl.util.strhash(filepath)
+    ctx.store.last_opened = [(code, filepath)]
+
+# -----------------------------------------------------------------------------
+def _load_cfg(ctx, id_app, id_org, **kwargs):
+    """
+    Update ctx.cfg with configuration data.
+
+    """
+
+    ctx.cfg.dirpath_cache = appdirs.user_cache_dir(  id_app, id_org)
+    ctx.cfg.dirpath_log   = appdirs.user_log_dir(    id_app, id_org)
+
+    filename = '{id}.cfg.yaml'.format(id = id_app)
+    for (id_cfg, dirpath) in (
+                    ('site_config', appdirs.site_config_dir( id_app, id_org)),
+                    ('user_config', appdirs.user_config_dir( id_app, id_org))):
+
+        filepath_cfg = os.path.join(dirpath, filename)
+        ctx.cfg['filepath_' + id_cfg] = filepath_cfg
+        if os.path.isfile(filepath_cfg):
+            ctx.cfg.from_file(filepath = filepath_cfg)
+
+    ctx.cfg.from_dict(kwargs)
+
+
+# -----------------------------------------------------------------------------
 def _load_theme(ctx, dirpath_app, id_theme):
     """
-    Update ctx.view with the specified theme.
+    Update ctx.theme with theme data.
 
     """
 
@@ -153,17 +223,14 @@ def _load_theme(ctx, dirpath_app, id_theme):
         raise RuntimeError(msg) from map_error['exception']
 
     # Resolve any references in the thing.
-    map_theme = dict()
     for id_section in ('color', 'style', 'form'):
         for (key, value) in map_cfg_theme[id_section].items():
-            map_theme[key] = fl.util.resolve(value)
+            ctx.theme[key] = fl.util.resolve(value)
 
-    map_theme['icon_play']    = _load_icon(ctx, dirpath_theme, 'play')
-    map_theme['icon_pause']   = _load_icon(ctx, dirpath_theme, 'pause')
-    map_theme['icon_stop']    = _load_icon(ctx, dirpath_theme, 'stop')
-    map_theme['font_primary'] = _filepath_font(dirpath_theme, 'default')
-
-    return map_theme
+    ctx.theme['icon_play']    = _load_icon(ctx, dirpath_theme, 'play')
+    ctx.theme['icon_pause']   = _load_icon(ctx, dirpath_theme, 'pause')
+    ctx.theme['icon_stop']    = _load_icon(ctx, dirpath_theme, 'stop')
+    ctx.theme['font_primary'] = _filepath_font(dirpath_theme, 'default')
 
 
 # -----------------------------------------------------------------------------

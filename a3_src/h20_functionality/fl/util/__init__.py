@@ -48,6 +48,7 @@ license:
 import collections
 import collections.abc
 import contextlib
+import hashlib
 import importlib
 import pprint
 import time
@@ -91,7 +92,7 @@ class Bureau(collections.abc.MutableMapping):
 
     # -------------------------------------------------------------------------
     def __init__(self,
-                filepath         = None,
+                 filepath        = None,
                  _engine         = None,
                  _path           = None,
                  _path_delimiter = '.'):
@@ -1422,3 +1423,15 @@ def from_spec(str_spec):
 
     (name_module, name_attrib) = str_spec.rsplit('.', 1)
     return getattr(importlib.import_module(name_module), name_attrib)
+
+
+# -----------------------------------------------------------------------------
+def strhash(string, length = 8):
+    """
+    Return a short hexadecimal hash code for the specified string.
+
+    """
+
+    sha256 = hashlib.sha256()
+    sha256.update(string.encode('utf-8'))
+    return sha256.hexdigest()[:length]

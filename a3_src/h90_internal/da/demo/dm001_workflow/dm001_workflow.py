@@ -173,17 +173,27 @@ def editor():
     import da.env
     import da.env.run
 
-    dirpath_app      = da.env.path(
-                               process_area = 'a3_src',
-                               control_tier = 'h60_system',
-                               relpath      = 'flowforge')
-    dirpath_env_root = da.env.dirpath_env_root()
+    ID_ORG      = 'df'
+    ID_APP      = 'flowforge'
+    dirpath_app = da.env.path(process_area = 'a3_src',
+                              control_tier = 'h60_system',
+                              relpath      = ID_APP)
 
+    # Optional configuration overrides.
+    #
+    ID_VIEW      = 'main'
+    ID_THEME     = 'light'
+    rootpath_env = da.env.dirpath_env_root()
 
     sys.exit(da.env.run.python_function(
-                spec      = 'pl.stableview.main',
-                iter_args = (dirpath_app, 'main', 'light'),
-                id_env    = 'e002_general_research'))
+                spec       = 'pl.stableview.main',
+                map_kwargs = { 'dirpath_app':   dirpath_app,
+                               'id_org':        ID_ORG,
+                               'id_app':        ID_APP,
+                               'id_view':       ID_VIEW,
+                               'id_theme':      ID_THEME,
+                               'rootpath_env':  rootpath_env },
+                id_env     = 'e002_general_research'))
 
 
 # -----------------------------------------------------------------------------

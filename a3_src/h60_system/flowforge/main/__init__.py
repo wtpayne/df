@@ -48,6 +48,7 @@ license:
 import collections
 import copy
 import os.path
+import functools
 
 import dearpygui
 
@@ -70,10 +71,17 @@ def coro(ctx):
     ctx.app.rule(cond = fl.rule.always(),
                  act  = _update_from_application_model)  # TODO: ctx.app.update FROM CONFIGURATION?
 
+    ctx.store.rule(cond = fl.rule.is_root_in(('store', 'last_opened')),
+                   act  = _update_last_opened)
+    if 'last_opened' not in ctx.store:
+        ctx.store.last_opened = []
+
     yield  # Context is created and widgets are added in gui.main().
 
-    with ctx.batch_context():
-        ctx.app.from_dict(fl.stableflow.cfg.prepare(_last_opened_path()))
+    if ctx.cfg.list_last_opened:
+        with ctx.batch_context():
+            ctx.app.from_dict(
+                fl.stableflow.cfg.prepare(ctx.cfg.last_opened_path))
 
     yield  # Viewport is shown, main loop starts in gui.main().
 
@@ -83,19 +91,37 @@ def coro(ctx):
 
 
 # -----------------------------------------------------------------------------
-def _last_opened_path():
+def _update_last_opened(ctx, tup_cmd):
     """
-    Return the path of the last opened model.
-
     """
+    with ctx.batch_context():
 
-    import da.env
-    return da.env.path(
-            control_tier = 'h90_internal',
-            relpath      = 'da/cli/service/process_assistant/process_assistant.stableflow.cfg.yaml',
-            # relpath    = 'da/demo/dm001_workflow/dm001_workflow.stableflow.cfg.yaml'
-            id_env       = 'e002_general_research')
+        # Clear old items.
+        #
+        recent = ctx.view.vp.win.menu.file.recent
+        for id_item in ctx.ui.get_item_children(item = recent._str_path(), slot = 1):
+            del ctx[ctx.ui.get_item_alias(id_item)]
 
+        # Re-add all items.
+        #
+        for (code, filepath) in ctx.store.last_opened:
+            recent[code]._fcn             = 'add_menu_item'
+            recent[code]._kwargs.label    = filepath
+            recent[code]._kwargs.callback = _open_specific_file
+
+        recent['clear']._fcn             = 'add_menu_item'
+        recent['clear']._kwargs.label    = 'Clear items'
+        recent['clear']._kwargs.callback = menu_file_recent_clear
+
+
+# -----------------------------------------------------------------------------
+def _open_specific_file(sender, app_data, ctx):
+    """
+    """
+    code_sender = sender.split('.')[-1]
+    for (code, filepath) in ctx.store.last_opened:
+        if code == code_sender:
+            ctx.app.from_dict(fl.stableflow.cfg.prepare(filepath))
 
 # -----------------------------------------------------------------------------
 def _update_from_application_model(ctx, tup_cmd):
@@ -226,7 +252,23 @@ def keypress(sender, app_data, ctx):
     Keypress handler.
 
     """
-    print('KEY')
+    if ctx.ui.is_key_down(ctx.ui.mvKey_Control):
+        if app_data == ctx.ui.mvKey_O:
+            menu_file_open(sender, app_data, ctx)
+
+        if app_data == ctx.ui.mvKey_S:
+            menu_file_save(sender, app_data, ctx)
+
+    else:
+
+        if app_data == ctx.ui.mvKey_Escape:
+            if 'open_file' in ctx.view:
+                del ctx.view.open_file
+            if 'save_file' in ctx.view:
+                del ctx.view.save_file
+            ctx.ui.configure_item('view.vp.win.ctx',
+                                  pos  = ctx.ui.get_mouse_pos(local = False),
+                                  show = False)
 
 
 # -----------------------------------------------------------------------------
@@ -257,7 +299,7 @@ def menu_file_open(sender, app_data, ctx):
 
     widget    = pl.stableview.widget
     open_file = widget(
-            ctx.vp.open_file,
+            ctx.view.open_file,
             'add_file_dialog',
             directory_selector = False,
             modal              = True,
@@ -267,7 +309,8 @@ def menu_file_open(sender, app_data, ctx):
             cancel_callback    = '_spec::flowforge.main.menu_file_open_cancel',
             width              = 700,
             height             = 500,
-            default_path       = os.path.expanduser('~'),
+            default_path       = '/media/wtp/Data1/dev/df/ws00_pri/a3_src/',
+            # default_path       = os.path.expanduser('~'),
             file_count         = 1)
 
     extension = widget(
@@ -286,7 +329,7 @@ def menu_file_open_cancel(sender, app_data, ctx):
 
     """
 
-    del ctx.vp.open_file
+    del ctx.view.open_file
 
 
 # -----------------------------------------------------------------------------
@@ -296,8 +339,32 @@ def menu_file_open_ok(sender, app_data, ctx):
 
     """
 
-    ctx.app.from_dict(fl.stableflow.cfg.prepare(app_data['file_path_name']))
-    del ctx.vp.open_file
+    filepath = app_data['file_path_name']
+    code     = fl.util.strhash(filepath)
+    ctx.store.last_opened.insert(0, (code, filepath))
+    if len(ctx.store.last_opened) > 8:
+        del ctx.store.last_opened[8:]
+
+    ctx.app.from_dict(fl.stableflow.cfg.prepare(filepath))
+    del ctx.view.open_file
+
+
+# -----------------------------------------------------------------------------
+def menu_file_recent(sender, app_data, ctx):
+    """
+    """
+
+    pass
+
+
+# -----------------------------------------------------------------------------
+def menu_file_recent_clear(sender, app_data, ctx):
+    """
+    """
+
+    print('CLEAR')
+    pass
+
 
 
 # -----------------------------------------------------------------------------
@@ -309,7 +376,7 @@ def menu_file_save(sender, app_data, ctx):
 
     widget    = pl.stableview.widget
     save_file = widget(
-            ctx.vp.save_file,
+            ctx.view.save_file,
             'add_file_dialog',
             directory_selector = False,
             modal              = True,
@@ -338,7 +405,7 @@ def menu_file_save_cancel(sender, app_data, ctx):
 
     """
 
-    del ctx.vp.save_file
+    del ctx.view.save_file
 
 
 # -----------------------------------------------------------------------------
@@ -349,7 +416,7 @@ def menu_file_save_ok(sender, app_data, ctx):
     """
 
     ctx.app.to_file(filepath = app_data['file_path_name'])
-    del ctx.vp.save_file
+    del ctx.view.save_file
 
 
 # -----------------------------------------------------------------------------
@@ -555,16 +622,12 @@ def system_play(sender, app_data, ctx):
 
     """
 
-    pass
-
-    # try:
-    #     cfg = ctx.app.to_dict()
-    #     # rootpath_env =  #### TODO?
-    #     fl.stableflow.cfg.set_launch_command(cfg, rootpath_env)
-    #     pl.stableflow.sys.start()
-    #     print('START 2')
-    # except Exception as err:
-    #     print(err)
+    try:
+        cfg = fl.stableflow.cfg.prepare(map_cfg = ctx.app.to_dict())
+        fl.stableflow.cfg.set_launch_command(cfg, ctx.cfg.rootpath_env)
+        pl.stableflow.sys.start(cfg)
+    except Exception as err:
+        print(err)
 
 
 # -----------------------------------------------------------------------------
@@ -574,13 +637,12 @@ def system_pause(sender, app_data, ctx):
 
     """
 
-    pass
-    # try:
-    #     print('PAUSE 1')
-    #     pl.stableflow.sys.pause()
-    #     print('PAUSE 2')
-    # except Exception as err:
-    #     print(err)
+    try:
+        cfg = fl.stableflow.cfg.prepare(map_cfg = ctx.app.to_dict())
+        fl.stableflow.cfg.set_launch_command(cfg, ctx.cfg.rootpath_env)
+        pl.stableflow.sys.pause(cfg)
+    except Exception as err:
+        print(err)
 
 
 # -----------------------------------------------------------------------------
@@ -590,13 +652,12 @@ def system_stop(sender, app_data, ctx):
 
     """
 
-    pass
-    # try:
-    #     print('STOP 1')
-    #     pl.stableflow.sys.stop(ctx.app.to_dict())
-    #     print('STOP 2')
-    # except Exception as err:
-    #     print(err)
+    try:
+        cfg = fl.stableflow.cfg.prepare(map_cfg = ctx.app.to_dict())
+        fl.stableflow.cfg.set_launch_command(cfg, ctx.cfg.rootpath_env)
+        pl.stableflow.sys.stop(cfg)
+    except Exception as err:
+        print(err)
 
 
 # -----------------------------------------------------------------------------

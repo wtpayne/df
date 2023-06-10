@@ -1420,13 +1420,26 @@ vp:
           _fcn:                   add_menu_item
           _kwargs:
             label:                "Open"
+            shortcut:             "Ctrl+O"
             callback:             _spec::flowforge.main.menu_file_open
 
         save:
           _fcn:                   add_menu_item
           _kwargs:
             label:                "Save"
+            shortcut:             "Ctrl+S"
             callback:             _spec::flowforge.main.menu_file_save
+
+        recent:
+          _fcn:                   add_menu
+          _kwargs:
+            label:                "Open recent"
+
+          clear:
+            _fcn:                 add_menu_item
+            _kwargs:
+              label:              "Clear items"
+              callback:           _spec::flowforge.main.menu_file_recent_clear
 
       edit:
         _fcn:                     add_menu
