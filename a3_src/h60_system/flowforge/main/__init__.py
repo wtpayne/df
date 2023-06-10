@@ -71,12 +71,11 @@ def coro(ctx):
     ctx.app.rule(cond = fl.rule.always(),
                  act  = _update_from_application_model)  # TODO: ctx.app.update FROM CONFIGURATION?
 
-    ctx.store.rule(cond = fl.rule.is_root_in(('store', 'last_opened')),
-                   act  = _update_last_opened)
-    if 'last_opened' not in ctx.store:
-        ctx.store.last_opened = []
+    _configure_recent_files_list(ctx)
 
     yield  # Context is created and widgets are added in gui.main().
+
+    _load_most_recent_file(ctx)
 
     if ctx.cfg.list_last_opened:
         with ctx.batch_context():
@@ -91,7 +90,48 @@ def coro(ctx):
 
 
 # -----------------------------------------------------------------------------
-def _update_last_opened(ctx, tup_cmd):
+def _configure_recent_files_list(ctx):
+    """
+    """
+    ctx.store.rule(cond = fl.rule.is_root_in(('store', 'recent_files')),
+                   act  = _update_recent_files_menu)
+
+    _add_to_recent_files(ctx, '/media/wtp/Data1/dev/df/ws00_pri/a3_src/h60_system/accord/accord.stableflow.cfg.yaml')
+    _add_to_recent_files(ctx, '/media/wtp/Data1/dev/df/ws00_pri/a3_src/h60_system/routine/routine.stableflow.cfg.yaml')
+    _add_to_recent_files(ctx, '/media/wtp/Data1/dev/df/ws00_pri/a3_src/h90_internal/da/cli/service/process_assistant/process_assistant.stableflow.cfg.yaml')
+
+
+# -----------------------------------------------------------------------------
+def _load_most_recent_file(ctx):
+    """
+    """
+    if len(ctx.store.recent_files) >= 1:
+        (_, filepath) = ctx.store.recent_files[0]
+        with ctx.batch_context():
+            ctx.app.from_dict(fl.stableflow.cfg.prepare(filepath))
+
+
+# -----------------------------------------------------------------------------
+def _add_to_recent_files(ctx, filepath, max_length = 8):
+    """
+    Add the specified filepath to the recent_files list.
+
+    """
+    if 'recent_files' not in ctx.store:
+        ctx.store.recent_files = []
+
+    tup_fileinfo = (fl.util.strhash(filepath), filepath)
+
+    if tup_fileinfo in ctx.store.recent_files:
+        ctx.store.recent_files.remove(tup_fileinfo)
+
+    ctx.store.recent_files.insert(0, tup_fileinfo)
+
+    ctx.store.recent_files = ctx.store.recent_files[:max_length]
+
+
+# -----------------------------------------------------------------------------
+def _update_recent_files_menu(ctx, tup_cmd):
     """
     """
     with ctx.batch_context():
@@ -99,12 +139,11 @@ def _update_last_opened(ctx, tup_cmd):
         # Clear old items.
         #
         recent = ctx.view.vp.win.menu.file.recent
-        for id_item in ctx.ui.get_item_children(item = recent._str_path(), slot = 1):
-            del ctx[ctx.ui.get_item_alias(id_item)]
+        _clear_recent_file_menu_items(ctx)
 
         # Re-add all items.
         #
-        for (code, filepath) in ctx.store.last_opened:
+        for (code, filepath) in ctx.store.recent_files:
             recent[code]._fcn             = 'add_menu_item'
             recent[code]._kwargs.label    = filepath
             recent[code]._kwargs.callback = _open_specific_file
@@ -119,9 +158,34 @@ def _open_specific_file(sender, app_data, ctx):
     """
     """
     code_sender = sender.split('.')[-1]
-    for (code, filepath) in ctx.store.last_opened:
+    for (code, filepath) in ctx.store.recent_files:
         if code == code_sender:
-            ctx.app.from_dict(fl.stableflow.cfg.prepare(filepath))
+            with ctx.batch_context():
+                ctx.app.from_dict(fl.stableflow.cfg.prepare(filepath))
+
+
+# -----------------------------------------------------------------------------
+def menu_file_recent_clear(sender, app_data, ctx):
+    """
+    """
+
+    with ctx.batch_context():
+        _clear_recent_file_menu_items(ctx)
+        recent = ctx.view.vp.win.menu.file.recent
+        recent['clear']._fcn             = 'add_menu_item'
+        recent['clear']._kwargs.label    = 'Clear items'
+        recent['clear']._kwargs.callback = menu_file_recent_clear
+
+
+# -----------------------------------------------------------------------------
+def _clear_recent_file_menu_items(ctx):
+    """
+    """
+
+    path_recent = ctx.view.vp.win.menu.file.recent._str_path()
+    for id_item in ctx.ui.get_item_children(item = path_recent, slot = 1):
+        del ctx[ctx.ui.get_item_alias(id_item)]
+
 
 # -----------------------------------------------------------------------------
 def _update_from_application_model(ctx, tup_cmd):
@@ -135,6 +199,7 @@ def _update_from_application_model(ctx, tup_cmd):
 
     nodeeditor     = ctx.view.vp.win.main.nodeeditor
     map_cfg_norm   = copy.deepcopy(ctx.app.to_dict())
+
     map_cfg_denorm = fl.stableflow.cfg.denormalize(map_cfg_norm)
     map_cfg_layout = fl.stableflow.cfg.layout.horizontal(
                                             map_cfg_denorm  = map_cfg_denorm,
@@ -247,31 +312,6 @@ def mouseright(sender, app_data, ctx):
 
 
 # -----------------------------------------------------------------------------
-def keypress(sender, app_data, ctx):
-    """
-    Keypress handler.
-
-    """
-    if ctx.ui.is_key_down(ctx.ui.mvKey_Control):
-        if app_data == ctx.ui.mvKey_O:
-            menu_file_open(sender, app_data, ctx)
-
-        if app_data == ctx.ui.mvKey_S:
-            menu_file_save(sender, app_data, ctx)
-
-    else:
-
-        if app_data == ctx.ui.mvKey_Escape:
-            if 'open_file' in ctx.view:
-                del ctx.view.open_file
-            if 'save_file' in ctx.view:
-                del ctx.view.save_file
-            ctx.ui.configure_item('view.vp.win.ctx',
-                                  pos  = ctx.ui.get_mouse_pos(local = False),
-                                  show = False)
-
-
-# -----------------------------------------------------------------------------
 def resize(sender, app_data, ctx):
     """
     Handle window resize events.
@@ -297,29 +337,31 @@ def menu_file_open(sender, app_data, ctx):
 
     """
 
-    widget    = pl.stableview.widget
-    open_file = widget(
-            ctx.view.open_file,
-            'add_file_dialog',
-            directory_selector = False,
-            modal              = True,
-            show               = True,
-            label              = 'Open file',
-            callback           = '_spec::flowforge.main.menu_file_open_ok',
-            cancel_callback    = '_spec::flowforge.main.menu_file_open_cancel',
-            width              = 700,
-            height             = 500,
-            default_path       = '/media/wtp/Data1/dev/df/ws00_pri/a3_src/',
-            # default_path       = os.path.expanduser('~'),
-            file_count         = 1)
+    with ctx.batch_context():
 
-    extension = widget(
-            open_file.extension,
-            'add_file_extension',
-            label         = 'yaml',
-            extension     = '.yaml',
-            width         = 200,
-            height        = 100)
+        widget    = pl.stableview.widget
+        open_file = widget(
+                ctx.view.open_file,
+                'add_file_dialog',
+                directory_selector = False,
+                modal              = True,
+                show               = True,
+                label              = 'Open file',
+                callback           = '_spec::flowforge.main.menu_file_open_ok',
+                cancel_callback    = '_spec::flowforge.main.menu_file_open_cancel',
+                width              = 700,
+                height             = 500,
+                default_path       = '/media/wtp/Data1/dev/df/ws00_pri/a3_src/',
+                # default_path       = os.path.expanduser('~'),
+                file_count         = 1)
+
+        extension = widget(
+                open_file.extension,
+                'add_file_extension',
+                label         = 'yaml',
+                extension     = '.yaml',
+                width         = 200,
+                height        = 100)
 
 
 # -----------------------------------------------------------------------------
@@ -329,7 +371,8 @@ def menu_file_open_cancel(sender, app_data, ctx):
 
     """
 
-    del ctx.view.open_file
+    with ctx.batch_context():
+        del ctx.view.open_file
 
 
 # -----------------------------------------------------------------------------
@@ -340,31 +383,11 @@ def menu_file_open_ok(sender, app_data, ctx):
     """
 
     filepath = app_data['file_path_name']
-    code     = fl.util.strhash(filepath)
-    ctx.store.last_opened.insert(0, (code, filepath))
-    if len(ctx.store.last_opened) > 8:
-        del ctx.store.last_opened[8:]
+    _add_to_recent_files(ctx, filepath)
 
-    ctx.app.from_dict(fl.stableflow.cfg.prepare(filepath))
-    del ctx.view.open_file
-
-
-# -----------------------------------------------------------------------------
-def menu_file_recent(sender, app_data, ctx):
-    """
-    """
-
-    pass
-
-
-# -----------------------------------------------------------------------------
-def menu_file_recent_clear(sender, app_data, ctx):
-    """
-    """
-
-    print('CLEAR')
-    pass
-
+    with ctx.batch_context():
+        ctx.app.from_dict(fl.stableflow.cfg.prepare(filepath))
+        del ctx.view.open_file
 
 
 # -----------------------------------------------------------------------------
@@ -374,28 +397,30 @@ def menu_file_save(sender, app_data, ctx):
 
     """
 
-    widget    = pl.stableview.widget
-    save_file = widget(
-            ctx.view.save_file,
-            'add_file_dialog',
-            directory_selector = False,
-            modal              = True,
-            show               = True,
-            label              = 'Save file',
-            callback           = '_spec::flowforge.main.menu_file_save_ok',
-            cancel_callback    = '_spec::flowforge.main.menu_file_save_cancel',
-            width              = 700,
-            height             = 500,
-            default_path       = os.path.expanduser('~'),
-            file_count         = 1)
+    with ctx.batch_context():
 
-    extension = widget(
-            save_file.extension,
-            'add_file_extension',
-            label     = 'yaml',
-            extension = '.yaml',
-            width     = 200,
-            height    = 100)
+        widget    = pl.stableview.widget
+        save_file = widget(
+                ctx.view.save_file,
+                'add_file_dialog',
+                directory_selector = False,
+                modal              = True,
+                show               = True,
+                label              = 'Save file',
+                callback           = '_spec::flowforge.main.menu_file_save_ok',
+                cancel_callback    = '_spec::flowforge.main.menu_file_save_cancel',
+                width              = 700,
+                height             = 500,
+                default_path       = os.path.expanduser('~'),
+                file_count         = 1)
+
+        extension = widget(
+                save_file.extension,
+                'add_file_extension',
+                label     = 'yaml',
+                extension = '.yaml',
+                width     = 200,
+                height    = 100)
 
 
 # -----------------------------------------------------------------------------
@@ -405,7 +430,8 @@ def menu_file_save_cancel(sender, app_data, ctx):
 
     """
 
-    del ctx.view.save_file
+    with ctx.batch_context():
+        del ctx.view.save_file
 
 
 # -----------------------------------------------------------------------------
@@ -416,7 +442,9 @@ def menu_file_save_ok(sender, app_data, ctx):
     """
 
     ctx.app.to_file(filepath = app_data['file_path_name'])
-    del ctx.view.save_file
+
+    with ctx.batch_context():
+        del ctx.view.save_file
 
 
 # -----------------------------------------------------------------------------
@@ -661,32 +689,45 @@ def system_stop(sender, app_data, ctx):
 
 
 # -----------------------------------------------------------------------------
-# def _save_file(ctx, filepath):
-#     """
-#     Save file.
+def _close_all_open_dialogs_and_windows(ctx):
+    """
+    Close all open dialogs and windows.
 
-#     """
-#     cfg_save = {
-#         'node': dict(),
-#         'edge': list()
-#     }
+    """
 
-    # Extract node and edge config from the view model
-    #
-    # for (key, value) in ctx.view.vp.win.main.nodeeditor.items():
-    #     if key.startswith('node_'):
-    #         cfg_save['node'][value._id] = value._cfg
-    #     if key.startswith('edge_'):
-    #         cfg_save['edge'].append(value._cfg)
+    with ctx.batch_context():
 
-    # import pprint
-    # pprint.pprint(cfg_save)
+        if 'open_file' in ctx.view:
+            del ctx.view.open_file
 
-    ##################################################
-    # TODO: WHAT METADATA DO I NEED?                 #
-    #       WHERE WILL IT BE STORED?                 #
-    #       APPLICATION MODEL TO VIEW MODEL MAPPING? #
-    ##################################################
+        if 'save_file' in ctx.view:
+            del ctx.view.save_file
 
-    # THINK ABOUT DATA FLOW BETWEEN APPLICATION MODEL AND VIEW MODEL
+        ctx.ui.configure_item('view.vp.win.ctx',
+                              pos  = ctx.ui.get_mouse_pos(local = False),
+                              show = False)
+
+
+# -----------------------------------------------------------------------------
+def keypress(sender, app_data, ctx):
+    """
+    Keypress handler.
+
+    """
+
+    if ctx.ui.is_key_down(ctx.ui.mvKey_Control):
+
+        if app_data == ctx.ui.mvKey_O:
+            menu_file_open(sender, app_data, ctx)
+
+        if app_data == ctx.ui.mvKey_S:
+            menu_file_save(sender, app_data, ctx)
+
+        if app_data == ctx.ui.mvKey_Q:
+            ctx.ui.stop_dearpygui()
+
+    else:
+
+        if app_data == ctx.ui.mvKey_Escape:
+            _close_all_open_dialogs_and_windows(ctx)
 

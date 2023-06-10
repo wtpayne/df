@@ -142,15 +142,14 @@ def main(dirpath_app, id_org, id_app, **kwargs):
 
             ctx.ui.setup_dearpygui()
 
-            with ctx.batch_context():
-                next(ctx.coro)                    # app late setup.
+            next(ctx.coro)                        # app late setup.
 
             ctx.ui.show_viewport()
             while ctx.ui.is_dearpygui_running():
 
-                with ctx.batch_context():
-                    next(ctx.coro)                # app runtime step.
-                    ctx.ui.render_dearpygui_frame()
+                next(ctx.coro)                    # app runtime step.
+                ctx.ui.render_dearpygui_frame()
+
         finally:
             ctx.ui.destroy_context()
 
@@ -172,10 +171,6 @@ def _load_store(ctx, id_app, id_org):
         if os.path.isfile(filepath_cfg):
             ctx.store.from_file(filepath = filepath_cfg)
 
-
-    filepath = '/media/wtp/Data1/dev/df/ws00_pri/a3_src/h60_system/routine/routine.stableflow.cfg.yaml'
-    code     = fl.util.strhash(filepath)
-    ctx.store.last_opened = [(code, filepath)]
 
 # -----------------------------------------------------------------------------
 def _load_cfg(ctx, id_app, id_org, **kwargs):

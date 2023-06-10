@@ -34,7 +34,7 @@ node:
       py_module:      cl.ctrl.sys.ic00_edict
     state_type:       py_dict
     config:
-      frequency_hz:   0.25
+      frequency_hz:   2
       idx_max:        200
 
   # ---------------------------------------------------------------------------
@@ -65,22 +65,31 @@ node:
         timezone:   "America/Toronto"
         hour:       16
       events:
+        hydration:
+          - "hydrate"
+          - "drink"
+          - "water"
+          - "milk"
+          - "tea"
+          - "coffee"
+          - "beer"
+          - "wine"
+          - "whisky"
 
 
   # ---------------------------------------------------------------------------
   # Discord integration
   #
   discord:
-    process:          proc_main
-    req_host_cfg:     default_configuration
+    process:            proc_main
+    req_host_cfg:       default_configuration
     functionality:
-      py_module:      cl.net.discord.client.ic00_edict
-    state_type:       py_dict
+      py_module:        cl.net.discord.client.ic00_edict
+    state_type:         py_dict
     config:
-      filepath_env:   Null
-      envvar_token:   TOKEN_DISCORD_BOT_ROUTINE
-      secs_interval:  1
-
+      filepath_dotenv:  Null
+      envvar_token:     TOKEN_DISCORD_BOT_ROUTINE
+      secs_interval:    0.5
 
 
 ###############################################################################
