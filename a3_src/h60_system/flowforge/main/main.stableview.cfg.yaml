@@ -101,7 +101,9 @@ theme:
           y:                        _ref::theme.alpha_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
-
+      # Causes segmentation fault, so leaving
+      # commented out for now.
+      #
       # style_window_padding:
       #   _fcn:                       add_thIeme_style
       #   _kwargs:
@@ -126,55 +128,55 @@ theme:
           y:                        _ref::theme.window_border_size_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
-      # style_window_min_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_WindowMinSize
-      #     x:                        _ref::theme.window_min_size_x
-      #     y:                        _ref::theme.window_min_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
+      style_window_min_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvStyleVar_WindowMinSize
+          x:                        _ref::theme.window_min_size_x
+          y:                        _ref::theme.window_min_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
-      # style_window_title_align:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_WindowTitleAlign
-      #     x:                        _ref::theme.window_title_align_x
-      #     y:                        _ref::theme.window_title_align_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
-
-
-      # style_child_rounding:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_ChildRounding
-      #     x:                        _ref::theme.child_rounding_x
-      #     y:                        _ref::theme.child_rounding_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
-
-      # style_child_border_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_ChildBorderSize
-      #     x:                        _ref::theme.child_border_size_x
-      #     y:                        _ref::theme.child_border_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
+      style_window_title_align:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvStyleVar_WindowTitleAlign
+          x:                        _ref::theme.window_title_align_x
+          y:                        _ref::theme.window_title_align_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
-      # style_popup_rounding:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_PopupRounding
-      #     x:                        _ref::theme.popup_rounding_x
-      #     y:                        _ref::theme.popup_rounding_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
+      style_child_rounding:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvStyleVar_ChildRounding
+          x:                        _ref::theme.child_rounding_x
+          y:                        _ref::theme.child_rounding_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
-      # style_popup_border_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_PopupBorderSize
-      #     x:                        _ref::theme.popup_border_size_x
-      #     y:                        _ref::theme.popup_border_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
+      style_child_border_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvStyleVar_ChildBorderSize
+          x:                        _ref::theme.child_border_size_x
+          y:                        _ref::theme.child_border_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
+
+
+      style_popup_rounding:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvStyleVar_PopupRounding
+          x:                        _ref::theme.popup_rounding_x
+          y:                        _ref::theme.popup_rounding_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
+
+      style_popup_border_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvStyleVar_PopupBorderSize
+          x:                        _ref::theme.popup_border_size_x
+          y:                        _ref::theme.popup_border_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
       style_frame_padding:
@@ -251,46 +253,45 @@ theme:
           y:                        _ref::theme.scrollbar_rounding_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
-      # style_grab_min_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_GrabMinSize
-      #     x:                        _ref::theme.grab_min_size_x
-      #     y:                        _ref::theme.grab_min_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
+      style_grab_min_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvStyleVar_GrabMinSize
+          x:                        _ref::theme.grab_min_size_x
+          y:                        _ref::theme.grab_min_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
-      # style_grab_rounding:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_GrabRounding
-      #     x:                        _ref::theme.grab_rounding_x
-      #     y:                        _ref::theme.grab_rounding_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
+      style_grab_rounding:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvStyleVar_GrabRounding
+          x:                        _ref::theme.grab_rounding_x
+          y:                        _ref::theme.grab_rounding_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
-      # style_tab_rounding:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_TabRounding
-      #     x:                        _ref::theme.tab_rounding_x
-      #     y:                        _ref::theme.tab_rounding_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
+      style_tab_rounding:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvStyleVar_TabRounding
+          x:                        _ref::theme.tab_rounding_x
+          y:                        _ref::theme.tab_rounding_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
+      style_button_text_align:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvStyleVar_ButtonTextAlign
+          x:                        _ref::theme.button_text_align_x
+          y:                        _ref::theme.button_text_align_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
-      # style_button_text_align:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_ButtonTextAlign
-      #     x:                        _ref::theme.button_text_align_x
-      #     y:                        _ref::theme.button_text_align_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
-
-      # style_selectable_text_align:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvStyleVar_SelectableTextAlign
-      #     x:                        _ref::theme.selectable_text_align_x
-      #     y:                        _ref::theme.selectable_text_align_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
+      style_selectable_text_align:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvStyleVar_SelectableTextAlign
+          x:                        _ref::theme.selectable_text_align_x
+          y:                        _ref::theme.selectable_text_align_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Core
 
 
       # -----------------------------------------------------------------------
@@ -313,6 +314,9 @@ theme:
           y:                        _ref::theme.node_corner_rounding_y
           category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
+      # Causes segmentation fault, so leaving
+      # commented out for now.
+      #
       # style_node_padding_horizontal:
       #   _fcn:                       add_theme_style
       #   _kwargs:
@@ -321,6 +325,9 @@ theme:
       #     y:                        _ref::theme.node_padding_horizontal_y
       #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Nodes
 
+      # Causes segmentation fault, so leaving
+      # commented out for now.
+      #
       # style_node_padding_vertical:
       #   _fcn:                       add_theme_style
       #   _kwargs:
@@ -415,221 +422,221 @@ theme:
       # -----------------------------------------------------------------------
       # Plot style.
       #
-      # style_line_weight:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LineWeight
-      #     x:                        _ref::theme.line_weight_x
-      #     y:                        _ref::theme.line_weight_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_line_weight:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LineWeight
+          x:                        _ref::theme.line_weight_x
+          y:                        _ref::theme.line_weight_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_marker:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_Marker
-      #     x:                        _ref::theme.marker_x
-      #     y:                        _ref::theme.marker_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_marker:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_Marker
+          x:                        _ref::theme.marker_x
+          y:                        _ref::theme.marker_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_marker_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MarkerSize
-      #     x:                        _ref::theme.marker_size_x
-      #     y:                        _ref::theme.marker_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_marker_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MarkerSize
+          x:                        _ref::theme.marker_size_x
+          y:                        _ref::theme.marker_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_marker_weight:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MarkerWeight
-      #     x:                        _ref::theme.marker_weight_x
-      #     y:                        _ref::theme.marker_weight_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_marker_weight:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MarkerWeight
+          x:                        _ref::theme.marker_weight_x
+          y:                        _ref::theme.marker_weight_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_fill_alpha:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_FillAlpha
-      #     x:                        _ref::theme.fill_alpha_x
-      #     y:                        _ref::theme.fill_alpha_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_fill_alpha:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_FillAlpha
+          x:                        _ref::theme.fill_alpha_x
+          y:                        _ref::theme.fill_alpha_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_error_bar_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_ErrorBarSize
-      #     x:                        _ref::theme.error_bar_size_x
-      #     y:                        _ref::theme.error_bar_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_error_bar_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_ErrorBarSize
+          x:                        _ref::theme.error_bar_size_x
+          y:                        _ref::theme.error_bar_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_error_bar_weight:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_ErrorBarWeight
-      #     x:                        _ref::theme.error_bar_weight_x
-      #     y:                        _ref::theme.error_bar_weight_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_error_bar_weight:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_ErrorBarWeight
+          x:                        _ref::theme.error_bar_weight_x
+          y:                        _ref::theme.error_bar_weight_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_digital_bit_height:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_DigitalBitHeight
-      #     x:                        _ref::theme.digital_bit_height_x
-      #     y:                        _ref::theme.digital_bit_height_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_digital_bit_height:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_DigitalBitHeight
+          x:                        _ref::theme.digital_bit_height_x
+          y:                        _ref::theme.digital_bit_height_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_digital_bit_gap:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_DigitalBitGap
-      #     x:                        _ref::theme.digital_bit_gap_x
-      #     y:                        _ref::theme.digital_bit_gap_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_digital_bit_gap:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_DigitalBitGap
+          x:                        _ref::theme.digital_bit_gap_x
+          y:                        _ref::theme.digital_bit_gap_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_plot_border_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_PlotBorderSize
-      #     x:                        _ref::theme.plot_border_size_x
-      #     y:                        _ref::theme.plot_border_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_plot_border_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_PlotBorderSize
+          x:                        _ref::theme.plot_border_size_x
+          y:                        _ref::theme.plot_border_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_minor_alpha:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MinorAlpha
-      #     x:                        _ref::theme.minor_alpha_x
-      #     y:                        _ref::theme.minor_alpha_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_minor_alpha:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MinorAlpha
+          x:                        _ref::theme.minor_alpha_x
+          y:                        _ref::theme.minor_alpha_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_major_tick_len:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MajorTickLen
-      #     x:                        _ref::theme.major_tick_len_x
-      #     y:                        _ref::theme.major_tick_len_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_major_tick_len:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MajorTickLen
+          x:                        _ref::theme.major_tick_len_x
+          y:                        _ref::theme.major_tick_len_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_minor_tick_len:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MinorTickLen
-      #     x:                        _ref::theme.minor_tick_len_x
-      #     y:                        _ref::theme.minor_tick_len_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_minor_tick_len:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MinorTickLen
+          x:                        _ref::theme.minor_tick_len_x
+          y:                        _ref::theme.minor_tick_len_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_major_tick_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MajorTickSize
-      #     x:                        _ref::theme.major_tick_size_x
-      #     y:                        _ref::theme.major_tick_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_major_tick_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MajorTickSize
+          x:                        _ref::theme.major_tick_size_x
+          y:                        _ref::theme.major_tick_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_minor_tick_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MinorTickSize
-      #     x:                        _ref::theme.minor_tick_size_x
-      #     y:                        _ref::theme.minor_tick_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_minor_tick_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MinorTickSize
+          x:                        _ref::theme.minor_tick_size_x
+          y:                        _ref::theme.minor_tick_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_major_grid_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MajorGridSize
-      #     x:                        _ref::theme.major_grid_size_x
-      #     y:                        _ref::theme.major_grid_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_major_grid_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MajorGridSize
+          x:                        _ref::theme.major_grid_size_x
+          y:                        _ref::theme.major_grid_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_minor_grid_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MinorGridSize
-      #     x:                        _ref::theme.minor_grid_size_x
-      #     y:                        _ref::theme.minor_grid_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_minor_grid_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MinorGridSize
+          x:                        _ref::theme.minor_grid_size_x
+          y:                        _ref::theme.minor_grid_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_plot_padding:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_PlotPadding
-      #     x:                        _ref::theme.plot_padding_x
-      #     y:                        _ref::theme.plot_padding_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_plot_padding:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_PlotPadding
+          x:                        _ref::theme.plot_padding_x
+          y:                        _ref::theme.plot_padding_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_label_padding:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LabelPadding
-      #     x:                        _ref::theme.label_padding_x
-      #     y:                        _ref::theme.label_padding_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_label_padding:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LabelPadding
+          x:                        _ref::theme.label_padding_x
+          y:                        _ref::theme.label_padding_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_legend_padding:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LegendPadding
-      #     x:                        _ref::theme.legend_padding_x
-      #     y:                        _ref::theme.legend_padding_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_legend_padding:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LegendPadding
+          x:                        _ref::theme.legend_padding_x
+          y:                        _ref::theme.legend_padding_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_legend_inner_padding:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LegendInnerPadding
-      #     x:                        _ref::theme.legend_inner_padding_x
-      #     y:                        _ref::theme.legend_inner_padding_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_legend_inner_padding:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LegendInnerPadding
+          x:                        _ref::theme.legend_inner_padding_x
+          y:                        _ref::theme.legend_inner_padding_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_legend_spacing:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LegendSpacing
-      #     x:                        _ref::theme.legend_spacing_x
-      #     y:                        _ref::theme.legend_spacing_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_legend_spacing:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_LegendSpacing
+          x:                        _ref::theme.legend_spacing_x
+          y:                        _ref::theme.legend_spacing_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_mouse_pos_padding:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MousePosPadding
-      #     x:                        _ref::theme.mouse_pos_padding_x
-      #     y:                        _ref::theme.mouse_pos_padding_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_mouse_pos_padding:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_MousePosPadding
+          x:                        _ref::theme.mouse_pos_padding_x
+          y:                        _ref::theme.mouse_pos_padding_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_annotation_padding:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_AnnotationPadding
-      #     x:                        _ref::theme.annotation_padding_x
-      #     y:                        _ref::theme.annotation_padding_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_annotation_padding:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_AnnotationPadding
+          x:                        _ref::theme.annotation_padding_x
+          y:                        _ref::theme.annotation_padding_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_fit_padding:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_FitPadding
-      #     x:                        _ref::theme.fit_padding_x
-      #     y:                        _ref::theme.fit_padding_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_fit_padding:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_FitPadding
+          x:                        _ref::theme.fit_padding_x
+          y:                        _ref::theme.fit_padding_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_plot_default_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_PlotDefaultSize
-      #     x:                        _ref::theme.plot_default_size_x
-      #     y:                        _ref::theme.plot_default_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_plot_default_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_PlotDefaultSize
+          x:                        _ref::theme.plot_default_size_x
+          y:                        _ref::theme.plot_default_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
-      # style_plot_min_size:
-      #   _fcn:                       add_theme_style
-      #   _kwargs:
-      #     target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_PlotMinSize
-      #     x:                        _ref::theme.plot_min_size_x
-      #     y:                        _ref::theme.plot_min_size_y
-      #     category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
+      style_plot_min_size:
+        _fcn:                       add_theme_style
+        _kwargs:
+          target:                   _spec::dearpygui.dearpygui.mvPlotStyleVar_PlotMinSize
+          x:                        _ref::theme.plot_min_size_x
+          y:                        _ref::theme.plot_min_size_y
+          category:                 _spec::dearpygui.dearpygui.mvThemeCat_Plots
 
       # -----------------------------------------------------------------------
       # Core colors.

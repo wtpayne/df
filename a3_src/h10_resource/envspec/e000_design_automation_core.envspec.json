@@ -102,6 +102,7 @@
     "# Local workspace directories - editable install.",
     "#",
 
+    { "type": "local",  "relpath": "a3_src/h10_resource"                      },
     { "type": "local",  "relpath": "a3_src/h20_functionality"                 },
     { "type": "local",  "relpath": "a3_src/h30_platform"                      },
     { "type": "local",  "relpath": "a3_src/h40_component"                     },

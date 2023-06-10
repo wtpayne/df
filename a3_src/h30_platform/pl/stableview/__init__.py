@@ -164,8 +164,8 @@ def _load_store(ctx, id_app, id_org):
 
     filename = '{id}.cfg.yaml'.format(id = id_app)
     for (id_cfg, dirpath) in (
-                    ('site_data',   appdirs.site_data_dir(   id_app, id_org)),
-                    ('user_data',   appdirs.user_data_dir(   id_app, id_org))):
+                ('site_data', appdirs.site_data_dir( id_app, id_org )),
+                ('user_data', appdirs.user_data_dir( id_app, id_org ))):
 
         filepath_cfg = os.path.join(dirpath, filename)
         ctx.cfg['filepath_' + id_cfg] = filepath_cfg
@@ -184,13 +184,13 @@ def _load_cfg(ctx, id_app, id_org, **kwargs):
 
     """
 
-    ctx.cfg.dirpath_cache = appdirs.user_cache_dir(  id_app, id_org)
-    ctx.cfg.dirpath_log   = appdirs.user_log_dir(    id_app, id_org)
+    ctx.cfg.dirpath_cache = appdirs.user_cache_dir( id_app, id_org )
+    ctx.cfg.dirpath_log   = appdirs.user_log_dir(   id_app, id_org )
 
     filename = '{id}.cfg.yaml'.format(id = id_app)
     for (id_cfg, dirpath) in (
-                    ('site_config', appdirs.site_config_dir( id_app, id_org)),
-                    ('user_config', appdirs.user_config_dir( id_app, id_org))):
+                ('site_config', appdirs.site_config_dir( id_app, id_org )),
+                ('user_config', appdirs.user_config_dir( id_app, id_org ))):
 
         filepath_cfg = os.path.join(dirpath, filename)
         ctx.cfg['filepath_' + id_cfg] = filepath_cfg

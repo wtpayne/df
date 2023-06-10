@@ -45,11 +45,8 @@ license:
 """
 
 
-import os
-
-import dotenv
-
 import fl.net.openai.client
+import key
 
 
 # -----------------------------------------------------------------------------
@@ -63,9 +60,10 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
     (request_handler,
      template_handler,
-     workflow_handler) = init_handlers(
-                filepath_env  = cfg['filepath_env'],
+     workflow_handler) = init_openai_client(
+                filepath_env  = cfg.get('filepath_env',  None),
                 envvar_key    = cfg.get('envvar_key',    'OPENAI_API_KEY'),
+                api_key       = cfg.get('api_key',       None),
                 is_bit        = cfg.get('is_bit',        True),  # Builtin test
                 is_async      = cfg.get('is_async',      False), # Asynchronous
                 secs_interval = cfg.get('secs_interval', 2),
@@ -129,25 +127,23 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
 
 # -----------------------------------------------------------------------------
-def init_handlers(filepath_env,
-                  envvar_key    = 'OPENAI_API_KEY',
-                  is_bit        = True,  # Built-in-test
-                  is_async      = False, # Asynchronous API access.
-                  secs_interval = 2,
-                  default       = None):
+def init_openai_client(filepath_env  = None,
+                       envvar_key    = 'OPENAI_API_KEY',
+                       api_key       = None,
+                       is_bit        = True,  # Built-in-test
+                       is_async      = False, # Asynchronous API access.
+                       secs_interval = 2,
+                       default       = None):
     """
     Return initialized handler coroutines for the OpenAI client.
 
     """
 
-    # Use an API key loaded from a .env
-    # file in the configured location.
-    #
-    dotenv.load_dotenv(dotenv_path = filepath_env,
-                       verbose     = True,
-                       override    = False)
+    if api_key is None:
+        api_key = key.load(id_value     = envvar_key,
+                           filepath_env = filepath_env)
 
-    cfg_handler = dict(api_key       = os.environ[envvar_key],
+    cfg_handler = dict(api_key       = api_key,
                        secs_interval = secs_interval,
                        is_bit        = is_bit,
                        is_async      = is_async,

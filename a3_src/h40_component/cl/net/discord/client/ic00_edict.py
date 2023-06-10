@@ -49,6 +49,10 @@ import dotenv
 import os
 
 import fl.net.discord.client
+import key
+
+
+DEFAULT_ENVVAR = 'TOKEN_DISCORD_BOT_DEFAULT'
 
 
 # -----------------------------------------------------------------------------
@@ -66,7 +70,11 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         outputs[id_out]['ts']   = dict()
         outputs[id_out]['list'] = list()
 
-    discord = init_discord_client(cfg)
+    discord = init_discord_client(
+                filepath_env  = cfg.get('filepath_env',  None),
+                envvar_key    = cfg.get('envvar_key',    DEFAULT_ENVVAR),
+                str_token     = cfg.get('str_token',     None),
+                secs_interval = cfg.get('secs_interval', 5))
 
     # Loop forever, sending messages
     # to and from the discord client
@@ -113,22 +121,21 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
 
 # -----------------------------------------------------------------------------
-def init_discord_client(cfg):
+def init_discord_client(filepath_env  = None,
+                        envvar_key    = DEFAULT_ENVVAR,
+                        str_token     = None,
+                        secs_interval = 5):
     """
     Return the discord client coroutine.
 
     """
 
-    # Load secrets from a .env
-    # file and load configuration.
-    #
-    dotenv.load_dotenv(dotenv_path = cfg['filepath_dotenv'],
-                       verbose     = True,
-                       override    = False)
-    cfg_client                  = dict()
-    cfg_client['str_token']     = os.environ[cfg['envvar_token']]
-    cfg_client['secs_interval'] = cfg.get('secs_interval', 5)
+    if str_token is None:
+        str_token = key.load(id_value     = envvar_key,
+                             filepath_env = filepath_env)
 
-    discord = fl.net.discord.client.coro(cfg_client)
+    cfg_client = { 'secs_interval': secs_interval,
+                   'str_token':     str_token }
+    discord    = fl.net.discord.client.coro(cfg_client)
 
     return discord
