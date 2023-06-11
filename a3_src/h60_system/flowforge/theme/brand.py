@@ -146,5 +146,6 @@ dark_grey_shade_3  = [ 50,  50,  50]
 dark_grey_shade_4  = [ 40,  40,  40]
 dark_grey_shade_5  = [ 30,  30,  30]
 
-accent_a           = [240, 105,  20]
+# accent_a           = [240, 105,  20]
+accent_a           = [200, 216, 227]
 
