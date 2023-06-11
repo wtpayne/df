@@ -96,9 +96,9 @@ def _configure_recent_files_list(ctx):
     ctx.store.rule(cond = fl.rule.is_root_in(('store', 'recent_files')),
                    act  = _update_recent_files_menu)
 
-    _add_to_recent_files(ctx, '/media/wtp/Data1/dev/df/ws00_pri/a3_src/h90_internal/da/cli/service/process_assistant/process_assistant.stableflow.cfg.yaml')
-    _add_to_recent_files(ctx, '/media/wtp/Data1/dev/df/ws00_pri/a3_src/h60_system/accord/accord.stableflow.cfg.yaml')
-    _add_to_recent_files(ctx, '/media/wtp/Data1/dev/df/ws00_pri/a3_src/h60_system/routine/routine.stableflow.cfg.yaml')
+    # _add_to_recent_files(ctx, '/media/wtp/Data1/dev/df/ws00_pri/a3_src/h90_internal/da/cli/service/process_assistant/process_assistant.stableflow.cfg.yaml')
+    # _add_to_recent_files(ctx, '/media/wtp/Data1/dev/df/ws00_pri/a3_src/h60_system/accord/accord.stableflow.cfg.yaml')
+    # _add_to_recent_files(ctx, '/media/wtp/Data1/dev/df/ws00_pri/a3_src/h60_system/routine/routine.stableflow.cfg.yaml')
 
 
 # -----------------------------------------------------------------------------
