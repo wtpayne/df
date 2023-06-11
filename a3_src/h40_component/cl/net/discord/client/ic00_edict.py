@@ -136,6 +136,7 @@ def init_discord_client(filepath_env  = None,
 
     cfg_client = { 'secs_interval': secs_interval,
                    'str_token':     str_token }
+
     discord    = fl.net.discord.client.coro(cfg_client)
 
     return discord

@@ -65,6 +65,10 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     outputs['msg']['ts']   = dict()
     outputs['msg']['list'] = list()
 
+    outputs['state']['ena']  = False
+    outputs['state']['ts']   = dict()
+    outputs['state']['list'] = list()
+
     list_to_app = list()
 
     state = fl.util.Bureau()
@@ -86,6 +90,10 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         outputs['msg']['ena'] = False
         outputs['msg']['ts'].clear()
         outputs['msg']['list'].clear()
+
+        outputs['state']['ena']  = False
+        outputs['state']['ts'].clear()
+        outputs['state']['list'].clear()
 
         list_to_app.clear()
 

@@ -139,7 +139,7 @@ def _filepath_dotenv():
     return da.env.path(
                 process_area = 'a3_src',
                 control_tier = 'h10_resource',
-                relpath      = 'keys/default.env')
+                relpath      = 'key/default.env')
 
 
 # -----------------------------------------------------------------------------

@@ -82,7 +82,7 @@ class SpecifyClNetOpenAiClientIc00_edict:
         filepath_env   = da.env.path(
                               process_area  = 'a3_src',
                               control_tier  = 'h10_resource',
-                              relpath       = 'keys/default.env')
+                              relpath       = 'key/default.env')
         cfg_client     = dict(filepath_env  = filepath_env,
                               envvar_key    = 'OPENAI_API_KEY',
                               secs_interval = 0.001,

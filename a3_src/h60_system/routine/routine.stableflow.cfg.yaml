@@ -48,6 +48,18 @@ node:
     state_type:       py_dict
 
   # ---------------------------------------------------------------------------
+  # Persistence
+  #
+  store:
+    process:            proc_main
+    req_host_cfg:       default_configuration
+    functionality:
+      py_module:        routine.store.ic00_edict
+    state_type:         py_dict
+    config:
+      filepath_store:   Null
+
+  # ---------------------------------------------------------------------------
   # Routine application logic.
   #
   routine:
@@ -75,7 +87,6 @@ node:
           - "beer"
           - "wine"
           - "whisky"
-
 
   # ---------------------------------------------------------------------------
   # Discord integration
@@ -111,6 +122,22 @@ edge:
   data:  py_dict
   src:   ctrl_main.outputs.control_routine
   dst:   routine.inputs.control
+
+- owner: ctrl_main
+  data:  py_dict
+  src:   ctrl_main.outputs.control_store
+  dst:   store.inputs.control
+
+- owner: store
+  data:  py_dict
+  src:   store.outputs.state
+  dst:   routine.inputs.state
+
+- owner: routine
+  data:  py_dict
+  src:   routine.outputs.state
+  dst:   store.inputs.state
+  dirn:  feedback
 
 - owner: routine
   data:  py_dict

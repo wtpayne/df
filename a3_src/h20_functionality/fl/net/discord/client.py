@@ -176,9 +176,11 @@ def _discord_client(cfg_client, queue_to_app, queue_from_app):
             # to the specified channel.
             #
             (id_chan, msg) = tup_msg
-            if id_chan not in map_chan.keys():
+            if id_chan not in map_chan.keys() or map_chan[id_chan] is None:
                 map_chan[id_chan] = discord_client.get_channel(id_chan)
-            await map_chan[id_chan].send(msg)
+
+            if map_chan[id_chan] is not None:
+                await map_chan[id_chan].send(msg)
 
     # -------------------------------------------------------------------------
     @discord_client.event
