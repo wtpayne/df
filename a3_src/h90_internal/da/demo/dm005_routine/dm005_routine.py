@@ -52,9 +52,10 @@ import sys
 # -----------------------------------------------------------------------------
 def start():
     """
-    Start dm001 system.
+    Start dm005 system.
 
     """
+
     tup_overrides = ('host.localhost.dirpath_log',          _dirpath_log(),
                      'node.discord.config.filepath_dotenv', _filepath_dotenv())
 
@@ -66,9 +67,10 @@ def start():
 # -----------------------------------------------------------------------------
 def stop():
     """
-    Stop dm001 system.
+    Stop dm005 system.
 
     """
+
     import da.env.run
     sys.exit(da.env.run.stableflow_stop(path_cfg = _filepath_cfg()))
 
@@ -79,6 +81,7 @@ def _dirpath_log():
     Return the directory path to the logging directory for this system.
 
     """
+
     import da.env
     return da.env.path(process_area = 'a4_tmp',
                        control_tier = 'h80_research',
@@ -91,6 +94,7 @@ def _filepath_dotenv():
     Return the filepath to the dotenv .env file containing the API key.
 
     """
+
     import da.env
     return da.env.path(
                 process_area = 'a3_src',
@@ -104,6 +108,7 @@ def _filepath_cfg():
     Return the filepath to the backend server stableflow configuration file.
 
     """
+
     import da.env
     return da.env.path(
                 process_area = 'a3_src',

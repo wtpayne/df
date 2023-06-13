@@ -49,12 +49,10 @@ import os
 import sys
 
 
-ID_APP = 'dm006_accord'
-
 # -----------------------------------------------------------------------------
 def start():
     """
-    Start dm001 system.
+    Start dm006 system.
 
     """
     tup_overrides = ('host.localhost.dirpath_log',          _dirpath_log(),
@@ -68,7 +66,7 @@ def start():
 # -----------------------------------------------------------------------------
 def stop():
     """
-    Stop dm001 system.
+    Stop dm006 system.
 
     """
     import da.env.run
@@ -84,7 +82,7 @@ def _dirpath_log():
     import da.env
     return da.env.path(process_area = 'a4_tmp',
                        control_tier = 'h80_research',
-                       relpath      = ID_APP)
+                       relpath      = 'dm006_accord')
 
 
 # -----------------------------------------------------------------------------
@@ -106,13 +104,10 @@ def _filepath_cfg():
     Return the filepath to the backend server stableflow configuration file.
 
     """
+
     import da.env
-
-    reldir_cfg   = 'da/demo/{id}'.format(id = ID_APP)
-    filename_cfg = '{id}.stableflow.cfg.yaml'.format(id = ID_APP)
-    relpath_cfg  = os.path.join(reldir_cfg, filename_cfg)
-
-    return da.env.path(process_area = 'a3_src',
-                       control_tier = 'h90_internal',
-                       relpath      = relpath_cfg)
+    return da.env.path(
+                process_area = 'a3_src',
+                control_tier = 'h60_system',
+                relpath      = 'accord/accord.stableflow.cfg.yaml')
 

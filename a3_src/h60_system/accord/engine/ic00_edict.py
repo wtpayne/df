@@ -60,9 +60,12 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
     outputs['msg']['ts']   = dict()
     outputs['msg']['list'] = list()
 
-    list_to_app = list()
-
     state = fl.util.Bureau()
+    state.channel.from_dict(cfg['channel'])
+    for (name_channel, id_channel) in state.channel.items():
+        state.lookup_channel[id_channel] = name_channel
+
+    list_to_app = list()
 
     while True:
 
@@ -76,22 +79,12 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
         list_to_app.clear()
 
-        # Handle periodic reminders.
-        #
-        if inputs['control']['ena']:
-            list_reminder = _get_announcements(state = state,
-                                               ts    = inputs['control']['ts'])
-            if list_reminder:
-                list_to_app.extend(list_reminder)
-
-        # Handle messages received from discord.
+        # Respond to messages received from discord.
         #
         if inputs['msg']['ena']:
             for map_msg in inputs['msg']['list']:
-                list_response = _process_message(state = state,
-                                                 **map_msg)
-                if list_response:
-                    list_to_app.extend(list_response)
+                list_to_app.extend(_handle_incoming_message(state = state,
+                                                            **map_msg))
 
         if list_to_app:
             outputs['msg']['ena'] = True
@@ -100,19 +93,33 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
 
 # -----------------------------------------------------------------------------
-def _get_announcements(state, ts):
+def _handle_incoming_message(state,
+                             msg_type,
+                             id_author,
+                             id_channel,
+                             id_msg,
+                             id_prev,
+                             content):
     """
     """
-    pass
+
+    list_to_app = list()
+
+    if id_channel == state.channel.admin:
+        list_to_app.extend(_handle_admin_command(state, content))
+
+    else:
+
+        if id_channel not in state.log:
+            state.log[id_channel] = list()
+        state.log[id_channel].append((msg_type, id_author, id_msg, content))
+
+
+    return list_to_app
 
 # -----------------------------------------------------------------------------
-def _process_message(state,
-                     msg_type,
-                     id_author,
-                     id_channel,
-                     id_msg,
-                     id_prev,
-                     content):
+def _handle_admin_command(state, content):
     """
     """
-    print('ACCORD CONTENT: ' + content)
+
+    return [(state.channel.admin, 'Test response.')]
