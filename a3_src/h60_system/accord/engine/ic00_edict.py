@@ -121,5 +121,11 @@ def _handle_incoming_message(state,
 def _handle_admin_command(state, content):
     """
     """
+    if content.startswith('Question'):
+        # send questions
+
+    if content == 'Summary':
+        # make summary
+
 
     return [(state.channel.admin, 'Test response.')]

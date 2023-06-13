@@ -136,6 +136,7 @@ def main(dirpath_app, id_org, id_app, **kwargs):
         next(ctx.coro)                            # app early setup.
 
         ctx.ui.create_context()
+        ctx.ui.configure_app(manual_callback_management = True)
 
         try:
             ctx.batch_finalize(batch)             # Trigger rules, create view.
@@ -148,6 +149,10 @@ def main(dirpath_app, id_org, id_app, **kwargs):
             while ctx.ui.is_dearpygui_running():
 
                 next(ctx.coro)                    # app runtime step.
+
+                jobs = ctx.ui.get_callback_queue() # retrieves and clears queue
+                ctx.ui.run_callbacks(jobs)
+
                 ctx.ui.render_dearpygui_frame()
 
         finally:

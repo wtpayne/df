@@ -80,7 +80,24 @@ node:
       secs_interval:  1
       debug:          True
 
-
+  # ---------------------------------------------------------------------------
+  # OpenAI integration
+  #
+  openai:
+    process:          proc_main
+    req_host_cfg:     default_configuration
+    functionality:
+      py_module:      cl.net.openai.client.ic00_edict
+    state_type:       py_dict
+    config:
+      filepath_env:   Null
+      envvar_key:     OPENAI_API_KEY
+      is_bit:         True
+      is_async:       False
+      secs_interval:  1
+      default:
+        id_endpoint:  chat_completions
+        model:        gpt-3.5-turbo
 
 ###############################################################################
 edge:
@@ -113,6 +130,27 @@ edge:
   dst:   accord.inputs.msg
   dirn:  feedback
 
+- owner: accord
+  data:  py_dict
+  src:   accord.outputs.workflow
+  dst:   openai.inputs.workflow
+
+- owner: openai
+  data:  py_dict
+  src:   openai.outputs.workflow
+  dst:   accord.inputs.workflow
+  dirn:  feedback
+
+- owner: accord
+  data:  py_dict
+  src:   accord.outputs.param
+  dst:   openai.inputs.param
+
+- owner: openai
+  data:  py_dict
+  src:   openai.outputs.param
+  dst:   accord.inputs.param
+  dirn:  feedback
 
 ###############################################################################
 data:

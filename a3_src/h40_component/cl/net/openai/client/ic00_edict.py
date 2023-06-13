@@ -88,11 +88,26 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
             outputs[id_out]['ts'].clear()
             outputs[id_out]['list'].clear()
 
+        map_ts = dict()
+
+        # Grab any new request inputs.
+        #
+        list_request = list()
+        if 'request' in inputs and inputs['request']['ena']:
+            map_ts       = inputs['request']['ts']
+            list_request = inputs['request']['list']
+
+        # Grab any new template inputs.
+        #
+        list_template = list()
+        if 'template' in inputs and inputs['template']['ena']:
+            map_ts        = inputs['template']['ts']
+            list_template = inputs['template']['list']
+
         # Grab any new workflow inputs.
         #
-        map_ts        = dict()
         list_workflow = list()
-        if inputs['workflow']['ena']:
+        if 'workflow' in inputs and inputs['workflow']['ena']:
             map_ts        = inputs['workflow']['ts']
             list_workflow = inputs['workflow']['list']
 
@@ -100,7 +115,7 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         #
         map_ts     = dict()
         list_param = list()
-        if inputs['param']['ena']:
+        if 'param' in inputs and inputs['param']['ena']:
             map_ts     = inputs['param']['ts']
             list_param = inputs['param']['list']
 
