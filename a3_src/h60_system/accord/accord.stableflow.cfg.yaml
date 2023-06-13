@@ -76,8 +76,9 @@ node:
     state_type:       py_dict
     config:
       filepath_env:   Null
-      envvar_token:   TOKEN_DISCORD_BOT_ACCORD
+      envvar_key:     TOKEN_DISCORD_BOT_ACCORD
       secs_interval:  1
+      debug:          True
 
 
 

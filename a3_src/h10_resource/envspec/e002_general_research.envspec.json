@@ -72,6 +72,16 @@
     "",
     "",
     "# -----------------------------------------------------------------------",
+    "# Packages required for numeric computing, analysis and visualisation.",
+    "#",
+
+    { "type": "pep508", "spec":    "pandas==2.0.2"                            },
+    { "type": "pep508", "spec":    "polars==0.18.2"                           },
+    { "type": "pep508", "spec":    "matplotlib==3.7.1"                        },
+
+    "",
+    "",
+    "# -----------------------------------------------------------------------",
     "# Packages required by pybullet.",
     "#",
 

@@ -74,7 +74,8 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
                 filepath_env  = cfg.get('filepath_env',  None),
                 envvar_key    = cfg.get('envvar_key',    DEFAULT_ENVVAR),
                 str_token     = cfg.get('str_token',     None),
-                secs_interval = cfg.get('secs_interval', 5))
+                secs_interval = cfg.get('secs_interval', 5),
+                debug         = cfg.get('debug',         False))
 
     # Loop forever, sending messages
     # to and from the discord client
@@ -106,7 +107,9 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
                 map_ts = pkt_in['ts']
                 list_to_app.extend(pkt_in['list'])
 
-        list_from_app = discord.send(list_to_app)
+        (list_from_app, list_log) = discord.send(list_to_app)
+
+        # TODO: HANDLE list_log
 
         # If any messages have been
         # received from the discord
@@ -114,6 +117,7 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         # in the component output.
         #
         if list_from_app:
+
             for id_out in outputs.keys():
                 outputs[id_out]['ena'] = True
                 outputs[id_out]['ts'].update(map_ts)
@@ -124,7 +128,8 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 def init_discord_client(filepath_env  = None,
                         envvar_key    = DEFAULT_ENVVAR,
                         str_token     = None,
-                        secs_interval = 5):
+                        secs_interval = 5,
+                        debug         = False):
     """
     Return the discord client coroutine.
 
@@ -135,7 +140,8 @@ def init_discord_client(filepath_env  = None,
                              filepath_env = filepath_env)
 
     cfg_client = { 'secs_interval': secs_interval,
-                   'str_token':     str_token }
+                   'str_token':     str_token,
+                   'debug':         debug }
 
     discord    = fl.net.discord.client.coro(cfg_client)
 

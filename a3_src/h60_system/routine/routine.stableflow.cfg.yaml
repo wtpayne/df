@@ -34,8 +34,8 @@ node:
       py_module:      cl.ctrl.sys.ic00_edict
     state_type:       py_dict
     config:
-      frequency_hz:   2
-      idx_max:        200
+      frequency_hz:   3
+      idx_max:        20000
 
   # ---------------------------------------------------------------------------
   # State management for the main process.
@@ -70,8 +70,8 @@ node:
     state_type:     py_dict
     config:
       channel:
-        control:    1115742663002554503
-        report:     1115742503044386816
+        control:    1117868125703131207
+        report:     1117868023030763581
       daily_summary:
         channel:    control
         timezone:   "America/Toronto"
@@ -99,8 +99,9 @@ node:
     state_type:         py_dict
     config:
       filepath_dotenv:  Null
-      envvar_token:     TOKEN_DISCORD_BOT_ROUTINE
-      secs_interval:    0.5
+      envvar_key:       TOKEN_DISCORD_BOT_ROUTINE
+      secs_interval:    2.0
+      debug:            True
 
 
 ###############################################################################

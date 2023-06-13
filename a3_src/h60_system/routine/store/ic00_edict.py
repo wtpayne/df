@@ -44,11 +44,6 @@ license:
 """
 
 
-import datetime
-import zoneinfo
-
-import thefuzz.process
-
 import fl.util
 
 

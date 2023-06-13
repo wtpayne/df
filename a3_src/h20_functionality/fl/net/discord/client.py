@@ -47,11 +47,17 @@ license:
 
 
 import asyncio
+import collections
 import multiprocessing
 import os
 import queue
 
 import fl.util
+
+
+# -----------------------------------------------------------------------------
+FileData = collections.namedtuple(
+                'FileData', ['filename', 'spoiler', 'description', 'buffer'])
 
 
 # -----------------------------------------------------------------------------
@@ -68,7 +74,8 @@ def coro(cfg_client):
     fcn_client       = _discord_client
     queue_to_app     = multiprocessing.Queue()  # stableflow --> client
     queue_from_app   = multiprocessing.Queue()  # client     --> stableflow
-    tup_args         = (cfg_client, queue_to_app, queue_from_app)
+    queue_log        = multiprocessing.Queue()  # client     --> stableflow
+    tup_args         = (cfg_client, queue_to_app, queue_from_app, queue_log)
     proc_client      = multiprocessing.Process(target = fcn_client,
                                                args   = tup_args,
                                                name   = str_name_process,
@@ -77,10 +84,11 @@ def coro(cfg_client):
 
     list_to_app   = list()
     list_from_app = list()
+    list_log      = list()
 
     while True:
 
-        (list_to_app) = yield (list_from_app)
+        (list_to_app) = yield (list_from_app, list_log)
 
         for tup_msg in list_to_app:
             try:
@@ -95,17 +103,24 @@ def coro(cfg_client):
         # stableflow system for
         # further processing.
         #
-        list_from_app = list()
+        list_from_app.clear()
         while True:
             try:
                 list_from_app.append(queue_from_app.get(block = False))
             except queue.Empty:
                 break
 
+        list_log.clear()
+        while True:
+            try:
+                list_log.append(queue_log.get(block = False))
+            except queue.Empty:
+                break
+
 
 
 # -----------------------------------------------------------------------------
-def _discord_client(cfg_client, queue_to_app, queue_from_app):
+def _discord_client(cfg_client, queue_to_app, queue_from_app, queue_log):
     """
     Run the discord client.
 
@@ -118,16 +133,18 @@ def _discord_client(cfg_client, queue_to_app, queue_from_app):
     import discord
     import discord.ext
 
-    intents                 = discord.Intents.default()
+    intents                 = discord.Intents.none()
+    intents.guilds          = True
     intents.message_content = True
     intents.messages        = True
+    intents.reactions       = True
     discord_client          = discord.Client(intents = intents)
 
     buffer_log = io.StringIO()
     loghandler = logging.StreamHandler(buffer_log)
 
     # -------------------------------------------------------------------------
-    async def _service_msg_queue(cfg_client, queue_to_app):
+    async def _service_msg_queue(cfg_client, queue_to_app, queue_log):
         """
         Message queue servicing coroutine.
 
@@ -151,14 +168,13 @@ def _discord_client(cfg_client, queue_to_app, queue_from_app):
 
             loghandler.flush()
             str_log = buffer_log.getvalue()
-            # TODO: - SEND ON A DIFFERENT QUEUE
-            # if str_log:
-            #     msg = dict(type = 'log',
-            #                msg  = str_log)
-            #     try:
-            #         queue_from_app.put(msg, block = False)
-            #     except queue.Full:
-            #         pass  # TODO: LOG SOME SORT OF ERROR?
+            if str_log:
+                msg = dict(type = 'log',
+                           msg  = str_log)
+                try:
+                    queue_log.put(msg, block = False)
+                except queue.Full:
+                    pass  # TODO: LOG SOME SORT OF ERROR?
 
             # Try to pull the next message
             # from the queue. If none are
@@ -179,8 +195,23 @@ def _discord_client(cfg_client, queue_to_app, queue_from_app):
             if id_chan not in map_chan.keys() or map_chan[id_chan] is None:
                 map_chan[id_chan] = discord_client.get_channel(id_chan)
 
-            if map_chan[id_chan] is not None:
+            if map_chan[id_chan] is None:
+                continue
+
+            if isinstance(msg, str):
                 await map_chan[id_chan].send(msg)
+                continue
+
+            if 'file' in msg and isinstance(msg['file'], FileData):
+
+                file_data   = msg['file']
+                msg['file'] = discord.File(
+                                fp          = io.BytesIO(file_data.buffer),
+                                filename    = file_data.filename,
+                                spoiler     = file_data.spoiler,
+                                description = file_data.description)
+
+            await map_chan[id_chan].send(**msg)
 
     # -------------------------------------------------------------------------
     @discord_client.event
@@ -197,9 +228,10 @@ def _discord_client(cfg_client, queue_to_app, queue_from_app):
         filled up.
 
         """
+
         task_msg = discord_client.loop.create_task(
-                                    coro = _service_msg_queue(
-                                                cfg_client, queue_to_app))
+                            coro = _service_msg_queue(
+                                        cfg_client, queue_to_app, queue_log))
 
     # -------------------------------------------------------------------------
     @discord_client.event
@@ -218,6 +250,7 @@ def _discord_client(cfg_client, queue_to_app, queue_from_app):
         queue.
 
         """
+
         if not message.author.bot:
             msg = dict(msg_type   = 'message',
                        id_prev    = None,
@@ -257,6 +290,7 @@ def _discord_client(cfg_client, queue_to_app, queue_from_app):
         queue.
 
         """
+
         if not msg_after.author.bot:
             try:
                 msg = dict(msg_type   = 'message',
@@ -269,5 +303,7 @@ def _discord_client(cfg_client, queue_to_app, queue_from_app):
             except queue.Full:
                 pass  # TODO: LOG SOME SORT OF ERROR?
 
-    discord_client.run(cfg_client['str_token'], log_handler = loghandler)
-    # discord_client.run(cfg_client['str_token'])
+    if cfg_client['debug']:
+        discord_client.run(cfg_client['str_token'])
+    else:
+        discord_client.run(cfg_client['str_token'], log_handler = loghandler)
