@@ -50,6 +50,27 @@ import sys
 
 
 # -----------------------------------------------------------------------------
+def test():
+    """
+    Run all dm005 tests.
+
+    """
+    import da.env
+    import da.test
+
+    _run   = da.test.run
+    _path  = da.env.path
+    ID_ENV = 'e002_general_research'
+
+    return _run(id_env    = ID_ENV,
+                iter_path = (_path(control_tier = 'h40_component',
+                                   relpath      = 'cl/util/persistence',
+                                   id_env       = ID_ENV),
+                             _path(control_tier = 'h60_system',
+                                   relpath      = 'routine',
+                                   id_env       = ID_ENV),))
+
+# -----------------------------------------------------------------------------
 def start():
     """
     Start dm005 system.
