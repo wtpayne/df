@@ -1138,8 +1138,17 @@ def tup_path_val_to_dict(tup_path_val):
 
             cursor = cursor[name]
 
-        name         = tup_path[-1]
-        cursor[name] = value
+        name = tup_path[-1]
+        if isinstance(cursor, dict):
+            cursor[name] = value
+        else:
+            idx      = int(name)
+            len_list = len(cursor)
+            if idx >= len_list:
+                len_needed = idx + 1  # Because 0-based
+                shortfall  = len_needed - len_list
+                cursor    += [None] * shortfall
+            cursor[name] = value
 
     return output
 
