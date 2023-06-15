@@ -158,6 +158,29 @@ class Bureau(collections.abc.MutableMapping):
                                str_format = None,
                                path_root  = self._bureau_path)
 
+    # -------------------------------------------------------------------------
+    def __getstate__(self):
+        """
+        Return a dictionary that represents the Bureau instance state.
+
+        """
+        return {
+            '_bureau_path_delimiter': self._bureau_path_delimiter,
+            '_bureau_path':           self._bureau_path,
+            '_bureau_engine':         self._bureau_engine,
+            '_bureau_data':           self._bureau_data,
+        }
+
+    # -------------------------------------------------------------------------
+    def __setstate__(self, state):
+        """
+        Update the Bureau instance state to match the provided dictionary.
+
+        """
+        self._bureau_path_delimiter = state['_bureau_path_delimiter']
+        self._bureau_path           = state['_bureau_path']
+        self._bureau_engine         = state['_bureau_engine']
+        self._bureau_data           = state['_bureau_data']
 
     # -------------------------------------------------------------------------
     def _str_path(self):
@@ -548,6 +571,38 @@ class BureauEngine():
         self._hist_edit       = list()
         self._hist_undo       = list()
         self._list_rule       = list()
+
+    # -------------------------------------------------------------------------
+    def __getstate__(self):
+        """
+        Return a dictionary that represents the BureauEngine instance state.
+
+        """
+
+        return {
+            '_bureau':          self._bureau,
+            '_do_keep_journal': self._do_keep_journal,
+            '_journal':         self._journal,
+            '_cmd_counter':     self._cmd_counter,
+            '_hist_edit':       self._hist_edit,
+            '_hist_undo':       self._hist_undo,
+            '_list_rule':       self._list_rule
+        }
+
+    # -------------------------------------------------------------------------
+    def __setstate__(self, state):
+        """
+        Update the BureauEngine instance state to match the provided dict.
+
+        """
+
+        self._bureau          = state['_bureau']
+        self._do_keep_journal = state['_do_keep_journal']
+        self._journal         = state['_journal']
+        self._cmd_counter     = state['_cmd_counter']
+        self._hist_edit       = state['_hist_edit']
+        self._hist_undo       = state['_hist_undo']
+        self._list_rule       = state['_list_rule']
 
     # -------------------------------------------------------------------------
     def get_item(self, path):
