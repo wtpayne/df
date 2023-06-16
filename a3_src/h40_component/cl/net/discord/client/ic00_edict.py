@@ -100,28 +100,37 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         # they can be printed in
         # the specified channel.
         #
-        map_ts      = dict()
-        list_to_app = list()
+        map_ts          = dict()
+        list_msg_to_bot = list()
+        list_cmd_to_bot = list()
         for (id_in, pkt_in) in inputs.items():
             if pkt_in['ena']:
                 map_ts = pkt_in['ts']
-                list_to_app.extend(pkt_in['list'])
+                list_msg_to_bot.extend(pkt_in['list'])
 
-        (list_from_app, list_log) = discord.send(list_to_app)
-
-        # TODO: HANDLE list_log
+        (list_msg_from_bot,
+         list_cmd_from_bot,
+         list_log_from_bot) = discord.send((list_msg_to_bot,
+                                            list_cmd_to_bot))
 
         # If any messages have been
         # received from the discord
         # client, then place them
         # in the component output.
         #
-        if list_from_app:
-
+        if list_msg_from_bot:
             for id_out in outputs.keys():
                 outputs[id_out]['ena'] = True
                 outputs[id_out]['ts'].update(map_ts)
-                outputs[id_out]['list'][:] = list_from_app
+                outputs[id_out]['list'][:] = list_msg_from_bot
+
+            print('ON MESSAGE!!!!! (C)')
+
+        if list_cmd_from_bot:
+            pass
+
+        if list_log_from_bot:
+            pass
 
 
 # -----------------------------------------------------------------------------
