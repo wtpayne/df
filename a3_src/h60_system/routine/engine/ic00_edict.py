@@ -68,27 +68,68 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
 
     signal = None
 
-    outputs['msg']['ena']  = False
-    outputs['msg']['ts']   = dict()
-    outputs['msg']['list'] = list()
+    # Initialize output data.
+    #
+    outputs['msg']['ena']    = False
+    outputs['msg']['ts']     = dict()
+    outputs['msg']['list']   = list()
 
     outputs['state']['ena']  = False
     outputs['state']['ts']   = dict()
     outputs['state']['list'] = list()
 
+    # Load configuration.
+    #
     state = fl.util.Bureau()
     state.cfg.from_dict(cfg)
 
-    state.set_keyphrase = set()
-    state.map_keyphrase = dict()
-    for (id_event, iter_keyphrase) in state.cfg.events.items():
-        state.set_keyphrase.update(iter_keyphrase)
+    # Build data structures to use when
+    # detecting and interpreting keyphrases,
+    # and also when producing color coded
+    # charts.
+    #
+    state.list_keyphrase = list()  # Used to build set of keyphrases.
+    state.map_keyphrase  = dict()  # keyphrase --> id_event
+    state.list_id_event  = list()  # id_event sort order
+    state.map_color      = dict()  # id_event --> color lookup
+    for cfg_event in state.cfg.event.values():
+
+        id_event       = cfg_event.id_event
+        iter_keyphrase = cfg_event.keyphrase
+        color          = cfg_event.color
+
+        state.list_id_event.append(id_event)
+        state.map_color[id_event] = color
+
         for keyphrase in iter_keyphrase:
             state.map_keyphrase[keyphrase] = id_event
+            state.list_keyphrase.append(keyphrase)
 
-    state.set_daily_summary = set()
+    # Keep a record of the events that we have
+    # recieved.
+    #
+    state.list_event_received = list()
 
-    list_to_app = list()
+    # Prepare list of scheduled messages sent.
+    # This is used to ensure that we don't
+    # send duplicate messages.
+    #
+    state.list_schedule_sent = list()
+    for idx in state.cfg.schedule:
+        state.list_schedule_sent.append(list())
+
+    # Queue for outbound messages and a
+    # timestamp to allow us to rate
+    # limit ourselves.
+    #
+    state.list_message_queue = list()
+    state.time_last_message  = 0.0
+
+    state.list_message_queue.append((1117868023030763581,'TEST MESSAGE'))
+
+    # Boolean flag to control saving.
+    #
+    state.has_changed = False
 
     while True:
 
@@ -99,33 +140,68 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         outputs['msg']['ena'] = False
         outputs['msg']['ts'].clear()
         outputs['msg']['list'].clear()
-
-        outputs['state']['ena']  = False
+        outputs['state']['ena'] = False
         outputs['state']['ts'].clear()
         outputs['state']['list'].clear()
 
-        list_to_app.clear()
+        # Load saved state.
+        #
+        # This only happens once on startup.
+        #
+        if inputs['state']['ena']:
+            state = inputs['state']['list'][0]
+        state.has_changed = False
 
         # Handle periodic summaries and reminders.
         #
+        timestamp = None
         if inputs['control']['ena']:
-            list_to_app.extend(_messages_due_to_be_sent(
-                                        state     = state,
-                                        timestamp = inputs['control']['ts']))
+            timestamp = inputs['control']['ts']
+            state.list_message_queue.extend(_messages_due_to_be_sent(
+                                                        state     = state,
+                                                        timestamp = timestamp))
 
         # Handle messages received from discord.
         #
         if inputs['msg']['ena']:
             for map_msg in inputs['msg']['list']:
-                list_to_app.extend(_process_incoming_message(
-                                            state = state,
-                                            ts    = inputs['control']['ts'],
-                                            **map_msg))
+                state.list_message_queue.extend(_process_incoming_message(
+                                                            state = state,
+                                                            ts    = timestamp,
+                                                            **map_msg))
 
-        if list_to_app:
-            outputs['msg']['ena'] = True
-            outputs['msg']['ts'].clear()
-            outputs['msg']['list'][:] = list_to_app
+        # Output messages to discord.
+        #
+        if (timestamp is not None) and len(state.list_message_queue) > 0:
+
+            secs_since_last = timestamp['unix_time'] - state.time_last_message
+            if secs_since_last > state.cfg.rate_limit_secs:
+                outputs['msg']['ena']     = True
+                outputs['msg']['ts']      = timestamp
+                outputs['msg']['list'][:] = [state.list_message_queue.pop(0)]
+                state.has_changed         = True
+                state.time_last_message   = timestamp['unix_time']
+
+        # Save the state if anything has changed.
+        #
+        if state.has_changed:
+            outputs['state']['ena']     = True
+            outputs['state']['ts']      = timestamp
+            outputs['state']['list'][:] = [state]
+
+        #################
+        #################
+        #################
+        print('')
+        print('-' * 80)
+        print('')
+        import pprint
+        pprint.pprint(state.list_event_received)
+        print('')
+        pprint.pprint(state.list_schedule_sent)
+        #################
+        #################
+        #################
 
 
 # -----------------------------------------------------------------------------
@@ -136,128 +212,241 @@ def _messages_due_to_be_sent(state, timestamp):
     """
 
     list_message = list()
-    id_day       = _id_day(timestamp)
 
-    if id_day not in state.set_daily_summary:
-        if _is_time_for_daily_summary(state, timestamp):
-            tup_summary = _daily_summary(state)
-            state.set_daily_summary.add(id_day)
-            list_message.append(tup_summary)
+    for (idx, item) in enumerate(state.cfg.schedule.values()):
+
+        if not _is_message_due(state, timestamp, idx):
+            continue
+
+        state.has_changed = True
+
+        if item.type == 'mantra':
+            id_channel  = state.cfg.channel[item.channel]
+            str_mantra  = state.cfg[item.message]
+            str_prefix  = 'Time for you to say your mantra:-'
+            str_message = '{prefix}\n\n*"{example}"*\n\n\u200B'.format(
+                                                        prefix  = str_prefix,
+                                                        example = str_mantra)
+            map_message = { 'content': str_message }
+            list_message.append((id_channel, map_message))
+
+        if item.type == 'summary':
+            id_channel  = state.cfg.channel[item.channel]
+            map_message = _daily_summary(state, item.timezone)
+            list_message.append((id_channel, map_message))
 
     return list_message
 
-# -----------------------------------------------------------------------------
-def _daily_summary(state):
-    """
-    Return a daily summary message tuple.
-
-    """
-
-    file_data = fl.net.discord.client.FileData(
-                            filename    = 'daily_summary.png',
-                            spoiler     = False,
-                            description = 'Daily Summary',
-                            buffer      = _plot_daily_summary_as_png(state))
-
-    payload = {
-        'content': 'Test daily summary 8.',
-        'file':    file_data
-    }
-
-    name_channel = state.cfg.daily_summary.channel
-    id_channel   = state.cfg.channel[name_channel]
-    tup_msg      = (id_channel, payload)
-    return tup_msg
-
 
 # -----------------------------------------------------------------------------
-def _plot_daily_summary_as_png(state):
+def _is_message_due(state, timestamp, idx):
+    """
+    Return True if the specified message is due, False otherwise.
+
+    This function checks if it's time to send a
+    message based on the hour and timezone
+    specified in the configured schedule.\
+
+    If it is time, and if the message has not
+    been sent in this hour, the function
+    indicates that the message is due by
+    returning True.
+
+    It also updates the state to mark that the
+    message will be sent. If it's not time, or
+    if the message has already been sent, the
+    function indicates that the message is not
+    due by returning False.
+
+    """
+    msg = state.cfg.schedule[idx]
+    utc = datetime.datetime.fromtimestamp(timestamp = timestamp['unix_time'],
+                                          tz        = datetime.timezone.utc)
+    now = utc.astimezone(zoneinfo.ZoneInfo(msg.timezone))
+
+    for msg_hour in sorted(msg.hour):
+
+        if (now.hour != msg_hour):
+            continue
+
+        id_hour         = timestamp['id_hour']
+        is_already_sent = id_hour in state.list_schedule_sent[idx]
+        if is_already_sent:
+            continue
+
+        state.list_schedule_sent[idx].append(id_hour)
+        return True
+
+    return False
+
+
+# -----------------------------------------------------------------------------
+def _daily_summary(state, timezone):
+    """
+    Return a daily summary message dict.
+
+    """
+    if not state.list_event_received:
+        return { 'content': 'No events recorded.' }
+
+    return {
+        'content': _compose_daily_summary(state, timezone),
+        'file':    fl.net.discord.client.FileData(
+                        filename    = 'daily_summary.png',
+                        spoiler     = False,
+                        description = 'Daily Summary',
+                        buffer      = plot_summary_chart(state, timezone))}
+
+
+# -----------------------------------------------------------------------------
+def _compose_daily_summary(state, timezone):
+    """
+    Return a string representing the daily summary.
+
+    """
+
+    # Convert timezone to local time.
+    #
+    list_local = list()
+    for (secs_epoch, id_event) in state.list_event_received:
+        zone_utc    = datetime.timezone.utc
+        utc_event   = datetime.datetime.fromtimestamp(secs_epoch, zone_utc)
+        local_event = utc_event.astimezone(zoneinfo.ZoneInfo(timezone))
+        list_local.append((local_event, id_event))
+
+    # Convert to dataframe and index by time.
+    #
+    df_local = pandas.DataFrame(data    = list_local,
+                                columns = ['timestamp', 'id_event'])
+    df_local.set_index('timestamp', inplace = True)
+
+    str_date  = df_local.index.max().strftime('%B %d')
+    str_title = 'Summary for {date}'.format(date = str_date)
+    str_count = 'There were {count} events recorded.'.format(
+                                        count = len(state.list_event_received))
+
+    str_summary = '{title}\n\n{count}'.format(title = str_title,
+                                              count = str_count)
+
+    return str_summary
+
+
+# -----------------------------------------------------------------------------
+def plot_summary_chart(state, timezone):
     """
     Return bytes representing the daily summary image
 
     """
-    events = [
-        (1623484800, 'event1'),  # '2023-06-12 08:00:00' UTC
-        (1623486600, 'event2'),  # '2023-06-12 08:30:00' UTC
-        (1623488400, 'event2'),  # '2023-06-12 09:00:00' UTC
-        (1623490200, 'event3'),  # '2023-06-12 09:30:00' UTC
-    ]
 
-    tz_utc     = datetime.timezone.utc
+    # Convert timezone to local time.
+    #
+    list_local = list()
+    for (secs_epoch, id_event) in state.list_event_received:
+        zone_utc    = datetime.timezone.utc
+        utc_event   = datetime.datetime.fromtimestamp(secs_epoch, zone_utc)
+        local_event = utc_event.astimezone(zoneinfo.ZoneInfo(timezone))
+        list_local.append((local_event, id_event))
 
-    events = [(datetime.datetime.fromtimestamp(ts, tz_utc), event) for ts, event in events]
+    # Convert to dataframe and index by time.
+    #
+    df_local = pandas.DataFrame(data    = list_local,
+                                columns = ['timestamp', 'id_event'])
+    df_local.set_index('timestamp', inplace = True)
 
-    EVENT_COLORS = {
-        'event1': 'red',
-        'event2': 'orange',
-        'event3': 'black',
-        'event4': 'yellow',
-    }
+    # Get the date. We will use this as the figure title.
+    #
+    str_date = df_local.index.max().strftime('%B %d')
 
-    # Convert list of events to dataframe
-    frame = pandas.DataFrame(events, columns = ['timestamp', 'event'])
-    frame.set_index('timestamp', inplace = True)
+    # Group events into one-hour bins.
+    #
+    one_hour       = '1H'
+    events_by_hour = df_local['id_event'].resample(one_hour).apply(list)
+    count_hour     = len(events_by_hour)
+    max_per_hour   = max([len(list_event) for list_event in events_by_hour])
 
-    # Resample the data to 30 minute intervals and get the most frequent event
-    resampled = frame.resample('30T').apply(lambda x: x.value_counts().idxmax() if len(x.value_counts())>0 else numpy.nan)
+    # Lookup table for colours.
+    #
+    map_colour    = state.map_colour.to_dict()
+    list_id_event = list(state.cfg.list_id_event)
 
-    # Create a color mapping for the resampled data
-    color_mapping = resampled['event'].map(EVENT_COLORS)
+    # Create a figure and axis and plot patches.
+    #
+    figure = matplotlib.pyplot.figure(figsize = (10, 10))
+    axis   = figure.gca()
 
-    # Create a new figure
-    matplotlib.pyplot.figure(figsize=(5, 10))
+    # Create patches.
+    #
+    for (idx_hour, list_event) in enumerate(events_by_hour):
 
-    # Iterate over each half hour and plot a colored bar
-    for i, (time, color) in enumerate(color_mapping.items()):
-        matplotlib.pyplot.barh(i, 1, color=color)
+        # Define a sort order for events.
+        #
+        list_event.sort(key = list_id_event.index)
 
-    matplotlib.pyplot.yticks(numpy.arange(0, 48, 2), [f'{h}:00' for h in range(24)])  # set y-axis labels
-    matplotlib.pyplot.gca().invert_yaxis()  # invert y-axis
+        for (idx_event, id_event) in enumerate(list_event):
 
-    # Save the plot as a PNG byte array
-    buffer = io.BytesIO()
-    matplotlib.pyplot.savefig(buffer, format='png')
-    buffer.seek(0)
-    bytes_fig = buffer.read()
+            x_min = idx_event
+            y_min = idx_hour
+            x_mid = x_min + 0.5
+            y_mid = y_min + 0.5
 
-    # Close the figure
-    matplotlib.pyplot.close()
+            axis.add_patch(matplotlib.patches.Rectangle(
+                                            xy     = (x_min, y_min),
+                                            width  = 1,
+                                            height = 1,
+                                            color  = map_colour[id_event]))
+            axis.text(x = x_mid,
+                      y = y_mid,
+                      s = id_event,
+                      horizontalalignment = 'center',
+                      verticalalignment   = 'center')
 
+    axis.set_title('Summary for {date}.'.format(date = str_date))
 
-    # print(resampled)
+    axis.set_xlim(0, max_per_hour)
+    axis.set_ylim(0, 24)
 
-    # filepath_fig = '/home/wtp/Pictures/Logos/Infinity.png'
-    # with open(filepath_fig, 'rb') as file_fig:
-    #     bytes_fig = file_fig.read()
-    return bytes_fig
+    x_labels = ['{idx}'.format(idx = idx) for idx in range(max_per_hour)]
+    axis.set_xticks(numpy.arange(0, max_per_hour, 1))
+    axis.set_xticklabels(x_labels)
+
+    y_labels = ['{hour}:00'.format(hour = hour) for hour in range(24)]
+    axis.set_yticks(numpy.arange(0, 24, 1))
+    axis.set_yticklabels(y_labels)
+    axis.invert_yaxis()
+
+    # DEBUG
+    matplotlib.pyplot.show()
+    # DEBUG
+
+    bytes_buffer = _save_figure_to_bytes(figure = figure, format = 'png')
+
+    return bytes_buffer
 
 
 # -----------------------------------------------------------------------------
-def _id_day(timestamp):
+def _save_figure_to_bytes(figure, format = 'png'):
     """
-    Return an id for a daily report.
+    Return the matplotlib figure as a saved image in a bytes string.
+
+    Args:
+
+        fig (matplotlib.figure.Figure):     Matplotlib figure handle
+
+        format (str, optional):             Desired output format. Defaults
+                                            to 'png'.
+
+    Returns:
+
+        bytes:  Byte representation of the figure.
 
     """
-    return str(timestamp['id_day'])
 
-
-# -----------------------------------------------------------------------------
-def _is_time_for_daily_summary(state, timestamp):
-    """
-    Return True if it is time to deliver a daily summary.
-
-    """
-
-    tz_utc     = datetime.timezone.utc
-    tz_cfg     = state.cfg.daily_summary.timezone
-    secs_epoch = timestamp['unix_time']
-    dt_utc     = datetime.datetime.fromtimestamp(secs_epoch, tz = tz_utc)
-    dt_local   = dt_utc.astimezone(zoneinfo.ZoneInfo(tz_cfg))
-
-    if dt_local.hour >= state.cfg.daily_summary.hour:
-        return True
-    else:
-        return False
+    io_buffer = io.BytesIO()
+    figure.savefig(io_buffer, format = 'png', dpi = 60)
+    io_buffer.seek(0)
+    bytes_buffer = io_buffer.read()
+    matplotlib.pyplot.close(figure)
+    return bytes_buffer
 
 
 # -----------------------------------------------------------------------------
@@ -271,16 +460,28 @@ def _process_incoming_message(state,
                               content):
     """
     """
+    print('ON MESSAGE!!!!! (D)')
 
-    dt_utc   = datetime.datetime.fromtimestamp(ts['unix_time'])
-    str_time = dt_utc.strftime('%H:%M')
+    dt_utc             = datetime.datetime.fromtimestamp(ts['unix_time'])
+    str_time           = dt_utc.strftime('%H:%M')
+    set_keyphrase      = {item for item in state.list_keyphrase}
+    (keyphrase, score) = thefuzz.process.extractOne(content, set_keyphrase)
 
-    (keyphrase, score) = thefuzz.process.extractOne(
-                                                content, state.set_keyphrase)
+    if keyphrase not in set_keyphrase:
+        print('KEYPHRASE NOT FOUND!')
+        return []
 
     id_event = state.map_keyphrase[keyphrase]
-    response = 'event: {id} registered at {ts}'.format(id = id_event,
-                                                       ts = str_time)
 
-    id_channel = 1115742503044386816
-    return [(id_channel, response)]
+    if not isinstance(state.list_event_received, list):
+        state.list_event_received = [item for item in state.list_event.values()]
+
+    state.list_event_received.append((ts['unix_time'], id_event))
+    state.has_changed = True
+
+    response = 'event: {id} registered at {ts}. (total = {count})'.format(
+                                        id    = id_event,
+                                        ts    = str_time,
+                                        count = len(state.list_event_received))
+
+    return [(state.cfg.channel.report, response)]

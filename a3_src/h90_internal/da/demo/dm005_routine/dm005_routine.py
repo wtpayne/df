@@ -63,12 +63,18 @@ def test():
     ID_ENV = 'e002_general_research'
 
     return _run(id_env    = ID_ENV,
-                iter_path = (_path(control_tier = 'h40_component',
+                iter_path = (_path(control_tier = 'h20_functionality',
+                                   relpath      = 'fl/net/discord',
+                                   id_env       = ID_ENV),
+                             _path(control_tier = 'h40_component',
+                                   relpath      = 'cl/net/discord',
+                                   id_env       = ID_ENV),
+                             _path(control_tier = 'h40_component',
                                    relpath      = 'cl/util/persistence',
                                    id_env       = ID_ENV),
                              _path(control_tier = 'h60_system',
                                    relpath      = 'routine',
-                                   id_env       = ID_ENV),))
+                                   id_env       = ID_ENV)))
 
 # -----------------------------------------------------------------------------
 def start():

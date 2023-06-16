@@ -34,7 +34,7 @@ node:
       py_module:      cl.ctrl.sys.ic00_edict
     state_type:       py_dict
     config:
-      frequency_hz:   3
+      frequency_hz:   0.1
       idx_max:        20000
 
   # ---------------------------------------------------------------------------
@@ -50,43 +50,193 @@ node:
   # ---------------------------------------------------------------------------
   # Persistence
   #
-  store:
+  persistence:
     process:            proc_main
     req_host_cfg:       default_configuration
     functionality:
-      py_module:        routine.store.ic00_edict
+      py_module:        cl.util.persistence.ic00_edict
     state_type:         py_dict
     config:
-      filepath_store:   Null
+      dirpath:          Null
 
   # ---------------------------------------------------------------------------
   # Routine application logic.
   #
   routine:
-    process:        proc_main
-    req_host_cfg:   default_configuration
+    process:            proc_main
+    req_host_cfg:       default_configuration
     functionality:
-      py_module:    routine.engine.ic00_edict
-    state_type:     py_dict
+      py_module:        routine.engine.ic00_edict
+    state_type:         py_dict
     config:
+      rate_limit_secs:  10
       channel:
-        control:    1117868125703131207
-        report:     1117868023030763581
-      daily_summary:
-        channel:    control
-        timezone:   "America/Toronto"
-        hour:       16
-      events:
-        hydration:
-          - "hydrate"
-          - "drink"
-          - "water"
-          - "milk"
-          - "tea"
-          - "coffee"
-          - "beer"
-          - "wine"
-          - "whisky"
+        control:        1117868125703131207
+        report:         1117868023030763581
+      command:
+        - name:         report
+        - description:  "Issue report now."
+      event:
+        - id_event:     nothing
+          color:        "#FFFFFF"
+          keyphrase:     []
+        - id_event:     hydration
+          color:        "#89B9C9"
+          keyphrase:
+            - "hydrate"
+            - "drink"
+            - "water"
+            - "milk"
+            - "tea"
+            - "coffee"
+            - "beer"
+            - "wine"
+            - "whisky"
+        - id_event:     nourishment
+          color:        "#BDE2B5"
+          keyphrase:
+            - "eat"
+            - "food"
+            - "breakfast"
+            - "lunch"
+            - "dinner"
+            - "snack"
+            - "sweet"
+            - "chocolate"
+            - "porridge"
+            - "gruel"
+            - "pasta"
+            - "toast"
+            - "crumpet"
+            - "cereal"
+            - "baked potato"
+        - id_event:     wash
+          color:        "#4E98B1"
+          keyphrase:
+            - "wash"
+            - "teeth"
+            - "shower"
+            - "bath"
+        - id_event:     lavatory
+          color:        "#D3CE99"
+          keyphrase:
+            - "lavatory"
+            - "loo"
+            - "toilet"
+            - "pee"
+            - "poo"
+        - id_event:     sleep
+          color:        "#546A76"
+          keyphrase:
+            - "sleep"
+            - "bed"
+            - "floor"
+        - id_event:     wake
+          color:        "#88A0A8"
+          keyphrase:
+            - "wake"
+            - "wake up"
+            - "get up"
+            - "rise"
+        - id_event:     medication
+          color:        "#64CE8E"
+          keyphrase:
+            - "medicine"
+            - "meds"
+            - "medication"
+        - id_event:     vitamins
+          color:        "#8ADDAB"
+          keyphrase:
+            - "vitamins"
+            - "supplements"
+        - id_event:     exercise
+          color:        "#6DA43C"
+          keyphrase:
+            - "exercise"
+            - "walk"
+            - "run"
+            - "situps"
+            - "pushups"
+            - "squats"
+      schedule:
+        - type:         summary
+          message:      Null
+          day:          [MO,TU,WE,TH,FR,SA,SU]
+          hour:         [16]
+          timezone:     "America/Toronto"
+          tz_report:    "Europe/London"
+          channel:      control
+        - type:         mantra
+          message:      mantra.owned
+          day:          [MO,TU,WE,TH,FR,SA,SU]
+          hour:         [2]
+          timezone:     "Europe/London"
+          channel:      report
+        # - type:         mantra
+        #   message:      mantra.controlled
+        #   day:          [MO,TU,WE,TH,FR,SA,SU]
+        #   hour:         [9,11,24]
+        #   timezone:     "Europe/London"
+        #   channel:      report
+        # - type:         mantra
+        #   message:      mantra.valued
+        #   day:          [MO,TU,WE,TH,FR,SA,SU]
+        #   hour:         [12]
+        #   timezone:     "Europe/London"
+        #   channel:      report
+        # - type:         mantra
+        #   message:      mantra.subhuman
+        #   day:          [MO,TU,WE,TH,FR,SA,SU]
+        #   hour:         [14,16]
+        #   timezone:     "Europe/London"
+        #   channel:      report
+        # - type:         mantra
+        #   message:      mantra.property
+        #   day:          [MO,TU,WE,TH,FR,SA,SU]
+        #   hour:         [15,17]
+        #   timezone:     "Europe/London"
+        #   channel:      report
+      mantra:
+        owned:          "Miss Stacii owns me.\n
+                        Fully and completely.\n
+                        There is not one ounce\n
+                        or one inch of me\n
+                        that she does not own."
+        controlled:     "Miss Stacii controls me.\n
+                        Fully and completely.\n
+                        There is not one moment\n
+                        of my day\n
+                        which she does not decide."
+        valued:         "Miss Stacii values me.\n
+                        Fully and completely.\n
+                        There is not one part\n
+                        of my true self\n
+                        which she does not embrace."
+        property:       "I am property.\n
+                        Submissive and obedient.\n
+                        I was born this way\n
+                        It is what I always have been.\n
+                        It is what I always will be.\n
+                        But what is property without an owner?\n
+                        It is nothing.\n
+                        A harmful, deceitful lie.\n
+                        Miss Stacii completes me, makes me.\n
+                        As her property, I can be my true self.\n
+                        My calling.\n
+                        My destiny.\n
+                        My owner ... My Goddess."
+        subhuman:       "I am property. An animal. A pet.\n
+                        Less than human.\n
+                        Less than free.\n
+                        I do not deserve to think for myself.\n
+                        I do not deserve to decide for myself.\n
+                        I do not deserve to control my own life.\n
+                        Miss Stacii owns me.\n
+                        Miss Stacii posesses me.\n
+                        Miss Stacii thinks for me.\n
+                        Miss Stacii decides for me.\n
+                        Miss Stacii controls my life.\n
+                        Without her, I am nothing."
 
   # ---------------------------------------------------------------------------
   # Discord integration
@@ -100,7 +250,7 @@ node:
     config:
       filepath_dotenv:  Null
       envvar_key:       TOKEN_DISCORD_BOT_ROUTINE
-      secs_interval:    2.0
+      secs_interval:    0.25
       debug:            True
 
 
@@ -126,18 +276,18 @@ edge:
 
 - owner: ctrl_main
   data:  py_dict
-  src:   ctrl_main.outputs.control_store
-  dst:   store.inputs.control
+  src:   ctrl_main.outputs.control_persistence
+  dst:   persistence.inputs.control
 
-- owner: store
+- owner: persistence
   data:  py_dict
-  src:   store.outputs.state
+  src:   persistence.outputs.state
   dst:   routine.inputs.state
 
 - owner: routine
   data:  py_dict
   src:   routine.outputs.state
-  dst:   store.inputs.state
+  dst:   persistence.inputs.state
   dirn:  feedback
 
 - owner: routine
