@@ -101,15 +101,11 @@ def _configure_recent_files_list(ctx):
 
     import da.env
 
-    # _add_to_recent_files(
-    #         ctx,
-    #         da.env.path(control_tier = 'h60_system',
-    #                     relpath      = 'northstar/northstar.stableflow.cfg.yaml'))
-
     _add_to_recent_files(
             ctx,
             da.env.path(control_tier = 'h60_system',
-                        relpath      = 'harmonica/harmonica.stableflow.cfg.yaml'))
+                        relpath      = 'northstar/northstar.stableflow.cfg.yaml'))
+
     # _add_to_recent_files(
     #         ctx,
     #         da.env.path(control_tier = 'h60_system',

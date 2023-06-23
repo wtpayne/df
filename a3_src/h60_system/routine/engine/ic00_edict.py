@@ -104,6 +104,7 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
         #
         if inputs['cmd']['ena']:
             for map_cmd in inputs['cmd']['list']:
+<<<<<<< HEAD
 
                 if map_cmd['name_command'] == 'shock':
 
@@ -150,6 +151,46 @@ def coro(runtime, cfg, inputs, state, outputs):  # pylint: disable=W0613
                 #     map_message['type']       = 'msg'
                 #     map_message['id_channel'] = int(state.cfg.channel['control'])
                 #     state.list_message_queue.append(map_message)
+=======
+                if map_cmd['name_command'] == 'diary':
+
+                    print('')
+                    print('')
+                    print(' +------------+')
+                    print(' | SHOW DIARY |')
+                    print(' +------------+')
+                    print('')
+                    print('')
+
+                    msg = 'Diary:\n\n'
+                    for (secs_epoch, str_event) in state.list_event_received:
+                        zone_utc    = datetime.timezone.utc
+                        utc_event   = datetime.datetime.fromtimestamp(secs_epoch, zone_utc)
+                        local_event = utc_event.astimezone(zoneinfo.ZoneInfo('Europe/London'))
+                        str_time    = local_event.strftime('%d %B - %H:%M')  # Customize the format as per your requirements
+
+                        msg += '\n  {time}: {evt}'.format(time = str_time,
+                                                          evt  = str_event)
+
+                    msg += '\n\n\u200B'
+
+                    id_channel  = state.cfg.channel['ctrl']
+                    state.list_message_queue.append((id_channel, msg))
+
+                if map_cmd['name_command'] == 'report':
+
+                    print('')
+                    print('')
+                    print(' +-----------------+')
+                    print(' | GENERATE REPORT |')
+                    print(' +-----------------+')
+                    print('')
+                    print('')
+
+                    id_channel  = state.cfg.channel['ctrl']
+                    map_message = _daily_summary(state, 'Europe/London')
+                    state.list_message_queue.append((id_channel, map_message))
+>>>>>>> f667730 (Add routine app)
 
         # Output messages to discord.
         #
@@ -224,17 +265,25 @@ def _reinit_state(state, cfg):
     #
     state.list_command_config_queue = list()
     state.list_command_config_queue.extend([
+<<<<<<< HEAD
         dict(name        = 'shock',
              description = 'Shock command.')])
         # dict(name        = 'report',
         #      description = 'Generate a report.'),
         # dict(name        = 'diary',
         #      description = 'List recorded events.')])
+=======
+        dict(name        = 'report',
+             description = 'Generate a report.'),
+        dict(name        = 'diary',
+             description = 'List recorded events.')])
+>>>>>>> f667730 (Add routine app)
 
     # Boolean flag to control saving.
     #
     state.has_changed = False
 
+<<<<<<< HEAD
     # print('')
     # print('#' * 80)
     # print('#' * 80)
@@ -245,6 +294,40 @@ def _reinit_state(state, cfg):
     # print('#' * 80)
     # print('#' * 80)
     # print('')
+=======
+    print('')
+    print('#' * 80)
+    print('#' * 80)
+    print('')
+    import pprint
+    pprint.pprint(state.to_dict())
+    print('')
+    print('#' * 80)
+    print('#' * 80)
+    print('')
+
+
+# -----------------------------------------------------------------------------
+def _init_output(outputs, tup_id_out):
+    """
+    """
+    for id_out in tup_id_out:
+        if id_out in outputs:
+            outputs[id_out]['ena']  = False
+            outputs[id_out]['ts']   = dict()
+            outputs[id_out]['list'] = list()
+
+
+# -----------------------------------------------------------------------------
+def _reset_output(outputs, tup_id_out):
+    """
+    """
+    for id_out in ('msg', 'cmd', 'state'):
+        if id_out in outputs:
+            outputs[id_out]['ena'] = False
+            outputs[id_out]['ts'].clear()
+            outputs[id_out]['list'].clear()
+>>>>>>> f667730 (Add routine app)
 
 
 # -----------------------------------------------------------------------------
@@ -265,10 +348,17 @@ def _update_output(state, timestamp, outputs):
             state.time_last_message   = timestamp['unix_time']
 
     if state.list_command_config_queue:
+<<<<<<< HEAD
         outputs['cfg_cmd']['ena']     = True
         outputs['cfg_cmd']['ts']      = timestamp
         outputs['cfg_cmd']['list'][:] = [state.list_command_config_queue.pop(0)]
         state.has_changed             = True
+=======
+        outputs['cmd']['ena']     = True
+        outputs['cmd']['ts']      = timestamp
+        outputs['cmd']['list'][:] = [state.list_command_config_queue.pop(0)]
+        state.has_changed         = True
+>>>>>>> f667730 (Add routine app)
 
     if state.has_changed:
         outputs['state']['ena']     = True
