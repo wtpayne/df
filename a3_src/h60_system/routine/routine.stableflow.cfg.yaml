@@ -271,13 +271,20 @@ edge:
 
 - owner: ctrl_main
   data:  py_dict
+  src:   ctrl_main.outputs.control_persistence
+  dst:   persistence.inputs.ctrl
+
+- owner: ctrl_main
+  data:  py_dict
   src:   ctrl_main.outputs.control_routine
   dst:   routine.inputs.ctrl
 
 - owner: ctrl_main
   data:  py_dict
-  src:   ctrl_main.outputs.control_persistence
-  dst:   persistence.inputs.ctrl
+  src:   ctrl_main.outputs.control_discord
+  dst:   discord.inputs.ctrl
+
+#  Functional chain for discord bot configuration and mux/demux.
 
 - owner: persistence
   data:  py_dict
