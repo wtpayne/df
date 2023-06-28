@@ -94,7 +94,15 @@
     "#",
 
     { "type": "pep508", "spec":    "streamlit==1.22.0"                        },
-    { "type": "pep508", "spec":    "gradio==3.28.1"                          },
+    { "type": "pep508", "spec":    "gradio==3.28.1"                           },
+
+    "",
+    "",
+    "# -----------------------------------------------------------------------",
+    "# Packages required for interacting with web APIs.",
+    "#",
+
+    { "type": "pep508", "spec":    "requests==2.31.0"                         },
 
     "",
     "",
