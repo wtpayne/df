@@ -304,8 +304,8 @@ edge:
 
 - owner: routine
   data:  py_dict
-  src:   routine.outputs.cmd
-  dst:   discord.inputs.cmd
+  src:   routine.outputs.cfg_cmd
+  dst:   discord.inputs.cfg_cmd
 
 - owner: discord
   data:  py_dict
