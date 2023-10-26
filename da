@@ -302,7 +302,7 @@ fi
 # the name of the command in the help string.
 #
 NAME_APP=$(basename "$0")
-if [ $# -eq 0 ]; then
+if [ ${#} -eq 0 ]; then
     python3 -m da.cli.command "${NAME_APP}"
 else
     python3 -m da.cli.command "${NAME_APP}" "${@}"
