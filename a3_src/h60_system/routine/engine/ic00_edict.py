@@ -224,34 +224,21 @@ def _reinit_state(state, cfg):
     #
     state.list_command_config_queue = list()
     state.list_command_config_queue.extend([
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 43dbfe9 (Work in progress on Routine.)
         dict(name        = 'shock',
              description = 'Shock command.')])
         # dict(name        = 'report',
         #      description = 'Generate a report.'),
         # dict(name        = 'diary',
         #      description = 'List recorded events.')])
-<<<<<<< HEAD
-=======
         dict(name        = 'report',
              description = 'Generate a report.'),
         dict(name        = 'diary',
              description = 'List recorded events.')])
->>>>>>> f667730 (Add routine app)
-=======
->>>>>>> 43dbfe9 (Work in progress on Routine.)
 
     # Boolean flag to control saving.
     #
     state.has_changed = False
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 43dbfe9 (Work in progress on Routine.)
     # print('')
     # print('#' * 80)
     # print('#' * 80)
@@ -262,8 +249,6 @@ def _reinit_state(state, cfg):
     # print('#' * 80)
     # print('#' * 80)
     # print('')
-<<<<<<< HEAD
-=======
     print('')
     print('#' * 80)
     print('#' * 80)
@@ -296,9 +281,6 @@ def _reset_output(outputs, tup_id_out):
             outputs[id_out]['ena'] = False
             outputs[id_out]['ts'].clear()
             outputs[id_out]['list'].clear()
->>>>>>> f667730 (Add routine app)
-=======
->>>>>>> 43dbfe9 (Work in progress on Routine.)
 
 
 # -----------------------------------------------------------------------------
@@ -319,23 +301,14 @@ def _update_output(state, timestamp, outputs):
             state.time_last_message   = timestamp['unix_time']
 
     if state.list_command_config_queue:
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 43dbfe9 (Work in progress on Routine.)
         outputs['cfg_cmd']['ena']     = True
         outputs['cfg_cmd']['ts']      = timestamp
         outputs['cfg_cmd']['list'][:] = [state.list_command_config_queue.pop(0)]
         state.has_changed             = True
-<<<<<<< HEAD
-=======
         outputs['cmd']['ena']     = True
         outputs['cmd']['ts']      = timestamp
         outputs['cmd']['list'][:] = [state.list_command_config_queue.pop(0)]
         state.has_changed         = True
->>>>>>> f667730 (Add routine app)
-=======
->>>>>>> 43dbfe9 (Work in progress on Routine.)
 
     if state.has_changed:
         outputs['state']['ena']     = True
